@@ -1,0 +1,21 @@
+{
+  "name": "sol-blade",
+  "version": "1.0.0",
+  "description": "Blade Game 3d",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "author": "Josh Massarella",
+  "license": "ISC",
+  "keywords": [],
+  "dependencies": {
+    "three": "^0.179.1"
+  },
+  "devDependencies": {
+    "vite": "^7.0.6"
+  }
+}
