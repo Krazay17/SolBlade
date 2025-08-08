@@ -37,30 +37,33 @@ export default class GameScene extends SceneBase {
     const ambientLight = new THREE.AmbientLight(0xffffff, .2);
     this.threeScene.add(ambientLight);
 
-    this.camControl = new PointerLockControls(this.game.camera, document.body);
+    //this.camControl = new PointerLockControls(this.game.camera, document.body);
 
     this.player = new Player(0, 0, 0, this.threeScene, this.game.camera);
     this.threeScene.add(this.player.mesh)
     // Attach camera to player at head height
-    this.player.mesh.add(this.game.camera);
-    this.game.camera.position.set(0, 0, 0);
+    // this.player.mesh.add(this.game.camera);
+    // this.game.camera.position.set(0, 0, 0);
 
 
     // Click to lock the pointer
-    document.addEventListener('click', () => {
-      this.camControl.lock();
-    });
-    // Optional: listen for lock/unlock
-    this.camControl.addEventListener('lock', () => {
-      console.log('Pointer locked');
-    });
-    this.camControl.addEventListener('unlock', () => {
-      console.log('Pointer unlocked');
-    });
+    // document.addEventListener('click', () => {
+    //   this.camControl.lock();
+    // });
+    // // Optional: listen for lock/unlock
+    // this.camControl.addEventListener('lock', () => {
+    //   console.log('Pointer locked');
+    // });
+    // this.camControl.addEventListener('unlock', () => {
+    //   console.log('Pointer unlocked');
+    // });
+
+
+
   }
 
   update(dt) {
-    this.camControl.update();
+    //this.camControl.update();
     this.player.update(dt);
     drawParticles(dt);
   }

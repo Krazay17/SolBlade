@@ -16,10 +16,36 @@ export default class Player {
         this.mesh.position.set(x, y, z);
         this.mesh.castShadow = true;
 
+        this.cameraArm = new THREE.Object3D();
+        this.mesh.add(this.cameraArm);
+        this.cameraArm.add(this.camera);
+
         Input.init();
 
         this.camDirection = new THREE.Vector3();
         this.speed = 5;
+
+        let yaw = 0;
+        let pitch = 0;
+
+        // Lock on click
+        document.addEventListener('click', () => {
+            document.body.requestPointerLock();
+        });
+
+        // Mouse movement (only works while locked)
+        document.addEventListener('mousemove', (event) => {
+            if (document.pointerLockElement === document.body) {
+                const sensitivity = 0.002;
+                yaw -= event.movementX * sensitivity;
+                pitch -= event.movementY * sensitivity;
+                pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+
+                this.mesh.rotation.y = yaw;        // Yaw
+                this.cameraArm.rotation.x = pitch; // Pitch
+            }
+        });
+
     }
 
     update(dt) {
@@ -32,7 +58,9 @@ export default class Player {
         if (Input.keys['KeyD']) strafe += this.speed;
 
         if (forward !== 0 || strafe !== 0) {
-            this.mesh.position.add(this.movementDirection(dt, forward, strafe));
+            let dir = this.movementDirection(dt, forward, strafe);
+            if (dir.length() > 0) dir.normalize().multiplyScalar(this.speed * dt);
+            this.mesh.position.add(dir);
         }
     }
 
