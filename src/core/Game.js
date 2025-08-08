@@ -5,10 +5,13 @@ export default class Game {
     this.lastTime = 0;
     this.running = true;
 
-    const canvas = document.getElementById('canvas');
-    this.renderer = new THREE.WebGLRenderer({ canvas });
+    this.canvas = document.getElementById('webgl');
+    this.renderer = new THREE.WebGLRenderer({ alpha: 0 });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
+
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.camera = new THREE.PerspectiveCamera(
       75,
@@ -17,17 +20,13 @@ export default class Game {
       1000
     );
 
-    this.camera.position.z = 5;
-    this.camera.lookAt(0, 0, 0);
-
-    this.scene = null; // Current scene (set later)
-
     window.addEventListener('resize', () => {
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    this.scene = null;
   }
 
   setScene(scene) {
@@ -46,7 +45,7 @@ export default class Game {
 
     if (this.running && this.scene) {
       this.scene.update(dt);
-      this.scene.render();
+      this.renderer.render(this.scene.threeScene, this.camera);
     }
 
     requestAnimationFrame(this.loop.bind(this));
