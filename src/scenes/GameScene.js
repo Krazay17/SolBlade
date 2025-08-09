@@ -26,6 +26,24 @@ export default class GameScene extends SceneBase {
     // Directional Light (main sun)
     const dirLight = new THREE.DirectionalLight(0xffffff, 1);
     dirLight.position.set(5, 10, 5);
+    // Make shadow area much bigger
+    dirLight.shadow.camera.left = -50;
+    dirLight.shadow.camera.right = 50;
+    dirLight.shadow.camera.top = 50;
+    dirLight.shadow.camera.bottom = -50;
+    dirLight.shadow.camera.near = 1;
+    dirLight.shadow.camera.far = 100;
+
+    // Increase resolution for better quality
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
+
+    this.threeScene.add(dirLight);
+
+    // Optional: see shadow frustum
+    const helper = new THREE.CameraHelper(dirLight.shadow.camera);
+    this.threeScene.add(helper);
+
     dirLight.castShadow = true;
     this.threeScene.add(dirLight);
 
