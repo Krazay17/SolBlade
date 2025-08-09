@@ -1,6 +1,6 @@
 import { Vector3 } from "three";
 
-const gravity = -9.8;
+const gravity = -29.8;
 const gravityObjects = [];
 
 export function updatePhysics(dt) {
@@ -8,7 +8,7 @@ export function updatePhysics(dt) {
         if (obj.usesGravity === false) continue;
         if (!obj.velocity) obj.velocity = new Vector3();
 
-        obj.velocity.y += gravity * dt;
+        obj.velocity.y = Math.min(200, obj.velocity.y += gravity * dt)
         obj.position.addScaledVector(obj.velocity, dt)
 
         if ((obj.position.y - (obj.height || 0)) < 0.001) {

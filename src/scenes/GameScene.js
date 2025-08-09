@@ -16,13 +16,21 @@ export default class GameScene extends SceneBase {
     clickParticles();
 
     // Floor
-    const floorGeom = new THREE.PlaneGeometry(100, 100);
-    const floorMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
-    const floor = new THREE.Mesh(floorGeom, floorMat);
-    floor.rotation.x = -Math.PI / 2; // lay flat
-    floor.position.y = 0;
-    floor.receiveShadow = true;
-    this.threeScene.add(floor);
+    const texLoader = new THREE.TextureLoader();
+    texLoader.load(
+      '/assets/GroundTexture.jpg',
+      (tex) => {
+        const floorGeom = new THREE.PlaneGeometry(100, 100);
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x444444, map: tex});
+        const floor = new THREE.Mesh(floorGeom, floorMat);
+        floor.rotation.x = -Math.PI / 2; // lay flat
+        floor.position.y = 0;
+        floor.receiveShadow = true;
+        this.threeScene.add(floor);
+      },
+      (prog) => console.log(prog)
+    );
+
 
     // Directional Light (main sun)
     const dirLight = new THREE.DirectionalLight(0xffffff, 1);

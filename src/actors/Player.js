@@ -56,8 +56,7 @@ export default class Player {
 
         this.camDirection = new THREE.Vector3();
         this.speed = 15;
-        this.maxJump = 100;
-        this.jump = 0;
+        this.jump = 1;
 
         let yaw = 0;
         let pitch = 0;
@@ -91,13 +90,13 @@ export default class Player {
         if (Input.keys['KeyA']) strafe -= this.speed;
         if (Input.keys['KeyD']) strafe += this.speed;
         if (Input.keys['Space']) {
-            if (this.jump < this.maxJump) {
-                this.mesh.position.y += .25;
+            if (this.jump < 20) {
+                this.mesh.velocity.y = this.jump;
                 this.jump += 200 * dt;
                 console.log(this.jump);
             }
         } else {
-            this.jump = 0;
+            this.jump = 1;
         }
 
         if (forward !== 0 || strafe !== 0) {
