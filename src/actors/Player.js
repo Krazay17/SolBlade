@@ -64,7 +64,6 @@ export default class Player {
         }
     }
 
-
     movementDirection(dt, speed, strafe = 0) {
         let forward = new THREE.Vector3();
         let right = new THREE.Vector3();
