@@ -3,6 +3,7 @@ import SceneBase from './_SceneBase.js';
 import Player from '../actors/Player.js';
 import Particle from "../actors/Particle.js";
 import { PointerLockControls } from 'three/examples/jsm/Addons.js';
+import { addPhysics } from '../core/Physics.js';
 
 export default class GameScene extends SceneBase {
   constructor(game) {
@@ -55,6 +56,7 @@ export default class GameScene extends SceneBase {
 
     this.player = new Player(0, 0, 0, this.threeScene, this.game.camera);
     this.threeScene.add(this.player.mesh)
+    addPhysics(this.player.mesh);
 
     this.spawnCubes();
   }

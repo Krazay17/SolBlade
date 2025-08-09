@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { updatePhysics } from './Physics';
 
 export default class Game {
   constructor() {
@@ -45,6 +46,7 @@ export default class Game {
 
     if (this.running && this.scene) {
       this.scene.update(dt);
+      updatePhysics(dt);
       this.renderer.render(this.scene.threeScene, this.camera);
     }
 
