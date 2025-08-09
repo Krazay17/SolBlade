@@ -20,7 +20,7 @@ export default class GameScene extends SceneBase {
     const floorMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2; // lay flat
-    floor.position.y = -.5;
+    floor.position.y = 0;
     floor.receiveShadow = true;
     this.threeScene.add(floor);
 
@@ -55,8 +55,6 @@ export default class GameScene extends SceneBase {
     this.threeScene.add(ambientLight);
 
     this.player = new Player(0, 0, 0, this.threeScene, this.game.camera);
-    this.threeScene.add(this.player.mesh)
-    addPhysics(this.player.mesh);
 
     this.spawnCubes();
   }
@@ -78,7 +76,7 @@ export default class GameScene extends SceneBase {
         metalness: 0.3  // metallic look 
       })
     );
-    cube1.position.set(5, 0, 5);
+    cube1.position.set(5, 2, 5);
     this.threeScene.add(cube1);
 
     const cube2 = new THREE.Mesh(
@@ -89,7 +87,7 @@ export default class GameScene extends SceneBase {
         metalness: 0.3  // metallic look 
       })
     );
-    cube2.position.set(2, 0, -5);
+    cube2.position.set(2, 2, -5);
     this.threeScene.add(cube2);
 
   }

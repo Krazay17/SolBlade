@@ -1,24 +1,56 @@
 import * as THREE from 'three';
 import Input from '../core/Input';
+import { addPhysics } from '../core/Physics';
+import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
 export default class Player {
     constructor(x, y, z, scene, camera) {
         this.scene = scene;
         this.camera = camera;
-        this.mesh = new THREE.Mesh(
-            new THREE.BoxGeometry(1, 1, 1),
-            new THREE.MeshStandardMaterial({
-                color: 0xffff00,
-                roughness: 0.5, // matte vs shiny
-                metalness: 0.3  // metallic look
-            })
-        );
-        this.mesh.position.set(x, y, z);
-        this.mesh.castShadow = true;
+        // this.mesh = new THREE.Mesh(
+        //     new THREE.BoxGeometry(1, 1, 1),
+        //     new THREE.MeshStandardMaterial({
+        //         color: 0xffff00,
+        //         roughness: 0.5, // matte vs shiny
+        //         metalness: 0.3  // metallic look
+        //     })
+        // );
+        // this.mesh.position.set(x, y, z);
+        // this.mesh.castShadow = true;
 
+        const loader = new GLTFLoader();
         this.cameraArm = new THREE.Object3D();
-        this.mesh.add(this.cameraArm);
-        this.cameraArm.add(this.camera);
+        this.cameraArm.position.set(0, 1.2, 0);
+
+        loader.load(
+            '/assets/KnightBlade.glb',
+            (gltf) => {
+                const model = gltf.scene;
+                model.position.set(0, 0, 0);
+                model.scale.set(1, 1, 1); // Adjust size if needed
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+                this.scene.add(model);
+                this.mesh = model;
+                this.mesh.position.set(x, y, z);
+                this.mesh.castShadow = true;
+                this.mesh.add(this.cameraArm);
+                this.cameraArm.add(this.camera);
+                this.mesh.height = 1;
+                addPhysics(this.mesh);
+            },
+            (xhr) => {
+                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+            },
+            (error) => {
+                console.error('Error loading model:', error);
+            }
+        );
+
 
         Input.init();
 
@@ -61,7 +93,7 @@ export default class Player {
         if (Input.keys['Space']) {
             if (this.jump < this.maxJump) {
                 this.mesh.position.y += .25;
-                this.jump += 200*dt;
+                this.jump += 200 * dt;
                 console.log(this.jump);
             }
         } else {
