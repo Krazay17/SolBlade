@@ -1,6 +1,6 @@
 // vite.config.js
 export default {
-	base: '/SolBlade/',
+	base: '/',
 	root: '.',               // Project root
 	publicDir: 'public',     // Static files
 	build: {
