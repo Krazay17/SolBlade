@@ -16,11 +16,11 @@ export default class GameScene extends SceneBase {
     clickParticles();
 
     // Floor
-    const floorGeom = new THREE.PlaneGeometry(50, 50);
+    const floorGeom = new THREE.PlaneGeometry(100, 100);
     const floorMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
     const floor = new THREE.Mesh(floorGeom, floorMat);
     floor.rotation.x = -Math.PI / 2; // lay flat
-    floor.position.y = -1;
+    floor.position.y = -.5;
     floor.receiveShadow = true;
     this.threeScene.add(floor);
 
