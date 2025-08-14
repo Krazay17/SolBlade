@@ -1,27 +1,31 @@
 import * as THREE from 'three';
 import Input from '../core/Input';
+import { Physics } from '../core/Physics';
 import { addPhysics } from '../core/Physics';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
 export default class Player {
-    constructor(x, y, z, scene, camera) {
+    constructor(x = 0, y = 25, z = 0, scene, camera, gameScene) {
         this.scene = scene;
         this.camera = camera;
-        // this.mesh = new THREE.Mesh(
-        //     new THREE.BoxGeometry(1, 1, 1),
-        //     new THREE.MeshStandardMaterial({
-        //         color: 0xffff00,
-        //         roughness: 0.5, // matte vs shiny
-        //         metalness: 0.3  // metallic look
-        //     })
-        // );
-        // this.mesh.position.set(x, y, z);
-        // this.mesh.castShadow = true;
+        this.gameScene = gameScene;
 
-        const loader = new GLTFLoader();
+
+        this.capsule = this.setupCapsule();
+        this.capsule.position.set(x, 2, z);
+        addPhysics(this.capsule);
+
+        this.physics = new Physics(gameScene.worldMesh);
+
         this.cameraArm = new THREE.Object3D();
-        this.cameraArm.position.set(0, 1.2, 0);
+        this.cameraArm.position.set(1, .8, 0);
+        this.capsule.add(this.cameraArm);
+        this.cameraArm.add(this.camera);
 
+        Input.init();
+
+        this.mesh;
+        const loader = new GLTFLoader();
         loader.load(
             '/assets/KnightBlade.glb',
             (gltf) => {
@@ -34,14 +38,9 @@ export default class Player {
                         child.receiveShadow = true;
                     }
                 });
-                this.scene.add(model);
                 this.mesh = model;
-                this.mesh.position.set(x, y, z);
                 this.mesh.castShadow = true;
-                this.mesh.add(this.cameraArm);
-                this.cameraArm.add(this.camera);
-                this.mesh.height = 1;
-                addPhysics(this.mesh);
+                this.capsule.add(this.mesh);
             },
             (xhr) => {
                 console.log((xhr.loaded / xhr.total * 100) + '% loaded');
@@ -51,13 +50,42 @@ export default class Player {
             }
         );
 
+        this.mouseCapture();
 
-        Input.init();
-
-        this.camDirection = new THREE.Vector3();
         this.speed = 15;
         this.jump = 1;
 
+
+    }
+
+    update(dt) {
+        let forward = 0;
+        let strafe = 0;
+
+        if (Input.keys['KeyW']) forward += this.speed;
+        if (Input.keys['KeyS']) forward -= this.speed;
+        if (Input.keys['KeyA']) strafe -= this.speed;
+        if (Input.keys['KeyD']) strafe += this.speed;
+        if (Input.keys['Space']) {
+            if (this.jump < 20) {
+                this.capsule.velocity.y = this.jump;
+                this.jump += 200 * dt;
+                this.physics.moveCapsule(this.capsule, new THREE.Vector3(0, 1, 0));
+            }
+        } else {
+            this.jump = 1;
+        }
+
+        if (forward !== 0 || strafe !== 0) {
+            let dir = this.movementDirection(dt, forward, strafe);
+            if (dir.length() > 0) dir.normalize().multiplyScalar(this.speed * dt);
+            //this.capsule.position.add(dir);
+            this.physics.moveCapsule(this.capsule, dir)
+        }
+        this.updateCapsuleCollision();
+    }
+
+    mouseCapture() {
         let yaw = 0;
         let pitch = 0;
 
@@ -74,36 +102,10 @@ export default class Player {
                 pitch -= event.movementY * sensitivity;
                 pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
 
-                this.mesh.rotation.y = yaw;        // Yaw
+                this.capsule.rotation.y = yaw;        // Yaw
                 this.cameraArm.rotation.x = pitch; // Pitch
             }
         });
-
-    }
-
-    update(dt) {
-        let forward = 0;
-        let strafe = 0;
-
-        if (Input.keys['KeyW']) forward += this.speed;
-        if (Input.keys['KeyS']) forward -= this.speed;
-        if (Input.keys['KeyA']) strafe -= this.speed;
-        if (Input.keys['KeyD']) strafe += this.speed;
-        if (Input.keys['Space']) {
-            if (this.jump < 20) {
-                this.mesh.velocity.y = this.jump;
-                this.jump += 200 * dt;
-                console.log(this.jump);
-            }
-        } else {
-            this.jump = 1;
-        }
-
-        if (forward !== 0 || strafe !== 0) {
-            let dir = this.movementDirection(dt, forward, strafe);
-            if (dir.length() > 0) dir.normalize().multiplyScalar(this.speed * dt);
-            this.mesh.position.add(dir);
-        }
     }
 
     movementDirection(dt, speed, strafe = 0) {
@@ -129,4 +131,44 @@ export default class Player {
         return direction;
     }
 
+    setupCapsule() {
+        const radius = .35;
+        const height = 1;
+
+        const capsuleGeo = new THREE.CapsuleGeometry(radius, height, 4, 8);
+        const capsuleMat = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
+        const capsule = new THREE.Mesh(capsuleGeo, capsuleMat);
+        this.scene.add(capsule);
+
+        capsule.name = 'PlayerRoot';
+
+        capsule.collider = {
+            radius,
+            height,
+        };
+
+        capsule.tempBox = new THREE.Box3();
+        capsule.tempSphere = new THREE.Sphere();
+        capsule.tempSegment = new THREE.Line3();
+
+        return capsule;
+    }
+
+    updateCapsuleCollision() {
+        const { radius, height } = this.capsule.collider;
+
+        // World position of the bottom and top points of the capsule
+        const start = new THREE.Vector3(0, height, 0).applyMatrix4(this.capsule.matrixWorld);
+        const end = new THREE.Vector3(0, -height, 0).applyMatrix4(this.capsule.matrixWorld);
+
+        this.capsule.tempSegment.set(start, end);
+        this.capsule.tempSphere.center.copy(start).lerp(end, 0.5);
+        this.capsule.tempSphere.radius = 4;
+        this.capsule.tempBox.setFromCenterAndSize(
+            this.capsule.tempSphere.center,
+            new THREE.Vector3(0.7, 1.0, 0.7)
+        );
+
+
+    }
 }

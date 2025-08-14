@@ -28,3 +28,35 @@ export default class Particle {
         return this.alpha <= 0;
     }
 }
+
+
+let particles = [];
+let canvas, ctx;
+
+export function clickParticles() {
+  canvas = document.getElementById('particles');
+  ctx = canvas.getContext('2d');
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  canvas.addEventListener('click', (e) => {
+    for (let i = 0; i < 20; i++) {
+      particles.push(new Particle(e.clientX, e.clientY));
+    }
+  });
+}
+
+export function drawParticles(dt) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = particles.filter(p => !p.isDead());
+  particles.forEach(p => {
+    p.update(dt);
+    p.draw(ctx);
+  });
+}
+
+export function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
