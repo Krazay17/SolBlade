@@ -27,6 +27,7 @@ export default class Input {
     });
     this.domElement.addEventListener('keydown', (e) => {
       this.keys[e.code] = true;
+      MyEventEmitter.emit('playerMove');
     });
     this.domElement.addEventListener('keyup', (e) => {
       this.keys[e.code] = false;

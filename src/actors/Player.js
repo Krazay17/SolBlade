@@ -49,6 +49,7 @@ export default class Player extends THREE.Object3D {
             this.mesh = model;
             this.animator = new PlayerAnimator(this.mesh, gltf.animations);
             this.animator.setState('idle');
+            MyEventEmitter.emit('playerReady', {name: LocalData.name, pos: this.position});
         });
 
         const material = getMaterial('playerMaterial');
