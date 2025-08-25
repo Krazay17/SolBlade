@@ -1,28 +1,33 @@
+import * as CANNON from 'cannon';
 import * as THREE from 'three';
-import Input from '../core/Input';
-import { Physics } from '../core/Physics';
-import { addPhysics } from '../core/Physics';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { getMaterial } from '../core/MaterialManager';
+import LocalData from '../core/LocalData';
+import MyEventEmitter from '../core/GlobalEventEmitter';
+import { IdleState, WalkState, JumpState } from '../core/PlayerStates';
+import { Pistol } from '../core/Weapons';
 
-export default class Player {
-    constructor(x = 0, y = 25, z = 0, scene, camera, gameScene) {
+export default class Player extends THREE.Object3D {
+    constructor(game, scene, { x = 0, y = 5, z = 0 }, camera, isLocal = true) {
+        super();
+        game.graphicsWorld.add(this);
+        this.game = game;
         this.scene = scene;
+        this.position.set(x, y, z);
         this.camera = camera;
-        this.gameScene = gameScene;
+        this.isLocal = isLocal;
+        this.input = game.input;
 
+        this.height = 1;
+        this.radius = .35;
 
-        this.capsule = this.setupCapsule();
-        this.capsule.position.set(x, 2, z);
-        addPhysics(this.capsule);
-
-        this.physics = new Physics(gameScene.worldMesh);
+        this.debugCapsule = this.setupCapsule(this.height, this.radius);
+        this.add(this.debugCapsule);
 
         this.cameraArm = new THREE.Object3D();
         this.cameraArm.position.set(1, .8, 0);
-        this.capsule.add(this.cameraArm);
+        this.add(this.cameraArm);
         this.cameraArm.add(this.camera);
-
-        Input.init();
 
         this.mesh;
         const loader = new GLTFLoader();
@@ -40,7 +45,7 @@ export default class Player {
                 });
                 this.mesh = model;
                 this.mesh.castShadow = true;
-                this.capsule.add(this.mesh);
+                this.add(this.mesh);
             },
             (xhr) => {
                 console.log((xhr.loaded / xhr.total * 100) + '% loaded');
@@ -50,125 +55,97 @@ export default class Player {
             }
         );
 
-        this.mouseCapture();
+        const material = getMaterial('playerMaterial');
+        const sphere = new CANNON.Sphere(1);
+        this.body = new CANNON.Body({
+            position: new CANNON.Vec3(x, y, z),
+            mass: 1,
+            shape: sphere,
+            fixedRotation: true,
+            material: material,
+        });
+        game.physicsWorld.addBody(this.body);
 
-        this.speed = 15;
-        this.jump = 1;
+        const contactMaterial = new CANNON.ContactMaterial(
+            material,
+            getMaterial('defaultMaterial'),
+            {
+                friction: 0,
+                restitution: 0,
+                contactEquationRelaxation: 50,
+            });
+        this.game.physicsWorld.addContactMaterial(contactMaterial);
 
 
+        this.states = {
+            idle: new IdleState(this),
+            walk: new WalkState(this),
+            jump: new JumpState(this),
+        }
+        this.currentState = this.states['idle'];
+
+        this.weapon = new Pistol();
+
+        if (isLocal) {
+            this.speed = 20;
+            this.acceleration = 100;
+            this.deceleration = 300;
+            this.jump = 10;
+        }
     }
 
-    update(dt) {
-        let forward = 0;
-        let strafe = 0;
+    update(dt, time) {
+        if (!this.body) return;
+        if (this.currentState) {
+            this.currentState.update(dt, this.input);
+        }
+        //Decelerate
+        this.body.velocity.x /= 1.05;
+        this.body.velocity.z /= 1.05;
 
-        if (Input.keys['KeyW']) forward += this.speed;
-        if (Input.keys['KeyS']) forward -= this.speed;
-        if (Input.keys['KeyA']) strafe -= this.speed;
-        if (Input.keys['KeyD']) strafe += this.speed;
-        if (Input.keys['Space']) {
-            if (this.jump < 20) {
-                this.capsule.velocity.y = this.jump;
-                this.jump += 200 * dt;
-                this.physics.moveCapsule(this.capsule, new THREE.Vector3(0, 1, 0));
+        this.handleInput(dt, time);
+
+        //Update visual position to physics position
+        this.position.copy(this.body.position);
+    }
+    handleInput(dt) {
+        if (!this.input) return;
+        this.rotation.y = this.input.yaw;        // Yaw
+        this.cameraArm.rotation.x = this.input.pitch; // Pitch
+
+        if(this.input.mice[0]) {
+            if (this.weapon.use(performance.now())) {
             }
+        }
+
+        if (this.input.keys['KeyG']) {
+            this.changeHealth(-10);
+            this.input.keys['KeyG'] = false; // Prevent continuous damage
+        }
+    }
+    setState(stateName) {
+        if (this.currentState) {
+            this.currentState.exit();
+        }
+        this.currentState = this.states[stateName];
+        if (this.currentState) {
+            this.currentState.enter();
         } else {
-            this.jump = 1;
+            console.warn(`State ${stateName} does not exist.`);
         }
-
-        if (forward !== 0 || strafe !== 0) {
-            let dir = this.movementDirection(dt, forward, strafe);
-            if (dir.length() > 0) dir.normalize().multiplyScalar(this.speed * dt);
-            //this.capsule.position.add(dir);
-            this.physics.moveCapsule(this.capsule, dir)
+    }
+    changeHealth(amount) {
+        LocalData.health = Math.max(0, LocalData.health + amount);
+        if (LocalData.health === 0) {
+            console.log("Player has died.");
         }
-        this.updateCapsuleCollision();
+        MyEventEmitter.emit('updateHealth', LocalData.health);
     }
-
-    mouseCapture() {
-        let yaw = 0;
-        let pitch = 0;
-
-        // Lock on click
-        document.addEventListener('click', () => {
-            document.body.requestPointerLock();
-        });
-
-        // Mouse movement (only works while locked)
-        document.addEventListener('mousemove', (event) => {
-            if (document.pointerLockElement === document.body) {
-                const sensitivity = 0.002;
-                yaw -= event.movementX * sensitivity;
-                pitch -= event.movementY * sensitivity;
-                pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
-
-                this.capsule.rotation.y = yaw;        // Yaw
-                this.cameraArm.rotation.x = pitch; // Pitch
-            }
-        });
-    }
-
-    movementDirection(dt, speed, strafe = 0) {
-        let forward = new THREE.Vector3();
-        let right = new THREE.Vector3();
-
-        // Get forward direction from camera (and ignore vertical tilt)
-        this.camera.getWorldDirection(forward);
-        forward.y = 0;
-        forward.normalize();
-
-        // Right vector = forward × up
-        right.crossVectors(forward, this.camera.up).normalize();
-
-        // Combine forward/backward and left/right
-        let direction = new THREE.Vector3();
-        direction.addScaledVector(forward, speed);  // W/S
-        direction.addScaledVector(right, strafe);   // A/D
-
-        // Apply delta time
-        direction.multiplyScalar(dt);
-
-        return direction;
-    }
-
-    setupCapsule() {
-        const radius = .35;
-        const height = 1;
-
+    setupCapsule(height, radius) {
         const capsuleGeo = new THREE.CapsuleGeometry(radius, height, 4, 8);
         const capsuleMat = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
         const capsule = new THREE.Mesh(capsuleGeo, capsuleMat);
-        this.scene.add(capsule);
-
-        capsule.name = 'PlayerRoot';
-
-        capsule.collider = {
-            radius,
-            height,
-        };
-
-        capsule.tempBox = new THREE.Box3();
-        capsule.tempSphere = new THREE.Sphere();
-        capsule.tempSegment = new THREE.Line3();
 
         return capsule;
-    }
-
-    updateCapsuleCollision() {
-        const { radius, height } = this.capsule.collider;
-
-        // World position of the bottom and top points of the capsule
-        const start = new THREE.Vector3(0, height, 0).applyMatrix4(this.capsule.matrixWorld);
-        const end = new THREE.Vector3(0, -height, 0).applyMatrix4(this.capsule.matrixWorld);
-
-        this.capsule.tempSegment.set(start, end);
-        this.capsule.tempSphere.center.copy(start).lerp(end, 0.5);
-        this.capsule.tempSphere.radius = 4;
-        this.capsule.tempBox.setFromCenterAndSize(
-            this.capsule.tempSphere.center,
-            new THREE.Vector3(0.7, 1.0, 0.7)
-        );
-
-
     }
 }

@@ -1,15 +1,9 @@
-#kb-section {
-    position: fixed;
-    bottom: 0;
-    left: 10%;
-    z-index: 1;
-    background: #111111b0;
-    overflow: hidden;
-    height: max-content;
-    width: max-content;
-}
-
 .kb-grid {
+    position: absolute;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    left: 50%;
+    transform: translateX(-50%);
     display: grid;
     grid-template-columns: repeat(11, 65px);
     padding-left: 5%;

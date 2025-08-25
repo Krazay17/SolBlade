@@ -3,14 +3,10 @@ import './keyBindsStyle.css';
 let kbGrid = null;
 
 export function setupKeybindWindow() {
-    const section = document.getElementById('kb-section');
-
     kbGrid = document.createElement('div');
     kbGrid.className = 'kb-grid';
-
-    section.appendChild(kbGrid);
-
-
+    document.body.appendChild(kbGrid);
+    
     // addButton('KeyUnpressed', 'KeyF', 'Int', 1, 1);
     // addButton('KeyUnpressed', 'KeyF', 'Int', 1, 2);
 }

@@ -1,135 +1,102 @@
 import * as THREE from 'three';
+import * as CANNON from 'cannon';
 import SceneBase from './_SceneBase.js';
 import Player from '../actors/Player.js';
 import { clickParticles, drawParticles } from "../actors/Particle.js";
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
-import { MeshBVH, acceleratedRaycast, computeBoundsTree, MeshBVHHelper } from 'three-mesh-bvh';
-import { addWorld } from '../core/Physics.js';
-import { setupKeybindWindow, addButton } from '../ui/KeyBinds.js';
-
-
-// Patch THREE's raycast to use BVH
-THREE.Mesh.prototype.raycast = acceleratedRaycast;
-THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+import { threeToCannon } from 'three-to-cannon';
+import { getMaterial } from '../core/MaterialManager.js';
 
 export default class GameScene extends SceneBase {
-  constructor(game) {
-    super(game);
-    this.threeScene = new THREE.Scene();
-
-    this.game.camera.position.z = 2;
-    this.game.camera.lookAt(0, 0, 0);
-
-    this.spawnLights();
+  onEnter() {
     this.spawnLevel()
-      .then(() => {
-        this.player = new Player(0, 0, 0, this.threeScene, this.game.camera, this);
-      })
-      .catch(err => console.error('Error loading level', err));
+    this.player = new Player(this.game, this, { x: 0, y: 5, z: 0 }, this.game.camera);
 
+    this.makeSky();
     clickParticles();
-    setupKeybindWindow()
-    addButton('KeyUnpressed', 'KeyW', 'Heal', 1, 2);
-    addButton('KeyUnpressed', 'KeyS', 'Crouch', 2, 2);
-    addButton('KeyUnpressed', 'KeyA', 'Left', 2, 1);
-    addButton('KeyUnpressed', 'KeyD', 'Right', 2, 3);
-    addButton('KeyUnpressed', 'ShiftLeft', 'Dash', 2, 4, '100px', 'Shift');
-    addButton('KeyUnpressed', 'Space', 'Jump', 2, 6, '140px');
-    addButton('KeyUnpressed', 'KeyF', 'Interact', 2, 9);
-    addButton('KeyUnpressed', 'KeyC', 'Inventory', 2, 10);
-    addButton('KeyUnpressed', 'KeyT', 'Home', 1, 10);
-    addButton('KeyUnpressed', 'KeyR', 'Respawn', 1, 9);
   }
 
-  update(dt) {
-    //this.camControl.update();
-    this.player?.update(dt);
-    drawParticles(dt);
+  update(dt, time) {
+    if (this.player) {
+      this.player.update(dt, time);
+    }
   }
 
-  spawnCubes() {
-    const geom = new THREE.BoxGeometry(2, 4, 2);
-
-    const cube1 = new THREE.Mesh(
-      geom,
-      new THREE.MeshStandardMaterial({
-        color: 0xff00ff,
-        roughness: 0.5, // matte vs shiny
-        metalness: 0.3  // metallic look 
-      })
-    );
-    cube1.position.set(5, 2, 5);
-    this.threeScene.add(cube1);
-
-    const cube2 = new THREE.Mesh(
-      geom,
-      new THREE.MeshStandardMaterial({
-        color: 0xff00ff,
-        roughness: 0.5, // matte vs shiny
-        metalness: 0.3  // metallic look 
-      })
-    );
-    cube2.position.set(2, 2, -5);
-    this.threeScene.add(cube2);
+  makeSky() {
+    const skyGeo = new THREE.SphereGeometry(500, 25, 25);
+    const skyMat = new THREE.MeshBasicMaterial({
+      color: 0x87ceeb,
+      side: THREE.BackSide
+    });
+    const sky = new THREE.Mesh(skyGeo, skyMat);
+    this.game.graphicsWorld.add(sky);
   }
 
-  spawnLights() {
-    // Directional Light (main sun)
-    const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-    dirLight.position.set(5, 100, 5);
-    // Make shadow area much bigger
-    dirLight.shadow.camera.left = -150;
-    dirLight.shadow.camera.right = 150;
-    dirLight.shadow.camera.top = 150;
-    dirLight.shadow.camera.bottom = -50;
-    dirLight.shadow.camera.near = 1;
-    dirLight.shadow.camera.far = 200;
-
-    // Increase resolution for better quality
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
-
-    dirLight.castShadow = true;
-    this.threeScene.add(dirLight);
-
-    // Ambient Light
-    const ambientLight = new THREE.AmbientLight(0xffffff, .2);
-    this.threeScene.add(ambientLight);
-
-    // Optional: see shadow frustum
-    // const helper = new THREE.CameraHelper(dirLight.shadow.camera);
-    // this.threeScene.add(helper);
-
-    // Optional helper to see light direction
-    // const lightHelper = new THREE.DirectionalLightHelper(dirLight, 1);
-    // this.threeScene.add(lightHelper);
+  makeFloor() {
+    //make a cannon floor plane
+    const groundBody = new CANNON.Body({
+      position: new CANNON.Vec3(0, 1, 0),
+      quaternion: new CANNON.Quaternion().setFromEuler(-Math.PI / 2, 0, 0),
+      mass: 0, // mass == 0 makes the body static
+      shape: new CANNON.Plane(),
+      material: getMaterial('defaultMaterial'),
+    });
+    this.game.physicsWorld.addBody(groundBody);
   }
 
   spawnLevel() {
-    return new Promise((resolve, reject) => {
-      // Load a test world mesh
-      const loader = new GLTFLoader();
-      loader.load('/assets/Level1.glb', (gltf) => {
-        this.worldMesh = gltf.scene.children[0];
-        this.worldMesh.castShadow = true;
-        this.worldMesh.receiveShadow = true;
+    // Load a test world mesh
+    const loader = new GLTFLoader();
+    loader.load('/assets/Level2.glb', (gltf) => {
+      const model = gltf.scene;
+      model.position.set(0, 0, 0);
+      model.scale.set(1, 1, 1); // Adjust size if needed
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+      this.game.graphicsWorld.add(model);
 
-        // Reset transform on mesh so BVH is accurate
-        this.worldMesh.position.set(0, 0, 0);
-        this.worldMesh.rotation.set(0, 0, 0);
-        this.worldMesh.scale.set(1, 1, 1);
+      // Create a static physics body for the level
+      gltf.scene.traverse((child) => {
+        if (child.isMesh) {
+          let shape;
+          try {
+            shape = createTrimesh(child.geometry);
+          } catch (e) {
+            console.warn('Could not create trimesh for', child);
+            return;
+          }
+          const body = new CANNON.Body({
+            mass: 0, // static
+            shape: shape,
+            material: getMaterial('defaultMaterial'),
+          });
+          body.position.copy(child.getWorldPosition(new THREE.Vector3()));
+          body.quaternion.copy(child.getWorldQuaternion(new THREE.Quaternion()));
+          this.game.physicsWorld.addBody(body);
+        }
+      });
 
-        this.worldMesh.geometry.computeBoundsTree();  // Compute BVH properly
-        this.threeScene.add(this.worldMesh);
-
-        // const helper = new MeshBVHHelper(this.worldMesh, 10);
-        // this.threeScene.add(helper);
-        addWorld(this.worldMesh);
-        resolve();
-      },
-        undefined,
-        (error) => reject(error)
-      );
-    })
+    });
   }
+}
+// Helper: Convert Three.js geometry to Cannon Trimesh
+function createTrimesh(geometry) {
+  const vertices = geometry.attributes.position.array;
+  let indices = [];
+
+  if (geometry.index) {
+    // If the geometry already has an index buffer
+    indices = Array.from(geometry.index.array);
+  } else {
+    // No index buffer → assume each consecutive 3 vertices is a triangle
+    for (let i = 0; i < vertices.length / 3; i++) {
+      indices.push(i);
+    }
+  }
+
+  return new CANNON.Trimesh(vertices, indices);
 }
