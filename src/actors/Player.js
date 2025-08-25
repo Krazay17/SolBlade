@@ -1,6 +1,6 @@
 import * as CANNON from 'cannon';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { FBXLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/GlobalEventEmitter';
@@ -19,10 +19,10 @@ export default class Player extends THREE.Object3D {
         this.input = game.input;
 
         this.height = 1;
-        this.radius = .35;
+        this.radius = .3;
 
-        this.debugCapsule = this.setupCapsule(this.height, this.radius);
-        this.add(this.debugCapsule);
+        //this.debugCapsule = this.setupCapsule(this.height, this.radius);
+        //this.add(this.debugCapsule);
 
         this.cameraArm = new THREE.Object3D();
         this.cameraArm.position.set(1, .8, 0);
@@ -30,30 +30,39 @@ export default class Player extends THREE.Object3D {
         this.cameraArm.add(this.camera);
 
         this.mesh;
-        const loader = new GLTFLoader();
-        loader.load(
-            '/assets/KnightBlade.glb',
-            (gltf) => {
-                const model = gltf.scene;
-                model.position.set(0, 0, 0);
-                model.scale.set(1, 1, 1); // Adjust size if needed
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        child.castShadow = true;
-                        child.receiveShadow = true;
-                    }
-                });
-                this.mesh = model;
-                this.mesh.castShadow = true;
-                this.add(this.mesh);
-            },
-            (xhr) => {
-                console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-            },
-            (error) => {
-                console.error('Error loading model:', error);
-            }
-        );
+        // const loader = new GLTFLoader();
+        // loader.load(
+        //     '/assets/KnightBlade.glb',
+        //     (gltf) => {
+        //         const model = gltf.scene;
+        //         model.position.set(0, 0, 0);
+        //         model.scale.set(1, 1, 1); // Adjust size if needed
+        //         model.traverse((child) => {
+        //             if (child.isMesh) {
+        //                 child.castShadow = true;
+        //                 child.receiveShadow = true;
+        //             }
+        //         });
+        //         this.mesh = model;
+        //         this.mesh.castShadow = true;
+        //         this.add(this.mesh);
+        //     },
+        //     (xhr) => {
+        //         console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        //     },
+        //     (error) => {
+        //         console.error('Error loading model:', error);
+        //     }
+        // );
+
+        const fbxLoader = new FBXLoader();
+        fbxLoader.load('/assets/GirlKnight.fbx', (fbx) => {
+            this.add(fbx);
+            fbx.scale.set(0.01, 0.01, 0.01);
+            fbx.position.set(0, -1, 0);
+            fbx.rotation.y = Math.PI;
+            this.mesh = fbx;
+        })
 
         const material = getMaterial('playerMaterial');
         const sphere = new CANNON.Sphere(1);

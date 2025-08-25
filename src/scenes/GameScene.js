@@ -4,7 +4,6 @@ import SceneBase from './_SceneBase.js';
 import Player from '../actors/Player.js';
 import { clickParticles, drawParticles } from "../actors/Particle.js";
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
-import { threeToCannon } from 'three-to-cannon';
 import { getMaterial } from '../core/MaterialManager.js';
 
 export default class GameScene extends SceneBase {
@@ -24,11 +23,12 @@ export default class GameScene extends SceneBase {
 
   makeSky() {
     const skyGeo = new THREE.SphereGeometry(500, 25, 25);
-    const skyMat = new THREE.MeshBasicMaterial({
-      color: 0x87ceeb,
+    const myTexture = new THREE.TextureLoader().load('assets/RedSky0.webp');
+    const myMaterial = new THREE.MeshBasicMaterial({
+      map: myTexture,
       side: THREE.BackSide
     });
-    const sky = new THREE.Mesh(skyGeo, skyMat);
+    const sky = new THREE.Mesh(skyGeo, myMaterial);
     this.game.graphicsWorld.add(sky);
   }
 
