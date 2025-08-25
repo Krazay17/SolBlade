@@ -6,6 +6,9 @@ export default class PlayerState {
     constructor(actor) {
         this.actor = actor;
         this.body = actor.body;
+        this.idleDecel = 0.9;
+        this.runDedel = 0.95;
+        this.jumpDecel = 0.995;
     }
     enter() { }
     update(dt, inputs) { }
@@ -17,6 +20,10 @@ export class IdleState extends PlayerState {
         this.actor.setAnimState('idle');
     }
     update(dt, inputs) {
+        // Decelerate horizontally
+        this.body.velocity.x *= this.idleDecel;
+        this.body.velocity.z *= this.idleDecel;
+
         if (inputs.keys['KeyW'] || inputs.keys['KeyA'] || inputs.keys['KeyS'] || inputs.keys['KeyD']) {
             this.actor.setState('run');
         }
@@ -27,35 +34,32 @@ export class IdleState extends PlayerState {
 }
 export class RunState extends PlayerState {
     enter() {
-        this.actor.setAnimState('run');
     }
     update(dt, inputs) {
         // Reset direction
         direction.set(0, 0, 0);
 
         // Decelerate horizontally
-        this.body.velocity.x *= 0.98;
-        this.body.velocity.z *= 0.98;
+        // this.body.velocity.x *= this.runDedel;
+        // this.body.velocity.z *= this.runDedel;
 
         // Gather input directions
         if (inputs.keys['KeyW']) {
             direction.z -= 1;
             this.actor.setAnimState('run');
         }
-        if (inputs.keys['KeyS']) direction.z += 1;
+        if (inputs.keys['KeyS']) {
+            direction.z += 1;
+            this.actor.setAnimState('run');
+        }
         if (inputs.keys['KeyA']) {
             direction.x -= 1;
-            if (!this.actor.getAnimState() === 'Run') {
-                this.actor.setAnimState('strafeLeft');
-
-            }
+            this.actor.setAnimState('strafeLeft');
         }
         if (inputs.keys['KeyD']) {
             direction.x += 1;
-            if (!this.actor.getAnimState() === 'Run') {
-                this.actor.setAnimState('strafeRight');
-
-            }
+            console.log(this.actor.getAnimState());
+            this.actor.setAnimState('strafeRight');
         }
 
         // If no movement, switch to idle
@@ -78,7 +82,7 @@ export class RunState extends PlayerState {
 }
 export class JumpState extends PlayerState {
     enter() {
-        this.body.velocity.y = 12;
+        this.body.velocity.y += 12;
         this.actor.setAnimState('jumping');
         this.jumpTimer = performance.now() + 500;
     }
@@ -94,8 +98,8 @@ export class JumpState extends PlayerState {
         direction.set(0, 0, 0);
 
         // Decelerate horizontally
-        this.body.velocity.x *= 0.98;
-        this.body.velocity.z *= 0.98;
+        this.body.velocity.x *= this.jumpDecel;
+        this.body.velocity.z *= this.jumpDecel;
 
         // Gather input directions
         if (inputs.keys['KeyW']) direction.z -= 1;
@@ -103,9 +107,14 @@ export class JumpState extends PlayerState {
         if (inputs.keys['KeyA']) direction.x -= 1;
         if (inputs.keys['KeyD']) direction.x += 1;
 
+        if (direction.length() === 0) return;
         const { rotatedX, rotatedZ } = getDirectionVector(inputs);
+        const currentX = this.body.velocity.x * rotatedX;
+        const currentZ = this.body.velocity.z * rotatedZ;
         this.body.velocity.x += rotatedX * this.actor.acceleration * dt;
         this.body.velocity.z += rotatedZ * this.actor.acceleration * dt;
+        console.log(currentX, currentZ);
+        clampHorizontalSpeed(this.body, this.actor.speed * 4);
     }
 }
 

@@ -1,4 +1,4 @@
-import MyEventEmitter from "../core/GlobalEventEmitter";
+import MyEventEmitter from "../core/MyEventEmitter";
 import LocalData from "../core/LocalData";
 import './PlayerInfoStyle.css';
 

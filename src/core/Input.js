@@ -1,4 +1,5 @@
 import { setupKeybindWindow, addButton } from "../ui/KeyBinds";
+import MyEventEmitter from "./MyEventEmitter";
 
 export default class Input {
   constructor(actor, domElement = document.body) {
@@ -21,24 +22,27 @@ export default class Input {
   }
 
   bindings() {
-    this.domElement.addEventListener('keydown', (ev) => {
-      this.keys[ev.code] = true;
+    this.domElement.addEventListener('keypress', (e) => {
+      MyEventEmitter.emit('KeyPressed', e.code);
     });
-    this.domElement.addEventListener('keyup', (ev) => {
-      this.keys[ev.code] = false;
+    this.domElement.addEventListener('keydown', (e) => {
+      this.keys[e.code] = true;
     });
-    this.domElement.addEventListener('mousedown', (ev) => {
-      this.mice[ev.button] = true;
+    this.domElement.addEventListener('keyup', (e) => {
+      this.keys[e.code] = false;
+    });
+    this.domElement.addEventListener('mousedown', (e) => {
+      this.mice[e.button] = true;
       this.gameElement.requestPointerLock();
     });
-    this.domElement.addEventListener('mouseup', (ev) => {
-      this.mice[ev.button] = false;
+    this.domElement.addEventListener('mouseup', (e) => {
+      this.mice[e.button] = false;
     });
 
-    this.domElement.addEventListener('mousemove', (ev) => {
+    this.domElement.addEventListener('mousemove', (e) => {
       if (this.gameElement === document.pointerLockElement) {
-        this.yaw -= ev.movementX * this.sensitivity;
-        this.pitch -= ev.movementY * this.sensitivity;
+        this.yaw -= e.movementX * this.sensitivity;
+        this.pitch -= e.movementY * this.sensitivity;
         this.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pitch));
       }
     });
@@ -49,11 +53,11 @@ export default class Input {
     addButton('KeyUnpressed', 'KeyS', 'Bwd', 2, 2);
     addButton('KeyUnpressed', 'KeyA', 'Left', 2, 1);
     addButton('KeyUnpressed', 'KeyD', 'Right', 2, 3);
-    addButton('KeyUnpressed', 'ShiftLeft', 'Dash', 2, 4, '100px', 'Shift');
+    //addButton('KeyUnpressed', 'ShiftLeft', 'Dash', 2, 4, '100px', 'Shift');
     addButton('KeyUnpressed', 'Space', 'Jump', 2, 6, '140px');
-    addButton('KeyUnpressed', 'KeyF', 'Interact', 2, 9);
-    addButton('KeyUnpressed', 'KeyC', 'Inventory', 2, 10);
-    addButton('KeyUnpressed', 'KeyT', 'Home', 1, 10);
+    //addButton('KeyUnpressed', 'KeyF', 'Interact', 2, 9);
+    //addButton('KeyUnpressed', 'KeyC', 'Inventory', 2, 10);
+    addButton('KeyUnpressed', 'KeyT', 'Pause', 1, 10);
     addButton('KeyUnpressed', 'KeyR', 'Respawn', 1, 9);
   }
 }

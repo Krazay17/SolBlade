@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { FBXLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
-import MyEventEmitter from '../core/GlobalEventEmitter';
+import MyEventEmitter from '../core/MyEventEmitter';
 import { IdleState, RunState, JumpState } from '../core/PlayerStates';
 import { Pistol } from '../core/Weapons';
 import PlayerAnimator from '../core/PlayerAnimator';
@@ -84,10 +84,17 @@ export default class Player extends THREE.Object3D {
         this.weapon = new Pistol();
 
         if (isLocal) {
-            this.speed = 20;
+            this.speed = 15;
             this.acceleration = 100;
             this.deceleration = 300;
             this.jump = 10;
+
+            MyEventEmitter.on('KeyPressed', (key) => {
+                if(key === 'KeyR') {
+                    this.body.position.set(0, 5, 0);
+                    this.body.velocity.set(0, 0, 0);
+                }
+            })
         }
     }
 
@@ -96,9 +103,6 @@ export default class Player extends THREE.Object3D {
             if (this.currentState) {
                 this.currentState.update(dt, this.input);
             }
-            //Decelerate
-            this.body.velocity.x /= 1.05;
-            this.body.velocity.z /= 1.05;
 
             this.handleInput(dt, time);
 
@@ -148,7 +152,6 @@ export default class Player extends THREE.Object3D {
             skipBackfaces: true,
             result: result
         });
-        console.log(result);
         return result.hasHit;
     }
     setState(stateName) {

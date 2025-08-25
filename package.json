@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Blade Game 3d",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "vite",
@@ -14,6 +15,8 @@
   "keywords": [],
   "dependencies": {
     "cannon": "^0.6.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "three": "^0.179.1",
     "three-mesh-bvh": "^0.9.1",
     "three-to-cannon": "^5.0.2"

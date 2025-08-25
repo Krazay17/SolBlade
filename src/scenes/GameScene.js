@@ -22,7 +22,7 @@ export default class GameScene extends SceneBase {
   }
 
   makeSky() {
-    const skyGeo = new THREE.SphereGeometry(500, 25, 25);
+    const skyGeo = new THREE.SphereGeometry(2500, 25, 25);
     const myTexture = new THREE.TextureLoader().load('assets/RedSky0.webp');
     const myMaterial = new THREE.MeshBasicMaterial({
       map: myTexture,

@@ -5,6 +5,7 @@ import Input from './Input';
 import { setupKeybindWindow, addButton } from '../ui/KeyBinds';
 import { getMaterial } from './MaterialManager';
 import PlayerInfo from '../ui/PlayerInfo';
+import MyEventEmitter from './MyEventEmitter';
 
 export default class Game {
   constructor(canvas) {
@@ -37,18 +38,24 @@ export default class Game {
       80,
       window.innerWidth / window.innerHeight,
       0.1,
-      1000
+      5000
     );
     this.camera.position.z = 2;
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
     this.spawnLights();
 
-    this.input = new Input(canvas)
+    this.input = new Input(canvas);
     this.playerInfo = new PlayerInfo();
     this.playerInfo.createUI();
 
     //this.setScene(LocalData.scene);
     this.initWindow();
+
+    MyEventEmitter.on('KeyPressed', (key) => {
+      if (key === 'KeyT') {
+        this.running = !this.running;
+      }
+    })
   }
 
   initWindow() {
@@ -72,7 +79,6 @@ export default class Game {
   loop(time) {
     const dt = (time - this.lastTime) / 1000;
     this.lastTime = time;
-
 
     if (this.running && this.scene) {
       this.scene.update(dt, time);

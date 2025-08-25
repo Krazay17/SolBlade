@@ -17,7 +17,7 @@ export default class PlayerAnimator {
   setState(state) {
     let actionName = null;
 
-    switch(state) {
+    switch (state) {
       case "attacking": actionName = "Attack"; break;
       case "jumping": actionName = "Jump"; break;
       case "falling": actionName = "FallLoopB"; break;
@@ -31,9 +31,9 @@ export default class PlayerAnimator {
       const nextAction = this.actions[actionName];
       if (this.currentAction !== nextAction) {
         if (this.currentAction) {
-          this.currentAction.fadeOut(0.4);
+          this.currentAction.fadeOut(0.25);
         }
-        nextAction.reset().fadeIn(0.4).play();
+        nextAction.reset().fadeIn(0.25).play();
         this.currentAction = nextAction;
         this.actionName = actionName;
       }
