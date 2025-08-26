@@ -66,3 +66,19 @@ export class Pistol extends Weapon {
         return false;
     }
 }
+
+export class Sword extends Weapon {
+    constructor(actor) {
+        super('Sword', 25, 5, .0001); // name, damage, range, cooldown
+        this.actor = actor;
+    }
+    use(currentTime, pos, dir) {
+        if (this.canUse(currentTime)) {
+            this.lastUsed = currentTime;
+            console.log('Sword swung!');
+            this.actor.animator.setState('swordSwing', { doesLoop: false, prio: 2 });
+            return true;
+        }
+        return false;
+    }
+}

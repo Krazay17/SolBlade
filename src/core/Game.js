@@ -6,6 +6,7 @@ import { setupKeybindWindow, addButton } from '../ui/KeyBinds';
 import { getMaterial } from './MaterialManager';
 import PlayerInfo from '../ui/PlayerInfo';
 import MyEventEmitter from './MyEventEmitter';
+import Globals from '../utils/Globals';
 
 export default class Game {
   constructor(canvas) {
@@ -32,6 +33,7 @@ export default class Game {
     });
     this.physicsWorld.gravity = new CANNON.Vec3(0, -15, 0);
     this.timeStep = 1 / 120;
+
     this.graphicsWorld = new THREE.Scene();
 
     this.camera = new THREE.PerspectiveCamera(
@@ -56,6 +58,11 @@ export default class Game {
         this.running = !this.running;
       }
     })
+
+    Globals.graphicsWorld = this.graphicsWorld;
+    Globals.physicsWorld = this.physicsWorld;
+    Globals.input = this.input;
+    Globals.camera = this.camera;
   }
 
   initWindow() {
@@ -81,8 +88,9 @@ export default class Game {
     this.lastTime = time;
 
     if (this.running && this.scene) {
-      this.scene.update(dt, time);
       this.physicsWorld.step(this.timeStep, dt, 6);
+      this.scene.update(dt, time);
+      
       this.renderer.render(this.graphicsWorld, this.camera);
     }
 

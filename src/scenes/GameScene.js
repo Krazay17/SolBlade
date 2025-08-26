@@ -23,6 +23,10 @@ export default class GameScene extends SceneBase {
   update(dt, time) {
     if (this.player) {
       this.player.update(dt, time);
+      if (this.player.body.position.y < -50) {
+        this.player.body.position.set(0, 5, 0);
+        this.player.body.velocity.set(0, 0, 0);
+      }
     }
     if (this.netPlayers) {
       Object.values(this.netPlayers).forEach(player => {

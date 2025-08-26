@@ -4,10 +4,12 @@ import { FBXLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
-import { IdleState, RunState, JumpState } from '../core/PlayerStates';
-import { Pistol } from '../core/Weapons';
+import { IdleState, RunState, JumpState, FallState } from '../core/PlayerStates';
+import { Pistol, Sword } from '../core/Weapons';
 import PlayerAnimator from '../core/PlayerAnimator';
 import { socket } from '../core/NetManager';
+import Globals from '../utils/Globals';
+import GroundChecker from '../core/GroundChecker';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera) {
@@ -45,14 +47,14 @@ export default class Player extends THREE.Object3D {
             this.animator.setState('idle');
         });
 
-        this.weapon = new Pistol(game.graphicsWorld);
+        this.weapon = new Sword(this);
 
         //this.debugCapsule = this.setupCapsule(this.height, this.radius);
         //this.add(this.debugCapsule);
         if (isLocal) {
             this.input = game.input;
 
-            this.speed = 10;
+            this.speed = 9;
             this.acceleration = 100;
             this.deceleration = 300;
             this.jump = 10;
@@ -83,6 +85,7 @@ export default class Player extends THREE.Object3D {
                     friction: 0,
                     restitution: 0,
                     contactEquationRelaxation: 50,
+                    id: 'playerGroundContact',
                 });
             this.game.physicsWorld.addContactMaterial(contactMaterial);
 
@@ -90,20 +93,29 @@ export default class Player extends THREE.Object3D {
                 idle: new IdleState(this),
                 run: new RunState(this),
                 jump: new JumpState(this),
+                fall: new FallState(this),
             }
-            this.currentState = this.states['idle'];
+            this.setState('idle');
 
             MyEventEmitter.on('KeyPressed', (key) => {
                 if (key === 'KeyR') {
                     this.body.position.set(0, 5, 0);
                     this.body.velocity.set(0, 0, 0);
                 }
-            })
+            });
+
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body);
         }
     }
 
     update(dt, time) {
         if (this.body) {
+            if (!this.floorTrace()) {
+                this.setState('fall');
+            } else if (this.currentState !== this.states['jump']) {
+                this.body.velocity.y = Math.min(this.body.velocity.y, 0);
+            }
+
             if (this.currentState) {
                 this.currentState.update(dt, this.input);
             }
@@ -138,24 +150,9 @@ export default class Player extends THREE.Object3D {
         }
     }
     floorTrace() {
-        const down = new CANNON.Vec3(0, -1, 0); // Direction of ray
-        const rayLength = this.height + .2; // Slightly below player
-        const origin = this.body.position.clone(); // Ray starts at player position
-        const result = new CANNON.RaycastResult();
-
-        // Create the ray
-        const ray = new CANNON.Ray(origin, down);
-
-        ray.intersectWorld(this.game.physicsWorld, {
-            from: origin,
-            to: origin.vadd(down.scale(rayLength)),
-            collisionFilterMask: -1,
-            collisionFilterGroup: 1,
-            skipBackfaces: true,
-            result: result
-        });
-        return result.hasHit;
+        return this.groundChecker.isGrounded();
     }
+
     getState() {
         return this.currentStateName ? this.currentStateName : null;
     }
