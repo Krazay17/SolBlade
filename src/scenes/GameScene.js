@@ -106,6 +106,8 @@ export default class GameScene extends SceneBase {
             mass: 0, // static
             shape: shape,
             material: getMaterial('defaultMaterial'),
+            collisionFilterGroup: 1,
+            collisionFilterMask: -1,
           });
           body.position.copy(child.getWorldPosition(new THREE.Vector3()));
           body.quaternion.copy(child.getWorldQuaternion(new THREE.Quaternion()));

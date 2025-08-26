@@ -4,7 +4,7 @@ import Globals from "../utils/Globals";
 import { or } from "three/tsl";
 
 export default class GroundChecker {
-    constructor(world, playerBody, rayLength = 1.2, spread = 0.35) {
+    constructor(world, playerBody, rayLength = 1.5, spread = 0.5) {
         this.world = world;
         this.playerBody = playerBody;
         this.rayLength = rayLength;
@@ -13,6 +13,10 @@ export default class GroundChecker {
         // Offsets around the player's bottom
         this.offsets = [
             new CANNON.Vec3(0, 0, 0),                      // center
+            new CANNON.Vec3(spread, 0, 0),                 // right
+            new CANNON.Vec3(-spread, 0, 0),                // left
+            new CANNON.Vec3(0, 0, spread),                 // front
+            new CANNON.Vec3(0, 0, -spread),                // back
             new CANNON.Vec3(spread, 0, spread),            // front-right
             new CANNON.Vec3(-spread, 0, spread),           // front-left
             new CANNON.Vec3(spread, 0, -spread),           // back-right
@@ -30,16 +34,20 @@ export default class GroundChecker {
 
             const result = new CANNON.RaycastResult();
             ray.intersectWorld(this.world, {
-                collisionFilterMask: -1,   // collide with everything
-                skipBackfaces: true,
+                //only collide with world floor
                 result: result,
+                collisionFilterGroup: 1,
+                collisionFilterMask: 1,
             });
 
+            //If any rays hit a walkable floor return true
+
             if (result.hasHit) {
-                // Optional: check the normal to ensure it’s mostly "up"
-                if (result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)) > 0.5) {
-                    return true; // standing on a walkable surface
-                }
+                return true;
+                // // Optional: check the normal to ensure it’s mostly "up"
+                // if (result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)) > 0.3) {
+                //     return true; // standing on a walkable surface
+                // }
             }
         }
         return false;

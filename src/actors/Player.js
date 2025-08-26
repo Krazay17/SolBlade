@@ -44,7 +44,7 @@ export default class Player extends THREE.Object3D {
             this.add(model);
             this.mesh = model;
             this.animator = new PlayerAnimator(this.mesh, gltf.animations);
-            this.animator.setState('idle');
+            this.setState('idle');
         });
 
         this.weapon = new Sword(this);
@@ -72,7 +72,8 @@ export default class Player extends THREE.Object3D {
                 shape: sphere,
                 fixedRotation: true,
                 material: material,
-                collisionFilterGroup: 1,
+                collisionFilterGroup: 2,
+                collisionFilterMask: -1,
             });
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
