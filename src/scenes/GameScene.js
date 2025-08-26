@@ -5,14 +5,19 @@ import Player from '../actors/Player.js';
 import { clickParticles, drawParticles } from "../actors/Particle.js";
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager.js';
+import { playerNetData, setNetScene } from '../core/NetManager.js';
+import LocalData from '../core/LocalData.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
-    this.spawnLevel()
-    this.player = new Player(this.game, this, { x: 0, y: 5, z: 0 }, this.game.camera);
+    this.name = 'level1';
+    this.spawnLevel();
+    this.netPlayers = {};
+    this.player = new Player(this.game, this, LocalData.position, true, this.game.camera);
 
     this.makeSky();
     clickParticles();
+    setNetScene(this, playerNetData(null, { scene: this.name, pos: LocalData.position, name: LocalData.name, money: LocalData.money }));
   }
 
   update(dt, time) {
@@ -42,6 +47,29 @@ export default class GameScene extends SceneBase {
       material: getMaterial('defaultMaterial'),
     });
     this.game.physicsWorld.addBody(groundBody);
+  }
+
+  addPlayer(playerData) {
+    console.log('adding player', playerData);
+    this.netPlayers[playerData.id] = new Player(this.game, this, playerData.pos, false);
+  }
+
+  removePlayer(id) {
+    if (this.netPlayers[id]) {
+      this.netPlayers[id].removeFromWorld();
+      delete this.netPlayers[id];
+    }
+  }
+
+  fullNetSync() {
+    if (!this.player) return null;
+    return playerNetData(null, {
+      scene: this.name,
+      pos: this.player.body.position,
+      state: this.player.getState(),
+      name: LocalData.name,
+      money: LocalData.money,
+    });
   }
 
   spawnLevel() {
@@ -79,7 +107,6 @@ export default class GameScene extends SceneBase {
           this.game.physicsWorld.addBody(body);
         }
       });
-
     });
   }
 }

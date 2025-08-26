@@ -1,4 +1,5 @@
 import { AnimationMixer } from "three";
+import { socket } from "./NetManager";
 
 export default class PlayerAnimator {
   constructor(mesh, animations) {
@@ -12,9 +13,16 @@ export default class PlayerAnimator {
     });
 
     this.currentAction = null;
+
+    // socket.on('playerStateUpdate', (data) => {
+    //   if (data.id !== socket.id) {
+    //     this.setState(data.state);
+    //   }
+    // });
   }
 
   setState(state) {
+    socket.emit('playerStateRequest', { id: socket.id, state });
     let actionName = null;
 
     switch (state) {

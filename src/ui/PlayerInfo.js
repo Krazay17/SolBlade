@@ -5,7 +5,7 @@ import './PlayerInfoStyle.css';
 export default class PlayerInfo {
     constructor() {
         this.name = LocalData.name || "Player";
-        this.level = LocalData.level || 1;
+        this.money = LocalData.money || 0;
         this.health = LocalData.health || 100;
         this.mana = LocalData.mana || 50;
     }
@@ -32,10 +32,9 @@ export default class PlayerInfo {
         nameBarElem.appendChild(nameElem);
         container.appendChild(nameBarElem);
 
-        const levelElem = document.createElement('div');
-        levelElem.id = 'player-level';
-        levelElem.textContent = `Level: ${this.level}`;
-        container.appendChild(levelElem);
+        const moneyElem = document.createElement('div');
+        moneyElem.textContent = `Source: ${this.money}`;
+        container.appendChild(moneyElem);
 
         const healthBarContainer = document.createElement('div');
         healthBarContainer.id = 'health-bar-container';

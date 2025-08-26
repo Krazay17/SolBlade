@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 class Weapon {
     constructor(name, damage, range, cooldown) {
         this.name = name;
@@ -5,6 +7,8 @@ class Weapon {
         this.range = range;
         this.cooldown = cooldown; // in seconds
         this.lastUsed = 0; // timestamp of last use
+        this.position = new THREE.Vector3();
+        this.direction = new THREE.Vector3();
     }
 
     canUse(currentTime) {
@@ -18,16 +22,45 @@ class Weapon {
         }
         return false; // Weapon is on cooldown
     }
+
+    fireRay(pos, dir) {
+        const result = new THREE.Ray(pos, dir);
+        const ray = new THREE.Raycaster(pos, dir);
+        ray.intersectObject(this.game.graphicsWorld.objects)
+        console.log(ray);
+    }
 }
 
 export class Pistol extends Weapon {
-    constructor() {
+    constructor(scene) {
         super('Pistol', 10, 50, 0.5); // name, damage, range, cooldown
+        this.scene = scene;
     }
-    use(currentTime) {
+    use(currentTime, pos, dir) {
         if (this.canUse(currentTime)) {
             this.lastUsed = currentTime;
             console.log('Pistol fired!');
+
+            const visual = () => {
+                new THREE.LineBasicMaterial({
+                    color: 0x00FF00,
+                });
+                new THREE.Line()
+                const shotGeom = new THREE.CylinderGeometry(.1, .1, 200, 6);
+                const shotMat = new THREE.MeshBasicMaterial({
+                    color: 0xFF0000,
+                });
+                const shotMesh = new THREE.Mesh(shotGeom, shotMat);
+                shotMesh.position.copy(pos);
+                const target = pos.add(dir);
+                shotMesh.lookAt(target)
+                this.scene.add(shotMesh);
+            }
+            visual();
+
+            const data = () => {
+                this.fireRay(pos, dir);
+            }
             return true;
         }
         return false;

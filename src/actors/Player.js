@@ -7,9 +7,10 @@ import MyEventEmitter from '../core/MyEventEmitter';
 import { IdleState, RunState, JumpState } from '../core/PlayerStates';
 import { Pistol } from '../core/Weapons';
 import PlayerAnimator from '../core/PlayerAnimator';
+import { socket } from '../core/NetManager';
 
 export default class Player extends THREE.Object3D {
-    constructor(game, scene, { x = 0, y = 5, z = 0 }, camera, isLocal = true) {
+    constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera) {
         super();
         game.graphicsWorld.add(this);
         this.game = game;
@@ -24,11 +25,12 @@ export default class Player extends THREE.Object3D {
 
         //this.debugCapsule = this.setupCapsule(this.height, this.radius);
         //this.add(this.debugCapsule);
-
-        this.cameraArm = new THREE.Object3D();
-        this.cameraArm.position.set(1, .8, 0);
-        this.add(this.cameraArm);
-        this.cameraArm.add(this.camera);
+        if (isLocal) {
+            this.cameraArm = new THREE.Object3D();
+            this.cameraArm.position.set(1, .8, 0);
+            this.add(this.cameraArm);
+            this.cameraArm.add(this.camera);
+        }
 
         this.mesh;
         this.mixer;
@@ -49,31 +51,33 @@ export default class Player extends THREE.Object3D {
             this.mesh = model;
             this.animator = new PlayerAnimator(this.mesh, gltf.animations);
             this.animator.setState('idle');
-            MyEventEmitter.emit('playerReady', {name: LocalData.name, pos: this.position});
         });
 
-        const material = getMaterial('playerMaterial');
-        const sphere = new CANNON.Sphere(1);
-        this.body = new CANNON.Body({
-            position: new CANNON.Vec3(x, y, z),
-            mass: 1,
-            shape: sphere,
-            fixedRotation: true,
-            material: material,
-        });
-        this.body.id = 'player';
-        game.physicsWorld.addBody(this.body);
-
-        const contactMaterial = new CANNON.ContactMaterial(
-            material,
-            getMaterial('defaultMaterial'),
-            {
-                friction: 0,
-                restitution: 0,
-                contactEquationRelaxation: 50,
+        if (isLocal) {
+            const material = getMaterial('playerMaterial');
+            const sphere = new CANNON.Sphere(1);
+            this.body = new CANNON.Body({
+                position: new CANNON.Vec3(x, y, z),
+                mass: 1,
+                shape: sphere,
+                fixedRotation: true,
+                material: material,
+                collisionFilterGroup: 1,
             });
-        this.game.physicsWorld.addContactMaterial(contactMaterial);
+            this.body.id = 'player';
+            game.physicsWorld.addBody(this.body);
 
+
+            const contactMaterial = new CANNON.ContactMaterial(
+                material,
+                getMaterial('defaultMaterial'),
+                {
+                    friction: 0,
+                    restitution: 0,
+                    contactEquationRelaxation: 50,
+                });
+            this.game.physicsWorld.addContactMaterial(contactMaterial);
+        }
 
         this.states = {
             idle: new IdleState(this),
@@ -82,7 +86,7 @@ export default class Player extends THREE.Object3D {
         }
         this.currentState = this.states['idle'];
 
-        this.weapon = new Pistol();
+        this.weapon = new Pistol(game.graphicsWorld);
 
         if (isLocal) {
             this.speed = 15;
@@ -91,11 +95,22 @@ export default class Player extends THREE.Object3D {
             this.jump = 10;
 
             MyEventEmitter.on('KeyPressed', (key) => {
-                if(key === 'KeyR') {
+                if (key === 'KeyR') {
                     this.body.position.set(0, 5, 0);
                     this.body.velocity.set(0, 0, 0);
                 }
             })
+
+            MyEventEmitter.emit('playerReady', {
+                pos: { x, y, z },
+                state: 'jumping',
+                user: { name: LocalData.name, money: LocalData.money }
+            });
+        }
+        if (!isLocal) {
+            socket.on('playerPosUpdate', (data) => {
+                this.position.copy(data);
+            });
         }
     }
 
@@ -109,6 +124,8 @@ export default class Player extends THREE.Object3D {
 
             //Update visual position to physics position
             this.position.copy(this.body.position);
+            LocalData.position = this.position;
+            socket.emit('playerPosRequest', this.position);
         }
         if (this.animator) {
             this.animator.update(dt);
@@ -121,7 +138,8 @@ export default class Player extends THREE.Object3D {
         this.cameraArm.rotation.x = this.input.pitch; // Pitch
 
         if (this.input.mice[0]) {
-            if (this.weapon.use(performance.now())) {
+            const direction = this.camera.getWorldDirection(new THREE.Vector3());
+            if (this.weapon.use(performance.now(), this.position, direction)) {
             }
         }
 
@@ -140,20 +158,18 @@ export default class Player extends THREE.Object3D {
         // Create the ray
         const ray = new CANNON.Ray(origin, down);
 
-        // Use options to avoid hitting the player's own body
-        const options = {
-            collisionFilterMask: -1, // all layers
-            skipBackfaces: true
-        };
-
         ray.intersectWorld(this.game.physicsWorld, {
             from: origin,
             to: origin.vadd(down.scale(rayLength)),
             collisionFilterMask: -1,
+            collisionFilterGroup: 1,
             skipBackfaces: true,
             result: result
         });
         return result.hasHit;
+    }
+    getState() {
+        return this.currentState ? this.currentState.name : null;
     }
     setState(stateName) {
         if (this.isLocal) {
@@ -166,6 +182,15 @@ export default class Player extends THREE.Object3D {
             } else {
                 console.warn(`State ${stateName} does not exist.`);
             }
+        }
+    }
+    removeFromWorld() {
+        if (this.body) {
+            this.game.physicsWorld.removeBody(this.body);
+            this.body = null;
+        }
+        if (this) {
+            this.game.graphicsWorld.remove(this);
         }
     }
     getAnimState() {

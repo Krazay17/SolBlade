@@ -82,7 +82,7 @@ export class RunState extends PlayerState {
 }
 export class JumpState extends PlayerState {
     enter() {
-        this.body.velocity.y += 12;
+        this.body.velocity.y = 12;
         this.actor.setAnimState('jumping');
         this.jumpTimer = performance.now() + 500;
     }
@@ -113,7 +113,6 @@ export class JumpState extends PlayerState {
         const currentZ = this.body.velocity.z * rotatedZ;
         this.body.velocity.x += rotatedX * this.actor.acceleration * dt;
         this.body.velocity.z += rotatedZ * this.actor.acceleration * dt;
-        console.log(currentX, currentZ);
         clampHorizontalSpeed(this.body, this.actor.speed * 4);
     }
 }

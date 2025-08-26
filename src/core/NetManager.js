@@ -4,41 +4,63 @@ import MyEventEmitter from "./MyEventEmitter";
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
     : "solbladeserver-production.up.railway.app";
-const socket = io(serverURL);
+export const socket = io(serverURL);
 
-let pendingRequests = {};
+let scene = null;
 
 socket.on("connect", () => {
     console.log(`I connected with id: ${socket.id}`);
-    MyEventEmitter.on("playerReady", (data) => {
-        socket.emit("playerReady", { id: socket.id, data });
-        socket.on("initData", (data) => {
-            console.log(data);
-        })
+
+    socket.on("disconnect", () => {
+        console.log("disconnected from server");
     });
+    if (scene) {
+        bindSocketEvents(scene.fullNetSync());
+        console.log(scene.fullNetSync());
+    } else {
+        MyEventEmitter.once('netSceneSet', bindSocketEvents);
+    }
 });
+
+function bindSocketEvents(myPlayerData) {
+    if (!scene) return;
+    socket.emit('joinGame', myPlayerData);
+    socket.on('currentPlayers', (playerList) => {
+        playerList.forEach(element => {
+            scene.addPlayer({ id: element.id, ...element.data });
+            console.log('Current Players: ', element);
+        });
+    });
+    socket.on('newPlayer', (playerInfo) => {
+        scene.addPlayer(playerInfo);
+    });
+    socket.on('playerDisconnected', (playerId) => {
+        scene.removePlayer(playerId);
+    })
+}
 
 setInterval(() => {
     socket.emit('heartbeat');
-}, 500);
+}, 1000);
 
-MyEventEmitter.on('playerMove', () => {
-    if (!socket.connected && !socket.active) {
-        socket.connect();
-    }
-})
+export function setNetScene(s, myPlayerData) {
+    scene = s;
+    MyEventEmitter.emit('netSceneSet', { myPlayerData })
+}
 
 export function initSocket() {
     return socket;
 }
 
-function queGameRequest(requestId, resolve, reject) {
-    pendingRequests[requestId] = { resolve, reject };
+export const defaultPlayerData = {
+    id: null,
+    scene: null,
+    pos: { x: 0, y: 5, z: 0 },
+    state: 'idle',
+    name: 'Player',
+    money: 0,
 }
 
-function resolveGameRequest(requestId, data) {
-    if (pendingRequests[requestId]) {
-        pendingRequests[requestId].resolve(data);
-        delete pendingRequests[requestId];
-    }
+export function playerNetData(id, overrides = {}) {
+    return { ...defaultPlayerData, id, ...overrides };
 }
