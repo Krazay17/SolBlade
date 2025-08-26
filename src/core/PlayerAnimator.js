@@ -1,28 +1,21 @@
 import { AnimationMixer } from "three";
-import { socket } from "./NetManager";
 
 export default class PlayerAnimator {
   constructor(mesh, animations) {
     this.mixer = new AnimationMixer(mesh);
     this.actions = {};
     this.actionName = null;
+    this.stateName = null;
 
     animations.forEach((clip) => {
       this.actions[clip.name] = this.mixer.clipAction(clip);
-      console.log('ANIMS: ', clip.name);
     });
 
     this.currentAction = null;
-
-    // socket.on('playerStateUpdate', (data) => {
-    //   if (data.id !== socket.id) {
-    //     this.setState(data.state);
-    //   }
-    // });
   }
 
   setState(state) {
-    socket.emit('playerStateRequest', { id: socket.id, state });
+    this.stateName = state;
     let actionName = null;
 
     switch (state) {

@@ -1,18 +1,72 @@
-import { Vector3 } from 'three';
-
-let direction = new Vector3();
-
+import { Vector3, Vector2 } from 'three';
 export default class PlayerState {
     constructor(actor) {
         this.actor = actor;
         this.body = actor.body;
+        this.speed = actor.speed;
         this.idleDecel = 0.9;
-        this.runDedel = 0.95;
-        this.jumpDecel = 0.995;
+        this.runDecel = 0.95;
+        this.jumpDecel = 0.998;
+        this.direction = new Vector3();
+        this.dir2d = new Vector2();
+        this.cur2d = new Vector2();
+        this.new2d = new Vector2();
     }
     enter() { }
     update(dt, inputs) { }
     exit() { }
+
+    movementVelocity(dt, inputs, accel, decel, maxSpeed) {
+        // Decelerate horizontally
+        this.body.velocity.x *= decel;
+        this.body.velocity.z *= decel;
+
+        if (this.direction.length() === 0) return;
+
+        const { rotatedX, rotatedZ } = this.getInputVector(inputs);
+
+        // Input direction as a vector
+        this.dir2d.set(rotatedX, rotatedZ);
+        this.dir2d.normalize();
+
+        // Current velocity as a vector
+        this.cur2d.set(this.body.velocity.x, this.body.velocity.z);
+
+        // Project velocity onto input direction
+        const projectedSpeed = this.cur2d.dot(this.dir2d);
+
+        // Only accelerate if projected speed is less than max speed
+        if (projectedSpeed < maxSpeed || this.dir2d.dot(this.cur2d.clone().normalize()) < 0) {
+            // Add acceleration in input direction
+            this.cur2d.add(this.dir2d.clone().multiplyScalar(accel * dt));
+        }
+
+        this.body.velocity.x = this.cur2d.x;
+        this.body.velocity.z = this.cur2d.y;
+    }
+
+    getInputDirection(inputs) {
+        this.direction.set(0, 0, 0);
+
+        // Gather input directions
+        if (inputs.keys['KeyW']) this.direction.z -= 1;
+        if (inputs.keys['KeyS']) this.direction.z += 1;
+        if (inputs.keys['KeyA']) this.direction.x -= 1;
+        if (inputs.keys['KeyD']) this.direction.x += 1;
+        this.direction.normalize();
+    }
+
+    getInputVector(inputs) {
+        // Rotate input direction by controller yaw
+        const yaw = inputs.yaw;
+        const cosYaw = Math.cos(yaw);
+        const sinYaw = Math.sin(yaw);
+
+        const rotatedX = this.direction.x * cosYaw + this.direction.z * sinYaw;
+        const rotatedZ = -this.direction.x * sinYaw + this.direction.z * cosYaw;
+
+        return { rotatedX, rotatedZ };
+    }
 }
 
 export class IdleState extends PlayerState {
@@ -36,57 +90,53 @@ export class RunState extends PlayerState {
     enter() {
     }
     update(dt, inputs) {
-        // Reset direction
-        direction.set(0, 0, 0);
+        this.getInputDirection(inputs);
+        this.movementVelocity(dt, inputs, this.actor.acceleration, this.runDecel, this.actor.speed);
 
-        // Decelerate horizontally
-        // this.body.velocity.x *= this.runDedel;
-        // this.body.velocity.z *= this.runDedel;
-
-        // Gather input directions
+        // Jump
+        if (inputs.keys['Space']) {
+            this.actor.setState('jump');
+            return;
+        }
         if (inputs.keys['KeyW']) {
-            direction.z -= 1;
+            this.direction.z -= 1;
             this.actor.setAnimState('run');
+            return;
         }
         if (inputs.keys['KeyS']) {
-            direction.z += 1;
+            this.direction.z += 1;
             this.actor.setAnimState('run');
+            return;
         }
         if (inputs.keys['KeyA']) {
-            direction.x -= 1;
+            this.direction.x -= 1;
             this.actor.setAnimState('strafeLeft');
         }
         if (inputs.keys['KeyD']) {
-            direction.x += 1;
-            console.log(this.actor.getAnimState());
+            this.direction.x += 1;
             this.actor.setAnimState('strafeRight');
         }
 
         // If no movement, switch to idle
-        if (direction.length() === 0) {
+        if (this.direction.length() === 0) {
             this.actor.setState('idle');
             return;
-        }
-
-        const { rotatedX, rotatedZ } = getDirectionVector(inputs);
-        this.body.velocity.x += rotatedX * this.actor.acceleration * dt;
-        this.body.velocity.z += rotatedZ * this.actor.acceleration * dt;
-
-        clampHorizontalSpeed(this.body, this.actor.speed);
-        // Jump
-        if (inputs.keys['Space']) {
-            this.actor.setState('jump');
         }
     }
 
 }
 export class JumpState extends PlayerState {
     enter() {
-        this.body.velocity.y = 12;
+        this.body.velocity.y = 8;
         this.actor.setAnimState('jumping');
         this.jumpTimer = performance.now() + 500;
+        this.accel = this.actor.acceleration / 3;
+        this.maxSpeed = this.actor.speed / 2;
     }
     update(dt, inputs) {
+        this.getInputDirection(inputs);
+        this.movementVelocity(dt, inputs, this.accel, this.jumpDecel, this.maxSpeed);
+
         if (this.jumpTimer < performance.now()) {
             this.actor.setAnimState('falling');
             if (this.actor.floorTrace()) {
@@ -94,49 +144,5 @@ export class JumpState extends PlayerState {
                 return;
             }
         }
-        // Reset direction
-        direction.set(0, 0, 0);
-
-        // Decelerate horizontally
-        this.body.velocity.x *= this.jumpDecel;
-        this.body.velocity.z *= this.jumpDecel;
-
-        // Gather input directions
-        if (inputs.keys['KeyW']) direction.z -= 1;
-        if (inputs.keys['KeyS']) direction.z += 1;
-        if (inputs.keys['KeyA']) direction.x -= 1;
-        if (inputs.keys['KeyD']) direction.x += 1;
-
-        if (direction.length() === 0) return;
-        const { rotatedX, rotatedZ } = getDirectionVector(inputs);
-        const currentX = this.body.velocity.x * rotatedX;
-        const currentZ = this.body.velocity.z * rotatedZ;
-        this.body.velocity.x += rotatedX * this.actor.acceleration * dt;
-        this.body.velocity.z += rotatedZ * this.actor.acceleration * dt;
-        clampHorizontalSpeed(this.body, this.actor.speed * 4);
-    }
-}
-
-function getDirectionVector(inputs) {
-    direction.normalize();
-
-    // Rotate input direction by controller yaw
-    const yaw = inputs.yaw;
-    const cosYaw = Math.cos(yaw);
-    const sinYaw = Math.sin(yaw);
-
-    const rotatedX = direction.x * cosYaw + direction.z * sinYaw;
-    const rotatedZ = -direction.x * sinYaw + direction.z * cosYaw;
-
-    return { rotatedX, rotatedZ };
-}
-
-function clampHorizontalSpeed(body, maxSpeed) {
-    // Clamp horizontal speed
-    const horizontalSpeed = Math.sqrt(body.velocity.x ** 2 + body.velocity.z ** 2);
-    if (horizontalSpeed > maxSpeed) {
-        const scale = maxSpeed / horizontalSpeed;
-        body.velocity.x *= scale;
-        body.velocity.z *= scale;
     }
 }

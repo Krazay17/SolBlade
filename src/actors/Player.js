@@ -18,23 +18,15 @@ export default class Player extends THREE.Object3D {
         this.position.set(x, y, z);
         this.camera = camera;
         this.isLocal = isLocal;
-        this.input = game.input;
 
         this.height = 1;
         this.radius = .3;
-
-        //this.debugCapsule = this.setupCapsule(this.height, this.radius);
-        //this.add(this.debugCapsule);
-        if (isLocal) {
-            this.cameraArm = new THREE.Object3D();
-            this.cameraArm.position.set(1, .8, 0);
-            this.add(this.cameraArm);
-            this.cameraArm.add(this.camera);
-        }
-
         this.mesh;
+        this.body = null;
         this.mixer;
         this.animations = {};
+
+
         const loader = new GLTFLoader();
         loader.load('/assets/KnightGirl.glb', (gltf) => {
             const model = gltf.scene;
@@ -53,7 +45,23 @@ export default class Player extends THREE.Object3D {
             this.animator.setState('idle');
         });
 
+        this.weapon = new Pistol(game.graphicsWorld);
+
+        //this.debugCapsule = this.setupCapsule(this.height, this.radius);
+        //this.add(this.debugCapsule);
         if (isLocal) {
+            this.input = game.input;
+
+            this.speed = 10;
+            this.acceleration = 100;
+            this.deceleration = 300;
+            this.jump = 10;
+
+            this.cameraArm = new THREE.Object3D();
+            this.cameraArm.position.set(1, .8, 0);
+            this.add(this.cameraArm);
+            this.cameraArm.add(this.camera);
+
             const material = getMaterial('playerMaterial');
             const sphere = new CANNON.Sphere(1);
             this.body = new CANNON.Body({
@@ -77,22 +85,13 @@ export default class Player extends THREE.Object3D {
                     contactEquationRelaxation: 50,
                 });
             this.game.physicsWorld.addContactMaterial(contactMaterial);
-        }
 
-        this.states = {
-            idle: new IdleState(this),
-            run: new RunState(this),
-            jump: new JumpState(this),
-        }
-        this.currentState = this.states['idle'];
-
-        this.weapon = new Pistol(game.graphicsWorld);
-
-        if (isLocal) {
-            this.speed = 15;
-            this.acceleration = 100;
-            this.deceleration = 300;
-            this.jump = 10;
+            this.states = {
+                idle: new IdleState(this),
+                run: new RunState(this),
+                jump: new JumpState(this),
+            }
+            this.currentState = this.states['idle'];
 
             MyEventEmitter.on('KeyPressed', (key) => {
                 if (key === 'KeyR') {
@@ -100,17 +99,6 @@ export default class Player extends THREE.Object3D {
                     this.body.velocity.set(0, 0, 0);
                 }
             })
-
-            MyEventEmitter.emit('playerReady', {
-                pos: { x, y, z },
-                state: 'jumping',
-                user: { name: LocalData.name, money: LocalData.money }
-            });
-        }
-        if (!isLocal) {
-            socket.on('playerPosUpdate', (data) => {
-                this.position.copy(data);
-            });
         }
     }
 
@@ -125,7 +113,7 @@ export default class Player extends THREE.Object3D {
             //Update visual position to physics position
             this.position.copy(this.body.position);
             LocalData.position = this.position;
-            socket.emit('playerPosRequest', this.position);
+            socket.emit('playerNetData', this.playerNetData());
         }
         if (this.animator) {
             this.animator.update(dt);
@@ -169,9 +157,10 @@ export default class Player extends THREE.Object3D {
         return result.hasHit;
     }
     getState() {
-        return this.currentState ? this.currentState.name : null;
+        return this.currentStateName ? this.currentStateName : null;
     }
     setState(stateName) {
+        this.currentStateName = stateName;
         if (this.isLocal) {
             if (this.currentState) {
                 this.currentState.exit();
@@ -184,7 +173,8 @@ export default class Player extends THREE.Object3D {
             }
         }
     }
-    removeFromWorld() {
+    removeFromWorld(id) {
+        console.log(`Removing player ${id} from world`);
         if (this.body) {
             this.game.physicsWorld.removeBody(this.body);
             this.body = null;
@@ -194,7 +184,7 @@ export default class Player extends THREE.Object3D {
         }
     }
     getAnimState() {
-        return this.animator ? this.animator.actionName : null;
+        return this.animator ? this.animator.stateName : null;
     }
     setAnimState(state) {
         if (this.animator) {
@@ -214,5 +204,13 @@ export default class Player extends THREE.Object3D {
         const capsule = new THREE.Mesh(capsuleGeo, capsuleMat);
 
         return capsule;
+    }
+
+    playerNetData() {
+        return {
+            pos: this.position,
+            rot: this.rotation.y,
+            state: this.getAnimState(),
+        };
     }
 }

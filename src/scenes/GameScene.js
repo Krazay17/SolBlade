@@ -17,12 +17,17 @@ export default class GameScene extends SceneBase {
 
     this.makeSky();
     clickParticles();
-    setNetScene(this, playerNetData(null, { scene: this.name, pos: LocalData.position, name: LocalData.name, money: LocalData.money }));
+    setNetScene(this, playerNetData({ scene: this.name, pos: LocalData.position, name: LocalData.name, money: LocalData.money }));
   }
 
   update(dt, time) {
     if (this.player) {
       this.player.update(dt, time);
+    }
+    if (this.netPlayers) {
+      Object.values(this.netPlayers).forEach(player => {
+        player.update(dt, time);
+      });
     }
   }
 
@@ -49,23 +54,19 @@ export default class GameScene extends SceneBase {
     this.game.physicsWorld.addBody(groundBody);
   }
 
-  addPlayer(playerData) {
-    console.log('adding player', playerData);
-    this.netPlayers[playerData.id] = new Player(this.game, this, playerData.pos, false);
-  }
-
-  removePlayer(id) {
-    if (this.netPlayers[id]) {
-      this.netPlayers[id].removeFromWorld();
-      delete this.netPlayers[id];
-    }
+  addPlayer(id, data) {
+    console.log(data);
+    const player = new Player(this.game, this, data.pos, false);
+    this.netPlayers[id] = player;
+    return player;
   }
 
   fullNetSync() {
     if (!this.player) return null;
-    return playerNetData(null, {
+    return playerNetData({
       scene: this.name,
       pos: this.player.body.position,
+      rot: this.player.rotation,
       state: this.player.getState(),
       name: LocalData.name,
       money: LocalData.money,

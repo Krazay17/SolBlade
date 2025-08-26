@@ -7,6 +7,7 @@ const serverURL = location.hostname === "localhost" ?
 export const socket = io(serverURL);
 
 let scene = null;
+let netPlayers = {};
 
 socket.on("connect", () => {
     console.log(`I connected with id: ${socket.id}`);
@@ -16,7 +17,6 @@ socket.on("connect", () => {
     });
     if (scene) {
         bindSocketEvents(scene.fullNetSync());
-        console.log(scene.fullNetSync());
     } else {
         MyEventEmitter.once('netSceneSet', bindSocketEvents);
     }
@@ -24,19 +24,38 @@ socket.on("connect", () => {
 
 function bindSocketEvents(myPlayerData) {
     if (!scene) return;
+
     socket.emit('joinGame', myPlayerData);
+
     socket.on('currentPlayers', (playerList) => {
         playerList.forEach(element => {
-            scene.addPlayer({ id: element.id, ...element.data });
-            console.log('Current Players: ', element);
+            if (element.id === socket.id) return;
+            netPlayers[element.id] = scene.addPlayer(element.id, element.data);
         });
     });
-    socket.on('newPlayer', (playerInfo) => {
-        scene.addPlayer(playerInfo);
+    socket.on('newPlayer', ({ id, data }) => {
+        if (id === socket.id) return;
+        netPlayers[id] = scene.addPlayer(id, data);
     });
     socket.on('playerDisconnected', (playerId) => {
-        scene.removePlayer(playerId);
+        netPlayers[playerId].removeFromWorld(playerId);
+        delete netPlayers[playerId];
     })
+    socket.on('playerNetUpdate', ({ id, data }) => {
+        if (netPlayers[id]) {
+            console.log(data);
+            netPlayers[id].position.copy(data.pos);
+            netPlayers[id].rotation.y = data.rot;
+            netPlayers[id].setAnimState(data.state);
+            //console.log(`Player ${id} position updated: ${data.position} state: ${data.state}`);
+            //netPlayers[id].quaternion.set(data.qx, data.qy, data.qz, data.qw);
+        }
+    });
+    socket.on('playerStateUpdate', ({ id, data }) => {
+        if (netPlayers[id]) {
+            netPlayers[id].setAnimState(data);
+        }
+    });
 }
 
 setInterval(() => {
@@ -45,7 +64,7 @@ setInterval(() => {
 
 export function setNetScene(s, myPlayerData) {
     scene = s;
-    MyEventEmitter.emit('netSceneSet', { myPlayerData })
+    MyEventEmitter.emit('netSceneSet', myPlayerData);
 }
 
 export function initSocket() {
@@ -53,14 +72,14 @@ export function initSocket() {
 }
 
 export const defaultPlayerData = {
-    id: null,
     scene: null,
     pos: { x: 0, y: 5, z: 0 },
+    rot: 0,
     state: 'idle',
     name: 'Player',
     money: 0,
 }
 
-export function playerNetData(id, overrides = {}) {
-    return { ...defaultPlayerData, id, ...overrides };
+export function playerNetData(overrides = {}) {
+    return { ...defaultPlayerData, ...overrides };
 }
