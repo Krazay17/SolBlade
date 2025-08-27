@@ -111,12 +111,6 @@ export default class Player extends THREE.Object3D {
 
     update(dt, time) {
         if (this.body) {
-            if (!this.floorTrace()) {
-                this.setState('fall');
-            } else if (this.currentState !== this.states['jump']) {
-                this.body.velocity.y = Math.min(this.body.velocity.y, 0);
-            }
-
             if (this.currentState) {
                 this.currentState.update(dt, this.input);
             }

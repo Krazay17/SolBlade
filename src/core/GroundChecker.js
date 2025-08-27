@@ -4,7 +4,7 @@ import Globals from "../utils/Globals";
 import { or } from "three/tsl";
 
 export default class GroundChecker {
-    constructor(world, playerBody, rayLength = 1.5, spread = 0.5) {
+    constructor(world, playerBody, rayLength = 1.3, spread = 0.3) {
         this.world = world;
         this.playerBody = playerBody;
         this.rayLength = rayLength;
@@ -36,7 +36,6 @@ export default class GroundChecker {
             ray.intersectWorld(this.world, {
                 //only collide with world floor
                 result: result,
-                collisionFilterGroup: 1,
                 collisionFilterMask: 1,
             });
 

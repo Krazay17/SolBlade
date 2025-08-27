@@ -1,0 +1,68 @@
+#discord-section {
+    background-color: rgba(0, 0, 0, 0);
+    display: flex;
+    position: fixed;
+    overflow-x: hidden;
+    top: 100px;
+    gap: 2px;
+    z-index: 4;
+    transform: translateX(calc(100% - 410px));
+    transition: transform 0.5s ease;
+}
+
+#discord-section.hidden {
+    transform: translateX(calc(100% - 60px));
+}
+
+#discordHideButton {
+    background-image: url(/assets/DiscordToggle.png);
+    background-size: cover;
+    width: 60px;
+    height: 50px;
+    background-color: black;
+    cursor: move;
+}
+
+#discordHideButton:hover {
+    background-color: white;
+}
+
+#chat-section {
+    display: flex;
+    flex-direction: column-reverse;
+    position: absolute;
+    bottom: 150px;
+    height: 200px;
+    width: 450px;
+    z-index: 2;
+}
+
+#chatMessages {
+    overflow-y: auto;
+    height: 40%;
+    background-color: rgba(0, 0, 0, 0);
+    transition: background-color .5s ease;
+    scrollbar-width: none;
+}
+
+#chatMessages.active {
+    height: 100%;
+    background-color: rgba(0, 0, 0, .4);
+}
+#chatMessages::-webkit-scrollbar {
+    display: none;
+    width: 1px;
+}
+
+.chatMessage {
+    word-wrap: break-word;
+    color: aliceblue;
+}
+
+#chatInput {
+    display: flex;
+    font-size: large;
+    width: 98%;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: aliceblue;
+}

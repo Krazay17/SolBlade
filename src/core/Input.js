@@ -15,6 +15,7 @@ export default class Input {
     this.keys = {};
     this.mice = {};
     this.lockMouse = false;
+    this.inputBlocked = false;
 
     this.bindings();
     setupKeybindWindow();
@@ -23,18 +24,23 @@ export default class Input {
 
   bindings() {
     this.domElement.addEventListener('keypress', (e) => {
+      if (this.inputBlocked) return;
       MyEventEmitter.emit('KeyPressed', e.code);
     });
     this.domElement.addEventListener('keydown', (e) => {
+      if (this.inputBlocked) return;
       this.keys[e.code] = true;
       MyEventEmitter.emit('playerMove');
     });
     this.domElement.addEventListener('keyup', (e) => {
+      if (this.inputBlocked) return;
       this.keys[e.code] = false;
     });
     this.domElement.addEventListener('mousedown', (e) => {
+      if (this.gameElement === e.target) {
+        this.gameElement.requestPointerLock();
+      }
       this.mice[e.button] = true;
-      this.gameElement.requestPointerLock();
     });
     this.domElement.addEventListener('mouseup', (e) => {
       this.mice[e.button] = false;

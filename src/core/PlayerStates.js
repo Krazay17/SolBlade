@@ -102,6 +102,7 @@ export class RunState extends PlayerState {
     update(dt, inputs) {
         this.getInputDirection(inputs);
         this.movementVelocity(dt, inputs, this.accel, this.runDecel, this.actor.speed);
+        let strafe = true;
 
         // Jump
         if (inputs.keys['Space']) {
@@ -109,22 +110,31 @@ export class RunState extends PlayerState {
             return;
         }
         if (inputs.keys['KeyW']) {
+            strafe = false;
             this.direction.z -= 1;
             this.actor.animator.setState('run', { doesLoop: true, prio: 1 });
-            return;
         }
         if (inputs.keys['KeyS']) {
+            strafe = false;
             this.direction.z += 1;
             this.actor.animator.setState('run', { doesLoop: true, prio: 1 });
-            return;
         }
         if (inputs.keys['KeyA']) {
             this.direction.x -= 1;
-            this.actor.animator.setState('strafeLeft', { doesLoop: true, prio: 1 });
+            if (strafe) {
+                this.actor.animator.setState('strafeLeft', { doesLoop: true, prio: 1 });
+            }
         }
         if (inputs.keys['KeyD']) {
             this.direction.x += 1;
-            this.actor.animator.setState('strafeRight', { doesLoop: true, prio: 1 });
+            if (strafe) {
+                this.actor.animator.setState('strafeRight', { doesLoop: true, prio: 1 });
+            }
+        }
+
+        if (!this.actor.floorTrace()) {
+            this.actor.setState('fall');
+            return;
         }
 
         // If no movement, switch to idle
@@ -139,9 +149,9 @@ export class RunState extends PlayerState {
 export class JumpState extends PlayerState {
     enter() {
         this.body.velocity.y = 10;
-        this.actor.animator.setState('jumping', { doesLoop: false, prio: 2 });
-        this.jumpTimer = performance.now() + 500;
-        this.accel = this.actor.acceleration * 2;
+        this.actor.animator.setState('jumping', { doesLoop: false, prio: 1 });
+        this.jumpTimer = performance.now() + 300;
+        this.accel = this.actor.acceleration / 1.5;
         this.maxSpeed = this.actor.speed;
     }
     update(dt, inputs) {

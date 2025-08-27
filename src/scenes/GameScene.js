@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon';
 import SceneBase from './_SceneBase.js';
 import Player from '../actors/Player.js';
-import { clickParticles, drawParticles } from "../actors/Particle.js";
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager.js';
 import { playerNetData, setNetScene } from '../core/NetManager.js';
 import LocalData from '../core/LocalData.js';
+import setupChat, { setChatScene } from '../ui/Chat.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -16,8 +16,8 @@ export default class GameScene extends SceneBase {
     this.player = new Player(this.game, this, LocalData.position, true, this.game.camera);
 
     this.makeSky();
-    clickParticles();
     setNetScene(this, playerNetData({ scene: this.name, pos: LocalData.position, name: LocalData.name, money: LocalData.money }));
+    setupChat();
   }
 
   update(dt, time) {
