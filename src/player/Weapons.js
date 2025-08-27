@@ -1,7 +1,9 @@
 import * as THREE from 'three';
+import Globals from '../utils/Globals';
+import MyEventEmitter from '../core/MyEventEmitter';
 
 class Weapon {
-    constructor(name, damage, range, cooldown) {
+    constructor(name = 'Weapon', damage = 1, range = 10, cooldown = 1) {
         this.name = name;
         this.damage = damage;
         this.range = range;
@@ -21,13 +23,6 @@ class Weapon {
             return true; // Weapon used successfully
         }
         return false; // Weapon is on cooldown
-    }
-
-    fireRay(pos, dir) {
-        const result = new THREE.Ray(pos, dir);
-        const ray = new THREE.Raycaster(pos, dir);
-        ray.intersectObject(this.game.graphicsWorld.objects)
-        console.log(ray);
     }
 }
 
@@ -69,15 +64,40 @@ export class Pistol extends Weapon {
 
 export class Sword extends Weapon {
     constructor(actor) {
-        super('Sword', 25, 5, .0001); // name, damage, range, cooldown
+        super('Sword', 25, 2, .7); // name, damage, range, cooldown
         this.actor = actor;
+        this.scene = actor?.scene;
+        this.traceDuration = 500; // duration of the sword trace in milliseconds
     }
     use(currentTime, pos, dir) {
         if (this.canUse(currentTime)) {
             this.lastUsed = currentTime;
-            console.log('Sword swung!');
             this.actor?.animator?.setState('swordSwing', { doesLoop: false, prio: 2 });
-            return true;
+            const ray = new THREE.Raycaster(pos, dir, 0, this.range);
+            const hitOwners = new Set();
+            const rayLoop = () => {
+                const startPos = this.actor.position.clone();
+                const camDir = this.actor.camera.getWorldDirection(new THREE.Vector3());
+                ray.set(startPos, camDir);
+                const result = ray.intersectObjects(Globals.graphicsWorld.children, true);
+                if (result.length > 0) {
+
+                    for (let r of result) {
+                        const target = r.object.userData.owner;
+                        if (!target || target === this.actor) continue;
+
+                        if (!hitOwners.has(target)) {
+                            hitOwners.add(target);
+                            target.takeDamage?.(this.damage, r.point, camDir);
+                            target.takeCC?.('knockback', camDir);
+                        }
+                    }
+                }
+            }
+            MyEventEmitter.on('postUpdate', rayLoop);
+            setTimeout(() => {
+                MyEventEmitter.off('postUpdate', rayLoop);
+            }, this.traceDuration);
         }
         return false;
     }

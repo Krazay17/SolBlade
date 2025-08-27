@@ -7,6 +7,7 @@ import { getMaterial } from './MaterialManager';
 import PlayerInfo from '../ui/PlayerInfo';
 import MyEventEmitter from './MyEventEmitter';
 import Globals from '../utils/Globals';
+import Player from '../player/Player';
 
 export default class Game {
   constructor(canvas) {
@@ -59,6 +60,8 @@ export default class Game {
       }
     })
 
+    //this.localPlayer = new Player(this, null, {})
+
     Globals.graphicsWorld = this.graphicsWorld;
     Globals.physicsWorld = this.physicsWorld;
     Globals.input = this.input;
@@ -88,8 +91,10 @@ export default class Game {
     this.lastTime = time;
 
     if (this.running && this.scene) {
+      MyEventEmitter.emit('preUpdate', dt, time);
       this.physicsWorld.step(this.timeStep, dt, 6);
       this.scene.update(dt, time);
+      MyEventEmitter.emit('postUpdate', dt, time);
       
       this.renderer.render(this.graphicsWorld, this.camera);
     }

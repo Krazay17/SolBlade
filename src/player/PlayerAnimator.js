@@ -14,6 +14,7 @@ export default class PlayerAnimator {
     });
 
     this.currentAction = null;
+    this.setState("idle");
   }
 
   setState(state, { doesLoop = true, prio = 1, onFinish } = {}) {
@@ -63,7 +64,6 @@ export default class PlayerAnimator {
         if (e.action === nextAction) {
           this.mixer.removeEventListener("finished", this._onFinished);
           this.actionPrio = 0; // reset prio
-          console.log("Animation finished:", e.action._clip.name);
           if (onFinish) onFinish();
           this.setState("idle", { doesLoop: true, prio: 0 });
         }

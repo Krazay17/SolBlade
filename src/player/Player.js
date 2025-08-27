@@ -4,15 +4,16 @@ import { FBXLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
-import { IdleState, RunState, JumpState, FallState } from '../core/PlayerStates';
-import { Pistol, Sword } from '../core/Weapons';
-import PlayerAnimator from '../core/PlayerAnimator';
-import { socket } from '../core/NetManager';
-import Globals from '../utils/Globals';
+import { IdleState, RunState, JumpState, FallState, KnockbackState, DashState } from './PlayerStates';
+import { Pistol, Sword } from './Weapons';
+import PlayerAnimator from './PlayerAnimator';
+import { tryPlayerDamage, socket, tryUpdatePosition, tryUpdateState, tryApplyCC } from '../core/NetManager';
 import GroundChecker from '../core/GroundChecker';
+import Health from './Health';
+import StateManager from './StateManager';
 
 export default class Player extends THREE.Object3D {
-    constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera) {
+    constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, netId) {
         super();
         game.graphicsWorld.add(this);
         this.game = game;
@@ -20,7 +21,11 @@ export default class Player extends THREE.Object3D {
         this.position.set(x, y, z);
         this.camera = camera;
         this.isLocal = isLocal;
+        this.name = 'Player';
+        this.netId = netId;
 
+
+        this.health = new Health();
         this.height = 1;
         this.radius = .3;
         this.mesh;
@@ -39,12 +44,12 @@ export default class Player extends THREE.Object3D {
                 if (child.isMesh) {
                     child.castShadow = true;
                     child.receiveShadow = true;
+                    child.userData.owner = this;
                 }
             });
             this.add(model);
             this.mesh = model;
             this.animator = new PlayerAnimator(this.mesh, gltf.animations);
-            this.setState('idle');
         });
 
         this.weapon = new Sword(this);
@@ -54,10 +59,10 @@ export default class Player extends THREE.Object3D {
         if (isLocal) {
             this.input = game.input;
 
-            this.speed = 9;
-            this.acceleration = 100;
+            this.speed = 5;
+            this.acceleration = 300;
             this.deceleration = 300;
-            this.jump = 10;
+            this.jump = 9;
 
             this.cameraArm = new THREE.Object3D();
             this.cameraArm.position.set(1, .8, 0);
@@ -89,12 +94,14 @@ export default class Player extends THREE.Object3D {
                     id: 'playerGroundContact',
                 });
             this.game.physicsWorld.addContactMaterial(contactMaterial);
-
+            this.stateManager = new StateManager(this);
             this.states = {
                 idle: new IdleState(this),
                 run: new RunState(this),
                 jump: new JumpState(this),
                 fall: new FallState(this),
+                knockback: new KnockbackState(this),
+                dash: new DashState(this),
             }
             this.setState('idle');
 
@@ -120,7 +127,12 @@ export default class Player extends THREE.Object3D {
             //Update visual position to physics position
             this.position.copy(this.body.position);
             LocalData.position = this.position;
-            socket.emit('playerNetData', this.playerNetData());
+
+        }
+        if (this.isLocal) {
+            tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
+            tryUpdateState(this.getAnimState());
+
         }
         if (this.animator) {
             this.animator.update(dt);
@@ -144,6 +156,48 @@ export default class Player extends THREE.Object3D {
             this.input.keys['KeyG'] = false; // Prevent continuous damage
         }
     }
+    takeDamage(amount) {
+        //Single player take damage
+        if (this.isLocal) {
+            this.health.takeDamage(amount);
+        }
+        // Networked player take damage
+        if (!this.isLocal) {
+            tryPlayerDamage(this, amount);
+        }
+    }
+    applyHealth({ amount, reason }) {
+        switch (reason) {
+            case "damage":
+                this.health.takeDamage(amount);
+                break;
+            case "heal":
+                this.health.heal(amount);
+                break;
+            default:
+                console.warn(`Unknown health change reason: ${reason}`);
+                this.health.adjust(amount);
+        }
+    }
+    takeCC(type, dir) {
+        if (this.isLocal) {
+            this.stateManager.setState('stunned');
+        }
+        if (!this.isLocal) {
+            const cc = { type, x: dir.x, y: dir.y, z: dir.z };
+            tryApplyCC(this, cc);
+        }
+    }
+    applyCC({ type, x, y, z }) {
+        const dir = new CANNON.Vec3(x, y, z);
+        switch (type) {
+            case 'knockback':
+                this.setState('knockback', dir);
+                break;
+            default:
+                console.warn(`Unknown CC type: ${type}`);
+        }
+    }
     floorTrace() {
         return this.groundChecker.isGrounded();
     }
@@ -151,7 +205,7 @@ export default class Player extends THREE.Object3D {
     getState() {
         return this.currentStateName ? this.currentStateName : null;
     }
-    setState(stateName) {
+    setState(stateName, data) {
         this.currentStateName = stateName;
         if (this.isLocal) {
             if (this.currentState) {
@@ -159,7 +213,7 @@ export default class Player extends THREE.Object3D {
             }
             this.currentState = this.states[stateName];
             if (this.currentState) {
-                this.currentState.enter();
+                this.currentState.enter(data);
             } else {
                 console.warn(`State ${stateName} does not exist.`);
             }
@@ -200,7 +254,7 @@ export default class Player extends THREE.Object3D {
 
     playerNetData() {
         return {
-            pos: this.position,
+            pos: { x: this.position.x, y: this.position.y, z: this.position.z },
             rot: this.rotation.y,
             state: this.getAnimState(),
         };

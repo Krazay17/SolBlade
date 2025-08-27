@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon';
 import SceneBase from './_SceneBase.js';
-import Player from '../actors/Player.js';
+import Player from '../player/Player.js';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager.js';
-import { playerNetData, setNetScene } from '../core/NetManager.js';
+import { setNetScene } from '../core/NetManager.js';
 import LocalData from '../core/LocalData.js';
-import setupChat, { setChatScene } from '../ui/Chat.js';
+import setupChat from '../ui/Chat.js';
+import Globals from '../utils/Globals.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -14,9 +15,16 @@ export default class GameScene extends SceneBase {
     this.spawnLevel();
     this.netPlayers = {};
     this.player = new Player(this.game, this, LocalData.position, true, this.game.camera);
+    Globals.player = this.player;
 
     this.makeSky();
-    setNetScene(this, playerNetData({ scene: this.name, pos: LocalData.position, name: LocalData.name, money: LocalData.money }));
+    setNetScene(this, {
+      scene: this.name,
+      pos: LocalData.position,
+      name: LocalData.name,
+      money: LocalData.money,
+      health: LocalData.health,
+    });
     setupChat();
   }
 
@@ -59,22 +67,22 @@ export default class GameScene extends SceneBase {
   }
 
   addPlayer(id, data) {
-    console.log(data);
-    const player = new Player(this.game, this, data.pos, false);
+    const player = new Player(this.game, this, data.pos, false, null, id);
     this.netPlayers[id] = player;
+    player.name = data.name;
     return player;
   }
 
   fullNetSync() {
     if (!this.player) return null;
-    return playerNetData({
+    return {
       scene: this.name,
       pos: this.player.body.position,
       rot: this.player.rotation,
       state: this.player.getState(),
       name: LocalData.name,
       money: LocalData.money,
-    });
+    };
   }
 
   spawnLevel() {

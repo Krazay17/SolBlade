@@ -1,7 +1,6 @@
 import * as CANNON from "cannon-es";
 import * as THREE from "three";
 import Globals from "../utils/Globals";
-import { or } from "three/tsl";
 
 export default class GroundChecker {
     constructor(world, playerBody, rayLength = 1.3, spread = 0.3) {

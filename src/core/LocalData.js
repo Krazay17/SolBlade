@@ -8,7 +8,6 @@ export default {
     mana: 50,
     scene: 1,
     position: { x: 0, y: 5, z: 0 },
-    quaterni: undefined,
 
     save() {
         const data = {
@@ -17,7 +16,6 @@ export default {
             money: this.money,
             scene: this.scene,
             position: this.position,
-            quaterni: this.quaterni,
         }
         localStorage.setItem('SolBladeSave', JSON.stringify(data));
     },
@@ -34,7 +32,6 @@ export default {
         this.name = parsed.name ?? this.name;
         this.scene = parsed.scene ?? this.scene;
         this.position = parsed.position ?? this.position;
-        this.quaterni = parsed.quaterni ?? this.quaterni;
     },
 
     reset() {

@@ -1,5 +1,6 @@
 import LocalData from "../core/LocalData";
-import { socket } from "../core/NetManager";
+import MyEventEmitter from "../core/MyEventEmitter";
+import { sendChatMessage, socket } from "../core/NetManager";
 import Globals from "../utils/Globals";
 import { sendDiscordMessage } from "./DiscordStuff";
 import './StyleChat.css';
@@ -20,24 +21,9 @@ document.body.appendChild(section);
 
 let isChatting = false;
 let message = "";
-let scene;
-
-export function chatNetwork() {
-    const netMessages = (d) => {
-        addMessage(d.message)
-    }
-
-    socket.on('chatMessageUpdate', ({ id, data }) => {
-        netMessages(data);
-    });
-}
 
 export function getChatting() {
     return isChatting;
-}
-
-export function setChatScene(s) {
-    scene = s;
 }
 
 export default function setupChat() {
@@ -92,17 +78,20 @@ export default function setupChat() {
                 };
                 sendDiscordMessage(message);
                 message = LocalData.name + ": " + textInput.value; // use .value for input/textarea
-                addMessage(message);
-                socket?.emit('chatMessageRequest', { player: LocalData.name, message });
+                addChatMessage(message);
+                sendChatMessage(LocalData.name, textInput.value);
                 textInput.value = ""; // clear after sending
                 textInput.blur();
             }
         }
     });
+    MyEventEmitter.on('chatMessage', ({ player, message }) => {
+        addChatMessage(`${player}: ${message}`);
+    });
 }
 
 
-function addMessage(tx) {
+export function addChatMessage(tx) {
     const newMessage = document.createElement('div');
     newMessage.className = 'chatMessage';
     newMessage.textContent = tx;

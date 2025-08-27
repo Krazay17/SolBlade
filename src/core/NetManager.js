@@ -1,5 +1,7 @@
 import { io } from "socket.io-client";
 import MyEventEmitter from "./MyEventEmitter";
+import { Vector3 } from "three";
+import Globals from "../utils/Globals";
 
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
@@ -8,6 +10,18 @@ export const socket = io(serverURL);
 
 let scene = null;
 let netPlayers = {};
+
+export const defaultPlayerData = {
+    scene: null,
+    pos: { x: 0, y: 5, z: 0 },
+    rot: 0,
+    state: 'idle',
+    name: 'Player',
+    money: 0,
+    health: 100,
+}
+
+let lastPlayerData = { ...defaultPlayerData };
 
 socket.on("connect", () => {
     console.log(`I connected with id: ${socket.id}`);
@@ -24,6 +38,7 @@ socket.on("connect", () => {
 
 function bindSocketEvents(myPlayerData) {
     if (!scene) return;
+    lastPlayerData = { ...myPlayerData };
 
     socket.emit('joinGame', myPlayerData);
 
@@ -38,22 +53,46 @@ function bindSocketEvents(myPlayerData) {
         netPlayers[id] = scene.addPlayer(id, data);
     });
     socket.on('playerDisconnected', (playerId) => {
-        netPlayers[playerId].removeFromWorld(playerId);
+        if (netPlayers[playerId]) {
+            netPlayers[playerId].removeFromWorld(playerId);
+        }
         delete netPlayers[playerId];
     })
     socket.on('playerNetUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
-            console.log(data);
             netPlayers[id].position.copy(data.pos);
             netPlayers[id].rotation.y = data.rot;
             netPlayers[id].setAnimState(data.state);
-            //console.log(`Player ${id} position updated: ${data.position} state: ${data.state}`);
-            //netPlayers[id].quaternion.set(data.qx, data.qy, data.qz, data.qw);
+        }
+    });
+    socket.on('playerPositionUpdate', ({ id, data }) => {
+        if (netPlayers[id]) {
+            netPlayers[id].position.copy(data.pos);
+            netPlayers[id].rotation.y = data.rot;
         }
     });
     socket.on('playerStateUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
-            netPlayers[id].setAnimState(data);
+            netPlayers[id].setAnimState(data.state);
+        }
+    });
+    socket.on('chatMessageUpdate', ({ id, data }) => {
+        if (netPlayers[id]) {
+            MyEventEmitter.emit('chatMessage', { player: data.player, message: data.message });
+        }
+    });
+    socket.on('playerHealthUpdate', ({ id, data }) => {
+        if (id === socket.id) {
+            scene.player.applyHealth(data);
+        } else if (netPlayers[id]) {
+            netPlayers[id].applyHealth(data);
+        }
+    });
+    socket.on('playerCCUpdate', ({ id, data }) => {
+        if (id === socket.id) {
+            scene.player.applyCC(data);
+        } else if (netPlayers[id]) {
+            netPlayers[id].applyCC(data);
         }
     });
 }
@@ -71,15 +110,32 @@ export function initSocket() {
     return socket;
 }
 
-export const defaultPlayerData = {
-    scene: null,
-    pos: { x: 0, y: 5, z: 0 },
-    rot: 0,
-    state: 'idle',
-    name: 'Player',
-    money: 0,
+export function sendChatMessage(player, message) {
+    socket.emit("chatMessageRequest", { player, message });
 }
 
-export function playerNetData(overrides = {}) {
-    return { ...defaultPlayerData, ...overrides };
+let lastSentPosition = new Vector3();
+let lastSentRotation = 0;
+export function tryUpdatePosition({ pos, rot }) {
+    if ((lastSentPosition === null || lastSentPosition.distanceToSquared(pos) > 0.000001)
+        || lastSentRotation !== rot) {
+        lastSentPosition.copy(pos);
+        lastSentRotation = rot;
+        socket.emit("playerPositionRequest", { pos: lastSentPosition, rot: lastSentRotation });
+    }
+}
+let lastSentState = null;
+export function tryUpdateState(state) {
+    if (lastSentState === null || lastSentState !== state) {
+        lastSentState = state;
+        socket.emit("playerStateRequest", { state });
+    }
+}
+
+export function tryPlayerDamage(actor, amount) {
+    socket.emit("playerHealthRequest", { targetId: actor.netId, reason: "damage", amount });
+}
+
+export function tryApplyCC(actor, cc) {
+    socket.emit("playerCCRequest", { targetId: actor.netId, ...cc });
 }
