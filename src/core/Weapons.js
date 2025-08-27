@@ -76,7 +76,7 @@ export class Sword extends Weapon {
         if (this.canUse(currentTime)) {
             this.lastUsed = currentTime;
             console.log('Sword swung!');
-            this.actor.animator.setState('swordSwing', { doesLoop: false, prio: 2 });
+            this.actor?.animator?.setState('swordSwing', { doesLoop: false, prio: 2 });
             return true;
         }
         return false;

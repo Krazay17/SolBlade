@@ -168,8 +168,8 @@ export class JumpState extends PlayerState {
 export class FallState extends PlayerState {
     enter() {
         this.actor.animator?.setState('falling', { doesLoop: true, prio: 1 });
-        this.accel = this.actor.acceleration / 2.5;
-        this.maxSpeed = this.actor.speed / 2;
+        this.accel = this.actor.acceleration / 3;
+        this.maxSpeed = this.actor.speed / 3;
     }
     update(dt, inputs) {
         this.getInputDirection(inputs);
