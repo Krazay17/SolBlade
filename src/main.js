@@ -5,9 +5,8 @@ import { initSocket } from "./core/NetManager";
 import Menu from "./ui/Menu";
 import soundPlayer from "./core/SoundPlayer";
 
-await LocalData.load().then(() => {
-    soundPlayer.setMasterVolume(LocalData.masterVolume);
-});
+LocalData.load();
+soundPlayer.setMasterVolume(LocalData.masterVolume);
 initSocket();
 const canvas = document.getElementById('webgl');
 const game = new Game(canvas);
