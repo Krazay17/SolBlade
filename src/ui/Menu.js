@@ -1,4 +1,5 @@
 import LocalData from '../core/LocalData';
+import MyEventEmitter from '../core/MyEventEmitter';
 import soundPlayer from '../core/SoundPlayer';
 import Globals from '../utils/Globals';
 import './StyleMenu.css';
@@ -53,6 +54,9 @@ export default class Menu {
         this.trackName = document.createElement('p');
         this.trackName.innerText = 'Current Track: ' + soundPlayer.getCurrentTrackName();
         this.menuElement.appendChild(this.trackName);
+        MyEventEmitter.on('musicChanged', (trackName) => {
+            this.trackName.innerText = 'Current Track: ' + trackName;
+        });
     }
 
     createSlider() {

@@ -1,4 +1,5 @@
 import LocalData from "./LocalData";
+import MyEventEmitter from "./MyEventEmitter";
 
 class SoundPlayer {
     constructor() {
@@ -28,6 +29,7 @@ class SoundPlayer {
                 const currentIndex = this.musics.indexOf(this.musicPlaying);
                 const nextIndex = currentIndex + 1 < this.musics.length ? currentIndex + 1 : 0;
                 this.playMusic(nextIndex);
+                MyEventEmitter.emit('musicChanged', this.getCurrentTrackName());
             }
         }
     }

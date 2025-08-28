@@ -14,7 +14,7 @@ export default class PlayerAnimator {
     });
 
     this.currentAction = null;
-    this.setAnimState("LaxIdle");
+    this.setAnimState("Idle");
   }
 
   setAnimState(state, once = false, seek = 0) {
@@ -31,10 +31,10 @@ export default class PlayerAnimator {
       action.setLoop(THREE.LoopOnce);
     }
     if (this.currentAction) {
-      this.currentAction.crossFadeTo(action, 0.1);
+      this.currentAction.crossFadeTo(action, 0.15);
     }
     action.time = seek;
-    action.reset().fadeIn(0.1).play();
+    action.reset().fadeIn(0.15).play();
     this.currentAction = action;
     if (seek) {
       action.time = seek;

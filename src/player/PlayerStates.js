@@ -78,7 +78,7 @@ class PlayerState {
 
 export class IdleState extends PlayerState {
     enter() {
-        this.actor.animator?.setAnimState('LaxIdle');
+        this.actor.animator?.setAnimState('Idle');
     }
     update(dt) {
         // Decelerate horizontally
@@ -171,7 +171,7 @@ export class JumpState extends PlayerState {
 
 export class FallState extends PlayerState {
     enter() {
-        this.actor.animator?.setAnimState('FallLoopB');
+        this.actor.animator?.setAnimState('FallLoop');
         this.accel = 50;
         this.maxSpeed = 5;
     }
@@ -192,7 +192,7 @@ export class AttackState extends PlayerState {
     enter() {
         this.accel = 600;
         this.maxSpeed = 1;
-        this.timer = performance.now() + 540;
+        this.timer = performance.now() + 610;
         this.actor.animator.setAnimState('AttackCombo', true, .15);
     }
     update(dt) {
