@@ -65,7 +65,7 @@ export default class PlayerAnimator {
           this.mixer.removeEventListener("finished", this._onFinished);
           this.actionPrio = 0; // reset prio
           if (onFinish) onFinish();
-          this.setState("idle", { doesLoop: true, prio: 0 });
+          //this.setState("idle", { doesLoop: true, prio: 0 });
         }
       };
       this.mixer.addEventListener("finished", this._onFinished);

@@ -8,6 +8,7 @@ import { setNetScene } from '../core/NetManager.js';
 import LocalData from '../core/LocalData.js';
 import setupChat from '../ui/Chat.js';
 import Globals from '../utils/Globals.js';
+import SkyBox from '../actors/SkyBox.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -41,17 +42,21 @@ export default class GameScene extends SceneBase {
         player.update(dt, time);
       });
     }
+
+    this.skyBox.update();
   }
 
   makeSky() {
-    const skyGeo = new THREE.SphereGeometry(2500, 25, 25);
-    const myTexture = new THREE.TextureLoader().load('assets/RedSky0.webp');
-    const myMaterial = new THREE.MeshBasicMaterial({
-      map: myTexture,
-      side: THREE.BackSide
-    });
-    const sky = new THREE.Mesh(skyGeo, myMaterial);
-    this.game.graphicsWorld.add(sky);
+    this.skyBox = new SkyBox();
+    this.game.graphicsWorld.add(this.skyBox);
+    // const skyGeo = new THREE.SphereGeometry(2500, 25, 25);
+    // const myTexture = new THREE.TextureLoader().load('assets/RedSky0.webp');
+    // const myMaterial = new THREE.MeshBasicMaterial({
+    //   map: myTexture,
+    //   side: THREE.BackSide
+    // });
+    // const sky = new THREE.Mesh(skyGeo, myMaterial);
+    // this.game.graphicsWorld.add(sky);
   }
 
   makeFloor() {
