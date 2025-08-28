@@ -9,6 +9,7 @@ class SoundPlayer {
     loadSound(name, url) {
         const audio = new Audio(url);
         this.sounds.set(name, audio);
+        return audio;
     }
 
     playSound(name) {

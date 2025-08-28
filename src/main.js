@@ -7,7 +7,6 @@ import soundPlayer from "./core/SoundPlayer";
 
 await LocalData.load().then(() => {
     soundPlayer.setMasterVolume(LocalData.masterVolume);
-    soundPlayer.playSound('music1');
 });
 initSocket();
 const canvas = document.getElementById('webgl');

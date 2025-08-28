@@ -19,8 +19,14 @@ export default class GameScene extends SceneBase {
     this.netPlayers = {};
     this.player = new Player(this.game, this, LocalData.position, true, this.game.camera);
     Globals.player = this.player;
-    soundPlayer.loadSound('music1', 'assets/BattleMusic4.wav');
-    soundPlayer.playSound('music1');
+
+    const firstMusic = soundPlayer.loadSound('music1', 'assets/BattleMusic4.wav');
+    firstMusic.loop = true;
+    function playMusiconFirstClick() {
+      soundPlayer.playSound('music1');
+      document.removeEventListener('mousedown', playMusiconFirstClick);
+    }
+    document.addEventListener('mousedown', playMusiconFirstClick);
 
     this.makeSky();
     setNetScene(this, {
