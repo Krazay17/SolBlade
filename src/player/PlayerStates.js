@@ -1,7 +1,8 @@
 import { Vec3 } from 'cannon';
 class PlayerState {
-    constructor(actor, options = {}) {
+    constructor(actor, manager, options = {}) {
         this.actor = actor;
+        this.manager = manager;
         this.body = actor.body;
         this.speed = actor.speed;
         this.accel = actor.acceleration;
@@ -29,7 +30,7 @@ class PlayerState {
 
         const inputDir = this.getInputDirection();
 
-        if(inputDir.length() === 0) return;
+        if (inputDir.length() === 0) return;
         //Project velocity onto input direction
         const projectedSpeed = this.body.velocity.dot(inputDir);
 
@@ -92,8 +93,7 @@ export class IdleState extends PlayerState {
             this.actor.setState('jump');
             return;
         }
-        if (this.input.keys['ShiftLeft']) {
-            this.actor.setState('dash');
+        if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
             return;
         }
     }
@@ -112,8 +112,7 @@ export class RunState extends PlayerState {
             this.actor.setState('jump');
             return;
         }
-        if (this.input.keys['ShiftLeft']) {
-            this.actor.setState('dash');
+        if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
             return;
         }
         if (this.input.keys['KeyW']) {
@@ -153,15 +152,14 @@ export class JumpState extends PlayerState {
     enter() {
         this.body.velocity.y = 9;
         this.actor.animator.setState('jumping', { doesLoop: false, prio: 1 });
-        this.jumpTimer = performance.now() + 350;
+        this.jumpTimer = performance.now() + 300;
         this.accel = 80;
-        this.maxSpeed = 8;
+        this.maxSpeed = this.actor.speed;
     }
     update(dt) {
         this.movementVelocity(dt, this.accel, this.jumpDecel, this.maxSpeed);
 
-        if (this.input.keys['ShiftLeft']) {
-            this.actor.setState('dash');
+        if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
             return;
         }
         if (this.jumpTimer < performance.now()) {
@@ -180,8 +178,7 @@ export class FallState extends PlayerState {
     update(dt) {
         this.movementVelocity(dt, this.accel, this.jumpDecel, this.maxSpeed);
 
-        if (this.input.keys['ShiftLeft']) {
-            this.actor.setState('dash');
+        if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
             return;
         }
         if (this.actor.floorTrace()) {
@@ -228,8 +225,8 @@ export class KnockbackState extends PlayerState {
 }
 
 export class DashState extends PlayerState {
-    constructor(actor, options = { cd: 1000 }) {
-        super(actor, options);
+    constructor(actor, manager, options = { cd: 1000 }) {
+        super(actor, manager, options);
     }
     enter() {
         //this.actor.animator.setState('dashing', { doesLoop: false, prio: 1 });
@@ -243,7 +240,7 @@ export class DashState extends PlayerState {
         if (this.timer < performance.now()) {
             const curVel = this.body.velocity;
             curVel.mult(0.2, this.body.velocity);
-            this.actor.setState('idle');
+            this.manager.setMovementState('idle');
             return;
         }
     }

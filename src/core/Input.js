@@ -60,7 +60,7 @@ export default class Input {
     addButton('KeyUnpressed', 'KeyS', 'Bwd', 2, 2);
     addButton('KeyUnpressed', 'KeyA', 'Left', 2, 1);
     addButton('KeyUnpressed', 'KeyD', 'Right', 2, 3);
-    //addButton('KeyUnpressed', 'ShiftLeft', 'Dash', 2, 4, '100px', 'Shift');
+    addButton('KeyUnpressed', 'ShiftLeft', 'Dash', 2, 4, '100px', 'Shift');
     addButton('KeyUnpressed', 'Space', 'Jump', 2, 6, '140px');
     //addButton('KeyUnpressed', 'KeyF', 'Interact', 2, 9);
     //addButton('KeyUnpressed', 'KeyC', 'Inventory', 2, 10);

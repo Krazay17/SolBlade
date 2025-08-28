@@ -82,6 +82,7 @@ export default class Player extends THREE.Object3D {
             });
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body);
 
 
             const contactMaterial = new CANNON.ContactMaterial(
@@ -112,15 +113,12 @@ export default class Player extends THREE.Object3D {
                 }
             });
 
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body);
         }
     }
 
     update(dt, time) {
         if (this.body) {
-            if (this.currentState) {
-                this.currentState.update(dt, this.input);
-            }
+            if (this.stateManager) this.stateManager.update(dt, time);
 
             this.handleInput(dt, time);
 
@@ -206,17 +204,8 @@ export default class Player extends THREE.Object3D {
         return this.currentStateName ? this.currentStateName : null;
     }
     setState(stateName, data) {
-        this.currentStateName = stateName;
         if (this.isLocal) {
-            if (this.currentState) {
-                this.currentState.exit();
-            }
-            this.currentState = this.states[stateName];
-            if (this.currentState) {
-                this.currentState.enter(data);
-            } else {
-                console.warn(`State ${stateName} does not exist.`);
-            }
+            this.stateManager.setMovementState(stateName);
         }
     }
     removeFromWorld(id) {

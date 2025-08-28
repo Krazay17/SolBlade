@@ -4,13 +4,13 @@ export default class StateManager {
     constructor(actor) {
         this.actor = actor;
         this.states = {
-            idle: new States.IdleState(actor),
-            run: new States.RunState(actor),
-            jump: new States.JumpState(actor),
-            fall: new States.FallState(actor),
-            attack: new States.AttackState(actor),
-            knockback: new States.KnockbackState(actor),
-            dash: new States.DashState(actor)
+            idle: new States.IdleState(actor, this),
+            run: new States.RunState(actor, this),
+            jump: new States.JumpState(actor, this),
+            fall: new States.FallState(actor, this),
+            attack: new States.AttackState(actor, this),
+            knockback: new States.KnockbackState(actor, this),
+            dash: new States.DashState(actor, this)
         };
         this.movementState = this.states.idle;
         this.actionState = null;
@@ -21,15 +21,36 @@ export default class StateManager {
         this.actionState?.update(dt, time);
     }
 
-    setMovementState(state) {
-        if (this.states[state]) {
-            this.movementState = this.states[state];
+    setMovementState(state, options) {
+        let newState = state;
+        if (state === 'idle' && !this.actor.floorTrace()) {
+            newState = 'fall';
+        }
+        if (this.states[newState]) {
+            this.movementState?.exit();
+            this.movementState = this.states[newState];
+            this.movementState?.enter(options);
         }
     }
 
-    setActionState(state) {
+    setActionState(state, options) {
         if (this.states[state]) {
+            this.actionState?.exit();
             this.actionState = this.states[state];
+            this.actionState?.enter(options);
         }
+    }
+
+    reset() {
+        this.movementState = this.states.idle;
+        this.actionState = null;
+    }
+
+    tryDash() {
+        if (this.states.dash.lastTime > performance.now()) return false;
+        this.states.dash.lastTime = performance.now() + this.states.dash.cd;
+        this.setMovementState('dash');
+        return true;
+
     }
 }
