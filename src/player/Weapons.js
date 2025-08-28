@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Globals from '../utils/Globals';
 import MyEventEmitter from '../core/MyEventEmitter';
+import soundPlayer from '../core/SoundPlayer';
 
 class Weapon {
     constructor(name = 'Weapon', damage = 1, range = 10, cooldown = 1) {
@@ -68,11 +69,14 @@ export class Sword extends Weapon {
         this.actor = actor;
         this.scene = actor?.scene;
         this.traceDuration = 500; // duration of the sword trace in milliseconds
+        soundPlayer.loadSound('swordSwing', '/assets/SwordSwing.wav');
+        soundPlayer.loadSound('swordHit', '/assets/SwordHit.wav');
     }
     use(currentTime, pos, dir) {
         if (this.canUse(currentTime)) {
             this.lastUsed = currentTime;
-            this.actor?.animator?.setState('swordSwing', { doesLoop: false, prio: 2 });
+            soundPlayer.playSound('swordSwing');
+            this.actor.stateManager.setState('attack');
             const ray = new THREE.Raycaster(pos, dir, 0, this.range);
             const hitOwners = new Set();
             const rayLoop = () => {
@@ -90,6 +94,7 @@ export class Sword extends Weapon {
                             hitOwners.add(target);
                             target.takeDamage?.(this.damage, r.point, camDir);
                             target.takeCC?.('knockback', camDir);
+                            soundPlayer.playSound('swordHit');
                         }
                     }
                 }

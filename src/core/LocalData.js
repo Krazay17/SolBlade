@@ -8,6 +8,7 @@ export default {
     mana: 50,
     scene: 1,
     position: { x: 0, y: 5, z: 0 },
+    masterVolume: 1,
 
     save() {
         const data = {
@@ -16,22 +17,29 @@ export default {
             money: this.money,
             scene: this.scene,
             position: this.position,
+            masterVolume: this.masterVolume,
         }
         localStorage.setItem('SolBladeSave', JSON.stringify(data));
     },
 
     load() {
-        const data = localStorage.getItem('SolBladeSave');
-        if (!data) return;
-        const parsed = JSON.parse(data);
-        if (parsed.version !== CURRENT_VERSION) {
-            this.reset();
-            console.warn('Version mismatch: ' + parsed.version + ' current: ' + CURRENT_VERSION);
-        }
-        this.money = parsed.money ?? this.money;
-        this.name = parsed.name ?? this.name;
-        this.scene = parsed.scene ?? this.scene;
-        this.position = parsed.position ?? this.position;
+        return new Promise((resolve) => {
+            const data = localStorage.getItem('SolBladeSave');
+            if (!data) return;
+            const parsed = JSON.parse(data);
+            if (parsed.version !== CURRENT_VERSION) {
+                this.reset();
+                console.warn('Version mismatch: ' + parsed.version + ' current: ' + CURRENT_VERSION);
+            }
+            this.money = parsed.money ?? this.money;
+            this.name = parsed.name ?? this.name;
+            this.scene = parsed.scene ?? this.scene;
+            this.position = parsed.position ?? this.position;
+            this.masterVolume = parsed.masterVolume ?? this.masterVolume;
+            console.log('Loaded local data:', this);
+            resolve();
+        });
+
     },
 
     reset() {

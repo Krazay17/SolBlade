@@ -10,10 +10,11 @@ export default class StateManager {
             fall: new States.FallState(actor, this),
             attack: new States.AttackState(actor, this),
             knockback: new States.KnockbackState(actor, this),
-            dash: new States.DashState(actor, this)
+            dash: new States.DashState(actor, this),
         };
         this.movementState = this.states.idle;
         this.actionState = null;
+        this.currentStateName = 'idle';
     }
 
     update(dt, time) {
@@ -21,7 +22,8 @@ export default class StateManager {
         this.actionState?.update(dt, time);
     }
 
-    setMovementState(state, options) {
+    setState(state, enterParams) {
+        this.currentStateName = state;
         let newState = state;
         if (state === 'idle' && !this.actor.floorTrace()) {
             newState = 'fall';
@@ -29,15 +31,18 @@ export default class StateManager {
         if (this.states[newState]) {
             this.movementState?.exit();
             this.movementState = this.states[newState];
-            this.movementState?.enter(options);
+            this.movementState?.enter(enterParams);
         }
     }
 
-    setActionState(state, options) {
+    setActionState(state, enterParams) {
         if (this.states[state]) {
             this.actionState?.exit();
             this.actionState = this.states[state];
-            this.actionState?.enter(options);
+            this.actionState?.enter(enterParams);
+        } else {
+            this.actionState?.exit();
+            this.actionState = null;
         }
     }
 
@@ -49,8 +54,12 @@ export default class StateManager {
     tryDash() {
         if (this.states.dash.lastTime > performance.now()) return false;
         this.states.dash.lastTime = performance.now() + this.states.dash.cd;
-        this.setMovementState('dash');
+        this.setState('dash');
         return true;
-
+    }
+    tryAttack() {
+        if (this.actionState) return false;
+        this.setActionState('attack');
+        return true;
     }
 }

@@ -1,0 +1,35 @@
+#menu-section {
+    position: relative;
+    background-color: #000000;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+#menu-item-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    margin-top: 50px;
+    gap: 5px;
+}
+
+.menu-item {
+    padding: 5px 10px;
+    border-bottom: 1px solid #444;
+}
+
+.menu-item:hover {
+    background-color: #555;
+}
+
+.menu-slider {
+    width: 100%;
+    margin-top: 10px;
+    background-color: #444;
+    border: none;
+    border-radius: 5px;
+    height: 5px;
+    outline: none;
+    transition: cubic-bezier(1, 0, 0, 1);
+}

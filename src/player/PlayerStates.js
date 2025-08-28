@@ -78,7 +78,7 @@ class PlayerState {
 
 export class IdleState extends PlayerState {
     enter() {
-        this.actor.animator?.setState('idle', { doesLoop: true, prio: 1 });
+        this.actor.animator?.setAnimState('LaxIdle');
     }
     update(dt) {
         // Decelerate horizontally
@@ -117,20 +117,20 @@ export class RunState extends PlayerState {
         }
         if (this.input.keys['KeyW']) {
             strafe = false;
-            this.actor.animator.setState('run', { doesLoop: true, prio: 1 });
+            this.actor.animator.setAnimState('Run');
         }
         if (this.input.keys['KeyS']) {
             strafe = false;
-            this.actor.animator.setState('run', { doesLoop: true, prio: 1 });
+            this.actor.animator.setAnimState('Run');
         }
         if (this.input.keys['KeyA']) {
             if (strafe) {
-                this.actor.animator.setState('strafeLeft', { doesLoop: true, prio: 1 });
+                this.actor.animator.setAnimState('StrafeLeft');
             }
         }
         if (this.input.keys['KeyD']) {
             if (strafe) {
-                this.actor.animator.setState('strafeRight', { doesLoop: true, prio: 1 });
+                this.actor.animator.setAnimState('StrafeRight', { doesLoop: true, prio: 1 });
             }
         }
 
@@ -151,7 +151,7 @@ export class RunState extends PlayerState {
 export class JumpState extends PlayerState {
     enter() {
         this.body.velocity.y = 9;
-        this.actor.animator.setState('jumping', { doesLoop: false, prio: 1 });
+        this.actor.animator.setAnimState('Jump');
         this.jumpTimer = performance.now() + 300;
         this.accel = 80;
         this.maxSpeed = this.actor.speed;
@@ -171,7 +171,7 @@ export class JumpState extends PlayerState {
 
 export class FallState extends PlayerState {
     enter() {
-        this.actor.animator?.setState('falling', { doesLoop: true, prio: 1 });
+        this.actor.animator?.setAnimState('FallLoopB');
         this.accel = 50;
         this.maxSpeed = 5;
     }
@@ -190,16 +190,16 @@ export class FallState extends PlayerState {
 
 export class AttackState extends PlayerState {
     enter() {
-        this.accel = 20;
-        this.maxSpeed = 2;
-        this.timer = performance.now() + 50; // 500ms attack duration
-        this.actor.animator.setState('attack', { doesLoop: false, prio: 2 });
+        this.accel = 80;
+        this.maxSpeed = 3;
+        this.timer = performance.now() + 511;
+        this.actor.animator.setAnimState('AttackCombo.001');
     }
     update(dt) {
         this.movementVelocity(dt, this.accel, this.jumpDecel, this.maxSpeed);
 
         if (performance.now() > this.timer) {
-            this.actor.setState('idle');
+            this.actor.stateManager.setState('idle');
         }
     }
 }
@@ -240,7 +240,7 @@ export class DashState extends PlayerState {
         if (this.timer < performance.now()) {
             const curVel = this.body.velocity;
             curVel.mult(0.2, this.body.velocity);
-            this.manager.setMovementState('idle');
+            this.manager.setState('idle');
             return;
         }
     }

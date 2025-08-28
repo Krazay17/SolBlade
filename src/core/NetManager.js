@@ -1,7 +1,6 @@
 import { io } from "socket.io-client";
 import MyEventEmitter from "./MyEventEmitter";
 import { Vector3 } from "three";
-import Globals from "../utils/Globals";
 
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
@@ -124,7 +123,7 @@ export function tryUpdatePosition({ pos, rot }) {
         socket.emit("playerPositionRequest", { pos: lastSentPosition, rot: lastSentRotation });
     }
 }
-let lastSentState = null;
+let lastSentState = 'Idle';
 export function tryUpdateState(state) {
     if (lastSentState === null || lastSentState !== state) {
         lastSentState = state;

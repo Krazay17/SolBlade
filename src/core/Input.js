@@ -7,6 +7,7 @@ export default class Input {
     this.domElement = domElement;
     this.gameElement = document.getElementById('webgl');
 
+    this.pointerLocked = false;
     this.sensitivity = 0.002;
     this.moveSpeed = 5;
 
@@ -38,7 +39,8 @@ export default class Input {
     });
     this.domElement.addEventListener('mousedown', (e) => {
       if (this.gameElement === e.target) {
-        this.gameElement.requestPointerLock();
+        this.pointerLock();
+        console.log(this.pointerLocked);
       }
       this.mice[e.button] = true;
     });
@@ -55,6 +57,18 @@ export default class Input {
     });
   }
 
+  pointerLock() {
+    const pointerLock = this.gameElement.requestPointerLock();
+    pointerLock.then(() => {
+      this.pointerLocked = true;
+    }).catch((err) => {
+      console.error('Failed to lock pointer:', err);
+    });
+    window.addEventListener('pointerlockchange', () => {
+      this.pointerLocked = document.pointerLockElement === this.gameElement;
+    });
+  }
+
   addKeys() {
     addButton('KeyUnpressed', 'KeyW', 'Fwd', 1, 2);
     addButton('KeyUnpressed', 'KeyS', 'Bwd', 2, 2);
@@ -63,7 +77,7 @@ export default class Input {
     addButton('KeyUnpressed', 'ShiftLeft', 'Dash', 2, 4, '100px', 'Shift');
     addButton('KeyUnpressed', 'Space', 'Jump', 2, 6, '140px');
     //addButton('KeyUnpressed', 'KeyF', 'Interact', 2, 9);
-    //addButton('KeyUnpressed', 'KeyC', 'Inventory', 2, 10);
+    addButton('KeyUnpressed', 'KeyB', 'Menu', 2, 10);
     addButton('KeyUnpressed', 'KeyT', 'Pause', 1, 10);
     addButton('KeyUnpressed', 'KeyR', 'Respawn', 1, 9);
   }

@@ -96,15 +96,6 @@ export default class Player extends THREE.Object3D {
                 });
             this.game.physicsWorld.addContactMaterial(contactMaterial);
             this.stateManager = new StateManager(this);
-            this.states = {
-                idle: new IdleState(this),
-                run: new RunState(this),
-                jump: new JumpState(this),
-                fall: new FallState(this),
-                knockback: new KnockbackState(this),
-                dash: new DashState(this),
-            }
-            this.setState('idle');
 
             MyEventEmitter.on('KeyPressed', (key) => {
                 if (key === 'KeyR') {
@@ -112,25 +103,18 @@ export default class Player extends THREE.Object3D {
                     this.body.velocity.set(0, 0, 0);
                 }
             });
-
         }
     }
-
     update(dt, time) {
         if (this.body) {
             if (this.stateManager) this.stateManager.update(dt, time);
-
             this.handleInput(dt, time);
-
-            //Update visual position to physics position
             this.position.copy(this.body.position);
             LocalData.position = this.position;
-
         }
         if (this.isLocal) {
             tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
             tryUpdateState(this.getAnimState());
-
         }
         if (this.animator) {
             this.animator.update(dt);
@@ -142,7 +126,7 @@ export default class Player extends THREE.Object3D {
         this.rotation.y = this.input.yaw;        // Yaw
         this.cameraArm.rotation.x = this.input.pitch; // Pitch
 
-        if (this.input.mice[0]) {
+        if (this.input.mice[0] && this.input.pointerLocked) {
             const direction = this.camera.getWorldDirection(new THREE.Vector3());
             if (this.weapon.use(performance.now(), this.position, direction)) {
             }
@@ -190,7 +174,7 @@ export default class Player extends THREE.Object3D {
         const dir = new CANNON.Vec3(x, y, z);
         switch (type) {
             case 'knockback':
-                this.setState('knockback', dir);
+                this.stateManager.setState?.('knockback', dir);
                 break;
             default:
                 console.warn(`Unknown CC type: ${type}`);
@@ -199,13 +183,12 @@ export default class Player extends THREE.Object3D {
     floorTrace() {
         return this.groundChecker.isGrounded();
     }
-
     getState() {
         return this.currentStateName ? this.currentStateName : null;
     }
     setState(stateName, data) {
         if (this.isLocal) {
-            this.stateManager.setMovementState(stateName);
+            this.stateManager.setState(stateName, data);
         }
     }
     removeFromWorld(id) {
@@ -223,7 +206,7 @@ export default class Player extends THREE.Object3D {
     }
     setAnimState(state) {
         if (this.animator) {
-            this.animator.setState(state);
+            this.animator.setAnimState(state);
         }
     }
     changeHealth(amount) {
@@ -240,7 +223,6 @@ export default class Player extends THREE.Object3D {
 
         return capsule;
     }
-
     playerNetData() {
         return {
             pos: { x: this.position.x, y: this.position.y, z: this.position.z },

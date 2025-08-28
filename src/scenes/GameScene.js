@@ -9,6 +9,8 @@ import LocalData from '../core/LocalData.js';
 import setupChat from '../ui/Chat.js';
 import Globals from '../utils/Globals.js';
 import SkyBox from '../actors/SkyBox.js';
+import soundPlayer from '../core/SoundPlayer.js';
+import menu from '../ui/Menu.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -17,6 +19,8 @@ export default class GameScene extends SceneBase {
     this.netPlayers = {};
     this.player = new Player(this.game, this, LocalData.position, true, this.game.camera);
     Globals.player = this.player;
+    soundPlayer.loadSound('music1', 'assets/BattleMusic4.wav');
+    soundPlayer.playSound('music1');
 
     this.makeSky();
     setNetScene(this, {
