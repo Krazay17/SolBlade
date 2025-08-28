@@ -19,12 +19,6 @@ export default class Menu {
             <p>Sound Volume</p>
             </div>
         `;
-        this.soundSlider = this.createSlider();
-        this.soundSlider.addEventListener('input', (event) => {
-            soundPlayer.setMasterVolume(event.target.value / 100);
-            LocalData.masterVolume = event.target.value / 100;
-            // Handle volume change
-        });
 
         window.addEventListener('keydown', (event) => {
             if (Globals.input.inputBlocked) return;
@@ -37,6 +31,28 @@ export default class Menu {
                 }
             }
         });
+
+        this.createAudioSection();
+    }
+
+    createAudioSection() {
+        this.soundSlider = this.createSlider();
+        this.soundSlider.addEventListener('input', (event) => {
+            soundPlayer.setMasterVolume(event.target.value / 100);
+            LocalData.masterVolume = event.target.value / 100;
+            // Handle volume change
+        });
+
+        this.skipButton = this.createButton();
+        this.skipButton.addEventListener('click', () => {
+            soundPlayer.skipTrack();
+            this.trackName.innerText = 'Current Track: ' + soundPlayer.getCurrentTrackName();
+            this.skipButton.blur();
+        });
+
+        this.trackName = document.createElement('p');
+        this.trackName.innerText = 'Current Track: ' + soundPlayer.getCurrentTrackName();
+        this.menuElement.appendChild(this.trackName);
     }
 
     createSlider() {
@@ -52,6 +68,14 @@ export default class Menu {
         console.log(LocalData.masterVolume)
         this.menuElement.appendChild(slider);
         return slider;
+    }
+
+    createButton(text = 'Skip Track') {
+        const button = document.createElement('button');
+        button.classList.add('menu-button');
+        button.innerText = text;
+        this.menuElement.appendChild(button);
+        return button;
     }
 
     open() {

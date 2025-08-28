@@ -83,6 +83,7 @@ export default class Player extends THREE.Object3D {
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
             this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body);
+            console.log('Player body loaded');
 
 
             const contactMaterial = new CANNON.ContactMaterial(
@@ -103,18 +104,25 @@ export default class Player extends THREE.Object3D {
                     this.body.velocity.set(0, 0, 0);
                 }
             });
+        } else {
+            this.targetPos = new THREE.Vector3();
+            this.targetRot = 0;
         }
     }
     update(dt, time) {
+        if (this.isLocal) {
+            tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
+            tryUpdateState(this.getAnimState());
+        } else {
+            //Lerp position for remote players
+            this.position.lerp(this.targetPos, 25 * dt);
+            this.rotation.y += (this.targetRot - this.rotation.y) * 25 * dt;
+        }
         if (this.body) {
             if (this.stateManager) this.stateManager.update(dt, time);
             this.handleInput(dt, time);
             this.position.copy(this.body.position);
             LocalData.position = this.position;
-        }
-        if (this.isLocal) {
-            tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
-            tryUpdateState(this.getAnimState());
         }
         if (this.animator) {
             this.animator.update(dt);
@@ -130,6 +138,11 @@ export default class Player extends THREE.Object3D {
             const direction = this.camera.getWorldDirection(new THREE.Vector3());
             if (this.weapon.use(performance.now(), this.position, direction)) {
             }
+        }
+        if (this.input.keys['KeyF']) {
+            const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
+            const scaledConvertedDirection = new CANNON.Vec3(direction.x, direction.y, direction.z).scale(2);
+            this.body.position = this.body.position.vadd(scaledConvertedDirection);
         }
 
         // Damage test

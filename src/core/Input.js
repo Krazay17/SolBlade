@@ -18,6 +18,13 @@ export default class Input {
     this.lockMouse = false;
     this.inputBlocked = false;
 
+    document.addEventListener('pointerlockchange', () => {
+      this.pointerLocked = (document.pointerLockElement === this.gameElement);
+    });
+    document.addEventListener('pointerlockerror', () => {
+      console.error('Pointer lock failed');
+    });
+
     this.bindings();
     setupKeybindWindow();
     this.addKeys();
@@ -39,8 +46,7 @@ export default class Input {
     });
     this.domElement.addEventListener('mousedown', (e) => {
       if (this.gameElement === e.target) {
-        this.pointerLock();
-        console.log(this.pointerLocked);
+        this.gameElement.requestPointerLock();
       }
       this.mice[e.button] = true;
     });
@@ -54,18 +60,6 @@ export default class Input {
         this.pitch -= e.movementY * this.sensitivity;
         this.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pitch));
       }
-    });
-  }
-
-  pointerLock() {
-    const pointerLock = this.gameElement.requestPointerLock();
-    pointerLock.then(() => {
-      this.pointerLocked = true;
-    }).catch((err) => {
-      console.error('Failed to lock pointer:', err);
-    });
-    window.addEventListener('pointerlockchange', () => {
-      this.pointerLocked = document.pointerLockElement === this.gameElement;
     });
   }
 

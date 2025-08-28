@@ -66,8 +66,10 @@ function bindSocketEvents(myPlayerData) {
     });
     socket.on('playerPositionUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
-            netPlayers[id].position.copy(data.pos);
-            netPlayers[id].rotation.y = data.rot;
+            netPlayers[id].targetPos.copy(data.pos);
+            netPlayers[id].targetRot = data.rot;
+            // netPlayers[id].position.copy(data.pos);
+            // netPlayers[id].rotation.y = data.rot;
         }
     });
     socket.on('playerStateUpdate', ({ id, data }) => {
@@ -116,7 +118,7 @@ export function sendChatMessage(player, message) {
 let lastSentPosition = new Vector3();
 let lastSentRotation = 0;
 export function tryUpdatePosition({ pos, rot }) {
-    if ((lastSentPosition === null || lastSentPosition.distanceToSquared(pos) > 0.000001)
+    if ((lastSentPosition === null || lastSentPosition.distanceToSquared(pos) > 0.001)
         || lastSentRotation !== rot) {
         lastSentPosition.copy(pos);
         lastSentRotation = rot;

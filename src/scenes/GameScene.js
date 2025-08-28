@@ -10,21 +10,22 @@ import setupChat from '../ui/Chat.js';
 import Globals from '../utils/Globals.js';
 import SkyBox from '../actors/SkyBox.js';
 import soundPlayer from '../core/SoundPlayer.js';
-import menu from '../ui/Menu.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
     this.name = 'level1';
     this.spawnLevel();
     this.netPlayers = {};
-    this.player = new Player(this.game, this, LocalData.position, true, this.game.camera);
+    let playerPosBuffer = LocalData.position;
+    playerPosBuffer.y += 2; //start a bit above ground
+    this.player = new Player(this.game, this, playerPosBuffer, true, this.game.camera);
     Globals.player = this.player;
 
-    const firstMusic = soundPlayer.loadSound('music1', 'assets/BattleMusic4.wav');
-    firstMusic.loop = true;
+    soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
     function playMusiconFirstClick() {
-      soundPlayer.playSound('music1');
+      soundPlayer.playMusic(0);
       document.removeEventListener('mousedown', playMusiconFirstClick);
+      soundPlayer.loadAllMusic();
     }
     document.addEventListener('mousedown', playMusiconFirstClick);
 
@@ -40,7 +41,7 @@ export default class GameScene extends SceneBase {
   }
 
   update(dt, time) {
-    if (this.player) {
+    if (this.player && this.levelLoaded) {
       this.player.update(dt, time);
       if (this.player.body.position.y < -50) {
         this.player.body.position.set(0, 5, 0);
@@ -137,6 +138,8 @@ export default class GameScene extends SceneBase {
           this.game.physicsWorld.addBody(body);
         }
       });
+      this.levelLoaded = true;
+      console.log('Level loaded');
     });
   }
 }

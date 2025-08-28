@@ -190,13 +190,13 @@ export class FallState extends PlayerState {
 
 export class AttackState extends PlayerState {
     enter() {
-        this.accel = 80;
-        this.maxSpeed = 3;
-        this.timer = performance.now() + 511;
-        this.actor.animator.setAnimState('AttackCombo.001');
+        this.accel = 600;
+        this.maxSpeed = 1;
+        this.timer = performance.now() + 540;
+        this.actor.animator.setAnimState('AttackCombo', true, .15);
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, this.jumpDecel, this.maxSpeed);
+        this.movementVelocity(dt, this.accel, .9, this.maxSpeed);
 
         if (performance.now() > this.timer) {
             this.actor.stateManager.setState('idle');
@@ -229,7 +229,7 @@ export class DashState extends PlayerState {
         super(actor, manager, options);
     }
     enter() {
-        //this.actor.animator.setState('dashing', { doesLoop: false, prio: 1 });
+        this.actor.animator.setAnimState('Dash');
         this.timer = performance.now() + 200;
         const dir = this.getInputDirection(-1);
         dir.normalize();
@@ -238,10 +238,12 @@ export class DashState extends PlayerState {
     update(dt) {
         this.movementVelocity(dt, this.accel, this.jumpDecel, this.maxSpeed);
         if (this.timer < performance.now()) {
-            const curVel = this.body.velocity;
-            curVel.mult(0.2, this.body.velocity);
             this.manager.setState('idle');
             return;
         }
+    }
+    exit() {
+        const curVel = this.body.velocity;
+        curVel.mult(0.3, this.body.velocity);
     }
 }

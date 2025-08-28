@@ -17,7 +17,7 @@ export default class PlayerAnimator {
     this.setAnimState("LaxIdle");
   }
 
-  setAnimState(state) {
+  setAnimState(state, once = false, seek = 0) {
     if (this.stateName === state) return;
     this.stateName = state;
     const action = this.actions[state];
@@ -27,12 +27,21 @@ export default class PlayerAnimator {
     }
     if (this.currentAction === action) return;
 
-    if (this.currentAction) {
-      this.currentAction.fadeOut(0.2);
+    if (once) {
+      action.setLoop(THREE.LoopOnce);
     }
-    action.reset().fadeIn(0.2).play();
+    if (this.currentAction) {
+      this.currentAction.crossFadeTo(action, 0.1);
+    }
+    action.time = seek;
+    action.reset().fadeIn(0.1).play();
     this.currentAction = action;
+    if (seek) {
+      action.time = seek;
+    }
+
   }
+
 
   update(delta) {
     this.mixer.update(delta);
