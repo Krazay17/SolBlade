@@ -34,6 +34,13 @@ class SoundPlayer {
         }
     }
 
+    setSeek(value) {
+        if (this.musicPlaying) {
+            const seekAmount = this.musicPlaying.duration * (value / 100);
+            this.musicPlaying.currentTime = seekAmount;
+        }
+    }
+
     skipTrack() {
         const currentIndex = this.musics.indexOf(this.musicPlaying);
         const nextIndex = currentIndex + 1 < this.musics.length ? currentIndex + 1 : 0;

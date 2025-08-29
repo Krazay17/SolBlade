@@ -16,8 +16,6 @@ export default class Menu {
         this.menuElement.id = 'menu-section';
         this.menuElement.innerHTML = `
             <h2>Menu</h2>
-            <p>Sound Volume</p>
-            </div>
         `;
 
         window.addEventListener('keydown', (event) => {
@@ -34,6 +32,7 @@ export default class Menu {
         });
 
         this.createAudioSection();
+
         this.sensitivitySlider = this.createSlider(Globals.input.sensitivity * 5000);
         this.sensitivitySlider.addEventListener('input', (event) => {
             Globals.input.sensitivity = event.target.value / 5000;
@@ -45,17 +44,59 @@ export default class Menu {
     }
 
     createAudioSection() {
-        this.soundSlider = this.createSlider(LocalData.masterVolume * 100);
-        this.soundSlider.addEventListener('input', (event) => {
+        this.volumeSlider = this.createSlider(LocalData.masterVolume * 100);
+        this.volumeSlider.addEventListener('input', (event) => {
             soundPlayer.setMasterVolume(event.target.value / 100);
             LocalData.masterVolume = event.target.value / 100;
+            this.volumeLabel.innerText = 'Master Volume: ' + LocalData.masterVolume;
+        });
+        this.volumeLabel = document.createElement('p');
+        this.volumeLabel.innerText = 'Master Volume: ' + LocalData.masterVolume;
+
+        this.menuElement.appendChild(this.volumeLabel);
+
+        let seekValue = 0;
+        this.seekSlider = this.createSlider(0);
+        this.seekSlider.addEventListener('input', (event) => {
+            soundPlayer.setSeek(event.target.value);
         });
 
-        this.skipButton = this.createButton();
-        this.skipButton.addEventListener('click', () => {
+        this.seekLabel = document.createElement('p');
+        this.seekLabel.innerText = 'Seek: 0';
+        this.menuElement.appendChild(this.seekLabel);
+        setInterval(() => {
+            if (soundPlayer.musicPlaying) {
+                this.seekSlider.value = (soundPlayer.musicPlaying.currentTime / soundPlayer.musicPlaying.duration) * 100;
+                this.seekLabel.innerText = 'Seek: ' + soundPlayer.musicPlaying.currentTime.toFixed(2) + ' / ' + soundPlayer.musicPlaying.duration.toFixed(2);
+            }
+        }, 10);
+
+        const buttonGrid = document.createElement('div');
+        buttonGrid.classList.add('menu-music-button-grid');
+        this.menuElement.appendChild(buttonGrid);
+
+        const playButton = document.createElement('button');
+        playButton.classList.add('menu-button');
+        playButton.innerText = "Play/Pause";
+        buttonGrid.appendChild(playButton);
+        const skipButton = document.createElement('button');
+        skipButton.classList.add('menu-button');
+        skipButton.innerText = "Skip";
+        buttonGrid.appendChild(skipButton);
+
+        playButton.addEventListener('click', () => {
+            if (soundPlayer.musicPlaying.paused) {
+                soundPlayer.musicPlaying.play();
+            } else {
+                soundPlayer.musicPlaying.pause();
+            }
+            playButton.blur();
+        });
+
+        skipButton.addEventListener('click', () => {
             soundPlayer.skipTrack();
             this.trackName.innerText = 'Current Track: ' + soundPlayer.getCurrentTrackName();
-            this.skipButton.blur();
+            skipButton.blur();
         });
 
         this.trackName = document.createElement('p');

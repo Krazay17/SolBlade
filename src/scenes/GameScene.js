@@ -10,6 +10,7 @@ import setupChat from '../ui/Chat.js';
 import Globals from '../utils/Globals.js';
 import SkyBox from '../actors/SkyBox.js';
 import soundPlayer from '../core/SoundPlayer.js';
+import DebugData from '../ui/DebugData.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -28,6 +29,8 @@ export default class GameScene extends SceneBase {
       soundPlayer.loadAllMusic();
     }
     document.addEventListener('mousedown', playMusiconFirstClick);
+
+    this.debugData = new DebugData(this.player);
 
     this.makeSky();
     setNetScene(this, {
@@ -53,8 +56,8 @@ export default class GameScene extends SceneBase {
         player.update(dt, time);
       });
     }
-
-    this.skyBox.update();
+    if(this.skyBox) this.skyBox.update();
+    this.debugData.update(dt, time);
   }
 
   makeSky() {

@@ -1,17 +1,21 @@
 import { Vec3 } from 'cannon';
+import { Vector3 } from 'three';
 class PlayerState {
     constructor(actor, manager, options = {}) {
         this.actor = actor;
         this.manager = manager;
         this.body = actor.body;
+        this.input = actor.input;
+
         this.maxSpeed = actor.maxSpeed;
         this.accel = actor.acceleration;
-        this.groundFriction = 0.8;
+        this.groundFriction = 0.875;
         this.airFriction = 0.995;
         this.airSpeed = 2;
+        this.dashSpeed = 25;
+        this.runBoost = 0;
         this.direction = new Vec3();
         this.current3d = new Vec3();
-        this.input = actor.input;
         Object.assign(this, options);
 
     }
@@ -19,20 +23,32 @@ class PlayerState {
     update(dt) { }
     exit() { }
 
+    isTryingToMove() {
+        if (this.input.keys['KeyW'] || this.input.keys['KeyA'] || this.input.keys['KeyS'] || this.input.keys['KeyD']) {
+            return true;
+        }
+        return false;
+    }
+
     setAnimState(state) {
         this.actor?.setAnimState?.(state);
     };
 
     movementVelocity(dt, accel, maxSpeed, friction = 1, decel = 1) {
         const inputDir = this.getInputDirection();
+        const lastVelocity = this.body.velocity.clone();
+        lastVelocity.y = 0;
+        lastVelocity.normalize();
+        const speedAdd = Math.max(0, lastVelocity.dot(this.direction));
+        this.runBoost += speedAdd * 10 * dt;
+        this.runBoost = Math.min(5000, this.runBoost * speedAdd);
+        console.log(this.runBoost);
 
         if (inputDir.almostZero()) {
             this.body.velocity.x *= friction;
             this.body.velocity.z *= friction;
             return;
         }
-        this.body.velocity.x *= decel;
-        this.body.velocity.z *= decel;
         //Project velocity onto input direction
         const horizClone = this.body.velocity.clone();
         horizClone.y = 0;
@@ -44,6 +60,8 @@ class PlayerState {
             this.body.velocity.x += inputDir.x * accel * dt;
             this.body.velocity.z += inputDir.z * accel * dt;
         }
+        this.body.velocity.x *= decel;
+        this.body.velocity.z *= decel;
     }
 
     getInputDirection(z = 0) {
@@ -78,10 +96,17 @@ class PlayerState {
 
         return { rotatedX, rotatedZ };
     }
+
+
 }
 
 export class IdleState extends PlayerState {
-    enter() {
+    enter(floor) {
+        console.log(`Floor: ${floor}`);
+        if (this.isTryingToMove()) {
+            this.actor.setState('run', floor);
+            return;
+        }
         this.actor.animator?.setAnimState('idle');
     }
     update(dt) {
@@ -89,10 +114,11 @@ export class IdleState extends PlayerState {
         this.body.velocity.x *= this.groundFriction;
         this.body.velocity.z *= this.groundFriction;
 
-        if (this.input.keys['KeyW'] || this.input.keys['KeyA'] || this.input.keys['KeyS'] || this.input.keys['KeyD']) {
-            this.actor.setState('run');
+        if (this.isTryingToMove()) {
+            this.actor.setState('run', this.actor.floorTrace());
             return;
         }
+
         if (this.input.keys['Space']) {
             this.actor.setState('jump');
             return;
@@ -100,15 +126,32 @@ export class IdleState extends PlayerState {
         if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
             return;
         }
+
+        if (!this.actor.floorTrace()) {
+            this.actor.setState('fall');
+            return;
+        }
     }
 }
 
 export class RunState extends PlayerState {
-    enter() {
+    constructor(actor, manager, options = {}) {
+        super(actor, manager, options);
+    }
+    enter(floorDot) {
+        this.actor.animator?.setAnimState('run');
         this.accel = 300;
+        const floorValue = 1 - floorDot;
+        if (floorDot) {
+            this.runBoost *= 1 + floorValue;
+            console.log(`Floor: ${1 + floorValue}`);
+        }
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, this.maxSpeed, this.groundFriction, this.groundFriction);
+
+        this.movementVelocity(dt, this.accel + this.runBoost, this.maxSpeed + this.runBoost, this.groundFriction, this.groundFriction);
+
+
         let strafe = true;
 
         // Jump
@@ -153,14 +196,11 @@ export class RunState extends PlayerState {
 }
 
 export class JumpState extends PlayerState {
-    constructor(actor, manager, options = {}) {
+    constructor(actor, manager, options = { accel: 100, maxSpeed: 3, airFriction: .99 }) {
         super(actor, manager, options);
-        this.accel = options.accel || this.accel;
-        this.maxSpeed = options.maxSpeed || this.maxSpeed;
-        this.airFriction = options.airFriction || this.airFriction;
     }
     enter() {
-        this.body.velocity.y = 9;
+        this.body.velocity.y = 9.8;
         this.actor.animator.setAnimState('jump');
         this.jumpTimer = performance.now() + 300;
     }
@@ -178,11 +218,8 @@ export class JumpState extends PlayerState {
 }
 
 export class FallState extends PlayerState {
-    constructor(actor, manager, options = {}) {
+    constructor(actor, manager, options = { accel: 50, maxSpeed: 3, airFriction: .99 }) {
         super(actor, manager, options);
-        this.accel = options.accel || this.accel;
-        this.maxSpeed = options.maxSpeed || this.maxSpeed;
-        this.airFriction = options.airFriction || this.airFriction;
     }
     enter() {
         this.actor.animator?.setAnimState('fall');
@@ -193,8 +230,9 @@ export class FallState extends PlayerState {
         if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
             return;
         }
-        if (this.actor.floorTrace()) {
-            this.actor.setState('idle');
+        const floor = this.actor.floorTrace();
+        if (floor) {
+            this.actor.setState('idle', floor);
             return;
         }
     }
@@ -203,8 +241,6 @@ export class FallState extends PlayerState {
 export class AttackState extends PlayerState {
     constructor(actor, manager, options = { accel: 400, maxSpeed: 2 }) {
         super(actor, manager, options);
-        this.accel = options.accel || this.accel;
-        this.maxSpeed = options.maxSpeed || this.maxSpeed;
     }
     enter() {
         this.timer = performance.now() + 610;
@@ -212,6 +248,7 @@ export class AttackState extends PlayerState {
     }
     update(dt) {
         this.movementVelocity(dt, this.accel, this.maxSpeed, this.groundFriction, this.groundFriction);
+        this.body.velocity.y *= 0.95;
 
         if (performance.now() > this.timer) {
             this.actor.stateManager.setState('idle');
@@ -228,29 +265,26 @@ export class KnockbackState extends PlayerState {
     }
     update(dt) {
         if (this.timer > performance.now()) return;
-        if (this.actor.floorTrace()) {
-            this.actor.setState('idle');
-            return;
-        } else {
-            this.actor.setState('fall');
-            return;
-        }
+        this.actor.setState('idle');
+        return;
     }
 }
 
 export class DashState extends PlayerState {
-    constructor(actor, manager, options = { cd: 1000 }) {
+    constructor(actor, manager, options = { cd: 1500 }) {
         super(actor, manager, options);
     }
     enter() {
         this.actor.animator.setAnimState('dash');
-        this.timer = performance.now() + 200;
-        const dir = this.getInputDirection(-1);
-        dir.normalize();
-        dir.mult(35, this.body.velocity);
+        this.timer = performance.now() + 370;
+        this.getInputDirection(-1);
+        this.dashSpeed = 25;
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, this.maxSpeed, this.airFriction);
+        this.direction.y = 0;
+        this.dashSpeed -= 55 * dt;
+        const dashVelocity = this.direction.scale(this.dashSpeed);
+        this.body.velocity.copy(dashVelocity);
         if (this.timer < performance.now()) {
             this.manager.setState('idle');
             return;
@@ -258,7 +292,7 @@ export class DashState extends PlayerState {
     }
     exit() {
         const curVel = this.body.velocity;
-        curVel.mult(0.3, this.body.velocity);
+        curVel.mult(0.4, this.body.velocity);
     }
 }
 

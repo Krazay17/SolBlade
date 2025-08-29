@@ -61,7 +61,7 @@ export default class Game {
     })
 
     //this.localPlayer = new Player(this, null, {})
-
+    Globals.game = this;
     Globals.graphicsWorld = this.graphicsWorld;
     Globals.physicsWorld = this.physicsWorld;
     Globals.input = this.input;

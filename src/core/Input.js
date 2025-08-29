@@ -38,7 +38,6 @@ export default class Input {
     this.domElement.addEventListener('keydown', (e) => {
       if (this.inputBlocked) return;
       this.keys[e.code] = true;
-      console.log(e.code);
       MyEventEmitter.emit('playerMove');
     });
     this.domElement.addEventListener('keyup', (e) => {

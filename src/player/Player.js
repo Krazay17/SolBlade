@@ -27,7 +27,7 @@ export default class Player extends THREE.Object3D {
 
         this.health = new Health();
         this.height = 1;
-        this.radius = .15;
+        this.radius = .4;
         this.mesh;
         this.body = null;
         this.mixer;
@@ -71,18 +71,20 @@ export default class Player extends THREE.Object3D {
 
             const material = getMaterial('playerMaterial');
             const sphere = new CANNON.Sphere(1);
-            this.body = new CANNON.Body({
+
+            const body = new CANNON.Body({
                 position: new CANNON.Vec3(x, y, z),
                 mass: 1,
-                shape: sphere,
                 fixedRotation: true,
+                shape: sphere,
                 material: material,
                 collisionFilterGroup: 2,
                 collisionFilterMask: -1,
             });
+            this.body = body;
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, 1.2, this.radius);
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .2, this.radius);
             console.log('Player body loaded');
 
 
@@ -145,7 +147,7 @@ export default class Player extends THREE.Object3D {
             this.body.position = this.body.position.vadd(scaledConvertedDirection);
             this.body.velocity.y = 0;
         }
-        if(this.input.keys['Digit1']) {
+        if (this.input.keys['Digit1']) {
             this.stateManager.tryEmote('rumbaDancing');
         }
 

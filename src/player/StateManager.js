@@ -6,7 +6,7 @@ export default class StateManager {
         this.states = {
             idle: new States.IdleState(actor, this),
             run: new States.RunState(actor, this),
-            jump: new States.JumpState(actor, this, { accel: 100, maxSpeed: 3 }),
+            jump: new States.JumpState(actor, this, { accel: 80, maxSpeed: 3 }),
             fall: new States.FallState(actor, this, { accel: 50, maxSpeed: 3 }),
             attack: new States.AttackState(actor, this),
             knockback: new States.KnockbackState(actor, this),
@@ -27,8 +27,10 @@ export default class StateManager {
         console.log(`Changing state from ${this.currentStateName} to ${state}`);
         this.currentStateName = state;
         let newState = state;
-        if (state === 'idle' && !this.actor.floorTrace()) {
+        const floor = this.actor.floorTrace();
+        if (state === 'idle' && !floor) {
             newState = 'fall';
+
         }
         if (this.states[newState]) {
             this.movementState?.exit();

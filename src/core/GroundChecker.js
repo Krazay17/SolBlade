@@ -41,7 +41,7 @@ export default class GroundChecker {
             //If any rays hit a walkable floor return true
 
             if (result.hasHit) {
-                return true;
+                return result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0));
                 // // Optional: check the normal to ensure it’s mostly "up"
                 // if (result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)) > 0.3) {
                 //     return true; // standing on a walkable surface
