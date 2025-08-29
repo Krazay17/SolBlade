@@ -82,7 +82,7 @@ class PlayerState {
 
 export class IdleState extends PlayerState {
     enter() {
-        this.actor.animator?.setAnimState('Idle');
+        this.actor.animator?.setAnimState('idle');
     }
     update(dt) {
         // Decelerate horizontally
@@ -121,20 +121,20 @@ export class RunState extends PlayerState {
         }
         if (this.input.keys['KeyW']) {
             strafe = false;
-            this.actor.animator.setAnimState('Run');
+            this.actor.animator.setAnimState('run');
         }
         if (this.input.keys['KeyS']) {
             strafe = false;
-            this.actor.animator.setAnimState('Run');
+            this.actor.animator.setAnimState('run');
         }
         if (this.input.keys['KeyA']) {
             if (strafe) {
-                this.actor.animator.setAnimState('StrafeLeft');
+                this.actor.animator.setAnimState('strafeLeft');
             }
         }
         if (this.input.keys['KeyD']) {
             if (strafe) {
-                this.actor.animator.setAnimState('StrafeRight');
+                this.actor.animator.setAnimState('strafeRight');
             }
         }
 
@@ -161,7 +161,7 @@ export class JumpState extends PlayerState {
     }
     enter() {
         this.body.velocity.y = 9;
-        this.actor.animator.setAnimState('Jump');
+        this.actor.animator.setAnimState('jump');
         this.jumpTimer = performance.now() + 300;
     }
     update(dt) {
@@ -185,7 +185,7 @@ export class FallState extends PlayerState {
         this.airFriction = options.airFriction || this.airFriction;
     }
     enter() {
-        this.actor.animator?.setAnimState('FallLoop');
+        this.actor.animator?.setAnimState('fall');
     }
     update(dt) {
         this.movementVelocity(dt, this.accel, this.maxSpeed, this.airFriction);
@@ -201,14 +201,14 @@ export class FallState extends PlayerState {
 }
 
 export class AttackState extends PlayerState {
-    constructor(actor, manager, options = { accel: 600, maxSpeed: 1 }) {
+    constructor(actor, manager, options = { accel: 400, maxSpeed: 2 }) {
         super(actor, manager, options);
         this.accel = options.accel || this.accel;
         this.maxSpeed = options.maxSpeed || this.maxSpeed;
     }
     enter() {
         this.timer = performance.now() + 610;
-        this.actor.animator.setAnimState('AttackCombo', true, .15);
+        this.actor.animator.setAnimState('attack');
     }
     update(dt) {
         this.movementVelocity(dt, this.accel, this.maxSpeed, this.groundFriction, this.groundFriction);
@@ -223,11 +223,10 @@ export class KnockbackState extends PlayerState {
     enter(dir) {
         dir.mult(35, this.body.velocity);
 
-        //this.actor.animator.setState('knockback', { doesLoop: false, prio: 2 });
         this.timer = performance.now() + 800;
+        this.actor.animator.setAnimState('knockBack');
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, this.maxSpeed, .98);
         if (this.timer > performance.now()) return;
         if (this.actor.floorTrace()) {
             this.actor.setState('idle');
@@ -244,7 +243,7 @@ export class DashState extends PlayerState {
         super(actor, manager, options);
     }
     enter() {
-        this.actor.animator.setAnimState('Dash');
+        this.actor.animator.setAnimState('dash');
         this.timer = performance.now() + 200;
         const dir = this.getInputDirection(-1);
         dir.normalize();
@@ -260,5 +259,25 @@ export class DashState extends PlayerState {
     exit() {
         const curVel = this.body.velocity;
         curVel.mult(0.3, this.body.velocity);
+    }
+}
+
+export class EmoteState extends IdleState {
+    enter(emote) {
+        this.actor.animator.setAnimState(emote);
+    }
+}
+
+export class DeadState extends PlayerState {
+    constructor(actor, manager, options = {}) {
+        super(actor, manager, options);
+    }
+    enter() {
+        this.actor.animator.setAnimState('dead');
+        this.body.velocity.set(0, 0, 0);
+    }
+    update(dt) {
+        // Handle dead-specific logic here
+        console.log("Player is dead");
     }
 }

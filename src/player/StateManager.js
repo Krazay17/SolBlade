@@ -11,6 +11,7 @@ export default class StateManager {
             attack: new States.AttackState(actor, this),
             knockback: new States.KnockbackState(actor, this),
             dash: new States.DashState(actor, this),
+            emote: new States.EmoteState(actor, this),
         };
         this.movementState = this.states.idle;
         this.actionState = null;
@@ -61,6 +62,11 @@ export default class StateManager {
     tryAttack() {
         if (this.actionState) return false;
         this.setActionState('attack');
+        return true;
+    }
+    tryEmote(emote) {
+        if (this.actionState) return false;
+        this.setState('emote', emote);
         return true;
     }
 }

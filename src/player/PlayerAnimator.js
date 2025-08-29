@@ -14,13 +14,52 @@ export default class PlayerAnimator {
     });
 
     this.currentAction = null;
-    this.setAnimState("Idle");
+    this.setAnimState("idle");
   }
 
-  setAnimState(state, once = false, seek = 0) {
+  setAnimState(state) {
     if (this.stateName === state) return;
     this.stateName = state;
-    const action = this.actions[state];
+    let once = false;
+    let seek = 0;
+    let animName;
+    switch (state) {
+      case "idle":
+        animName = "Idle";
+        break;
+      case "run":
+        animName = "Run";
+        break;
+      case "strafeLeft":
+        animName = "StrafeLeft";
+        break;
+      case "strafeRight":
+        animName = "StrafeRight";
+        break;
+      case "dash":
+        animName = "Dash";
+        break;
+      case "jump":
+        animName = "Jump";
+        break;
+      case "fall":
+        animName = "FallLoop";
+        break;
+      case "attack":
+        animName = "AttackCombo";
+        seek = 0.15;
+        break;
+      case "knockBack":
+        animName = "KnockBack";
+        break;
+      case "rumbaDancing":
+        animName = "RumbaDancing";
+        break;
+      default:
+        console.warn(`No animation state found for: ${state}`);
+        return null;
+    };
+    const action = this.actions[animName];
     if (!action) {
       console.warn(`No animation found for state: ${state}`);
       return;

@@ -145,6 +145,9 @@ export default class Player extends THREE.Object3D {
             this.body.position = this.body.position.vadd(scaledConvertedDirection);
             this.body.velocity.y = 0;
         }
+        if(this.input.keys['Digit1']) {
+            this.stateManager.tryEmote('rumbaDancing');
+        }
 
         // Damage test
         if (this.input.keys['KeyG']) {

@@ -57,13 +57,6 @@ function bindSocketEvents(myPlayerData) {
         }
         delete netPlayers[playerId];
     })
-    socket.on('playerNetUpdate', ({ id, data }) => {
-        if (netPlayers[id]) {
-            netPlayers[id].position.copy(data.pos);
-            netPlayers[id].rotation.y = data.rot;
-            netPlayers[id].setAnimState(data.state);
-        }
-    });
     socket.on('playerPositionUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
             netPlayers[id].targetPos.copy(data.pos);
@@ -125,7 +118,7 @@ export function tryUpdatePosition({ pos, rot }) {
         socket.emit("playerPositionRequest", { pos: lastSentPosition, rot: lastSentRotation });
     }
 }
-let lastSentState = 'Idle';
+let lastSentState = 'idle';
 export function tryUpdateState(state) {
     if (lastSentState === null || lastSentState !== state) {
         lastSentState = state;
