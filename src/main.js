@@ -12,7 +12,6 @@ const canvas = document.getElementById('webgl');
 const game = new Game(canvas);
 const gameScene = new GameScene(game);
 const menu = new Menu();
-menu.open();
 
 game.setScene(gameScene);
 game.start();

@@ -4,11 +4,11 @@ class PlayerState {
         this.actor = actor;
         this.manager = manager;
         this.body = actor.body;
-        this.speed = actor.speed;
+        this.maxSpeed = actor.maxSpeed;
         this.accel = actor.acceleration;
-        this.idleDecel = 0.9;
-        this.runDecel = 0.94;
-        this.jumpDecel = 0.998;
+        this.groundFriction = 0.8;
+        this.airFriction = 0.995;
+        this.airSpeed = 2;
         this.direction = new Vec3();
         this.current3d = new Vec3();
         this.input = actor.input;
@@ -23,16 +23,21 @@ class PlayerState {
         this.actor?.setAnimState?.(state);
     };
 
-    movementVelocity(dt, accel, decel, maxSpeed) {
-        // Decelerate horizontally
-        this.body.velocity.x *= decel;
-        this.body.velocity.z *= decel;
-
+    movementVelocity(dt, accel, maxSpeed, friction = 1, decel = 1) {
         const inputDir = this.getInputDirection();
 
-        if (inputDir.length() === 0) return;
+        if (inputDir.almostZero()) {
+            this.body.velocity.x *= friction;
+            this.body.velocity.z *= friction;
+            return;
+        }
+        this.body.velocity.x *= decel;
+        this.body.velocity.z *= decel;
         //Project velocity onto input direction
-        const projectedSpeed = this.body.velocity.dot(inputDir);
+        const horizClone = this.body.velocity.clone();
+        horizClone.y = 0;
+        // Get the amount of velocity in the input direction
+        const projectedSpeed = horizClone.dot(inputDir);
 
         // Only accelerate if projected speed is less than max speed
         if (projectedSpeed < maxSpeed) {
@@ -49,7 +54,6 @@ class PlayerState {
         if (this.input.keys['KeyS']) this.direction.z += 1;
         if (this.input.keys['KeyA']) this.direction.x -= 1;
         if (this.input.keys['KeyD']) this.direction.x += 1;
-        this.direction.normalize();
 
         if (this.direction.length() === 0) {
             this.direction.z = z;
@@ -82,8 +86,8 @@ export class IdleState extends PlayerState {
     }
     update(dt) {
         // Decelerate horizontally
-        this.body.velocity.x *= this.idleDecel;
-        this.body.velocity.z *= this.idleDecel;
+        this.body.velocity.x *= this.groundFriction;
+        this.body.velocity.z *= this.groundFriction;
 
         if (this.input.keys['KeyW'] || this.input.keys['KeyA'] || this.input.keys['KeyS'] || this.input.keys['KeyD']) {
             this.actor.setState('run');
@@ -104,7 +108,7 @@ export class RunState extends PlayerState {
         this.accel = 300;
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, this.runDecel, this.actor.speed);
+        this.movementVelocity(dt, this.accel, this.maxSpeed, this.groundFriction, this.groundFriction);
         let strafe = true;
 
         // Jump
@@ -130,7 +134,7 @@ export class RunState extends PlayerState {
         }
         if (this.input.keys['KeyD']) {
             if (strafe) {
-                this.actor.animator.setAnimState('StrafeRight', { doesLoop: true, prio: 1 });
+                this.actor.animator.setAnimState('StrafeRight');
             }
         }
 
@@ -149,15 +153,19 @@ export class RunState extends PlayerState {
 }
 
 export class JumpState extends PlayerState {
+    constructor(actor, manager, options = {}) {
+        super(actor, manager, options);
+        this.accel = options.accel || this.accel;
+        this.maxSpeed = options.maxSpeed || this.maxSpeed;
+        this.airFriction = options.airFriction || this.airFriction;
+    }
     enter() {
         this.body.velocity.y = 9;
         this.actor.animator.setAnimState('Jump');
         this.jumpTimer = performance.now() + 300;
-        this.accel = 80;
-        this.maxSpeed = this.actor.speed;
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, this.jumpDecel, this.maxSpeed);
+        this.movementVelocity(dt, this.accel, this.maxSpeed, this.airFriction);
 
         if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
             return;
@@ -170,13 +178,17 @@ export class JumpState extends PlayerState {
 }
 
 export class FallState extends PlayerState {
+    constructor(actor, manager, options = {}) {
+        super(actor, manager, options);
+        this.accel = options.accel || this.accel;
+        this.maxSpeed = options.maxSpeed || this.maxSpeed;
+        this.airFriction = options.airFriction || this.airFriction;
+    }
     enter() {
         this.actor.animator?.setAnimState('FallLoop');
-        this.accel = 50;
-        this.maxSpeed = 5;
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, this.jumpDecel, this.maxSpeed);
+        this.movementVelocity(dt, this.accel, this.maxSpeed, this.airFriction);
 
         if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
             return;
@@ -189,14 +201,17 @@ export class FallState extends PlayerState {
 }
 
 export class AttackState extends PlayerState {
+    constructor(actor, manager, options = { accel: 600, maxSpeed: 1 }) {
+        super(actor, manager, options);
+        this.accel = options.accel || this.accel;
+        this.maxSpeed = options.maxSpeed || this.maxSpeed;
+    }
     enter() {
-        this.accel = 600;
-        this.maxSpeed = 1;
         this.timer = performance.now() + 610;
         this.actor.animator.setAnimState('AttackCombo', true, .15);
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, .9, this.maxSpeed);
+        this.movementVelocity(dt, this.accel, this.maxSpeed, this.groundFriction, this.groundFriction);
 
         if (performance.now() > this.timer) {
             this.actor.stateManager.setState('idle');
@@ -212,7 +227,7 @@ export class KnockbackState extends PlayerState {
         this.timer = performance.now() + 800;
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, .98, this.maxSpeed);
+        this.movementVelocity(dt, this.accel, this.maxSpeed, .98);
         if (this.timer > performance.now()) return;
         if (this.actor.floorTrace()) {
             this.actor.setState('idle');
@@ -236,7 +251,7 @@ export class DashState extends PlayerState {
         dir.mult(35, this.body.velocity);
     }
     update(dt) {
-        this.movementVelocity(dt, this.accel, this.jumpDecel, this.maxSpeed);
+        this.movementVelocity(dt, this.accel, this.maxSpeed, this.airFriction);
         if (this.timer < performance.now()) {
             this.manager.setState('idle');
             return;

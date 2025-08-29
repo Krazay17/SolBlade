@@ -55,12 +55,18 @@ export default class Input {
     });
 
     this.domElement.addEventListener('mousemove', (e) => {
-      if (this.gameElement === document.pointerLockElement) {
+      if (document.pointerLockElement !== this.gameElement) return;
+
+      if (Math.abs(e.movementX) < 200 && Math.abs(e.movementY) < 200) {
         this.yaw -= e.movementX * this.sensitivity;
-        this.pitch -= e.movementY * this.sensitivity;
-        this.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, this.pitch));
+        this.pitch = Math.max(
+          -Math.PI / 2,
+          Math.min(Math.PI / 2, this.pitch - e.movementY * this.sensitivity)
+        );
       }
+
     });
+
   }
 
   addKeys() {

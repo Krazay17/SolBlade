@@ -23,22 +23,19 @@ export default {
     },
 
     load() {
-        return new Promise((resolve) => {
-            const data = localStorage.getItem('SolBladeSave');
-            if (!data) return;
-            const parsed = JSON.parse(data);
-            if (parsed.version !== CURRENT_VERSION) {
-                this.reset();
-                console.warn('Version mismatch: ' + parsed.version + ' current: ' + CURRENT_VERSION);
-            }
-            this.money = parsed.money ?? this.money;
-            this.name = parsed.name ?? this.name;
-            this.scene = parsed.scene ?? this.scene;
-            this.position = parsed.position ?? this.position;
-            this.masterVolume = parsed.masterVolume ?? this.masterVolume;
-            console.log('Loaded local data:', this);
-            resolve();
-        });
+        const data = localStorage.getItem('SolBladeSave');
+        if (!data) return;
+        const parsed = JSON.parse(data);
+        if (parsed.version !== CURRENT_VERSION) {
+            this.reset();
+            console.warn('Version mismatch: ' + parsed.version + ' current: ' + CURRENT_VERSION);
+        }
+        this.money = parsed.money ?? this.money;
+        this.name = parsed.name ?? this.name;
+        this.scene = parsed.scene ?? this.scene;
+        this.position = parsed.position ?? this.position;
+        this.masterVolume = parsed.masterVolume ?? this.masterVolume;
+        console.log('Loaded local data:', this);
 
     },
 

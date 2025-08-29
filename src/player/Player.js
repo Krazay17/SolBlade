@@ -27,7 +27,7 @@ export default class Player extends THREE.Object3D {
 
         this.health = new Health();
         this.height = 1;
-        this.radius = .3;
+        this.radius = .15;
         this.mesh;
         this.body = null;
         this.mixer;
@@ -59,7 +59,7 @@ export default class Player extends THREE.Object3D {
         if (isLocal) {
             this.input = game.input;
 
-            this.speed = 5;
+            this.maxSpeed = 5;
             this.acceleration = 300;
             this.deceleration = 300;
             this.jump = 9;
@@ -82,7 +82,7 @@ export default class Player extends THREE.Object3D {
             });
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body);
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, 1.2, this.radius);
             console.log('Player body loaded');
 
 
@@ -143,6 +143,7 @@ export default class Player extends THREE.Object3D {
             const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
             const scaledConvertedDirection = new CANNON.Vec3(direction.x, direction.y, direction.z).scale(2);
             this.body.position = this.body.position.vadd(scaledConvertedDirection);
+            this.body.velocity.y = 0;
         }
 
         // Damage test

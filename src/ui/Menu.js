@@ -16,7 +16,6 @@ export default class Menu {
         this.menuElement.id = 'menu-section';
         this.menuElement.innerHTML = `
             <h2>Menu</h2>
-            <div id="menu-item-grid">
             <p>Sound Volume</p>
             </div>
         `;
@@ -27,6 +26,7 @@ export default class Menu {
                 this.isOpen = !this.isOpen;
                 if (this.isOpen) {
                     this.open();
+                    document.exitPointerLock();
                 } else {
                     this.close();
                 }
@@ -34,14 +34,21 @@ export default class Menu {
         });
 
         this.createAudioSection();
+        this.sensitivitySlider = this.createSlider(Globals.input.sensitivity * 5000);
+        this.sensitivitySlider.addEventListener('input', (event) => {
+            Globals.input.sensitivity = event.target.value / 5000;
+            this.sensitivityText.innerText = 'Mouse Sensitivity: ' + Globals.input.sensitivity;
+        });
+        this.sensitivityText = document.createElement('p');
+        this.sensitivityText.innerText = 'Mouse Sensitivity: ' + Globals.input.sensitivity;
+        this.menuElement.appendChild(this.sensitivityText);
     }
 
     createAudioSection() {
-        this.soundSlider = this.createSlider();
+        this.soundSlider = this.createSlider(LocalData.masterVolume * 100);
         this.soundSlider.addEventListener('input', (event) => {
             soundPlayer.setMasterVolume(event.target.value / 100);
             LocalData.masterVolume = event.target.value / 100;
-            // Handle volume change
         });
 
         this.skipButton = this.createButton();
@@ -59,7 +66,7 @@ export default class Menu {
         });
     }
 
-    createSlider() {
+    createSlider(start = 50) {
         const slider = document.createElement('input');
         slider.addEventListener('mousedown', (e) => {
             e.stopPropagation();
@@ -68,8 +75,7 @@ export default class Menu {
         slider.type = 'range';
         slider.min = 0;
         slider.max = 100;
-        slider.value = LocalData.masterVolume * 100;
-        console.log(LocalData.masterVolume)
+        slider.value = start;
         this.menuElement.appendChild(slider);
         return slider;
     }
