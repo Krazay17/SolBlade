@@ -18,6 +18,7 @@ export default class DebugData {
         this.dt = dt;
         this.fps = 1 / dt;
         const playerPos = this.player.position.clone();
+        if (!playerPos.x || !playerPos.y || !playerPos.z) return;
 
         this.debugSection.innerHTML = `
             <p>FPS: ${this.fps.toFixed(2)}</p>
@@ -25,7 +26,8 @@ export default class DebugData {
             <p>Y: ${playerPos.y.toFixed(2)}</p>
             <p>Z: ${playerPos.z.toFixed(2)}</p>
             <p>Player State: ${this.player.stateManager.currentStateName}</p>
-            <p>Run Boost: ${this.player.stateManager.currentState?.runBoost?? 0}</p>
+            <p>Run Boost: ${this.player.runBoost?.toFixed(2) ?? 0}</p>
+            <p>Player Speed: ${Math.round(Math.hypot(this.player.body.velocity.x, this.player.body.velocity.z) * 10)}</p>
         `;
     }
 }

@@ -1,4 +1,5 @@
-import * as States from './PlayerStates.js';
+import RunBoost from '../RunBoost.js';
+import * as States from './index.js';
 
 export default class StateManager {
     constructor(actor) {
@@ -6,25 +7,29 @@ export default class StateManager {
         this.states = {
             idle: new States.IdleState(actor, this),
             run: new States.RunState(actor, this),
-            jump: new States.JumpState(actor, this, { accel: 80, maxSpeed: 3 }),
-            fall: new States.FallState(actor, this, { accel: 50, maxSpeed: 3 }),
+            jump: new States.JumpState(actor, this),
+            fall: new States.FallState(actor, this),
             attack: new States.AttackState(actor, this),
             knockback: new States.KnockbackState(actor, this),
             dash: new States.DashState(actor, this),
             emote: new States.EmoteState(actor, this),
         };
-        this.movementState = this.states.idle;
+        this.runBooster = new RunBoost(actor);
+        this.activeState = this.states.idle;
         this.actionState = null;
         this.currentStateName = 'idle';
+        this.lastVelocity;
+        this.runBoost = 0;
+        this.maxRunBoost = 5000;
     }
 
     update(dt, time) {
-        this.movementState?.update(dt, time);
+        this.activeState?.update(dt, time);
         this.actionState?.update(dt, time);
+        this.runBooster?.update(dt, this.currentStateName);
     }
 
     setState(state, enterParams) {
-        console.log(`Changing state from ${this.currentStateName} to ${state}`);
         this.currentStateName = state;
         let newState = state;
         const floor = this.actor.floorTrace();
@@ -33,9 +38,9 @@ export default class StateManager {
 
         }
         if (this.states[newState]) {
-            this.movementState?.exit();
-            this.movementState = this.states[newState];
-            this.movementState?.enter(enterParams);
+            this.activeState?.exit();
+            this.activeState = this.states[newState];
+            this.activeState?.enter(enterParams);
         }
     }
 
@@ -51,7 +56,7 @@ export default class StateManager {
     }
 
     reset() {
-        this.movementState = this.states.idle;
+        this.activeState = this.states.idle;
         this.actionState = null;
     }
 

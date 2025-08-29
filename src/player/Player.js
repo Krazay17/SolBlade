@@ -4,13 +4,12 @@ import { FBXLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
-import { IdleState, RunState, JumpState, FallState, KnockbackState, DashState } from './PlayerStates';
 import { Pistol, Sword } from './Weapons';
 import PlayerAnimator from './PlayerAnimator';
 import { tryPlayerDamage, socket, tryUpdatePosition, tryUpdateState, tryApplyCC } from '../core/NetManager';
-import GroundChecker from '../core/GroundChecker';
+import GroundChecker from './GroundChecker';
 import Health from './Health';
-import StateManager from './StateManager';
+import StateManager from './playerStates/StateManager';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, netId) {
@@ -62,6 +61,7 @@ export default class Player extends THREE.Object3D {
             this.maxSpeed = 5;
             this.acceleration = 300;
             this.deceleration = 300;
+            this.runBoost = 0;
             this.jump = 9;
 
             this.cameraArm = new THREE.Object3D();
@@ -84,7 +84,7 @@ export default class Player extends THREE.Object3D {
             this.body = body;
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .2, this.radius);
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .25, this.radius);
             console.log('Player body loaded');
 
 
