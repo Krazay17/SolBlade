@@ -1,7 +1,8 @@
 import * as THREE from "three";
 
 export default class PlayerAnimator {
-  constructor(mesh, animations) {
+  constructor(actor, mesh, animations) {
+    this.actor = actor;
     this.mixer = new THREE.AnimationMixer(mesh);
     this.actions = {};
     this.actionName = null;
@@ -14,7 +15,7 @@ export default class PlayerAnimator {
     });
 
     this.currentAction = null;
-    this.setAnimState("idle");
+    this.setAnimState(this.actor.isLocal ? 'idle' : this.actor.currentAnimState);
   }
 
   setAnimState(state) {

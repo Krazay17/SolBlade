@@ -27,6 +27,9 @@ socket.on("connect", () => {
 
     socket.on("disconnect", () => {
         console.log("disconnected from server");
+        if (scene) {
+            Object.values(netPlayers).forEach(p => p.removeFromWorld(p.netId));
+        }
     });
     if (scene) {
         bindSocketEvents(scene.fullNetSync());
@@ -42,6 +45,7 @@ function bindSocketEvents(myPlayerData) {
     socket.emit('joinGame', myPlayerData);
 
     socket.on('currentPlayers', (playerList) => {
+        console.log('Current players:', playerList);
         playerList.forEach(element => {
             if (element.id === socket.id) return;
             netPlayers[element.id] = scene.addPlayer(element.id, element.data);

@@ -56,7 +56,7 @@ export default class GameScene extends SceneBase {
         player.update(dt, time);
       });
     }
-    if(this.skyBox) this.skyBox.update();
+    if (this.skyBox) this.skyBox.update();
     this.debugData.update(dt, time);
   }
 
@@ -89,6 +89,7 @@ export default class GameScene extends SceneBase {
     const player = new Player(this.game, this, data.pos, false, null, id);
     this.netPlayers[id] = player;
     player.name = data.name;
+    player.currentAnimState = data.state;
     return player;
   }
 

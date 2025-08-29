@@ -14,7 +14,6 @@ import StateManager from './playerStates/StateManager';
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, netId) {
         super();
-        game.graphicsWorld.add(this);
         this.game = game;
         this.scene = scene;
         this.position.set(x, y, z);
@@ -22,6 +21,7 @@ export default class Player extends THREE.Object3D {
         this.isLocal = isLocal;
         this.name = 'Player';
         this.netId = netId;
+        game.graphicsWorld.add(this);
 
 
         this.health = new Health();
@@ -31,7 +31,8 @@ export default class Player extends THREE.Object3D {
         this.body = null;
         this.mixer;
         this.animations = {};
-
+        this.currentAnimState = null;
+        this.currentPosition = new CANNON.Vec3(x, y, z);
 
         const loader = new GLTFLoader();
         loader.load('/assets/KnightGirl.glb', (gltf) => {
@@ -48,7 +49,7 @@ export default class Player extends THREE.Object3D {
             });
             this.add(model);
             this.mesh = model;
-            this.animator = new PlayerAnimator(this.mesh, gltf.animations);
+            this.animator = new PlayerAnimator(this, this.mesh, gltf.animations);
         });
 
         this.weapon = new Sword(this);
@@ -73,7 +74,7 @@ export default class Player extends THREE.Object3D {
             const sphere = new CANNON.Sphere(1);
 
             const body = new CANNON.Body({
-                position: new CANNON.Vec3(x, y, z),
+                position: this.currentPosition,
                 mass: 1,
                 fixedRotation: true,
                 shape: sphere,
@@ -107,7 +108,7 @@ export default class Player extends THREE.Object3D {
                 }
             });
         } else {
-            this.targetPos = new THREE.Vector3();
+            this.targetPos = new THREE.Vector3(x, y, z);
             this.targetRot = 0;
         }
     }
@@ -203,7 +204,7 @@ export default class Player extends THREE.Object3D {
         return this.groundChecker.isGrounded();
     }
     getState() {
-        return this.currentStateName ? this.currentStateName : null;
+        return this.stateManager.currentStateName ? this.stateManager.currentStateName : null;
     }
     setState(stateName, data) {
         if (this.isLocal) {
