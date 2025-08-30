@@ -9,7 +9,8 @@ import PlayerAnimator from './PlayerAnimator';
 import { tryPlayerDamage, socket, tryUpdatePosition, tryUpdateState, tryApplyCC } from '../core/NetManager';
 import GroundChecker from './GroundChecker';
 import Health from './Health';
-import StateManager from './playerStates/StateManager';
+import StateManager from './playerStates/_StateManager';
+import RunBoost from './RunBoost';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, netId) {
@@ -52,19 +53,18 @@ export default class Player extends THREE.Object3D {
             this.mesh = model;
             this.animator = new PlayerAnimator(this, this.mesh, gltf.animations);
         });
-
         this.weapon = new Sword(this);
 
-        //this.debugCapsule = this.setupCapsule(this.height, this.radius);
-        //this.add(this.debugCapsule);
+        // Local Player setup
         if (isLocal) {
             this.input = game.input;
 
             this.maxSpeed = 5;
             this.acceleration = 300;
             this.deceleration = 300;
-            this.runBoost = 0;
             this.jump = 9;
+
+            this.direction = new CANNON.Vec3();
 
             this.cameraArm = new THREE.Object3D();
             this.cameraArm.position.set(1, .8, 0);
@@ -86,7 +86,7 @@ export default class Player extends THREE.Object3D {
             this.body = body;
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .25, this.radius);
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .1, this.radius);
 
             const contactMaterial = new CANNON.ContactMaterial(
                 material,
@@ -99,6 +99,8 @@ export default class Player extends THREE.Object3D {
                 });
             this.game.physicsWorld.addContactMaterial(contactMaterial);
             this.stateManager = new StateManager(this);
+            this.runBooster = new RunBoost(this);
+
 
             MyEventEmitter.on('KeyPressed', (key) => {
                 if (key === 'KeyR') {
@@ -107,11 +109,13 @@ export default class Player extends THREE.Object3D {
                 }
             });
         } else {
+            // Remote Player
             this.targetPos = new THREE.Vector3(x, y, z);
             this.targetRot = 0;
         }
     }
     update(dt, time) {
+        if (!this.mesh) return;
         if (this.isLocal) {
             tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
             tryUpdateState(this.getAnimState());
@@ -121,6 +125,7 @@ export default class Player extends THREE.Object3D {
             this.rotation.y += (this.targetRot - this.rotation.y) * 25 * dt;
         }
         if (this.body) {
+            this.runBooster.update(dt, this.stateManager.currentStateName);
             if (this.stateManager) this.stateManager.update(dt, time);
             this.handleInput(dt, time);
             this.position.copy(this.body.position);
@@ -157,6 +162,40 @@ export default class Player extends THREE.Object3D {
             this.input.keys['KeyG'] = false; // Prevent continuous damage
         }
     }
+
+    getInputDirection(z = 0) {
+        this.direction.set(0, 0, 0);
+
+        // Gather input directions
+        if (this.input.keys['KeyW']) this.direction.z -= 1;
+        if (this.input.keys['KeyS']) this.direction.z += 1;
+        if (this.input.keys['KeyA']) this.direction.x -= 1;
+        if (this.input.keys['KeyD']) this.direction.x += 1;
+
+        if (this.direction.length() === 0) {
+            this.direction.z = z;
+        }
+
+        const { rotatedX, rotatedZ } = this.rotateInputVector(this.direction);
+
+        // Input direction as a vector
+        this.direction.set(rotatedX, 0, rotatedZ);
+        this.direction.normalize();
+        return this.direction;
+    }
+
+    rotateInputVector(dir) {
+        // Rotate input direction by controller yaw
+        const yaw = this.input.yaw;
+        const cosYaw = Math.cos(yaw);
+        const sinYaw = Math.sin(yaw);
+
+        const rotatedX = dir.x * cosYaw + dir.z * sinYaw;
+        const rotatedZ = -dir.x * sinYaw + dir.z * cosYaw;
+
+        return { rotatedX, rotatedZ };
+    }
+
     takeDamage(amount) {
         //Single player take damage
         if (this.isLocal) {
@@ -204,11 +243,6 @@ export default class Player extends THREE.Object3D {
     }
     getState() {
         return this.stateManager.currentStateName ? this.stateManager.currentStateName : null;
-    }
-    setState(stateName, data) {
-        if (this.isLocal) {
-            this.stateManager.setState(stateName, data);
-        }
     }
     destroy(id) {
         console.log(`Removing player ${id} from world`);

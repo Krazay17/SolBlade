@@ -60,8 +60,8 @@ function bindSocketEvents(myPlayerData) {
     socket.on('playerDisconnected', (playerId) => {
         if (netPlayers[playerId]) {
             scene.removePlayer(playerId);
+            delete netPlayers[playerId];
         }
-        delete netPlayers[playerId];
     })
     socket.on('playerPositionUpdate', ({ id, data }) => {
         if (netPlayers[id]) {

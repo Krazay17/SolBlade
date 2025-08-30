@@ -8,10 +8,11 @@ export default class PlayerState {
 
         this.maxGroundSpeed = 8;
         this.groundAccel = 10;
-        this.maxAirSpeed = 8;
-        this.airAccel = 4;
-        this.airFriction = .05;
-        this.friction = 8;
+        this.maxAirSpeed = 6;
+        this.airAccel = 6;
+        this.airFriction = .015;
+        this.friction = 3;
+        this.airStrafe = .015;
 
         this.direction = new Vec3();
         this.current3d = new Vec3();
@@ -20,10 +21,14 @@ export default class PlayerState {
 
     }
     enter() { }
-    update(dt) { 
-        this.applyFriction(dt, 1);
-    }
+    update(dt) { }
     exit() { }
+    canEnter() {
+        return true;
+    }
+    canExit() {
+        return true;
+    }
 
     setAnimState(state) {
         this.actor?.setAnimState?.(state);
@@ -61,55 +66,24 @@ export default class PlayerState {
         this.body.velocity.y = oldY;
     }
 
-    runBoost(dt, wishdir, accel = 10) {
-        const vel = this.body.velocity.clone();
-        vel.y = 0; // ignore vertical movement
-        const normVel = vel.clone();
-        normVel.normalize();
-
-        const speed = vel.length();
-
-        if (speed < 0.0001) {
-            this.manager.runBoost = 0;
-            return;
-        }
-        if (speed < this.manager.lastVelocity) {
-            this.manager.runBoost = Math.max(this.manager.runBoost - accel / 2 * dt, 0);
-        }
-        const alignment = Math.abs(wishdir.dot(normVel));
-        this.manager.runBoost *= alignment;
-        // Apply run boost
-        this.manager.runBoost = Math.min(this.manager.runBoost + accel * dt, this.manager.maxRunBoost);
-        this.actor.runBoost = this.manager.runBoost;
-        this.manager.lastVelocity = speed;
-    }
-
-    runBoostFriction(dt, decel) {
-        this.manager.runBoost = Math.max(this.manager.runBoost - decel * dt, 0);
-    }
-
-
     accelerate(wishdir, wishspeed, accel, dt) {
+        const scaledWishSpeed = wishspeed + this.actor.runBooster.getBoost();
         const currentVelocity = this.body.velocity.clone(); // speed in that direction
         currentVelocity.y = 0;
         const currentHorizSpeed = currentVelocity.dot(wishdir);
 
-        const addSpeed = (wishspeed - currentHorizSpeed);
+        const addSpeed = (scaledWishSpeed - currentHorizSpeed);
         if (addSpeed <= 0) return;
 
-        this.runBoost(dt, wishdir);
-        this.tapStrafe(wishdir, 0.01);
+        this.tapStrafe(wishdir, this.airStrafe);
 
-        const accelSpeed = Math.min(accel * wishspeed * dt, addSpeed);
+        const accelSpeed = Math.min(accel * scaledWishSpeed * dt, addSpeed);
         this.body.velocity.x += wishdir.x * accelSpeed;
         this.body.velocity.z += wishdir.z * accelSpeed;
-
-        const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
     }
 
     applyFriction(dt, friction = this.friction) {
         const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
-        this.runBoostFriction(dt, 5);
         if (speed < 0.0001) return;
 
         const drop = speed * friction * dt;
@@ -131,7 +105,7 @@ export default class PlayerState {
         const wishspeed = this.maxGroundSpeed;
 
         // 3. Accelerate
-        this.accelerate(wishdir, wishspeed + this.actor.runBoost, this.groundAccel, dt);
+        this.accelerate(wishdir, wishspeed, this.groundAccel, dt);
     }
 
     airMove(dt) {
@@ -141,7 +115,7 @@ export default class PlayerState {
 
         const wishspeed = this.maxAirSpeed;
 
-        this.accelerate(wishdir, wishspeed + this.actor.runBoost, this.airAccel, dt);
+        this.accelerate(wishdir, wishspeed, this.airAccel, dt);
     }
 
     getInputDirection(z = 0) {

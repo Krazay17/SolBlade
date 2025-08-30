@@ -1,13 +1,13 @@
 import PlayerState from "./_PlayerState";
 
 export default class AttackState extends PlayerState {
-    constructor(actor, manager, options = { accel: 400, maxSpeed: 2 }) {
+    constructor(actor, manager, options = {}) {
         super(actor, manager, options);
     }
     enter() {
         this.timer = performance.now() + 610;
         this.airFriction = 6;
-        this.actor.animator.setAnimState('attack');
+        this.actor.animator?.setAnimState('attack');
     }
     update(dt) {
         this.airMove(dt);

@@ -1,4 +1,3 @@
-import RunBoost from '../RunBoost.js';
 import * as States from './index.js';
 
 export default class StateManager {
@@ -14,37 +13,35 @@ export default class StateManager {
             dash: new States.DashState(actor, this),
             emote: new States.EmoteState(actor, this),
         };
-        this.runBooster = new RunBoost(actor);
         this.activeState = this.states.idle;
         this.actionState = null;
         this.currentStateName = 'idle';
-        this.lastVelocity;
-        this.runBoost = 0;
-        this.maxRunBoost = 5000;
     }
 
     update(dt, time) {
         this.activeState?.update(dt, time);
         this.actionState?.update(dt, time);
-        this.runBooster?.update(dt, this.currentStateName);
     }
 
     setState(state, enterParams) {
-        this.currentStateName = state;
-        let newState = state;
-        const floor = this.actor.floorTrace();
-        if (state === 'idle' && !floor) {
-            newState = 'fall';
+        if (this.currentStateName === state && this.activeState) return;
+        if (!this.states[state]?.canEnter(enterParams)) return;
+        if (!this.activeState?.canExit(enterParams)) return;
 
-        }
+        let newState = state;
         if (this.states[newState]) {
             this.activeState?.exit();
             this.activeState = this.states[newState];
             this.activeState?.enter(enterParams);
+            this.currentStateName = newState;
+            console.log(newState);
         }
     }
 
     setActionState(state, enterParams) {
+        if (!this.states[state]?.canEnter(enterParams)) return;
+        if (!this.actionState?.canExit(enterParams)) return;
+
         if (this.states[state]) {
             this.actionState?.exit();
             this.actionState = this.states[state];
@@ -60,17 +57,6 @@ export default class StateManager {
         this.actionState = null;
     }
 
-    tryDash() {
-        if (this.states.dash.lastTime > performance.now()) return false;
-        this.states.dash.lastTime = performance.now() + this.states.dash.cd;
-        this.setState('dash');
-        return true;
-    }
-    tryAttack() {
-        if (this.actionState) return false;
-        this.setActionState('attack');
-        return true;
-    }
     tryEmote(emote) {
         if (this.actionState) return false;
         this.setState('emote', emote);

@@ -2,6 +2,7 @@ export default class Health {
     constructor(maxHealth = 100) {
         this.maxHealth = maxHealth;
         this.currentHealth = maxHealth;
+        this.screenFlash = false;
     }
 
     takeDamage(amount) {

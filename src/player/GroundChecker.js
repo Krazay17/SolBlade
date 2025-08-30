@@ -8,6 +8,8 @@ export default class GroundChecker {
         this.playerBody = playerBody;
         this.rayLength = rayLength;
         this.spread = spread;
+        this.lastHit = null;
+        this.lastResult = null;
 
         // Offsets around the player's bottom
         this.offsets = [
@@ -36,16 +38,15 @@ export default class GroundChecker {
                 //only collide with world floor
                 result: result,
                 collisionFilterMask: 1,
+                skipBackfaces: true,
             });
+            this.lastResult = result;
 
             //If any rays hit a walkable floor return true
 
             if (result.hasHit) {
-                return result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0));
-                // // Optional: check the normal to ensure it’s mostly "up"
-                // if (result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)) > 0.3) {
-                //     return true; // standing on a walkable surface
-                // }
+                this.lastHit = result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0));
+                return result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)) > 0.7;
             }
         }
         return false;

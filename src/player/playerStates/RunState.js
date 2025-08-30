@@ -11,43 +11,44 @@ export default class RunState extends PlayerState {
         }
     }
     update(dt) {
-        this.groundMove(dt)
+        this.groundMove(dt);
+
         let strafe = true;
         // Jump
         if (this.input.keys['Space']) {
-            this.actor.setState('jump');
+            this.manager.setState('jump');
             return;
         }
-        if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
+        if (this.input.keys['ShiftLeft']) {
+            this.manager.setState('dash')
             return;
         }
         if (this.input.keys['KeyW']) {
             strafe = false;
-            this.actor.animator.setAnimState('run');
+            this.actor.animator?.setAnimState('run');
         }
         if (this.input.keys['KeyS']) {
             strafe = false;
-            this.actor.animator.setAnimState('run');
+            this.actor.animator?.setAnimState('run');
         }
         if (this.input.keys['KeyA']) {
             if (strafe) {
-                this.actor.animator.setAnimState('strafeLeft');
+                this.actor.animator?.setAnimState('strafeLeft');
             }
         }
         if (this.input.keys['KeyD']) {
             if (strafe) {
-                this.actor.animator.setAnimState('strafeRight');
+                this.actor.animator?.setAnimState('strafeRight');
             }
         }
 
-        if (!this.actor.floorTrace()) {
-            this.actor.setState('fall');
+        if (!this.actor.groundChecker.isGrounded()) {
+            this.manager.setState('fall');
             return;
         }
-
         // If no movement, switch to idle
         if (this.direction.length() === 0) {
-            this.actor.setState('idle');
+            this.manager.setState('idle');
             return;
         }
     }

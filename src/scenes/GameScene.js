@@ -32,6 +32,7 @@ export default class GameScene extends SceneBase {
     document.addEventListener('mousedown', playMusiconFirstClick);
 
     this.debugData = new DebugData(this.player);
+    this.partyFrame = new PartyFrame(this.player);
 
     this.makeSky();
     setNetScene(this, {
@@ -42,7 +43,6 @@ export default class GameScene extends SceneBase {
       health: LocalData.health,
     });
     setupChat();
-    this.partyFrame = new PartyFrame(this.player);
   }
 
   update(dt, time) {

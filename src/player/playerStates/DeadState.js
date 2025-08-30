@@ -5,7 +5,7 @@ export default class DeadState extends PlayerState {
         super(actor, manager, options);
     }
     enter() {
-        this.actor.animator.setAnimState('dead');
+        this.actor.animator?.setAnimState('dead');
         this.body.velocity.set(0, 0, 0);
     }
     update(dt) {

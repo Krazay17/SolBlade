@@ -6,12 +6,13 @@ export default class FallState extends PlayerState {
     }
     update(dt) {
         this.airMove(dt);
-        if (this.input.keys['ShiftLeft'] && this.manager.tryDash()) {
+
+        if (this.actor.groundChecker.isGrounded()) {
+            this.manager.setState('idle');
             return;
         }
-        const floor = this.actor.floorTrace();
-        if (floor > 0.7) {
-            this.actor.setState('idle', floor);
+        if (this.input.keys['ShiftLeft']) {
+            this.manager.setState('dash')
             return;
         }
     }
