@@ -1,6 +1,6 @@
 import * as CANNON from 'cannon';
 import * as THREE from 'three';
-import { FBXLoader, GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
@@ -19,12 +19,13 @@ export default class Player extends THREE.Object3D {
         this.position.set(x, y, z);
         this.camera = camera;
         this.isLocal = isLocal;
-        this.name = 'Player';
+        this.name = LocalData.name || 'Player';
         this.netId = netId;
         game.graphicsWorld.add(this);
 
 
-        this.health = new Health();
+        this.healthComponent = new Health();
+        this.health = this.healthComponent.currentHealth;
         this.height = 1;
         this.radius = .4;
         this.mesh;
@@ -86,8 +87,6 @@ export default class Player extends THREE.Object3D {
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
             this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .25, this.radius);
-            console.log('Player body loaded');
-
 
             const contactMaterial = new CANNON.ContactMaterial(
                 material,
@@ -211,7 +210,7 @@ export default class Player extends THREE.Object3D {
             this.stateManager.setState(stateName, data);
         }
     }
-    removeFromWorld(id) {
+    destroy(id) {
         console.log(`Removing player ${id} from world`);
         if (this.body) {
             this.game.physicsWorld.removeBody(this.body);

@@ -8,7 +8,6 @@ export default class RunState extends PlayerState {
         this.actor.animator?.setAnimState('run');
         const floorValue = 1 - floorDot;
         if (floorDot) {
-            console.log(`Floor: ${1 + floorValue}`);
         }
     }
     update(dt) {

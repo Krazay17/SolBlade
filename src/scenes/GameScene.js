@@ -11,6 +11,7 @@ import Globals from '../utils/Globals.js';
 import SkyBox from '../actors/SkyBox.js';
 import soundPlayer from '../core/SoundPlayer.js';
 import DebugData from '../ui/DebugData.js';
+import PartyFrame from '../ui/PartyFrame.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -41,6 +42,7 @@ export default class GameScene extends SceneBase {
       health: LocalData.health,
     });
     setupChat();
+    this.partyFrame = new PartyFrame(this.player);
   }
 
   update(dt, time) {
@@ -90,7 +92,17 @@ export default class GameScene extends SceneBase {
     this.netPlayers[id] = player;
     player.name = data.name;
     player.currentAnimState = data.state;
+    this.partyFrame.addPlayer(player);
     return player;
+  }
+
+  removePlayer(id) {
+    const player = this.netPlayers[id];
+    if (player) {
+      this.partyFrame.removePlayer(player);
+      player.destroy(id);
+      delete this.netPlayers[id];
+    }
   }
 
   fullNetSync() {

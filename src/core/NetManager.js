@@ -28,7 +28,9 @@ socket.on("connect", () => {
     socket.on("disconnect", () => {
         console.log("disconnected from server");
         if (scene) {
-            Object.values(netPlayers).forEach(p => p.removeFromWorld(p.netId));
+            Object.values(netPlayers).forEach(p => {
+                scene.removePlayer(p.netId);
+            });
         }
     });
     if (scene) {
@@ -57,7 +59,7 @@ function bindSocketEvents(myPlayerData) {
     });
     socket.on('playerDisconnected', (playerId) => {
         if (netPlayers[playerId]) {
-            netPlayers[playerId].removeFromWorld(playerId);
+            scene.removePlayer(playerId);
         }
         delete netPlayers[playerId];
     })
@@ -76,7 +78,9 @@ function bindSocketEvents(myPlayerData) {
     });
     socket.on('chatMessageUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
-            MyEventEmitter.emit('chatMessage', { player: data.player, message: data.message });
+            MyEventEmitter.emit('chatMessage', { player: data.player, message: data.message, color: 'white' });
+        } else if (id === 111) {
+            MyEventEmitter.emit('chatMessage', { player: 'Server', message: data.message, color: 'red' });
         }
     });
     socket.on('playerHealthUpdate', ({ id, data }) => {

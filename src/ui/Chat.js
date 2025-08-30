@@ -85,16 +85,17 @@ export default function setupChat() {
             }
         }
     });
-    MyEventEmitter.on('chatMessage', ({ player, message }) => {
-        addChatMessage(`${player}: ${message}`);
+    MyEventEmitter.on('chatMessage', ({ player, message, color }) => {
+        addChatMessage(`${player}: ${message}`, color);
     });
 }
 
 
-export function addChatMessage(tx) {
+export function addChatMessage(tx, color) {
     const newMessage = document.createElement('div');
     newMessage.className = 'chatMessage';
     newMessage.textContent = tx;
+    newMessage.style.color = color;
     messages.appendChild(newMessage);
     messages.scrollTop = messages.scrollHeight;
 }
