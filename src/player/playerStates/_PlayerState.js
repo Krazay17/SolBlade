@@ -8,7 +8,7 @@ export default class PlayerState {
 
         this.maxGroundSpeed = 8;
         this.groundAccel = 8;
-        this.maxAirSpeed = 6;
+        this.maxAirSpeed = 8;
         this.airAccel = 4;
         this.airFriction = .01;
         this.friction = 3;
