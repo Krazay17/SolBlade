@@ -8,6 +8,7 @@ export default class RunBoost {
         this.boostAmount = 0;
         this.lastVelocity = new Vec3();
         this.lastAlignment = 0;
+        this.lastSpeed = 0;
 
         this.alignmentLax = 0;
         this.maxRunBoost = 5000;
@@ -16,13 +17,14 @@ export default class RunBoost {
 
     getalignment() {
         const currentVelocity = this.body.velocity.clone();
-        if (currentVelocity.almostZero()) {
-            return 0;
-        } else {
-            currentVelocity.y = 0;
-            this.lastSpeed = currentVelocity.length();
-            currentVelocity.normalize();
-        }
+        // if (currentVelocity.almostZero()) {
+        //     return 0;
+        // } else {
+        const currentSpeed = currentVelocity.clone();
+        this.lastSpeed = currentSpeed.length();
+        currentVelocity.y = 0;
+        currentVelocity.normalize();
+        //}
 
         // const alignment = this.actor.getInputDirection().clone();
         // if (alignment.length() !== 0) {
@@ -34,11 +36,13 @@ export default class RunBoost {
         return this.lastAlignment;
     }
     update(dt, state) {
-        if (this.body.velocity.length() < this.lastSpeed) {
+        const currentVelocity = this.body.velocity.clone();
+        currentVelocity.y = 0;
+        if (currentVelocity.length() < this.lastSpeed) {
             this.boostAmount *= 0.98;
         }
         const currentAlignment = this.getalignment();
-        let misAlign = Math.pow(currentAlignment, 25);
+        let misAlign = Math.pow(currentAlignment, 11);
         if (state === 'run') {
             this.boostAmount = Math.min(this.maxRunBoost, this.boostAmount + this.boostAccel * misAlign * dt);
         }

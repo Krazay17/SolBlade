@@ -35,6 +35,7 @@ export default class Player extends THREE.Object3D {
         this.animations = {};
         this.currentAnimState = null;
         this.currentPosition = new CANNON.Vec3(x, y, z);
+        this.meshes = [];
 
         const loader = new GLTFLoader();
         loader.load('/assets/KnightGirl.glb', (gltf) => {
@@ -47,6 +48,7 @@ export default class Player extends THREE.Object3D {
                     child.castShadow = true;
                     child.receiveShadow = true;
                     child.userData.owner = this;
+                    this.meshes.push(child);
                 }
             });
             this.add(model);
@@ -54,6 +56,7 @@ export default class Player extends THREE.Object3D {
             this.animator = new PlayerAnimator(this, this.mesh, gltf.animations);
         });
         this.weapon = new Sword(this);
+
 
         // Local Player setup
         if (isLocal) {
@@ -65,6 +68,7 @@ export default class Player extends THREE.Object3D {
             this.jump = 9;
 
             this.direction = new CANNON.Vec3();
+            this.tempVector = new THREE.Vector3();
 
             this.cameraArm = new THREE.Object3D();
             this.cameraArm.position.set(1, .8, 0);
@@ -161,6 +165,11 @@ export default class Player extends THREE.Object3D {
             this.changeHealth(-10);
             this.input.keys['KeyG'] = false; // Prevent continuous damage
         }
+    }
+
+    getCameraDirection() {
+        this.camera.getWorldDirection(this.tempVector);
+        return this.tempVector;
     }
 
     getInputDirection(z = 0) {

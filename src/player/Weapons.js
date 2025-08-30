@@ -12,6 +12,8 @@ class Weapon {
         this.lastUsed = 0; // timestamp of last use
         this.position = new THREE.Vector3();
         this.direction = new THREE.Vector3();
+        this.tempVector = new THREE.Vector3();
+        this.tempVector2 = new THREE.Vector3();
     }
 
     canUse(currentTime) {
@@ -79,20 +81,32 @@ export class Sword extends Weapon {
             this.actor.stateManager.setState('attack');
             const ray = new THREE.Raycaster(pos, dir, 0, this.range);
             const hitOwners = new Set();
+            let frameCount = 0;
             const rayLoop = () => {
-                const startPos = this.actor.position.clone();
-                const camDir = this.actor.camera.getWorldDirection(new THREE.Vector3());
-                ray.set(startPos, camDir);
-                const result = ray.intersectObjects(Globals.graphicsWorld.children, true);
-                if (result.length > 0) {
+                frameCount++;
+                if (frameCount % 5 !== 0) return;
 
+                const startPos = this.tempVector.copy(this.actor.position);
+                const camDir = this.tempVector2.copy(this.actor.getCameraDirection());
+                let enemyMeshs = [];
+                ray.set(startPos, camDir);
+                Globals.scene.enemieActorsMap.forEach((mesh, actor) => {
+                    if (actor === this.actor) return;
+                    if (actor.position.distanceTo(startPos) < this.range && !enemyMeshs.includes(mesh)) {
+                        enemyMeshs.push(...mesh);
+                    }
+                });
+                if (enemyMeshs.length === 0) return;
+                const result = ray.intersectObjects(enemyMeshs, false);
+                if (result.length > 0) {
                     for (let r of result) {
                         const target = r.object.userData.owner;
                         if (!target || target === this.actor) continue;
 
                         if (!hitOwners.has(target)) {
+                            console.log('Sword hit:', target.name);
                             hitOwners.add(target);
-                            target.takeDamage?.(this.damage, r.point, camDir);
+                            target.healthComponent.takeDamage?.(this.damage, r.point, camDir);
                             target.takeCC?.('knockback', camDir);
                             soundPlayer.playSound('swordHit');
                         }

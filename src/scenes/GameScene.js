@@ -17,11 +17,13 @@ export default class GameScene extends SceneBase {
   onEnter() {
     this.name = 'level1';
     this.spawnLevel();
+    this.enemieActorsMap = new Map();
     this.netPlayers = {};
     let playerPosBuffer = LocalData.position;
     playerPosBuffer.y += 2; //start a bit above ground
     this.player = new Player(this.game, this, playerPosBuffer, true, this.game.camera);
     Globals.player = this.player;
+    this.enemieActorsMap.set(this.player, this.player.meshes);
 
     soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
     function playMusiconFirstClick() {
@@ -93,6 +95,7 @@ export default class GameScene extends SceneBase {
     player.name = data.name;
     player.currentAnimState = data.state;
     this.partyFrame.addPlayer(player);
+    this.enemieActorsMap.set(player, player.meshes);
     return player;
   }
 

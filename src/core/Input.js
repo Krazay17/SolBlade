@@ -19,6 +19,7 @@ export default class Input {
     this.inputBlocked = false;
 
     document.addEventListener('pointerlockchange', () => {
+      console.log('Pointer lock changed');
       this.pointerLocked = (document.pointerLockElement === this.gameElement);
     });
     document.addEventListener('pointerlockerror', () => {
@@ -46,7 +47,9 @@ export default class Input {
     });
     this.domElement.addEventListener('mousedown', (e) => {
       if (this.gameElement === e.target) {
-        this.gameElement.requestPointerLock();
+        if (!this.pointerLocked) {
+          this.gameElement.requestPointerLock();
+        }
       }
       this.mice[e.button] = true;
     });
