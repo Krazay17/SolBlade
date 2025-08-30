@@ -6,35 +6,43 @@ export default class RunBoost {
         this.body = actor.body;
         this.input = actor.input;
         this.boostAmount = 0;
-        this.lastVelocity = new Vec3(0, 0, 0);
+        this.lastVelocity = new Vec3();
         this.lastAlignment = 0;
 
-        this.alignmentLax = .1;
+        this.alignmentLax = 0;
         this.maxRunBoost = 5000;
         this.boostAccel = 5;
     }
 
     getalignment() {
-        const alignment = this.actor.getInputDirection().clone();
-        if (alignment.length() !== 0) {
-            this.lastAlignment = Math.max(0, Math.min(1, alignment.dot(this.lastVelocity) + this.alignmentLax));
+        const currentVelocity = this.body.velocity.clone();
+        if (currentVelocity.almostZero()) {
+            return 0;
+        } else {
+            currentVelocity.y = 0;
+            this.lastSpeed = currentVelocity.length();
+            currentVelocity.normalize();
         }
-        this.lastVelocity = this.body.velocity.clone();
-        this.lastVelocity.y = 0;
-        this.lastVelocity.normalize();
-        return this.lastAlignment || 0;
+
+        // const alignment = this.actor.getInputDirection().clone();
+        // if (alignment.length() !== 0) {
+        //     this.lastAlignment = Math.max(0, Math.min(1, alignment.dot(this.lastVelocity) + this.alignmentLax));
+        // }
+        this.lastAlignment = Math.max(0, Math.min(1, currentVelocity.dot(this.lastVelocity)));
+
+        this.lastVelocity = currentVelocity.clone();
+        return this.lastAlignment;
     }
     update(dt, state) {
-        if(this.body.velocity.length() < 6) {
-            this.boostAmount = Math.max(0, this.boostAmount - this.boostAccel * 20 * dt);
-            return;
+        if (this.body.velocity.length() < this.lastSpeed) {
+            this.boostAmount *= 0.98;
         }
         const currentAlignment = this.getalignment();
+        let misAlign = Math.pow(currentAlignment, 25);
         if (state === 'run') {
-            this.boostAmount = Math.min(this.boostAmount + this.boostAccel * dt * currentAlignment, this.maxRunBoost);
-        } else {
-            this.boostAmount = Math.max(0, (this.boostAmount - (1 - currentAlignment) * this.boostAccel * 10 * dt));
+            this.boostAmount = Math.min(this.maxRunBoost, this.boostAmount + this.boostAccel * misAlign * dt);
         }
+        this.boostAmount *= misAlign;
     }
 
     getBoost() {

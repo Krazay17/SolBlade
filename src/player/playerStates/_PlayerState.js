@@ -7,12 +7,12 @@ export default class PlayerState {
         this.input = actor.input;
 
         this.maxGroundSpeed = 8;
-        this.groundAccel = 10;
+        this.groundAccel = 8;
         this.maxAirSpeed = 6;
-        this.airAccel = 6;
-        this.airFriction = .015;
+        this.airAccel = 4;
+        this.airFriction = .01;
         this.friction = 3;
-        this.airStrafe = .015;
+        this.airStrafe = .01;
 
         this.direction = new Vec3();
         this.current3d = new Vec3();
