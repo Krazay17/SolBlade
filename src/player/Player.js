@@ -1,6 +1,5 @@
 import * as CANNON from 'cannon';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
@@ -23,6 +22,7 @@ export default class Player extends THREE.Object3D {
         this.name = LocalData.name || 'Player';
         this.netId = netId;
         game.graphicsWorld.add(this);
+        this.skinCache = {};
 
 
         this.healthComponent = new Health();
@@ -35,28 +35,11 @@ export default class Player extends THREE.Object3D {
         this.animations = {};
         this.currentAnimState = null;
         this.currentPosition = new CANNON.Vec3(x, y, z);
+        this.bodyMesh = null;
         this.meshes = [];
+        this.setMesh();
 
-        const loader = new GLTFLoader();
-        loader.load('/assets/KnightGirl.glb', (gltf) => {
-            const model = gltf.scene;
-            model.position.set(0, -1, 0);
-            model.scale.set(1, 1, 1);
-            model.rotation.y = Math.PI;
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
-                    child.userData.owner = this;
-                    this.meshes.push(child);
-                }
-            });
-            this.add(model);
-            this.mesh = model;
-            this.animator = new PlayerAnimator(this, this.mesh, gltf.animations);
-        });
-        this.weapon = new Sword(this);
-
+        this.weapon = new Sword(this, scene);
 
         // Local Player setup
         if (isLocal) {
@@ -90,7 +73,7 @@ export default class Player extends THREE.Object3D {
             this.body = body;
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .1, this.radius);
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .4, this.radius);
 
             const contactMaterial = new CANNON.ContactMaterial(
                 material,
@@ -118,6 +101,7 @@ export default class Player extends THREE.Object3D {
             this.targetRot = 0;
         }
     }
+
     update(dt, time) {
         if (!this.mesh) return;
         if (this.isLocal) {
@@ -139,6 +123,59 @@ export default class Player extends THREE.Object3D {
             this.animator.update(dt);
         }
     }
+    async setMesh(skinName = 'KnightGirl') {
+        if (this.meshName === skinName) return;
+        const newMesh = await this.scene.meshManager.createMesh(skinName);
+        this.meshName = skinName;
+        this.remove(this.mesh);
+        this.mesh = newMesh;
+        this.add(this.mesh);
+        const meshBody = newMesh.meshBody;
+        meshBody.userData.owner = this;
+        this.scene.actorMeshes.push(meshBody);
+        this.animator = new PlayerAnimator(this, newMesh, newMesh.animations);
+    }
+    // async setMesh(skinName, file = '/assets/KnightGirl.glb') {
+    //     const { model, animations, bodyMesh } = await this.scene.setMesh(skinName, file, this);
+    //     this.mesh = model;
+    //     this.animator = new PlayerAnimator(this, model, animations);
+    //     this.bodyMesh = bodyMesh;
+    //     this.add(this.mesh);
+    // }
+    // if (this.skinCache[skinName]) {
+    //     if (this.mesh !== this.skinCache[skinName].mesh) {
+    //         this.remove(this.mesh);
+    //         this.mesh = this.skinCache[skinName].mesh;
+    //         this.animator = this.skinCache[skinName].animator;
+    //         this.add(this.mesh);
+    //     }
+    //     return;
+    // } else {
+    //     this.scene.glbLoader.load(file, (gltf) => {
+    //         const model = gltf.scene;
+    //         model.position.set(0, -1, 0);
+    //         model.scale.set(1, 1, 1);
+    //         model.rotation.y = Math.PI;
+    //         model.traverse((child) => {
+    //             if (child.isMesh) {
+    //                 child.castShadow = true;
+    //                 child.receiveShadow = true;
+    //                 child.userData.owner = this;
+    //                 if (child.name.includes('BodyMesh')) {
+    //                     this.bodyMesh = child;
+    //                 }
+    //             }
+    //         });
+    //         if (this.mesh) this.remove(this.mesh);
+    //         this.add(model);
+    //         this.mesh = model;
+    //         this.animator = new PlayerAnimator(this, this.mesh, gltf.animations);
+    //         this.skinCache[skinName] = {
+    //             mesh: this.mesh,
+    //             animator: this.animator
+    //         };
+    //     });
+    // }
     handleInput(dt) {
         if (!this.input) return;
         // Rotate player
@@ -158,6 +195,9 @@ export default class Player extends THREE.Object3D {
         }
         if (this.input.keys['Digit1']) {
             this.stateManager.tryEmote('rumbaDancing');
+        }
+        if (this.input.keys['Digit2']) {
+            this.stateManager.tryEmote('twerk');
         }
 
         // Damage test

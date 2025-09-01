@@ -9,17 +9,17 @@ export default class PlayerState {
         this.maxGroundSpeed = 8;
         this.groundAccel = 8;
         this.maxAirSpeed = 8;
-        this.airAccel = 4;
-        this.airFriction = .01;
-        this.friction = 3;
+        this.airAccel = 3;
+        this.airFriction = .001;
+        this.friction = 0;
         this.airStrafe = .01;
 
         this.direction = new Vec3();
         this.current3d = new Vec3();
         this.tempVec = new Vec3();
         Object.assign(this, options);
-
     }
+
     enter() { }
     update(dt) { }
     exit() { }

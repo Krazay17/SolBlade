@@ -4,11 +4,8 @@ export default class RunState extends PlayerState {
     constructor(actor, manager, options = {}) {
         super(actor, manager, options);
     }
-    enter(floorDot) {
+    enter() {
         this.actor.animator?.setAnimState('run');
-        const floorValue = 1 - floorDot;
-        if (floorDot) {
-        }
     }
     update(dt) {
         this.groundMove(dt);

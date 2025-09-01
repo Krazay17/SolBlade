@@ -18,6 +18,13 @@ export default class PlayerAnimator {
     this.setAnimState(this.actor.isLocal ? 'idle' : this.actor.currentAnimState);
   }
 
+  destroy() {
+    this.mixer.stopAllAction();
+    this.actions = {};
+    this.currentAction = null;
+    this.mixer = null;
+  }
+
   setAnimState(state) {
     if (this.stateName === state) return;
     this.stateName = state;
@@ -47,7 +54,7 @@ export default class PlayerAnimator {
         animName = "FallLoop";
         break;
       case "attack":
-        animName = "AttackCombo";
+        animName = "Attack";
         seek = 0.15;
         break;
       case "knockBack":
@@ -55,6 +62,9 @@ export default class PlayerAnimator {
         break;
       case "rumbaDancing":
         animName = "RumbaDancing";
+        break;
+      case "twerk":
+        animName = "Twerk";
         break;
       default:
         console.warn(`No animation state found for: ${state}`);

@@ -12,24 +12,15 @@ export default class RunBoost {
 
         this.alignmentLax = 0;
         this.maxRunBoost = 5000;
-        this.boostAccel = 5;
+        this.boostAccel = 10;
     }
-
     getalignment() {
         const currentVelocity = this.body.velocity.clone();
-        // if (currentVelocity.almostZero()) {
-        //     return 0;
-        // } else {
-        const currentSpeed = currentVelocity.clone();
-        this.lastSpeed = currentSpeed.length();
         currentVelocity.y = 0;
         currentVelocity.normalize();
-        //}
 
-        // const alignment = this.actor.getInputDirection().clone();
-        // if (alignment.length() !== 0) {
-        //     this.lastAlignment = Math.max(0, Math.min(1, alignment.dot(this.lastVelocity) + this.alignmentLax));
-        // }
+        //const alignment = this.actor.getInputDirection().clone();
+
         this.lastAlignment = Math.max(0, Math.min(1, currentVelocity.dot(this.lastVelocity)));
 
         this.lastVelocity = currentVelocity.clone();
@@ -38,6 +29,7 @@ export default class RunBoost {
     update(dt, state) {
         const currentVelocity = this.body.velocity.clone();
         currentVelocity.y = 0;
+        currentVelocity.normalize();
         if (currentVelocity.length() < this.lastSpeed) {
             this.boostAmount *= 0.98;
         }
@@ -47,6 +39,12 @@ export default class RunBoost {
             this.boostAmount = Math.min(this.maxRunBoost, this.boostAmount + this.boostAccel * misAlign * dt);
         }
         this.boostAmount *= misAlign;
+
+        this.lastSpeed = currentVelocity.length();
+    }
+
+    setBoost(amount) {
+        this.boostAmount = amount;
     }
 
     getBoost() {

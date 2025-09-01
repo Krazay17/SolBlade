@@ -19,7 +19,6 @@ export default class Input {
     this.inputBlocked = false;
 
     document.addEventListener('pointerlockchange', () => {
-      console.log('Pointer lock changed');
       this.pointerLocked = (document.pointerLockElement === this.gameElement);
     });
     document.addEventListener('pointerlockerror', () => {

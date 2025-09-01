@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon';
 import SceneBase from './_SceneBase.js';
 import Player from '../player/Player.js';
-import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader, SkeletonUtils } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager.js';
 import { setNetScene } from '../core/NetManager.js';
 import LocalData from '../core/LocalData.js';
@@ -12,18 +12,22 @@ import SkyBox from '../actors/SkyBox.js';
 import soundPlayer from '../core/SoundPlayer.js';
 import DebugData from '../ui/DebugData.js';
 import PartyFrame from '../ui/PartyFrame.js';
+import PlayerAnimator from '../player/PlayerAnimator.js';
+import MeshManager from '../core/MeshManager.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
     this.name = 'level1';
     this.spawnLevel();
-    this.enemieActorsMap = new Map();
     this.netPlayers = {};
     let playerPosBuffer = LocalData.position;
     playerPosBuffer.y += 2; //start a bit above ground
+
+    this.meshManager = new MeshManager();
+    this.actorMeshes = [];
+
     this.player = new Player(this.game, this, playerPosBuffer, true, this.game.camera);
     Globals.player = this.player;
-    this.enemieActorsMap.set(this.player, this.player.meshes);
 
     soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
     function playMusiconFirstClick() {
@@ -50,7 +54,7 @@ export default class GameScene extends SceneBase {
   update(dt, time) {
     if (this.player && this.levelLoaded) {
       this.player.update(dt, time);
-      if (this.player.body.position.y < -50) {
+      if (this.player.body.position.y < -100) {
         this.player.body.position.set(0, 5, 0);
         this.player.body.velocity.set(0, 0, 0);
       }
@@ -95,7 +99,6 @@ export default class GameScene extends SceneBase {
     player.name = data.name;
     player.currentAnimState = data.state;
     this.partyFrame.addPlayer(player);
-    this.enemieActorsMap.set(player, player.meshes);
     return player;
   }
 

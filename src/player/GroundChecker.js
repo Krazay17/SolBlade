@@ -25,6 +25,13 @@ export default class GroundChecker {
         ];
     }
 
+    floorDot() {
+        if (this.lastHit) {
+            return this.lastHit;
+        }
+        return 0;
+    }
+
     isGrounded() {
         const origin = this.playerBody.position.clone();
 

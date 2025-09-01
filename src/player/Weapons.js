@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import Globals from '../utils/Globals';
 import MyEventEmitter from '../core/MyEventEmitter';
 import soundPlayer from '../core/SoundPlayer';
+import MeshTrace from '../core/MeshTrace';
 
 class Weapon {
     constructor(name = 'Weapon', damage = 1, range = 10, cooldown = 1) {
@@ -66,58 +67,71 @@ export class Pistol extends Weapon {
 }
 
 export class Sword extends Weapon {
-    constructor(actor) {
+    constructor(actor, scene) {
         super('Sword', 25, 2, .7); // name, damage, range, cooldown
         this.actor = actor;
-        this.scene = actor?.scene;
+        this.scene = scene;
         this.traceDuration = 500; // duration of the sword trace in milliseconds
         soundPlayer.loadSound('swordSwing', '/assets/SwordSwing.wav');
         soundPlayer.loadSound('swordHit', '/assets/SwordHit.wav');
     }
-    use(currentTime, pos, dir) {
+    use(currentTime) {
         if (this.canUse(currentTime)) {
             this.lastUsed = currentTime;
             soundPlayer.playSound('swordSwing');
             this.actor.stateManager.setState('attack');
-            const ray = new THREE.Raycaster(pos, dir, 0, this.range);
-            const hitOwners = new Set();
-            let frameCount = 0;
-            const rayLoop = () => {
-                frameCount++;
-                if (frameCount % 5 !== 0) return;
+            const actors = this.scene.actorMeshes;
+            let hitActors = new Set();
 
-                const startPos = this.tempVector.copy(this.actor.position);
-                const camDir = this.tempVector2.copy(this.actor.getCameraDirection());
-                let enemyMeshs = [];
-                ray.set(startPos, camDir);
-                Globals.scene.enemieActorsMap.forEach((mesh, actor) => {
-                    if (actor === this.actor) return;
-                    if (actor.position.distanceTo(startPos) < this.range && !enemyMeshs.includes(mesh)) {
-                        enemyMeshs.push(...mesh);
-                    }
-                });
-                if (enemyMeshs.length === 0) return;
-                const result = ray.intersectObjects(enemyMeshs, false);
-                if (result.length > 0) {
-                    for (let r of result) {
-                        const target = r.object.userData.owner;
-                        if (!target || target === this.actor) continue;
+            const loop = () => {
+                const startPos = this.actor.position.clone();
+                const camDir = this.tempVector2.copy(this.actor.getCameraDirection()).normalize();
+                for (const mesh of actors) {
+                    const owner = mesh.userData.owner;
+                    const meshPos = owner.position.clone();
+                    const meshDist = meshPos.distanceTo(startPos);
+                    const meshDir = meshPos.clone().sub(startPos).normalize();
 
-                        if (!hitOwners.has(target)) {
-                            console.log('Sword hit:', target.name);
-                            hitOwners.add(target);
-                            target.healthComponent.takeDamage?.(this.damage, r.point, camDir);
-                            target.takeCC?.('knockback', camDir);
-                            soundPlayer.playSound('swordHit');
-                        }
-                    }
+                    if (owner === this.actor) continue;
+                    if (meshDist > this.range) continue;
+                    if (meshDir.dot(camDir) < 0.5) continue;
+                    if (hitActors.has(owner)) continue;
+                    console.log('Hit actor:', owner);
+
+                    hitActors.add(owner);
+                    owner.takeDamage?.(this.damage);
+                    owner.takeCC?.('knockback', camDir);
+                    soundPlayer.playSound('swordHit');
                 }
             }
-            MyEventEmitter.on('postUpdate', rayLoop);
+            MyEventEmitter.on('postUpdate', loop);
             setTimeout(() => {
-                MyEventEmitter.off('postUpdate', rayLoop);
+                MyEventEmitter.off('postUpdate', loop);
             }, this.traceDuration);
         }
-        return false;
     }
+}
+
+function rayLoop(start, dir, length, duration, callback) {
+    let frameCount = 0;
+    let hitActors = new Set();
+    const loop = () => {
+        frameCount++;
+        if (frameCount % 5 !== 0) return;
+
+        const meshTracer = new MeshTrace(this.scene);
+        meshTracer.lineTrace(start, dir, length, (hits) => {
+            for (const hit of hits) {
+                const actor = hit.object.userData.owner;
+                if (actor && actor !== this.actor) {
+                    hitActors.add(actor, hit);
+                    callback(hit);
+                }
+            }
+        });
+    }
+    MyEventEmitter.on('postUpdate', loop);
+    setTimeout(() => {
+        MyEventEmitter.off('postUpdate', loop);
+    }, duration);
 }
