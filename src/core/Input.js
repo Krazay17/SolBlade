@@ -18,6 +18,26 @@ export default class Input {
     this.lockMouse = false;
     this.inputBlocked = false;
 
+    this.actions = {
+      'KeyW': 'moveForward',
+      'KeyS': 'moveBackward',
+      'KeyA': 'moveLeft',
+      'KeyD': 'moveRight',
+      'KeyE': 'dash',
+      'Space': 'jump',
+      'ShiftLeft': 'blade'
+    };
+
+    this.actionStates = {
+      'moveForward': false,
+      'moveBackward': false,
+      'moveLeft': false,
+      'moveRight': false,
+      'dash': false,
+      'jump': false,
+      'blade': false
+    };
+
     document.addEventListener('pointerlockchange', () => {
       this.pointerLocked = (document.pointerLockElement === this.gameElement);
     });
@@ -37,12 +57,16 @@ export default class Input {
     });
     this.domElement.addEventListener('keydown', (e) => {
       if (this.inputBlocked) return;
+      console.log(`Key pressed: ${e.code}`);
       this.keys[e.code] = true;
-      MyEventEmitter.emit('playerMove');
+      const action = this.actions[e.code];
+      if(action) this.actionStates[action] = true;
     });
     this.domElement.addEventListener('keyup', (e) => {
       if (this.inputBlocked) return;
       this.keys[e.code] = false;
+      const action = this.actions[e.code];
+      if(action) this.actionStates[action] = false;
     });
     this.domElement.addEventListener('mousedown', (e) => {
       if (this.gameElement === e.target) {
@@ -76,9 +100,9 @@ export default class Input {
     addButton('KeyUnpressed', 'KeyS', 'Bwd', 2, 2);
     addButton('KeyUnpressed', 'KeyA', 'Left', 2, 1);
     addButton('KeyUnpressed', 'KeyD', 'Right', 2, 3);
-    addButton('KeyUnpressed', 'ShiftLeft', 'Dash', 2, 4, '100px', 'Shift');
+    addButton('KeyUnpressed', 'KeyE', 'Dash', 1, 4);
+    addButton('KeyUnpressed', 'ShiftLeft', 'Blade', 2, 4, '100px', 'Shift');
     addButton('KeyUnpressed', 'Space', 'Jump', 2, 6, '140px');
-    //addButton('KeyUnpressed', 'KeyF', 'Interact', 2, 9);
     addButton('KeyUnpressed', 'KeyB', 'Menu', 2, 10);
     addButton('KeyUnpressed', 'KeyT', 'Pause', 1, 10);
     addButton('KeyUnpressed', 'KeyR', 'Respawn', 1, 9);

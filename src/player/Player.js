@@ -39,7 +39,8 @@ export default class Player extends THREE.Object3D {
         this.meshes = [];
         this.setMesh();
 
-        this.weapon = new Sword(this, scene);
+        this.weaponL = new Pistol(this, scene);
+        this.weaponR = new Sword(this, scene);
 
         // Local Player setup
         if (isLocal) {
@@ -73,7 +74,7 @@ export default class Player extends THREE.Object3D {
             this.body = body;
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .4, this.radius);
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .25, this.radius);
 
             const contactMaterial = new CANNON.ContactMaterial(
                 material,
@@ -104,78 +105,30 @@ export default class Player extends THREE.Object3D {
 
     update(dt, time) {
         if (!this.mesh) return;
+
+        // Local Player
         if (this.isLocal) {
             tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
             tryUpdateState(this.getAnimState());
+            if (this.body) {
+                this.runBooster.update(dt, this.stateManager.currentStateName);
+                if (this.stateManager) this.stateManager.update(dt, time);
+                this.handleInput(dt, time);
+                this.position.copy(this.body.position);
+                LocalData.position = this.position;
+            }
         } else {
-            //Lerp position for remote players
+            // Remote Player
             this.position.lerp(this.targetPos, 25 * dt);
             this.rotation.y += (this.targetRot - this.rotation.y) * 25 * dt;
         }
-        if (this.body) {
-            this.runBooster.update(dt, this.stateManager.currentStateName);
-            if (this.stateManager) this.stateManager.update(dt, time);
-            this.handleInput(dt, time);
-            this.position.copy(this.body.position);
-            LocalData.position = this.position;
-        }
+
+        // Local and Remote Player
         if (this.animator) {
             this.animator.update(dt);
         }
     }
-    async setMesh(skinName = 'KnightGirl') {
-        if (this.meshName === skinName) return;
-        const newMesh = await this.scene.meshManager.createMesh(skinName);
-        this.meshName = skinName;
-        this.remove(this.mesh);
-        this.mesh = newMesh;
-        this.add(this.mesh);
-        const meshBody = newMesh.meshBody;
-        meshBody.userData.owner = this;
-        this.scene.actorMeshes.push(meshBody);
-        this.animator = new PlayerAnimator(this, newMesh, newMesh.animations);
-    }
-    // async setMesh(skinName, file = '/assets/KnightGirl.glb') {
-    //     const { model, animations, bodyMesh } = await this.scene.setMesh(skinName, file, this);
-    //     this.mesh = model;
-    //     this.animator = new PlayerAnimator(this, model, animations);
-    //     this.bodyMesh = bodyMesh;
-    //     this.add(this.mesh);
-    // }
-    // if (this.skinCache[skinName]) {
-    //     if (this.mesh !== this.skinCache[skinName].mesh) {
-    //         this.remove(this.mesh);
-    //         this.mesh = this.skinCache[skinName].mesh;
-    //         this.animator = this.skinCache[skinName].animator;
-    //         this.add(this.mesh);
-    //     }
-    //     return;
-    // } else {
-    //     this.scene.glbLoader.load(file, (gltf) => {
-    //         const model = gltf.scene;
-    //         model.position.set(0, -1, 0);
-    //         model.scale.set(1, 1, 1);
-    //         model.rotation.y = Math.PI;
-    //         model.traverse((child) => {
-    //             if (child.isMesh) {
-    //                 child.castShadow = true;
-    //                 child.receiveShadow = true;
-    //                 child.userData.owner = this;
-    //                 if (child.name.includes('BodyMesh')) {
-    //                     this.bodyMesh = child;
-    //                 }
-    //             }
-    //         });
-    //         if (this.mesh) this.remove(this.mesh);
-    //         this.add(model);
-    //         this.mesh = model;
-    //         this.animator = new PlayerAnimator(this, this.mesh, gltf.animations);
-    //         this.skinCache[skinName] = {
-    //             mesh: this.mesh,
-    //             animator: this.animator
-    //         };
-    //     });
-    // }
+
     handleInput(dt) {
         if (!this.input) return;
         // Rotate player
@@ -184,7 +137,12 @@ export default class Player extends THREE.Object3D {
 
         if (this.input.mice[0] && this.input.pointerLocked) {
             const direction = this.camera.getWorldDirection(new THREE.Vector3());
-            if (this.weapon.use(performance.now(), this.position, direction)) {
+            if (this.weaponL.use(performance.now(), this.position, direction)) {
+            }
+        }
+        if (this.input.mice[2] && this.input.pointerLocked) {
+            const direction = this.camera.getWorldDirection(new THREE.Vector3());
+            if (this.weaponR.use(performance.now(), this.position, direction)) {
             }
         }
         if (this.input.keys['KeyF']) {
@@ -205,6 +163,19 @@ export default class Player extends THREE.Object3D {
             this.changeHealth(-10);
             this.input.keys['KeyG'] = false; // Prevent continuous damage
         }
+    }
+
+    async setMesh(skinName = 'KnightGirl') {
+        if (this.meshName === skinName) return;
+        const newMesh = await this.scene.meshManager.createMesh(skinName);
+        this.meshName = skinName;
+        this.remove(this.mesh);
+        this.mesh = newMesh;
+        this.add(this.mesh);
+        const meshBody = newMesh.meshBody;
+        meshBody.userData.owner = this;
+        this.scene.actorMeshes.push(meshBody);
+        this.animator = new PlayerAnimator(this, newMesh, newMesh.animations);
     }
 
     getCameraDirection() {
@@ -258,14 +229,14 @@ export default class Player extends THREE.Object3D {
     applyHealth({ amount, reason }) {
         switch (reason) {
             case "damage":
-                this.health.takeDamage(amount);
+                this.healthComponent.takeDamage(amount);
                 break;
             case "heal":
-                this.health.heal(amount);
+                this.healthComponent.heal(amount);
                 break;
             default:
                 console.warn(`Unknown health change reason: ${reason}`);
-                this.health.adjust(amount);
+                this.healthComponent.adjust(amount);
         }
     }
     takeCC(type, dir) {
@@ -273,15 +244,20 @@ export default class Player extends THREE.Object3D {
             this.stateManager.setState('stunned');
         }
         if (!this.isLocal) {
-            const cc = { type, x: dir.x, y: dir.y, z: dir.z };
+            const cc = { type, dir };
             tryApplyCC(this, cc);
         }
     }
-    applyCC({ type, x, y, z }) {
-        const dir = new CANNON.Vec3(x, y, z);
+    applyCC({ type, dir }) {
+        this.tempVector.copy(dir);
+        console.log(dir);
         switch (type) {
+            case 'stun':
+                this.stateManager.setState?.('stun', { type, dir: this.tempVector });
+                break;
             case 'knockback':
-                this.stateManager.setState?.('knockback', dir);
+                this.stateManager.setState?.('stun', { type, dir: this.tempVector });
+                this.body.velocity.copy(this.tempVector);
                 break;
             default:
                 console.warn(`Unknown CC type: ${type}`);

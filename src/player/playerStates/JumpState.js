@@ -17,7 +17,7 @@ export default class JumpState extends PlayerState {
             this.manager.setState('idle');
             return;
         }
-        if (this.input.keys['ShiftLeft']) {
+        if (this.input.keys['KeyE']) {
             this.manager.setState('dash')
             return;
         }

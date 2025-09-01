@@ -16,8 +16,12 @@ export default class RunState extends PlayerState {
             this.manager.setState('jump');
             return;
         }
-        if (this.input.keys['ShiftLeft']) {
+        if (this.input.actionStates.dash) {
             this.manager.setState('dash')
+            return;
+        }
+        if (this.input.actionStates.blade) {
+            this.manager.setState('blade');
             return;
         }
         if (this.input.keys['KeyW']) {

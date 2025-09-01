@@ -11,7 +11,7 @@ export default class FallState extends PlayerState {
             this.manager.setState('idle');
             return;
         }
-        if (this.input.keys['ShiftLeft']) {
+        if (this.input.actionStates.dash) {
             this.manager.setState('dash')
             return;
         }

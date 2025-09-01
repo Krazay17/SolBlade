@@ -11,7 +11,7 @@ export default class PlayerState {
         this.maxAirSpeed = 8;
         this.airAccel = 3;
         this.airFriction = .001;
-        this.friction = 0;
+        this.friction = 4;
         this.airStrafe = .01;
 
         this.direction = new Vec3();

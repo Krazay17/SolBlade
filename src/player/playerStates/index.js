@@ -6,4 +6,5 @@ export { default as AttackState } from './AttackState.js';
 export { default as DashState } from './DashState.js';
 export { default as DeadState } from './DeadState.js';
 export { default as EmoteState } from './EmoteState.js';
-export { default as KnockbackState } from './KnockbackState.js';
+export { default as StunState } from './StunState.js';
+export { default as BladeState } from './BladeState.js';

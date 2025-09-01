@@ -25,15 +25,17 @@ export default class PlayerAnimator {
     this.mixer = null;
   }
 
-  setAnimState(state) {
+  setAnimState(state, once = false, callback) {
     if (this.stateName === state) return;
     this.stateName = state;
-    let once = false;
     let seek = 0;
     let animName;
     switch (state) {
       case "idle":
         animName = "Idle";
+        break;
+      case "crouch":
+        animName = "Crouch";
         break;
       case "run":
         animName = "Run";
@@ -57,7 +59,7 @@ export default class PlayerAnimator {
         animName = "Attack";
         seek = 0.15;
         break;
-      case "knockBack":
+      case "knockback":
         animName = "KnockBack";
         break;
       case "rumbaDancing":
@@ -65,6 +67,9 @@ export default class PlayerAnimator {
         break;
       case "twerk":
         animName = "Twerk";
+        break;
+      case "gunshoot":
+        animName = "GunShoot";
         break;
       default:
         console.warn(`No animation state found for: ${state}`);
@@ -79,6 +84,10 @@ export default class PlayerAnimator {
 
     if (once) {
       action.setLoop(THREE.LoopOnce);
+      action.clampWhenFinished = true;
+      // action.addEventListener('finished', () => {
+      //   if (callback) callback();
+      // });
     }
     if (this.currentAction) {
       this.currentAction.crossFadeTo(action, 0.15);

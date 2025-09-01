@@ -26,13 +26,14 @@ export default class GroundChecker {
     }
 
     floorDot() {
-        if (this.lastHit) {
-            return this.lastHit;
+        const result = this.floorTrace();
+        if (result) {
+            return result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0));
         }
         return 0;
     }
 
-    isGrounded() {
+    floorTrace() {
         const origin = this.playerBody.position.clone();
 
         for (let offset of this.offsets) {
@@ -53,10 +54,15 @@ export default class GroundChecker {
 
             if (result.hasHit) {
                 this.lastHit = result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0));
-                return result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)) > 0.7;
+                return result;
             }
         }
         return false;
+    }
+
+    isGrounded() {
+        const result = this.floorTrace();
+        return result ? result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)) > 0.7 : false;
     }
 
     visualDebugTrace() {

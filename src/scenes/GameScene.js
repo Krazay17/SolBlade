@@ -12,8 +12,8 @@ import SkyBox from '../actors/SkyBox.js';
 import soundPlayer from '../core/SoundPlayer.js';
 import DebugData from '../ui/DebugData.js';
 import PartyFrame from '../ui/PartyFrame.js';
-import PlayerAnimator from '../player/PlayerAnimator.js';
 import MeshManager from '../core/MeshManager.js';
+import Crosshair from '../ui/Crosshair.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -25,6 +25,7 @@ export default class GameScene extends SceneBase {
 
     this.meshManager = new MeshManager();
     this.actorMeshes = [];
+    this.crosshair = new Crosshair(this.game.graphicsWorld);
 
     this.player = new Player(this.game, this, playerPosBuffer, true, this.game.camera);
     Globals.player = this.player;

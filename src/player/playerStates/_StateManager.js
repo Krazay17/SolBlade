@@ -9,9 +9,10 @@ export default class StateManager {
             jump: new States.JumpState(actor, this),
             fall: new States.FallState(actor, this),
             attack: new States.AttackState(actor, this),
-            knockback: new States.KnockbackState(actor, this),
+            stun: new States.StunState(actor, this),
             dash: new States.DashState(actor, this),
             emote: new States.EmoteState(actor, this),
+            blade: new States.BladeState(actor, this),
         };
         this.activeState = this.states.idle;
         this.actionState = null;
@@ -24,9 +25,9 @@ export default class StateManager {
     }
 
     setState(state, enterParams) {
-        if (this.currentStateName === state && this.activeState) return;
-        if (!this.states[state]?.canEnter(enterParams)) return;
-        if (!this.activeState?.canExit(enterParams)) return;
+        if (this.currentStateName === state && this.activeState) return false;
+        if (!this.states[state]?.canEnter(enterParams)) return false;
+        if (!this.activeState?.canExit(enterParams)) return false;
 
         let newState = state;
         if (this.states[newState]) {
@@ -35,12 +36,13 @@ export default class StateManager {
             this.activeState?.enter(enterParams);
             this.currentStateName = newState;
             console.log(newState);
+            return true;
         }
     }
 
     setActionState(state, enterParams) {
-        if (!this.states[state]?.canEnter(enterParams)) return;
-        if (!this.actionState?.canExit(enterParams)) return;
+        if (!this.states[state]?.canEnter(enterParams)) return false;
+        if (!this.actionState?.canExit(enterParams)) return false;
 
         if (this.states[state]) {
             this.actionState?.exit();

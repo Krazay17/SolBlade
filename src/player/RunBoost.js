@@ -35,7 +35,7 @@ export default class RunBoost {
         }
         const currentAlignment = this.getalignment();
         let misAlign = Math.pow(currentAlignment, 11);
-        if (state === 'run') {
+        if (state === 'run'|| state === 'blade') {
             this.boostAmount = Math.min(this.maxRunBoost, this.boostAmount + this.boostAccel * misAlign * dt);
         }
         this.boostAmount *= misAlign;
