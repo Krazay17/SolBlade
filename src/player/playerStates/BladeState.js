@@ -1,4 +1,5 @@
 import PlayerState from "./_PlayerState";
+import { Vec3 } from "cannon";
 
 export default class BladeState extends PlayerState {
     constructor(actor, manager, options = {}) {
@@ -10,11 +11,20 @@ export default class BladeState extends PlayerState {
     enter() {
         this.actor.animator?.setAnimState('crouch', true);
 
-        const floorDotHorz = 1 - this.actor.groundChecker.floorDot();
-        this.body.velocity.mult(1 + floorDotHorz, this.body.velocity);
+        //const floorDotHorz = 1 - this.actor.groundChecker.floorDot();
+        //this.body.velocity.mult(1 + floorDotHorz, this.body.velocity);
+        this.tempVec.copy(this.actor.groundChecker.floorNormal());
+        this.tempVec.cross(new Vec3(0, 1, 0), this.tempVec);
+        this.actor.groundChecker.floorNormal().cross(this.tempVec, this.tempVec);
+        console.log(this.tempVec);
+        this.body.velocity.vadd(this.tempVec.scale(this.body.velocity.length()), this.body.velocity);
     }
     update(dt) {
         this.groundMove(dt);
+        this.tempVec.copy(this.actor.groundChecker.floorNormal());
+        this.tempVec.cross(new Vec3(0, 1, 0), this.tempVec);
+        this.actor.groundChecker.floorNormal().cross(this.tempVec, this.tempVec);
+        this.body.velocity.vadd(this.tempVec.scale(20 * dt), this.body.velocity);
 
         if (!this.input.actionStates.blade) {
             this.manager.setState('idle');
@@ -26,7 +36,6 @@ export default class BladeState extends PlayerState {
             this.manager.setState('jump');
             return;
         }
-        console.log(this.actor.groundChecker.floorDot());
 
         if (this.actor.groundChecker.floorDot() < 0.4) {
             this.manager.setState('fall');

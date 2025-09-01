@@ -72,10 +72,10 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 32px;
-    height: 32px;
-    background: url('assets/CrossHair.png') no-repeat center center;
+    width: 48px;
+    height: 48px;
     background-size: contain;
     pointer-events: none;
+    z-index: 1000;
     transform: translate(-50%, -50%);
 }

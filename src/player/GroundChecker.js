@@ -33,6 +33,14 @@ export default class GroundChecker {
         return 0;
     }
 
+    floorNormal() {
+        const result = this.floorTrace();
+        if (result) {
+            return result.hitNormalWorld;
+        }
+        return new CANNON.Vec3(0, 1, 0);
+    }
+
     floorTrace() {
         const origin = this.playerBody.position.clone();
 
@@ -57,7 +65,7 @@ export default class GroundChecker {
                 return result;
             }
         }
-        return false;
+        return null;
     }
 
     isGrounded() {

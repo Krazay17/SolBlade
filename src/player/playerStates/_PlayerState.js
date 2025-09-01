@@ -16,7 +16,7 @@ export default class PlayerState {
 
         this.direction = new Vec3();
         this.current3d = new Vec3();
-        this.tempVec = new Vec3();
+        this.tempVec = new Vec3(0, 0, 0);
         Object.assign(this, options);
     }
 

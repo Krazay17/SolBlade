@@ -52,21 +52,21 @@ export default class Input {
 
   bindings() {
     this.domElement.addEventListener('keypress', (e) => {
+      console.log(`Key pressed: ${e.code}`);
       if (this.inputBlocked) return;
       MyEventEmitter.emit('KeyPressed', e.code);
     });
     this.domElement.addEventListener('keydown', (e) => {
       if (this.inputBlocked) return;
-      console.log(`Key pressed: ${e.code}`);
       this.keys[e.code] = true;
       const action = this.actions[e.code];
-      if(action) this.actionStates[action] = true;
+      if (action) this.actionStates[action] = true;
     });
     this.domElement.addEventListener('keyup', (e) => {
       if (this.inputBlocked) return;
       this.keys[e.code] = false;
       const action = this.actions[e.code];
-      if(action) this.actionStates[action] = false;
+      if (action) this.actionStates[action] = false;
     });
     this.domElement.addEventListener('mousedown', (e) => {
       if (this.gameElement === e.target) {
