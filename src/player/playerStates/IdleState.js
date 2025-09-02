@@ -7,7 +7,7 @@ export default class IdleState extends PlayerState {
     update(dt) {
         this.actor.movement.idleMove(dt);
         
-        if (this.isTryingToMove()) {
+        if (!this.actor.movement.getInputDirection().isZero()) {
             this.manager.setState('run', this.actor.floorTrace());
             return;
         }
@@ -26,7 +26,7 @@ export default class IdleState extends PlayerState {
             return;
         }
 
-        if (!this.actor.floorTrace()) {
+        if (!this.actor.groundChecker.isGrounded()) {
             this.manager.setState('fall');
             return;
         }
@@ -36,8 +36,8 @@ export default class IdleState extends PlayerState {
             this.manager.setState('fall');
             return false;
         }
-        if (this.isTryingToMove()) {
-            this.manager.setState('run');
+        if (!this.actor.movement.getInputDirection().isZero()) {
+            this.manager.setState('run', this.actor.floorTrace());
             return false;
         }
         return true;

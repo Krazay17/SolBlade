@@ -26,7 +26,6 @@ export default class PlayerAnimator {
   }
 
   setAnimState(state, once = false, callback) {
-    if (this.stateName === state) return;
     this.stateName = state;
     let seek = 0;
     let animName;
@@ -95,6 +94,7 @@ export default class PlayerAnimator {
     }
     action.time = seek;
     action.reset().fadeIn(0.1).play();
+    console.log(action)
     this.currentAction = action;
     if (seek) {
       action.time = seek;

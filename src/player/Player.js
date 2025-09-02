@@ -231,6 +231,10 @@ export default class Player extends THREE.Object3D {
         return { rotatedX, rotatedZ };
     }
 
+    setName(newName) {
+        this.name = newName;
+    }
+    
     takeDamage(amount) {
         //Single player take damage
         if (this.isLocal) {

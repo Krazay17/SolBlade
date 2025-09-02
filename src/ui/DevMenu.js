@@ -39,89 +39,89 @@ export default class DevMenu {
         const tapMax = 1;
         this.movementSliders = {
             idleFriction: this.createSlider('Idle Friction', this.groundGrid, this.movementValues.idle.friction, frictionMax,
-                (name, value, label) => {
-                    this.movementValues.idle.friction = lerp(0, frictionMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.idle.friction.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.idle.friction = value;
+                    return this.movementValues.idle.friction;
                 }),
             groundFriction: this.createSlider('Ground Friction', this.groundGrid, this.movementValues.ground.friction, frictionMax,
-                (name, value, label) => {
-                    this.movementValues.ground.friction = lerp(0, frictionMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.ground.friction.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.ground.friction = value;
+                    return this.movementValues.ground.friction;
                 }),
             groundAccel: this.createSlider('Ground Accel', this.groundGrid, this.movementValues.ground.accel, accelMax,
-                (name, value, label) => {
-                    this.movementValues.ground.accel = lerp(0, accelMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.ground.accel.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.ground.accel = value;
+                    return this.movementValues.ground.accel;
                 }),
             groundSpeed: this.createSlider('Ground Speed', this.groundGrid, this.movementValues.ground.speed, speedMax,
-                (name, value, label) => {
-                    this.movementValues.ground.speed = lerp(0, speedMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.ground.speed.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.ground.speed = value;
+                    return this.movementValues.ground.speed;
                 }),
             groundTap: this.createSlider('Ground Tap', this.groundGrid, this.movementValues.ground.tap, tapMax,
-                (name, value, label) => {
-                    this.movementValues.ground.tap = lerp(0, tapMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.ground.tap.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.ground.tap = value;
+                    return this.movementValues.ground.tap;
                 }),
             airFriction: this.createSlider('Air Friction', this.airGrid, this.movementValues.air.friction, frictionMax,
-                (name, value, label) => {
-                    this.movementValues.air.friction = lerp(0, frictionMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.air.friction.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.air.friction = value;
+                    return this.movementValues.air.friction;
                 }),
             airAccel: this.createSlider('Air Accel', this.airGrid, this.movementValues.air.accel, accelMax,
-                (name, value, label) => {
-                    this.movementValues.air.accel = lerp(0, accelMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.air.accel.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.air.accel = value;
+                    return this.movementValues.air.accel;
                 }),
             airSpeed: this.createSlider('Air Speed', this.airGrid, this.movementValues.air.speed, speedMax,
-                (name, value, label) => {
-                    this.movementValues.air.speed = lerp(0, speedMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.air.speed.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.air.speed = value;
+                    return this.movementValues.air.speed;
                 }),
             airTap: this.createSlider('Air Tap', this.airGrid, this.movementValues.air.tap, tapMax,
-                (name, value, label) => {
-                    this.movementValues.air.tap = lerp(0, tapMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.air.tap.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.air.tap = value;
+                    return this.movementValues.air.tap;
                 }),
             bladeFriction: this.createSlider('Blade Friction', this.bladeGrid, this.movementValues.blade.friction, frictionMax,
-                (name, value, label) => {
-                    this.movementValues.blade.friction = lerp(0, frictionMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.blade.friction.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.blade.friction = value;
+                    return this.movementValues.blade.friction;
                 }),
             bladeAccel: this.createSlider('Blade Accel', this.bladeGrid, this.movementValues.blade.accel, accelMax,
-                (name, value, label) => {
-                    this.movementValues.blade.accel = lerp(0, accelMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.blade.accel.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.blade.accel = value;
+                    return this.movementValues.blade.accel;
                 }),
             bladeSpeed: this.createSlider('Blade Speed', this.bladeGrid, this.movementValues.blade.speed, speedMax,
-                (name, value, label) => {
-                    this.movementValues.blade.speed = lerp(0, speedMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.blade.speed.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.blade.speed = value;
+                    return this.movementValues.blade.speed;
                 }),
             bladeTap: this.createSlider('Blade Tap', this.bladeGrid, this.movementValues.blade.tap, tapMax,
-                (name, value, label) => {
-                    this.movementValues.blade.tap = lerp(0, tapMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.blade.tap.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.blade.tap = value;
+                    return this.movementValues.blade.tap;
                 }),
             attackFriction: this.createSlider('Attack Friction', this.attackGrid, this.movementValues.attack.friction, frictionMax,
-                (name, value, label) => {
-                    this.movementValues.attack.friction = lerp(0, frictionMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.attack.friction.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.attack.friction = value;
+                    return this.movementValues.attack.friction;
                 }),
             attackAccel: this.createSlider('Attack Accel', this.attackGrid, this.movementValues.attack.accel, accelMax,
-                (name, value, label) => {
-                    this.movementValues.attack.accel = lerp(0, accelMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.attack.accel.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.attack.accel = value;
+                    return this.movementValues.attack.accel;
                 }),
             attackSpeed: this.createSlider('Attack Speed', this.attackGrid, this.movementValues.attack.speed, speedMax,
-                (name, value, label) => {
-                    this.movementValues.attack.speed = lerp(0, speedMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.attack.speed.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.attack.speed = value;
+                    return this.movementValues.attack.speed;
                 }),
             attackTap: this.createSlider('Attack Tap', this.attackGrid, this.movementValues.attack.tap, tapMax,
-                (name, value, label) => {
-                    this.movementValues.attack.tap = lerp(0, tapMax, value / 100);
-                    label.innerText = `${name}: ${this.movementValues.attack.tap.toFixed(2)}`;
+                (value) => {
+                    this.movementValues.attack.tap = value;
+                    return this.movementValues.attack.tap;
                 }),
 
         };
@@ -142,23 +142,37 @@ export default class DevMenu {
     }
 
     createSlider(name, grid, initialValue, maxValue, callback) {
-        const scaledInitialValue = initialValue / maxValue * 100;
+        const labelGrid = document.createElement('div');
         const label = document.createElement('label');
         label.classList.add('devLabel');
-        label.innerText = `${name}: ${initialValue}`;
+        label.innerText = `${name}: `;
+        const valueDisplay = document.createElement('input');
+        valueDisplay.classList.add('devLabel');
+        valueDisplay.value = `${initialValue}`;
         const slider = document.createElement('input');
         slider.classList.add('devSlider');
         slider.type = 'range';
+        slider.step = '0.01';
         slider.min = 0;
-        slider.max = 100;
-        slider.value = scaledInitialValue;
-        grid.appendChild(label);
+        slider.max = maxValue;
+        slider.value = initialValue;
+        labelGrid.appendChild(label);
+        labelGrid.appendChild(valueDisplay);
+        grid.appendChild(labelGrid);
         grid.appendChild(slider);
 
+        valueDisplay.onchange = () => {
+            const value = parseFloat(valueDisplay.value);
+            if (!isNaN(value) && typeof value === 'number') {
+                slider.value = callback(value);
+            }
+        };
+
         slider.oninput = () => {
-            const value = slider.value;
-            callback(name, value, label);
+            const value = parseFloat(slider.value);
+            valueDisplay.value = callback(value);
         };
         return slider;
     }
+
 }

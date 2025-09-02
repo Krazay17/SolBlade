@@ -37,6 +37,7 @@ export default class StateManager {
             this.activeState = this.states[newState];
             this.activeState?.enter(enterParams);
             this.currentStateName = newState;
+            console.log(newState);
             return true;
         }
     }

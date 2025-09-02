@@ -80,6 +80,7 @@ export default class PlayerMovement {
     }
 
     airMove(dt) {
+        console.log(this.values.air.speed, this.values.air.accel, this.values.air.friction, this.values.air.tap);
         this.applyFriction(dt, this.values.air.friction);
 
         const wishdir = this.getInputDirection();
@@ -164,7 +165,7 @@ export default class PlayerMovement {
         if (this.direction.length() === 0) {
             this.direction.z = z;
         }
-
+        if (this.direction.isZero()) return this.direction;
         const { rotatedX, rotatedZ } = this.rotateInputVector(this.direction);
 
         // Input direction as a vector

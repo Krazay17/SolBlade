@@ -77,6 +77,11 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[id].setAnimState(data.state);
         }
     });
+    socket.on('playerNameUpdate', ({ id, data }) => {
+        if (netPlayers[id]) {
+            netPlayers[id].setName(data.name);
+        }
+    });
     socket.on('chatMessageUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
             MyEventEmitter.emit('chatMessage', { player: data.player, message: data.message, color: 'white' });

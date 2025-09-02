@@ -8,7 +8,7 @@ export default class JumpState extends PlayerState {
         this.actor.movement.jumpStart();
     }
     update(dt) {
-        this.actor.movement.airMove(dt);
+        //this.actor.movement.airMove(dt);
 
         if (this.jumpTimer < performance.now()) {
             this.manager.setState('idle');

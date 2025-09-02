@@ -4,18 +4,22 @@ export default class RunState extends PlayerState {
     constructor(actor, manager, options = {}) {
         super(actor, manager, options);
     }
-    enter() {
-        this.actor.animator?.setAnimState('run');
-    }
     update(dt) {
         this.actor.movement.groundMove(dt);
-
-        let strafe = true;
-        // Jump
+        // If no movement, switch to idle
+        if (!this.actor.groundChecker.isGrounded()) {
+            this.manager.setState('fall');
+            return;
+        }
+        if (this.actor.movement.getInputDirection().isZero()) {
+            this.manager.setState('idle');
+            return;
+        }
         if (this.input.keys['Space']) {
             this.manager.setState('jump');
             return;
         }
+
         if (this.input.actionStates.dash) {
             this.manager.setState('dash')
             return;
@@ -24,6 +28,8 @@ export default class RunState extends PlayerState {
             this.manager.setState('blade');
             return;
         }
+        
+        let strafe = true;
         if (this.input.keys['KeyW']) {
             strafe = false;
             this.actor.animator?.setAnimState('run');
@@ -43,15 +49,6 @@ export default class RunState extends PlayerState {
             }
         }
 
-        if (!this.actor.groundChecker.isGrounded()) {
-            this.manager.setState('fall');
-            return;
-        }
-        // If no movement, switch to idle
-        if (this.actor.movement.direction.length() === 0) {
-            this.manager.setState('idle');
-            return;
-        }
     }
 
 }

@@ -17,7 +17,6 @@ export default class BladeState extends PlayerState {
             console.log(this.enterBoost);
         }
 
-
         //const floorDotHorz = 1 - this.actor.groundChecker.floorDot();
         //this.body.velocity.mult(1 + floorDotHorz, this.body.velocity);
         // this.tempVec.copy(this.actor.groundChecker.floorNormal());
@@ -48,5 +47,20 @@ export default class BladeState extends PlayerState {
             this.manager.setState('dash');
             return;
         }
+        if(this.actor.groundChecker.isGrounded() === false) {
+            if(!this.floorTimer) {
+                this.floorTimer = setTimeout(() => {
+                    this.manager.setState('fall');
+                    this.floorTimer = null;
+                }, 100);
+            }
+        } else {
+            clearTimeout(this.floorTimer);
+            this.floorTimer = null;
+        }
+    }
+    exit() {
+        clearTimeout(this.floorTimer);
+        this.floorTimer = null;
     }
 }

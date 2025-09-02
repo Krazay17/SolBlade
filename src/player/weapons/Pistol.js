@@ -6,7 +6,7 @@ import Globals from '../../utils/Globals.js';
 
 export default class Pistol extends BaseWeapon {
     constructor(actor, scene) {
-        super(actor, 'Pistol', 10, 250, 0.5); // name, damage, range, cooldown
+        super(actor, 'Pistol', 10, 250, .45); // name, damage, range, cooldown
         this.scene = scene;
         soundPlayer.loadSfx('gunshoot', '/assets/GunShoot.wav');
         this.meshTracer = new MeshTrace(this.scene);
@@ -14,7 +14,7 @@ export default class Pistol extends BaseWeapon {
     use(currentTime, pos, dir) {
         if (this.canUse(currentTime) &&
             this.actor.stateManager.setState('attack', {
-                weapon: this, anim: 'gunshoot', duration: 500
+                weapon: this, anim: 'gunshoot', duration: 350
             })) {
             this.lastUsed = currentTime;
             const offSetPos = pos.clone().add(this.tempVector.set(0, .4, 0));
