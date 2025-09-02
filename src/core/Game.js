@@ -7,7 +7,6 @@ import { getMaterial } from './MaterialManager';
 import PlayerInfo from '../ui/PlayerInfo';
 import MyEventEmitter from './MyEventEmitter';
 import Globals from '../utils/Globals';
-import Player from '../player/Player';
 
 export default class Game {
   constructor(canvas) {
@@ -45,6 +44,7 @@ export default class Game {
     );
     this.camera.position.z = 2;
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+
     this.spawnLights();
 
     this.input = new Input(canvas);

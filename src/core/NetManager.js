@@ -50,6 +50,7 @@ function bindSocketEvents(myPlayerData) {
         console.log('Current players:', playerList);
         playerList.forEach(element => {
             if (element.id === socket.id) return;
+            if (netPlayers[element.id]) return;
             netPlayers[element.id] = scene.addPlayer(element.id, element.data);
         });
     });
@@ -80,7 +81,7 @@ function bindSocketEvents(myPlayerData) {
         if (netPlayers[id]) {
             MyEventEmitter.emit('chatMessage', { player: data.player, message: data.message, color: 'white' });
         } else if (id === 111) {
-            MyEventEmitter.emit('chatMessage', { player: 'Server', message: data.message, color: 'red' });
+            MyEventEmitter.emit('chatMessage', { player: 'Server', message: data.message, color: data.color });
         }
     });
     socket.on('playerHealthUpdate', ({ id, data }) => {

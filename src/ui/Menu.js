@@ -59,16 +59,35 @@ export default class Menu {
     }
 
     createAudioSection() {
-        this.volumeSlider = this.createSlider(LocalData.masterVolume * 100);
-        this.volumeSlider.addEventListener('input', (event) => {
+        this.masterVolumeSlider = this.createSlider(LocalData.masterVolume * 100);
+        this.masterVolumeSlider.addEventListener('input', (event) => {
             soundPlayer.setMasterVolume(event.target.value / 100);
             LocalData.masterVolume = event.target.value / 100;
-            this.volumeLabel.innerText = 'Master Volume: ' + LocalData.masterVolume;
+            this.masterVolumeLabel.innerText = 'Master Volume: ' + LocalData.masterVolume;
         });
-        this.volumeLabel = document.createElement('p');
-        this.volumeLabel.innerText = 'Master Volume: ' + LocalData.masterVolume;
+        this.masterVolumeLabel = document.createElement('p');
+        this.masterVolumeLabel.innerText = 'Master Volume: ' + LocalData.masterVolume;
+        this.menuElement.appendChild(this.masterVolumeLabel);
 
-        this.menuElement.appendChild(this.volumeLabel);
+        this.musicVolumeSlider = this.createSlider(LocalData.musicVolume * 100);
+        this.musicVolumeSlider.addEventListener('input', (event) => {
+            soundPlayer.setMusicVolume(event.target.value / 100);
+            LocalData.musicVolume = event.target.value / 100;
+            this.musicVolumeLabel.innerText = 'Music Volume: ' + LocalData.musicVolume;
+        });
+        this.musicVolumeLabel = document.createElement('p');
+        this.musicVolumeLabel.innerText = 'Music Volume: ' + LocalData.musicVolume;
+        this.menuElement.appendChild(this.musicVolumeLabel);
+
+        this.sfxVolumeSlider = this.createSlider(LocalData.sfxVolume * 100);
+        this.sfxVolumeSlider.addEventListener('input', (event) => {
+            soundPlayer.setSfxVolume(event.target.value / 100);
+            LocalData.sfxVolume = event.target.value / 100;
+            this.sfxVolumeLabel.innerText = 'SFX Volume: ' + LocalData.sfxVolume;
+        });
+        this.sfxVolumeLabel = document.createElement('p');
+        this.sfxVolumeLabel.innerText = 'SFX Volume: ' + LocalData.sfxVolume;
+        this.menuElement.appendChild(this.sfxVolumeLabel);
 
         let seekValue = 0;
         this.seekSlider = this.createSlider(0);

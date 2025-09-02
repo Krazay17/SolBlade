@@ -17,6 +17,7 @@ export default class StateManager {
         this.activeState = this.states.idle;
         this.actionState = null;
         this.currentStateName = 'idle';
+        this.lastState = null;
     }
 
     update(dt, time) {
@@ -32,10 +33,10 @@ export default class StateManager {
         let newState = state;
         if (this.states[newState]) {
             this.activeState?.exit();
+            this.lastState = this.currentStateName;
             this.activeState = this.states[newState];
             this.activeState?.enter(enterParams);
             this.currentStateName = newState;
-            console.log(newState);
             return true;
         }
     }

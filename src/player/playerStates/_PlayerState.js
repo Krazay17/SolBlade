@@ -13,6 +13,7 @@ export default class PlayerState {
         this.airFriction = .001;
         this.friction = 4;
         this.airStrafe = .01;
+        this.cooldown = 0;
 
         this.direction = new Vec3();
         this.current3d = new Vec3();

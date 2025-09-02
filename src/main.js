@@ -6,7 +6,7 @@ import Menu from "./ui/Menu";
 import soundPlayer from "./core/SoundPlayer";
 
 LocalData.load();
-soundPlayer.setMasterVolume(LocalData.masterVolume);
+soundPlayer.setInitVolume();
 initSocket();
 const canvas = document.getElementById('webgl');
 const game = new Game(canvas);

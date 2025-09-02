@@ -9,6 +9,8 @@ export default {
     scene: 1,
     position: { x: 0, y: 5, z: 0 },
     masterVolume: 1,
+    musicVolume: 1,
+    sfxVolume: 1,
 
     save() {
         const data = {
@@ -18,6 +20,8 @@ export default {
             scene: this.scene,
             position: this.position,
             masterVolume: this.masterVolume,
+            musicVolume: this.musicVolume,
+            sfxVolume: this.sfxVolume,
         }
         localStorage.setItem('SolBladeSave', JSON.stringify(data));
     },
@@ -35,6 +39,8 @@ export default {
         this.scene = parsed.scene ?? this.scene;
         this.position = parsed.position ?? this.position;
         this.masterVolume = parsed.masterVolume ?? this.masterVolume;
+        this.musicVolume = parsed.musicVolume ?? this.musicVolume;
+        this.sfxVolume = parsed.sfxVolume ?? this.sfxVolume;
         console.log('Loaded local data:', this);
 
     },

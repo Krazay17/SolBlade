@@ -3,13 +3,14 @@ import * as THREE from 'three';
 import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
-import { Pistol, Sword } from './Weapons';
+import { Pistol, Sword } from './weapons/index';
 import PlayerAnimator from './PlayerAnimator';
 import { tryPlayerDamage, socket, tryUpdatePosition, tryUpdateState, tryApplyCC } from '../core/NetManager';
 import GroundChecker from './GroundChecker';
 import Health from './Health';
 import StateManager from './playerStates/_StateManager';
 import RunBoost from './RunBoost';
+import CameraFX from '../core/CameraFX';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, netId) {
@@ -55,12 +56,13 @@ export default class Player extends THREE.Object3D {
             this.tempVector = new THREE.Vector3();
 
             this.cameraArm = new THREE.Object3D();
-            this.cameraArm.position.set(1, .8, 0);
+            this.cameraArm.position.set(1, 1, 0);
             this.add(this.cameraArm);
             this.cameraArm.add(this.camera);
+            CameraFX.init(this.camera);
 
             const material = getMaterial('playerMaterial');
-            const sphere = new CANNON.Sphere(1);
+            const sphere = new CANNON.Sphere(.65);
 
             const body = new CANNON.Body({
                 position: this.currentPosition,
@@ -72,9 +74,15 @@ export default class Player extends THREE.Object3D {
                 collisionFilterMask: -1,
             });
             this.body = body;
+            // this.body.addEventListener('collide', (event) => {
+            //     this.isTouching = true;
+            // });
+            // MyEventEmitter.on('preUpdate', () => {
+            //     this.isTouching = false;
+            // });
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .25, this.radius);
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .3, this.radius);
 
             const contactMaterial = new CANNON.ContactMaterial(
                 material,
@@ -116,6 +124,7 @@ export default class Player extends THREE.Object3D {
                 this.handleInput(dt, time);
                 this.position.copy(this.body.position);
                 LocalData.position = this.position;
+                CameraFX.update(dt);
             }
         } else {
             // Remote Player
@@ -153,6 +162,7 @@ export default class Player extends THREE.Object3D {
         }
         if (this.input.keys['Digit1']) {
             this.stateManager.tryEmote('rumbaDancing');
+            CameraFX.shake(0.02, 125);
         }
         if (this.input.keys['Digit2']) {
             this.stateManager.tryEmote('twerk');

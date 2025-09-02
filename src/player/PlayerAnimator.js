@@ -90,15 +90,26 @@ export default class PlayerAnimator {
       // });
     }
     if (this.currentAction) {
-      this.currentAction.crossFadeTo(action, 0.15);
+      this.currentAction.timeScale = 1;
+      this.currentAction.crossFadeTo(action, 0.2);
     }
     action.time = seek;
-    action.reset().fadeIn(0.15).play();
+    action.reset().fadeIn(0.1).play();
     this.currentAction = action;
     if (seek) {
       action.time = seek;
     }
 
+  }
+
+  hitFreeze(duration = 170) {
+    if (this.currentAction) {
+      this.currentAction.timeScale = 0.025;
+      console.log("Hit freeze activated", this.currentAction.timeScale);
+      setTimeout(() => {
+        this.currentAction.timeScale = 1;
+      }, duration);
+    }
   }
 
 

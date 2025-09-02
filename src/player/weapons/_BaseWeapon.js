@@ -1,0 +1,141 @@
+import * as THREE from 'three';
+import MyEventEmitter from '../../core/MyEventEmitter';
+import MeshTrace from '../../core/MeshTrace';
+import Globals from '../../utils/Globals';
+
+export default class BaseWeapon {
+    constructor(actor, name = 'Weapon', damage = 1, range = 10, cooldown = 1) {
+        this.actor = actor;
+        this.name = name;
+        this.damage = damage;
+        this.range = range;
+        this.cooldown = cooldown; // in seconds
+        this.lastUsed = 0; // timestamp of last use
+        this.position = new THREE.Vector3();
+        this.direction = new THREE.Vector3();
+        this.tempVector = new THREE.Vector3();
+        this.tempVector2 = new THREE.Vector3();
+        this.hitActors = new Set();
+    }
+
+    canUse(currentTime) {
+        const otherWeapon = this.actor.weaponR === this ? this.actor.weaponL : this.actor.weaponR;
+        return (currentTime - this.lastUsed) >= this.cooldown * 1000;
+    }
+
+    use(currentTime) {
+        if (this.canUse(currentTime)) {
+            this.lastUsed = currentTime;
+            return true; // Weapon used successfully
+        }
+        return false; // Weapon is on cooldown
+    }
+
+    update() { }
+
+    meleeTrace(start, direction, length = 5, dot = 0.5, callback) {
+        const actors = this.scene.actorMeshes;
+        const startPos = start.clone();
+        const camDir = direction.clone().normalize();
+        for (const mesh of actors) {
+            const target = mesh.userData.owner;
+            const meshPos = target.position.clone();
+            const meshDist = meshPos.distanceTo(startPos);
+            const meshDir = meshPos.clone().sub(startPos).normalize();
+
+            if (target === this.actor) continue;
+            if (this.hitActors.has(target)) continue;
+            if (meshDist > length) continue;
+            if (meshDir.dot(camDir) < dot) continue;
+
+            this.hitActors.add(target);
+            callback?.(target, camDir);
+        }
+    }
+
+    rayLoop(start, dir, length, duration, callback) {
+        let frameCount = 0;
+        let hitActors = new Set();
+        const loop = () => {
+            frameCount++;
+            if (frameCount % 5 !== 0) return;
+
+            const meshTracer = new MeshTrace(this.scene);
+            meshTracer.lineTrace(start, dir, length, (hits) => {
+                for (const hit of hits) {
+                    const actor = hit.object.userData.owner;
+                    if (actor && actor !== this.actor) {
+                        hitActors.add(actor, hit);
+                        callback(hit);
+                    }
+                }
+            });
+        }
+        MyEventEmitter.on('postUpdate', loop);
+        setTimeout(() => {
+            MyEventEmitter.off('postUpdate', loop);
+        }, duration);
+    }
+
+    spawnHitParticles(position, count = 8) {
+    for (let i = 0; i < count; i++) {
+        const geometry = new THREE.SphereGeometry(0.07, 8, 8);
+        const material = new THREE.MeshBasicMaterial({ color: 0xff2222, emissive: 0xff2222 });
+        const orb = new THREE.Mesh(geometry, material);
+
+        // Random direction and speed
+        const dir = new THREE.Vector3(
+            (Math.random() - 0.5) * 2,
+            Math.random() * 1.5,
+            (Math.random() - 0.5) * 2
+        ).normalize().multiplyScalar(0.5 + Math.random() * 0.7);
+
+        orb.position.copy(position);
+
+        Globals.graphicsWorld.add(orb);
+
+        // Animate and remove after 0.4s
+        const start = performance.now();
+        function animate() {
+            const elapsed = performance.now() - start;
+            orb.position.add(dir.clone().multiplyScalar(0.04));
+            orb.material.opacity = Math.max(0, 1 - elapsed / 400);
+            orb.material.transparent = true;
+            if (elapsed < 400) {
+                requestAnimationFrame(animate);
+            } else {
+                Globals.graphicsWorld.remove(orb);
+                orb.geometry.dispose();
+                orb.material.dispose();
+            }
+        }
+        animate = animate.bind(this);
+        animate();
+    }
+}
+}
+
+// const loop = () => {
+//     const startPos = this.actor.position.clone();
+//     const camDir = this.tempVector2.copy(this.actor.getCameraDirection()).normalize();
+//     for (const mesh of actors) {
+//         const owner = mesh.userData.owner;
+//         const meshPos = owner.position.clone();
+//         const meshDist = meshPos.distanceTo(startPos);
+//         const meshDir = meshPos.clone().sub(startPos).normalize();
+
+//         if (owner === this.actor) continue;
+//         if (meshDist > this.range) continue;
+//         if (meshDir.dot(camDir) < 0.5) continue;
+//         if (hitActors.has(owner)) continue;
+
+//         hitActors.add(owner);
+//         owner.takeDamage?.(this.damage);
+//         owner.takeCC?.('knockback', camDir);
+//         soundPlayer.playSound('swordHit');
+//     }
+// }
+// MyEventEmitter.on('postUpdate', loop);
+// setTimeout(() => {
+//     MyEventEmitter.off('postUpdate', loop);
+// }, this.traceDuration);

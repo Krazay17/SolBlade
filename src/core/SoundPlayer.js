@@ -5,7 +5,10 @@ class SoundPlayer {
     constructor() {
         this.sounds = new Map();
         this.masterVolume = LocalData.masterVolume;
+        this.musicVolume = LocalData.musicVolume;
+        this.sfxVolume = LocalData.sfxVolume;
         this.musics = [];
+        this.sfx = [];
         this.musicPlaying = null;
     }
 
@@ -15,6 +18,10 @@ class SoundPlayer {
         return audio;
     }
 
+    loadSfx(name, url) {
+        this.sfx.push(this.loadSound(name, url));
+    }
+
     loadMusic(name, url) {
         this.musics.push(this.loadSound(name, url));
     }
@@ -22,7 +29,7 @@ class SoundPlayer {
     playMusic(track = 0) {
         this.musicPlaying = this.musics[track];
         if (this.musicPlaying) {
-            this.musicPlaying.volume = this.masterVolume;
+            this.musicPlaying.volume = this.musicVolume * this.masterVolume;
             this.musicPlaying.currentTime = 0;
             this.musicPlaying.play();
             this.musicPlaying.onended = () => {
@@ -55,7 +62,7 @@ class SoundPlayer {
         const sound = this.sounds.get(name);
         if (sound) {
             sound.currentTime = 0;
-            sound.volume = this.masterVolume;
+            sound.volume = this.sfxVolume * this.masterVolume;
             sound.play();
         }
     }
@@ -63,8 +70,28 @@ class SoundPlayer {
     setMasterVolume(value) {
         this.masterVolume = value;
         this.sounds.forEach((sound) => {
-            sound.volume = value;
+            sound.volume = sound.volume * this.masterVolume;
         });
+    }
+
+    setMusicVolume(value) {
+        this.musicVolume = value;
+        if (this.musicPlaying) {
+            this.musicPlaying.volume = this.musicVolume * this.masterVolume;
+        }
+    }
+
+    setSfxVolume(value) {
+        this.sfxVolume = value;
+        this.sfx.forEach((sound) => {
+            sound.volume = sound.volume * this.sfxVolume;
+        });
+    }
+
+    setInitVolume() {
+        this.setMasterVolume(LocalData.masterVolume);
+        this.setMusicVolume(LocalData.musicVolume);
+        this.setSfxVolume(LocalData.sfxVolume);
     }
 
     getCurrentTrackName() {

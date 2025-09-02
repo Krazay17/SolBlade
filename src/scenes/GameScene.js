@@ -14,6 +14,7 @@ import DebugData from '../ui/DebugData.js';
 import PartyFrame from '../ui/PartyFrame.js';
 import MeshManager from '../core/MeshManager.js';
 import Crosshair from '../ui/Crosshair.js';
+import CameraFX from '../core/CameraFX.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -55,6 +56,8 @@ export default class GameScene extends SceneBase {
   update(dt, time) {
     if (this.player && this.levelLoaded) {
       this.player.update(dt, time);
+
+      // KillFloor
       if (this.player.body.position.y < -100) {
         this.player.body.position.set(0, 5, 0);
         this.player.body.velocity.set(0, 0, 0);
