@@ -69,9 +69,12 @@ class SoundPlayer {
 
     setMasterVolume(value) {
         this.masterVolume = value;
-        this.sounds.forEach((sound) => {
-            sound.volume = sound.volume * this.masterVolume;
+        this.sfx.forEach((sound) => {
+            sound.volume = this.sfxVolume * this.masterVolume;
         });
+        if (this.musicPlaying) {
+            this.musicPlaying.volume = this.musicVolume * this.masterVolume;
+        }
     }
 
     setMusicVolume(value) {

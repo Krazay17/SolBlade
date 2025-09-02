@@ -26,7 +26,7 @@ export default class StateManager {
     }
 
     setState(state, enterParams) {
-        if (this.currentStateName === state && this.activeState) return false;
+        if ((this.currentStateName === state && !this.activeState.reEnter) && this.activeState) return false;
         if (!this.states[state]?.canEnter(enterParams)) return false;
         if (!this.activeState?.canExit(enterParams)) return false;
 
@@ -52,6 +52,12 @@ export default class StateManager {
         } else {
             this.actionState?.exit();
             this.actionState = null;
+        }
+    }
+
+    setStateProp(state, prop, value) {
+        if (this.states[state]) {
+            this.states[state][prop] = value;
         }
     }
 

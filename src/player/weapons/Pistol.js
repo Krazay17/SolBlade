@@ -48,7 +48,6 @@ export default class Pistol extends BaseWeapon {
                     }
                 }
             });
-
             return true;
         }
         return false;

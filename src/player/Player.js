@@ -11,6 +11,8 @@ import Health from './Health';
 import StateManager from './playerStates/_StateManager';
 import RunBoost from './RunBoost';
 import CameraFX from '../core/CameraFX';
+import PlayerMovement from './PlayerMovement';
+import DevMenu from '../ui/DevMenu';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, netId) {
@@ -94,9 +96,12 @@ export default class Player extends THREE.Object3D {
                     id: 'playerGroundContact',
                 });
             this.game.physicsWorld.addContactMaterial(contactMaterial);
-            this.stateManager = new StateManager(this);
-            this.runBooster = new RunBoost(this);
 
+            this.movement = new PlayerMovement(this);
+            this.runBooster = new RunBoost(this);
+            this.stateManager = new StateManager(this);
+
+            this.devMenu = new DevMenu(this, this.movement);
 
             MyEventEmitter.on('KeyPressed', (key) => {
                 if (key === 'KeyR') {

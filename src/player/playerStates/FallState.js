@@ -5,7 +5,7 @@ export default class FallState extends PlayerState {
         this.actor.animator?.setAnimState('fall');
     }
     update(dt) {
-        this.airMove(dt);
+        this.actor.movement.airMove(dt);
 
         if (this.actor.groundChecker.isGrounded()) {
             this.manager.setState('idle');

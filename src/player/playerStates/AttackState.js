@@ -5,22 +5,21 @@ export default class AttackState extends PlayerState {
         super(actor, manager, options);
         this.weapon = null;
     }
-    enter({ weapon, anim, damageDelay = 0 }) {
+    enter({ weapon, anim, damageDelay = 0, duration = 610 }) {
         this.weapon = weapon;
-        this.timer = performance.now() + 610;
+        this.exitTimer = performance.now() + duration;
         this.airFriction = 6;
         this.actor.animator?.setAnimState(anim);
         this.damageDelay = performance.now() + damageDelay;
     }
     update(dt) {
-        this.airMove(dt);
-        this.body.velocity.y *= .98;
+        this.actor.movement.attackMove(dt);
 
         if (performance.now() > this.damageDelay) {
             this.weapon.update();
         }
 
-        if (performance.now() > this.timer) {
+        if (performance.now() > this.exitTimer) {
             this.actor.stateManager.setState('idle');
         }
     }

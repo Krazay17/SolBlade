@@ -8,7 +8,7 @@ export default class RunState extends PlayerState {
         this.actor.animator?.setAnimState('run');
     }
     update(dt) {
-        this.groundMove(dt);
+        this.actor.movement.groundMove(dt);
 
         let strafe = true;
         // Jump
@@ -48,7 +48,7 @@ export default class RunState extends PlayerState {
             return;
         }
         // If no movement, switch to idle
-        if (this.direction.length() === 0) {
+        if (this.actor.movement.direction.length() === 0) {
             this.manager.setState('idle');
             return;
         }

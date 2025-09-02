@@ -5,7 +5,8 @@ export default class IdleState extends PlayerState {
         this.actor.animator?.setAnimState('idle');
     }
     update(dt) {
-        this.applyFriction(dt, 25);
+        this.actor.movement.idleMove(dt);
+        
         if (this.isTryingToMove()) {
             this.manager.setState('run', this.actor.floorTrace());
             return;

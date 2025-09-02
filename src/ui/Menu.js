@@ -15,8 +15,14 @@ export default class Menu {
         this.menuElement = document.createElement('div');
         this.menuElement.id = 'menu-section';
         this.menuElement.innerHTML = `
-            <h2>Menu</h2>
+            <h2>Menu <button class="close-button">X</button></h2>
         `;
+        document.body.appendChild(this.menuElement);
+        this.open();
+
+        this.menuElement.querySelector('.close-button').addEventListener('click', () => {
+            this.close();
+        });
 
         window.addEventListener('keydown', (event) => {
             if (Globals.input.inputBlocked) return;
@@ -28,6 +34,12 @@ export default class Menu {
                 } else {
                     this.close();
                 }
+            }
+        });
+        window.addEventListener('keydown', (event) => {
+            if (Globals.input.inputBlocked) return;
+            if (event.code === 'KeyM') {
+                document.exitPointerLock();
             }
         });
 
@@ -96,12 +108,12 @@ export default class Menu {
         });
 
         this.seekLabel = document.createElement('p');
-        this.seekLabel.innerText = 'Seek: 0';
+        this.seekLabel.innerText = 'Music Seek: 0';
         this.menuElement.appendChild(this.seekLabel);
         setInterval(() => {
             if (soundPlayer.musicPlaying) {
                 this.seekSlider.value = (soundPlayer.musicPlaying.currentTime / soundPlayer.musicPlaying.duration) * 100;
-                this.seekLabel.innerText = 'Seek: ' + soundPlayer.musicPlaying.currentTime.toFixed(2) + ' / ' + soundPlayer.musicPlaying.duration.toFixed(2);
+                this.seekLabel.innerText = 'Music Seek: ' + soundPlayer.musicPlaying.currentTime.toFixed(2) + ' / ' + soundPlayer.musicPlaying.duration.toFixed(2);
             }
         }, 10);
 
@@ -164,12 +176,12 @@ export default class Menu {
     }
 
     open() {
-        document.body.appendChild(this.menuElement);
+        this.menuElement.style.display = 'block';
         this.isOpen = true;
     }
 
     close() {
-        document.body.removeChild(this.menuElement);
+        this.menuElement.style.display = 'none';
         this.isOpen = false;
     }
 }
