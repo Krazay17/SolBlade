@@ -31,7 +31,7 @@ export default class Player extends THREE.Object3D {
         this.healthComponent = new Health();
         this.health = this.healthComponent.currentHealth;
         this.height = 1;
-        this.radius = .4;
+        this.radius = .3;
         this.mesh;
         this.body = null;
         this.mixer;
@@ -234,7 +234,7 @@ export default class Player extends THREE.Object3D {
     setName(newName) {
         this.name = newName;
     }
-    
+
     takeDamage(amount) {
         //Single player take damage
         if (this.isLocal) {

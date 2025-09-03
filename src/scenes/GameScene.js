@@ -14,7 +14,6 @@ import DebugData from '../ui/DebugData.js';
 import PartyFrame from '../ui/PartyFrame.js';
 import MeshManager from '../core/MeshManager.js';
 import Crosshair from '../ui/Crosshair.js';
-import CameraFX from '../core/CameraFX.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -172,17 +171,46 @@ export default class GameScene extends SceneBase {
 // Helper: Convert Three.js geometry to Cannon Trimesh
 function createTrimesh(geometry) {
   const vertices = geometry.attributes.position.array;
-  let indices = [];
+  let indices;
 
   if (geometry.index) {
     // If the geometry already has an index buffer
-    indices = Array.from(geometry.index.array);
+    indices = geometry.index.array;
   } else {
-    // No index buffer → assume each consecutive 3 vertices is a triangle
+    let indices = [];
     for (let i = 0; i < vertices.length / 3; i++) {
       indices.push(i);
     }
+    indices = new Uint16Array(indices);
   }
 
   return new CANNON.Trimesh(vertices, indices);
+}
+
+// Helper: Convert Three.js geometry to Cannon ConvexPolyhedron
+function createConvexHull(geometry) {
+  const position = geometry.attributes.position;
+  const vertices = [];
+  for (let i = 0; i < position.count; i++) {
+    vertices.push(new CANNON.Vec3(
+      position.getX(i),
+      position.getY(i),
+      position.getZ(i)
+    ));
+  }
+
+  // Faces: each face is an array of vertex indices
+  let faces = [];
+  if (geometry.index) {
+    const indices = geometry.index.array;
+    for (let i = 0; i < indices.length; i += 3) {
+      faces.push([indices[i], indices[i + 1], indices[i + 2]]);
+    }
+  } else {
+    for (let i = 0; i < vertices.length; i += 3) {
+      faces.push([i, i + 1, i + 2]);
+    }
+  }
+
+  return new CANNON.ConvexPolyhedron({ vertices, faces });
 }

@@ -54,7 +54,6 @@ export default class GroundChecker {
                 //only collide with world floor
                 result: result,
                 collisionFilterMask: 1,
-                skipBackfaces: true,
             });
             this.lastResult = result;
 
@@ -70,7 +69,10 @@ export default class GroundChecker {
 
     isGrounded() {
         const result = this.floorTrace();
-        return result ? result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)) > 0.7 : false;
+        if (result) {
+            console.log(result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)));
+        }
+        return result ? Math.abs(result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0))) > 0.6 : false;
     }
 
     visualDebugTrace() {

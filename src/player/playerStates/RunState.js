@@ -6,7 +6,7 @@ export default class RunState extends PlayerState {
     }
     update(dt) {
         this.actor.movement.groundMove(dt);
-        // If no movement, switch to idle
+
         if (!this.actor.groundChecker.isGrounded()) {
             this.manager.setState('fall');
             return;

@@ -16,33 +16,33 @@ export default class PlayerMovement {
         console.log(savedValues);
         this.values = savedValues ?? {
             ground: {
-                friction: 5,
+                friction: 12,
                 accel: 10,
                 speed: 10,
-                tap: .01
+                tap: .2
             },
             air: {
-                friction: 2,
-                accel: 5,
-                speed: 10,
+                friction: 0,
+                accel: 2.5,
+                speed: 4,
                 tap: .01
             },
             blade: {
                 friction: 0.1,
-                accel: 2,
+                accel: 1,
                 speed: 10,
                 tap: .01
             },
             idle: {
-                friction: 5,
+                friction: 14,
                 accel: 10,
                 speed: 10,
                 tap: .01
             },
             attack: {
                 friction: 3,
-                accel: 3,
-                speed: 3,
+                accel: 1,
+                speed: 1,
                 tap: .01
             },
             dash: {
@@ -80,13 +80,16 @@ export default class PlayerMovement {
     }
 
     airMove(dt) {
-        console.log(this.values.air.speed, this.values.air.accel, this.values.air.friction, this.values.air.tap);
         this.applyFriction(dt, this.values.air.friction);
 
         const wishdir = this.getInputDirection();
         if (wishdir.almostZero()) return;
 
         this.accelerate(wishdir, this.values.air.speed, this.values.air.accel, dt, this.values.air.tap);
+    }
+
+    bladeEnter() {
+        this.slopeBoost(this.body.velocity.length());
     }
 
     bladeMove(dt) {
@@ -97,10 +100,14 @@ export default class PlayerMovement {
 
         this.accelerate(wishdir, this.values.blade.speed, this.values.blade.accel, dt, this.values.blade.tap);
 
+        this.slopeBoost(5 * dt);
+    }
+
+    slopeBoost(amnt) {
         this.tempVec.copy(this.actor.groundChecker.floorNormal());
         this.tempVec.cross(this.tempVec2.set(0, 1, 0), this.tempVec);
         this.actor.groundChecker.floorNormal().cross(this.tempVec, this.tempVec);
-        this.body.velocity.vadd(this.tempVec.scale(15 * dt), this.body.velocity);
+        this.body.velocity.vadd(this.tempVec.scale(amnt), this.body.velocity);
     }
 
     dashStart() {

@@ -16,22 +16,9 @@ export default class BladeState extends PlayerState {
             this.body.velocity.mult(this.enterBoost, this.body.velocity);
             console.log(this.enterBoost);
         }
-
-        //const floorDotHorz = 1 - this.actor.groundChecker.floorDot();
-        //this.body.velocity.mult(1 + floorDotHorz, this.body.velocity);
-        // this.tempVec.copy(this.actor.groundChecker.floorNormal());
-        // this.tempVec.cross(new Vec3(0, 1, 0), this.tempVec);
-        // this.actor.groundChecker.floorNormal().cross(this.tempVec, this.tempVec);
-        // console.log(this.tempVec);
-        // this.body.velocity.vadd(this.tempVec.scale(this.body.velocity.length()), this.body.velocity);
     }
     update(dt) {
         this.actor.movement.bladeMove(dt);
-
-        // this.tempVec.copy(this.actor.groundChecker.floorNormal());
-        // this.tempVec.cross(new Vec3(0, 1, 0), this.tempVec);
-        // this.actor.groundChecker.floorNormal().cross(this.tempVec, this.tempVec);
-        // this.body.velocity.vadd(this.tempVec.scale(15 * dt), this.body.velocity);
 
         if (!this.input.actionStates.blade) {
             this.manager.setState('idle');
@@ -39,7 +26,7 @@ export default class BladeState extends PlayerState {
         }
 
         // Jump
-        if (this.input.keys['Space'] && this.actor.groundChecker.isGrounded()) {
+        if (this.input.keys['Space']) {
             this.manager.setState('jump');
             return;
         }
@@ -47,12 +34,12 @@ export default class BladeState extends PlayerState {
             this.manager.setState('dash');
             return;
         }
-        if(this.actor.groundChecker.isGrounded() === false) {
-            if(!this.floorTimer) {
+        if (!this.actor.groundChecker.isGrounded()) {
+            if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {
                     this.manager.setState('fall');
                     this.floorTimer = null;
-                }, 100);
+                }, 300);
             }
         } else {
             clearTimeout(this.floorTimer);
