@@ -5,14 +5,14 @@ import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
 import { Pistol, Sword } from './weapons/index';
 import PlayerAnimator from './PlayerAnimator';
-import { tryPlayerDamage, socket, tryUpdatePosition, tryUpdateState, tryApplyCC } from '../core/NetManager';
+import { tryPlayerDamage, tryUpdatePosition, tryUpdateState, tryApplyCC, netSocket } from '../core/NetManager';
 import GroundChecker from './GroundChecker';
-import Health from './Health';
 import StateManager from './playerStates/_StateManager';
 import RunBoost from './RunBoost';
 import CameraFX from '../core/CameraFX';
 import PlayerMovement from './PlayerMovement';
 import DevMenu from '../ui/DevMenu';
+import NamePlate from '../core/Nameplate';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, netId) {
@@ -27,9 +27,7 @@ export default class Player extends THREE.Object3D {
         game.graphicsWorld.add(this);
         this.skinCache = {};
 
-
-        this.healthComponent = new Health();
-        this.health = this.healthComponent.currentHealth;
+        this.isDead = false;
         this.height = 1;
         this.radius = .3;
         this.mesh;
@@ -41,6 +39,10 @@ export default class Player extends THREE.Object3D {
         this.bodyMesh = null;
         this.meshes = [];
         this.setMesh();
+
+
+        this.health = 100;
+        this.energy = 100;
 
         this.weaponL = new Pistol(this, scene);
         this.weaponR = new Sword(this, scene);
@@ -58,7 +60,7 @@ export default class Player extends THREE.Object3D {
             this.tempVector = new THREE.Vector3();
 
             this.cameraArm = new THREE.Object3D();
-            this.cameraArm.position.set(1, 1, 0);
+            this.cameraArm.position.set(.5, 1, 0);
             this.add(this.cameraArm);
             this.cameraArm.add(this.camera);
             CameraFX.init(this.camera);
@@ -74,7 +76,14 @@ export default class Player extends THREE.Object3D {
                 material: material,
                 collisionFilterGroup: 2,
                 collisionFilterMask: -1,
+
             });
+            if (!scene.levelLoaded) {
+                body.sleep();
+                MyEventEmitter.once('levelLoaded', () => {
+                    body.wakeUp();
+                });
+            }
             this.body = body;
             // this.body.addEventListener('collide', (event) => {
             //     this.isTouching = true;
@@ -113,6 +122,7 @@ export default class Player extends THREE.Object3D {
             // Remote Player
             this.targetPos = new THREE.Vector3(x, y, z);
             this.targetRot = 0;
+            this.namePlate = new NamePlate(this, this.height + 0.5);
         }
     }
 
@@ -233,31 +243,98 @@ export default class Player extends THREE.Object3D {
 
     setName(newName) {
         this.name = newName;
+        this.namePlate?.setName(newName);
     }
 
-    takeDamage(amount) {
-        //Single player take damage
-        if (this.isLocal) {
-            this.health.takeDamage(amount);
-        }
-        // Networked player take damage
-        if (!this.isLocal) {
-            tryPlayerDamage(this, amount);
-        }
+
+    setEnergy(newEnergy) {
+        this.energy = newEnergy;
+        this.namePlate?.setEnergy(newEnergy);
     }
-    applyHealth({ amount, reason }) {
+
+    infoUpdate() {
+        socket.on('playerInfoUpdate', (data) => {
+            const { name, health, mana, money } = data;
+            this.namePlate.infoUpdate({ name, health, mana, money });
+        });
+    }
+
+    // from local
+    changeHealth(reason, amount) {
+        let netId;
+        if (this.isLocal) {
+            // Local player
+            netId = netSocket.id;
+
+            switch (reason) {
+                case "damage":
+                    this.setHealth(amount);
+                    break;
+                case "reset":
+                    this.setHealth(100);
+                    break;
+            }
+        } else {
+            // Remote player
+            netId = this.netId;
+
+            switch (reason) {
+                case "damage":
+                    this.setHealth(amount);
+                    break;
+                case "reset":
+                    this.setHealth(100);
+                    break;
+            }
+        }
+
+        netSocket.emit('playerHealthSend', { targetId: netId, reason, amount });
+    }
+    // from server
+    applyHealth({ targetId, reason, amount, health }) {
+        this.setHealth(health);
         switch (reason) {
             case "damage":
-                this.healthComponent.takeDamage(amount);
+                console.log('damage!');
                 break;
-            case "heal":
-                this.healthComponent.heal(amount);
+            case "reset":
+                console.log('reset!');
                 break;
-            default:
-                console.warn(`Unknown health change reason: ${reason}`);
-                this.healthComponent.adjust(amount);
         }
     }
+
+    // call twice from local and server
+    setHealth(newHealth) {
+        this.health = newHealth;
+
+        if (this.isLocal) {
+            if (this.health === 0) {
+                this.die();
+            }
+            LocalData.health = newHealth;
+            MyEventEmitter.emit('updateHealth', LocalData.health);
+
+        } else {
+            this.namePlate?.setHealth(newHealth);
+        }
+    }
+    // only local
+    die() {
+        if (!this.isLocal) return;
+        this.stateManager.setState('dead');
+        netSocket.emit('playerDieSend', { targetId: netSocket.id });
+    }
+    // only local
+    unDie() {
+        if (!this.isLocal) return;
+        this.stateManager.setState('idle');
+        this.body.position.set(0, 5, 0);
+        this.body.velocity.set(0, 0, 0);
+
+        this.setHealth(100);
+        netSocket.emit('playerHealthSend', { targetId: netSocket.id, reason: 'reset', amount: 100 });
+    }
+
     takeCC(type, dir) {
         if (this.isLocal) {
             this.stateManager.setState('stunned');
@@ -269,7 +346,6 @@ export default class Player extends THREE.Object3D {
     }
     applyCC({ type, dir }) {
         this.tempVector.copy(dir);
-        console.log(dir);
         switch (type) {
             case 'stun':
                 this.stateManager.setState?.('stun', { type, dir: this.tempVector });
@@ -305,13 +381,6 @@ export default class Player extends THREE.Object3D {
         if (this.animator) {
             this.animator.setAnimState(state);
         }
-    }
-    changeHealth(amount) {
-        LocalData.health = Math.max(0, LocalData.health + amount);
-        if (LocalData.health === 0) {
-            console.log("Player has died.");
-        }
-        MyEventEmitter.emit('updateHealth', LocalData.health);
     }
     setupCapsule(height, radius) {
         const capsuleGeo = new THREE.CapsuleGeometry(radius, height, 4, 8);

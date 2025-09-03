@@ -1,7 +1,7 @@
 import MyEventEmitter from "../core/MyEventEmitter";
 import LocalData from "../core/LocalData";
 import './PlayerInfoStyle.css';
-import { socket } from "../core/NetManager";
+import { netSocket } from "../core/NetManager";
 
 export default class PlayerInfo {
     constructor() {
@@ -26,7 +26,7 @@ export default class PlayerInfo {
             if (newName) {
                 this.name = newName;
                 nameElem.textContent = this.name;
-                socket.emit('playerNameUpdate', { name: this.name });
+                netSocket.emit('playerNameSend', this.name);
                 LocalData.name = this.name;
                 LocalData.save();
             }

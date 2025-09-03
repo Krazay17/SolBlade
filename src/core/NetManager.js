@@ -5,7 +5,9 @@ import { Vector3 } from "three";
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
     : "solbladeserver-production.up.railway.app";
-export const socket = io(serverURL);
+
+const socket = io(serverURL);
+export const netSocket = socket;
 
 let scene = null;
 let netPlayers = {};
@@ -24,15 +26,6 @@ let lastPlayerData = { ...defaultPlayerData };
 
 socket.on("connect", () => {
     console.log(`I connected with id: ${socket.id}`);
-
-    socket.on("disconnect", () => {
-        console.log("disconnected from server");
-        if (scene) {
-            Object.values(netPlayers).forEach(p => {
-                scene.removePlayer(p.netId);
-            });
-        }
-    });
     if (scene) {
         bindSocketEvents(scene.fullNetSync());
     } else {
@@ -46,22 +39,32 @@ function bindSocketEvents(myPlayerData) {
 
     socket.emit('joinGame', myPlayerData);
 
+    socket.on('disconnect', () => {
+        console.log("disconnected from server");
+        if (scene) {
+            Object.values(netPlayers).forEach(p => {
+                console.log(p);
+                scene.removePlayer(p.netId);
+                delete netPlayers[p.netId];
+            });
+        }
+    });
     socket.on('currentPlayers', (playerList) => {
-        console.log('Current players:', playerList);
         playerList.forEach(element => {
-            if (element.id === socket.id) return;
-            if (netPlayers[element.id]) return;
-            netPlayers[element.id] = scene.addPlayer(element.id, element.data);
+            if (element.netId === socket.id) return;
+            console.log(element);
+            if (netPlayers[element.netId]) return;
+            netPlayers[element.netId] = scene.addPlayer(element.netId, element.data);
         });
     });
-    socket.on('newPlayer', ({ id, data }) => {
-        if (id === socket.id) return;
-        netPlayers[id] = scene.addPlayer(id, data);
+    socket.on('newPlayer', ({ netId, data }) => {
+        if (netId === socket.id) return;
+        netPlayers[netId] = scene.addPlayer(netId, data);
     });
-    socket.on('playerDisconnected', (playerId) => {
-        if (netPlayers[playerId]) {
-            scene.removePlayer(playerId);
-            delete netPlayers[playerId];
+    socket.on('playerDisconnected', (netId) => {
+        if (netPlayers[netId]) {
+            scene.removePlayer(netId);
+            delete netPlayers[netId];
         }
     })
     socket.on('playerPositionUpdate', ({ id, data }) => {
@@ -77,9 +80,10 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[id].setAnimState(data.state);
         }
     });
-    socket.on('playerNameUpdate', ({ id, data }) => {
+    socket.on('playerNameUpdate', ({ id, name }) => {
         if (netPlayers[id]) {
-            netPlayers[id].setName(data.name);
+            netPlayers[id].setName(name);
+            MyEventEmitter.emit('playerNameUpdate', { player: netPlayers[id], name });
         }
     });
     socket.on('chatMessageUpdate', ({ id, data }) => {
@@ -90,10 +94,12 @@ function bindSocketEvents(myPlayerData) {
         }
     });
     socket.on('playerHealthUpdate', ({ id, data }) => {
-        if (id === socket.id) {
+        const { targetId } = data;
+        console.log('localSocket: ', socket.id, 'targetSocket: ', targetId, data);
+        if (targetId === socket.id) {
             scene.player.applyHealth(data);
-        } else if (netPlayers[id]) {
-            netPlayers[id].applyHealth(data);
+        } else if (netPlayers[targetId]) {
+            netPlayers[targetId].applyHealth(data);
         }
     });
     socket.on('playerCCUpdate', ({ id, data }) => {
@@ -119,7 +125,7 @@ export function initSocket() {
 }
 
 export function sendChatMessage(player, message) {
-    socket.emit("chatMessageRequest", { player, message });
+    socket.emit("chatMessageSend", { player, message });
 }
 
 let lastSentPosition = new Vector3();
@@ -129,21 +135,21 @@ export function tryUpdatePosition({ pos, rot }) {
         || lastSentRotation !== rot) {
         lastSentPosition.copy(pos);
         lastSentRotation = rot;
-        socket.emit("playerPositionRequest", { pos: lastSentPosition, rot: lastSentRotation });
+        socket.emit("playerPositionSend", { pos: lastSentPosition, rot: lastSentRotation });
     }
 }
 let lastSentState = 'idle';
 export function tryUpdateState(state) {
     if (lastSentState === null || lastSentState !== state) {
         lastSentState = state;
-        socket.emit("playerStateRequest", { state });
+        socket.emit("playerStateSend", { state });
     }
 }
 
 export function tryPlayerDamage(actor, amount) {
-    socket.emit("playerHealthRequest", { targetId: actor.netId, reason: "damage", amount });
+    socket.emit("playerHealthSend", { targetId: actor.netId, reason: "damage", amount });
 }
 
 export function tryApplyCC(actor, cc) {
-    socket.emit("playerCCRequest", { targetId: actor.netId, ...cc });
+    socket.emit("playerCCSend", { targetId: actor.netId, ...cc });
 }

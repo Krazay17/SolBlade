@@ -14,6 +14,7 @@ import DebugData from '../ui/DebugData.js';
 import PartyFrame from '../ui/PartyFrame.js';
 import MeshManager from '../core/MeshManager.js';
 import Crosshair from '../ui/Crosshair.js';
+import MyEventEmitter from '../core/MyEventEmitter.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -21,7 +22,7 @@ export default class GameScene extends SceneBase {
     this.spawnLevel();
     this.netPlayers = {};
     let playerPosBuffer = LocalData.position;
-    playerPosBuffer.y += 2; //start a bit above ground
+    playerPosBuffer.y += 0.1; //start a bit above ground
 
     this.meshManager = new MeshManager();
     this.actorMeshes = [];
@@ -58,8 +59,7 @@ export default class GameScene extends SceneBase {
 
       // KillFloor
       if (this.player.body.position.y < -100) {
-        this.player.body.position.set(0, 5, 0);
-        this.player.body.velocity.set(0, 0, 0);
+        this.player.die();
       }
     }
     if (this.netPlayers) {
@@ -165,6 +165,7 @@ export default class GameScene extends SceneBase {
       });
       this.levelLoaded = true;
       console.log('Level loaded');
+      MyEventEmitter.emit('levelLoaded');
     });
   }
 }

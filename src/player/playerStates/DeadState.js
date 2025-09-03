@@ -5,11 +5,24 @@ export default class DeadState extends PlayerState {
         super(actor, manager, options);
     }
     enter() {
-        this.actor.animator?.setAnimState('dead');
-        this.body.velocity.set(0, 0, 0);
+        this.actor.animator?.setAnimState('knockback');
+        this.actor.isDead = true;
+
+        setTimeout(() => {
+            this.actor.isDead = false;
+            this.actor.unDie();
+        }, 2500);
     }
     update(dt) {
         // Handle dead-specific logic here
-        console.log("Player is dead");
+    }
+    exit() {
+        this.actor.isDead = false;
+    }
+    canEnter() {
+        return !this.actor.isDead;
+    }
+    canExit() {
+        return !this.actor.isDead;
     }
 }

@@ -13,7 +13,6 @@ export default class PlayerMovement {
         this.dashValue = 0;
 
         const savedValues = LocalData.movementValues;
-        console.log(savedValues);
         this.values = savedValues ?? {
             ground: {
                 friction: 12,
@@ -60,7 +59,7 @@ export default class PlayerMovement {
     resetDefaultValues() {
         this.values = {
             ground: {
-                friction: 12,
+                friction: 10,
                 accel: 10,
                 speed: 10,
                 tap: .2
@@ -78,15 +77,15 @@ export default class PlayerMovement {
                 tap: .01
             },
             idle: {
-                friction: 14,
+                friction: 15,
                 accel: 10,
                 speed: 10,
                 tap: .01
             },
             attack: {
-                friction: 3,
-                accel: 1,
-                speed: 1,
+                friction: 2,
+                accel: 2,
+                speed: 2,
                 tap: .01
             },
             dash: {

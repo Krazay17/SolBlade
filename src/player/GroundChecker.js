@@ -67,9 +67,9 @@ export default class GroundChecker {
         return null;
     }
 
-    isGrounded() {
+    isGrounded(slope = 0.7) {
         const result = this.floorTrace();
-        return result ? Math.abs(result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0))) > 0.6 : false;
+        return result ? Math.abs(result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0))) > slope : false;
     }
 
     visualDebugTrace() {

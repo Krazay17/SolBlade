@@ -1,3 +1,4 @@
+import { netSocket } from "../../core/NetManager";
 import PlayerState from "./_PlayerState";
 
 export default class IdleState extends PlayerState {
@@ -6,7 +7,7 @@ export default class IdleState extends PlayerState {
     }
     update(dt) {
         this.actor.movement.idleMove(dt);
-        
+
         if (!this.actor.movement.getInputDirection().isZero()) {
             this.manager.setState('run', this.actor.floorTrace());
             return;
@@ -29,6 +30,11 @@ export default class IdleState extends PlayerState {
         if (!this.actor.groundChecker.isGrounded()) {
             this.manager.setState('fall');
             return;
+        }
+    }
+    exit() {
+        if (!netSocket.connected) {
+            netSocket.connect();
         }
     }
     canEnter() {

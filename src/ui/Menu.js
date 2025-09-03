@@ -18,7 +18,6 @@ export default class Menu {
             <h2>Menu <button class="close-button">X</button></h2>
         `;
         document.body.appendChild(this.menuElement);
-        this.open();
 
         this.menuElement.querySelector('.close-button').addEventListener('click', () => {
             this.close();

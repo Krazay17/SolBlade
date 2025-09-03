@@ -4,17 +4,16 @@ import { Vec3 } from "cannon";
 export default class BladeState extends PlayerState {
     constructor(actor, manager, options = {}) {
         super(actor, manager, options);
-        this.enterBoost = 1.5;
-        this.maxEnterBoost = 1.5;
+        this.enterBoost = 1.25;
+        this.maxEnterBoost = 1.25;
     }
     enter() {
         this.actor.animator?.setAnimState('crouch', true);
 
-        if (this.actor.groundChecker.isGrounded()) {
+        if (this.actor.groundChecker.isGrounded(.6)) {
             this.enterBoost = this.lastEnter ? Math.max(1, Math.min((performance.now() - this.lastEnter) / 1000, this.maxEnterBoost)) : this.maxEnterBoost;
             this.lastEnter = performance.now();
             this.body.velocity.mult(this.enterBoost, this.body.velocity);
-            console.log(this.enterBoost);
         }
     }
     update(dt) {
@@ -34,7 +33,7 @@ export default class BladeState extends PlayerState {
             this.manager.setState('dash');
             return;
         }
-        if (!this.actor.groundChecker.isGrounded()) {
+        if (!this.actor.groundChecker.isGrounded(.6)) {
             if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {
                     this.manager.setState('fall');

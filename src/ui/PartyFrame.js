@@ -10,16 +10,16 @@ export default class PartyFrame {
         this.container.id = 'party-frame';
         document.body.appendChild(this.container);
 
-        MyEventEmitter.on('playerHealthChange', (player, health) => {
-            const playerElement = this.players.get(player);
-            if (playerElement) {
-                const healthFill = playerElement.querySelector('.party-healthbar-fill');
-                if (healthFill) {
-                    healthFill.style.width = `${health}%`;
-                }
-            }
-        });
-        MyEventEmitter.on('playerNameChange', (player, name) => {
+        // MyEventEmitter.on('playerHealthChange', (player, health) => {
+        //     const playerElement = this.players.get(player);
+        //     if (playerElement) {
+        //         const healthFill = playerElement.querySelector('.party-healthbar-fill');
+        //         if (healthFill) {
+        //             healthFill.style.width = `${health}%`;
+        //         }
+        //     }
+        // });
+        MyEventEmitter.on('playerNameUpdate', ({player, name}) => {
             const playerElement = this.players.get(player);
             if (playerElement) {
                 playerElement.innerText = name;
@@ -40,11 +40,11 @@ export default class PartyFrame {
         healthBar.appendChild(healthFill);
 
         playerElement.appendChild(healthBar);
-        this.container.appendChild(playerElement);
         playerElement.addEventListener('click', () => {
             this.selectPlayer(player);
         });
 
+        this.container.appendChild(playerElement);
         this.players.set(player, playerElement);
     }
 

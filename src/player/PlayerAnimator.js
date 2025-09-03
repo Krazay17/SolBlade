@@ -94,7 +94,6 @@ export default class PlayerAnimator {
     }
     action.time = seek;
     action.reset().fadeIn(0.1).play();
-    console.log(action)
     this.currentAction = action;
     if (seek) {
       action.time = seek;

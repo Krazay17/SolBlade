@@ -6,7 +6,7 @@ import Globals from '../../utils/Globals.js';
 
 export default class Pistol extends BaseWeapon {
     constructor(actor, scene) {
-        super(actor, 'Pistol', 10, 250, .45); // name, damage, range, cooldown
+        super(actor, 'Pistol', 20, 250, .7); // name, damage, range, cooldown
         this.scene = scene;
         soundPlayer.loadSfx('gunshoot', '/assets/GunShoot.wav');
         this.meshTracer = new MeshTrace(this.scene);
@@ -20,6 +20,7 @@ export default class Pistol extends BaseWeapon {
             const offSetPos = pos.clone().add(this.tempVector.set(0, .4, 0));
             let cameraPos = new THREE.Vector3();
             this.actor.cameraArm.getWorldPosition(cameraPos);
+            this.hitActors.clear();
 
 
             const fx = () => {
@@ -39,10 +40,10 @@ export default class Pistol extends BaseWeapon {
             this.meshTracer.lineTrace(cameraPos, dir, this.range, (hits) => {
                 for (const hit of hits) {
                     const actor = hit.object.userData.owner;
-                    if (actor && actor !== this.actor) {
+                    if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
                         this.hitActors.add(actor);
-                        actor.takeDamage?.(this.damage);
-                        actor.takeCC?.('knockback', this.tempVector.set(0, 5, 0));
+                        actor.takeCC?.('knockback', this.tempVector.set(dir.x, 5, dir.z));
+                        actor.changeHealth?.('damage', this.damage);
                         soundPlayer.playSound('gunshoot');
                         this.spawnHitParticles(actor.position);
                     }

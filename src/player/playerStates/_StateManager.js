@@ -13,6 +13,7 @@ export default class StateManager {
             dash: new States.DashState(actor, this),
             emote: new States.EmoteState(actor, this),
             blade: new States.BladeState(actor, this),
+            dead: new States.DeadState(actor, this),
         };
         this.activeState = this.states.idle;
         this.actionState = null;
@@ -27,8 +28,8 @@ export default class StateManager {
 
     setState(state, enterParams) {
         if ((this.currentStateName === state && !this.activeState.reEnter) && this.activeState) return false;
-        if (!this.states[state]?.canEnter(enterParams)) return false;
-        if (!this.activeState?.canExit(enterParams)) return false;
+        if (!this.states[state]?.canEnter(state, enterParams)) return false;
+        if (!this.activeState?.canExit(state, enterParams)) return false;
 
         let newState = state;
         if (this.states[newState]) {

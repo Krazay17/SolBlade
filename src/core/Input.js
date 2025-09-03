@@ -8,7 +8,7 @@ export default class Input {
     this.gameElement = document.getElementById('webgl');
 
     this.pointerLocked = false;
-    this.sensitivity = 0.002;
+    this.sensitivity = 0.0016;
     this.moveSpeed = 5;
 
     this.yaw = 0;

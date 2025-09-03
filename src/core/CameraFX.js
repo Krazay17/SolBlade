@@ -1,4 +1,5 @@
 import { Vector3 } from "three";
+import * as THREE from "three";
 
 export default {
     init(camera) {
