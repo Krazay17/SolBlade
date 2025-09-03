@@ -5,7 +5,6 @@ export default class DevMenu {
     constructor(actor, movementComp) {
         this.actor = actor;
         this.movementComp = movementComp;
-        this.movementValues = movementComp.values;
 
         this.isOpen = false;
 
@@ -38,98 +37,112 @@ export default class DevMenu {
         const speedMax = 20;
         const tapMax = 1;
         this.movementSliders = {
-            idleFriction: this.createSlider('Idle Friction', this.groundGrid, this.movementValues.idle.friction, frictionMax,
-                (value) => {
-                    this.movementValues.idle.friction = value;
-                    return this.movementValues.idle.friction;
-                }),
-            groundFriction: this.createSlider('Ground Friction', this.groundGrid, this.movementValues.ground.friction, frictionMax,
-                (value) => {
-                    this.movementValues.ground.friction = value;
-                    return this.movementValues.ground.friction;
-                }),
-            groundAccel: this.createSlider('Ground Accel', this.groundGrid, this.movementValues.ground.accel, accelMax,
-                (value) => {
-                    this.movementValues.ground.accel = value;
-                    return this.movementValues.ground.accel;
-                }),
-            groundSpeed: this.createSlider('Ground Speed', this.groundGrid, this.movementValues.ground.speed, speedMax,
-                (value) => {
-                    this.movementValues.ground.speed = value;
-                    return this.movementValues.ground.speed;
-                }),
-            groundTap: this.createSlider('Ground Tap', this.groundGrid, this.movementValues.ground.tap, tapMax,
-                (value) => {
-                    this.movementValues.ground.tap = value;
-                    return this.movementValues.ground.tap;
-                }),
-            airFriction: this.createSlider('Air Friction', this.airGrid, this.movementValues.air.friction, frictionMax,
-                (value) => {
-                    this.movementValues.air.friction = value;
-                    return this.movementValues.air.friction;
-                }),
-            airAccel: this.createSlider('Air Accel', this.airGrid, this.movementValues.air.accel, accelMax,
-                (value) => {
-                    this.movementValues.air.accel = value;
-                    return this.movementValues.air.accel;
-                }),
-            airSpeed: this.createSlider('Air Speed', this.airGrid, this.movementValues.air.speed, speedMax,
-                (value) => {
-                    this.movementValues.air.speed = value;
-                    return this.movementValues.air.speed;
-                }),
-            airTap: this.createSlider('Air Tap', this.airGrid, this.movementValues.air.tap, tapMax,
-                (value) => {
-                    this.movementValues.air.tap = value;
-                    return this.movementValues.air.tap;
-                }),
-            bladeFriction: this.createSlider('Blade Friction', this.bladeGrid, this.movementValues.blade.friction, frictionMax,
-                (value) => {
-                    this.movementValues.blade.friction = value;
-                    return this.movementValues.blade.friction;
-                }),
-            bladeAccel: this.createSlider('Blade Accel', this.bladeGrid, this.movementValues.blade.accel, accelMax,
-                (value) => {
-                    this.movementValues.blade.accel = value;
-                    return this.movementValues.blade.accel;
-                }),
-            bladeSpeed: this.createSlider('Blade Speed', this.bladeGrid, this.movementValues.blade.speed, speedMax,
-                (value) => {
-                    this.movementValues.blade.speed = value;
-                    return this.movementValues.blade.speed;
-                }),
-            bladeTap: this.createSlider('Blade Tap', this.bladeGrid, this.movementValues.blade.tap, tapMax,
-                (value) => {
-                    this.movementValues.blade.tap = value;
-                    return this.movementValues.blade.tap;
-                }),
-            attackFriction: this.createSlider('Attack Friction', this.attackGrid, this.movementValues.attack.friction, frictionMax,
-                (value) => {
-                    this.movementValues.attack.friction = value;
-                    return this.movementValues.attack.friction;
-                }),
-            attackAccel: this.createSlider('Attack Accel', this.attackGrid, this.movementValues.attack.accel, accelMax,
-                (value) => {
-                    this.movementValues.attack.accel = value;
-                    return this.movementValues.attack.accel;
-                }),
-            attackSpeed: this.createSlider('Attack Speed', this.attackGrid, this.movementValues.attack.speed, speedMax,
-                (value) => {
-                    this.movementValues.attack.speed = value;
-                    return this.movementValues.attack.speed;
-                }),
-            attackTap: this.createSlider('Attack Tap', this.attackGrid, this.movementValues.attack.tap, tapMax,
-                (value) => {
-                    this.movementValues.attack.tap = value;
-                    return this.movementValues.attack.tap;
-                }),
-
+            idle: {
+                friction: this.createSlider('Idle Friction', this.groundGrid, this.movementComp.values.idle.friction, frictionMax,
+                    (value) => {
+                        this.movementComp.values.idle.friction = value;
+                        return this.movementComp.values.idle.friction;
+                    }),
+            },
+            ground: {
+                friction: this.createSlider('Ground Friction', this.groundGrid, this.movementComp.values.ground.friction, frictionMax,
+                    (value) => {
+                        this.movementComp.values.ground.friction = value;
+                        return this.movementComp.values.ground.friction;
+                    }),
+                accel: this.createSlider('Ground Accel', this.groundGrid, this.movementComp.values.ground.accel, accelMax,
+                    (value) => {
+                        this.movementComp.values.ground.accel = value;
+                        return this.movementComp.values.ground.accel;
+                    }),
+                speed: this.createSlider('Ground Speed', this.groundGrid, this.movementComp.values.ground.speed, speedMax,
+                    (value) => {
+                        this.movementComp.values.ground.speed = value;
+                        return this.movementComp.values.ground.speed;
+                    }),
+                tap: this.createSlider('Ground Tap', this.groundGrid, this.movementComp.values.ground.tap, tapMax,
+                    (value) => {
+                        this.movementComp.values.ground.tap = value;
+                        return this.movementComp.values.ground.tap;
+                    }),
+            },
+            air: {
+                friction: this.createSlider('Air Friction', this.airGrid, this.movementComp.values.air.friction, frictionMax,
+                    (value) => {
+                        this.movementComp.values.air.friction = value;
+                        return this.movementComp.values.air.friction;
+                    }),
+                accel: this.createSlider('Air Accel', this.airGrid, this.movementComp.values.air.accel, accelMax,
+                    (value) => {
+                        this.movementComp.values.air.accel = value;
+                        return this.movementComp.values.air.accel;
+                    }),
+                speed: this.createSlider('Air Speed', this.airGrid, this.movementComp.values.air.speed, speedMax,
+                    (value) => {
+                        this.movementComp.values.air.speed = value;
+                        return this.movementComp.values.air.speed;
+                    }),
+                tap: this.createSlider('Air Tap', this.airGrid, this.movementComp.values.air.tap, tapMax,
+                    (value) => {
+                        this.movementComp.values.air.tap = value;
+                        return this.movementComp.values.air.tap;
+                    }),
+            },
+            blade: {
+                friction: this.createSlider('Blade Friction', this.bladeGrid, this.movementComp.values.blade.friction, frictionMax,
+                    (value) => {
+                        this.movementComp.values.blade.friction = value;
+                        return this.movementComp.values.blade.friction;
+                    }),
+                accel: this.createSlider('Blade Accel', this.bladeGrid, this.movementComp.values.blade.accel, accelMax,
+                    (value) => {
+                        this.movementComp.values.blade.accel = value;
+                        return this.movementComp.values.blade.accel;
+                    }),
+                speed: this.createSlider('Blade Speed', this.bladeGrid, this.movementComp.values.blade.speed, speedMax,
+                    (value) => {
+                        this.movementComp.values.blade.speed = value;
+                        return this.movementComp.values.blade.speed;
+                    }),
+                tap: this.createSlider('Blade Tap', this.bladeGrid, this.movementComp.values.blade.tap, tapMax,
+                    (value) => {
+                        this.movementComp.values.blade.tap = value;
+                        return this.movementComp.values.blade.tap;
+                    }),
+            },
+            attack: {
+                friction: this.createSlider('Attack Friction', this.attackGrid, this.movementComp.values.attack.friction, frictionMax,
+                    (value) => {
+                        this.movementComp.values.attack.friction = value;
+                        return this.movementComp.values.attack.friction;
+                    }),
+                accel: this.createSlider('Attack Accel', this.attackGrid, this.movementComp.values.attack.accel, accelMax,
+                    (value) => {
+                        this.movementComp.values.attack.accel = value;
+                        return this.movementComp.values.attack.accel;
+                    }),
+                speed: this.createSlider('Attack Speed', this.attackGrid, this.movementComp.values.attack.speed, speedMax,
+                    (value) => {
+                        this.movementComp.values.attack.speed = value;
+                        return this.movementComp.values.attack.speed;
+                    }),
+                tap: this.createSlider('Attack Tap', this.attackGrid, this.movementComp.values.attack.tap, tapMax,
+                    (value) => {
+                        this.movementComp.values.attack.tap = value;
+                        return this.movementComp.values.attack.tap;
+                    }),
+            },
         };
+
+        const resetButton = this.createButton('Reset to Default', () => {
+            this.resetMovementDefaults();
+        })
 
         this.section.appendChild(this.groundGrid);
         this.section.appendChild(this.airGrid);
         this.section.appendChild(this.bladeGrid);
         this.section.appendChild(this.attackGrid);
+        this.section.appendChild(resetButton);
         document.body.appendChild(this.section);
     }
 
@@ -139,6 +152,26 @@ export default class DevMenu {
 
     close() {
         this.section.style.display = 'none';
+    }
+
+    resetMovementDefaults() {
+        const newValues = this.movementComp.resetDefaultValues();
+        for (const [key, value] of Object.entries(this.movementSliders)) {
+            for (const [key2, elements] of Object.entries(value)) {
+                console.log(key2);
+                const {slider, valueDisplay} = elements;
+                slider.value = newValues[key][key2];
+                valueDisplay.value = newValues[key][key2];
+            }
+        }
+    }
+
+    createButton(label, callback) {
+        const button = document.createElement('button');
+        button.classList.add('devButton');
+        button.innerText = label;
+        button.onclick = callback;
+        return button;
     }
 
     createSlider(name, grid, initialValue, maxValue, callback) {
@@ -172,7 +205,7 @@ export default class DevMenu {
             const value = parseFloat(slider.value);
             valueDisplay.value = callback(value);
         };
-        return slider;
+        return { slider, valueDisplay };
     }
 
 }

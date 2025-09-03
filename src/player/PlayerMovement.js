@@ -49,10 +49,51 @@ export default class PlayerMovement {
                 speed: 25
             }
         }
+
+        
         window.addEventListener('beforeunload', () => {
             LocalData.movementValues = this.values;
             LocalData.save();
         });
+    }
+
+    resetDefaultValues() {
+        this.values = {
+            ground: {
+                friction: 12,
+                accel: 10,
+                speed: 10,
+                tap: .2
+            },
+            air: {
+                friction: 0,
+                accel: 2.5,
+                speed: 4,
+                tap: .01
+            },
+            blade: {
+                friction: 0.1,
+                accel: 1,
+                speed: 10,
+                tap: .01
+            },
+            idle: {
+                friction: 14,
+                accel: 10,
+                speed: 10,
+                tap: .01
+            },
+            attack: {
+                friction: 3,
+                accel: 1,
+                speed: 1,
+                tap: .01
+            },
+            dash: {
+                speed: 25
+            }
+        }
+        return this.values;
     }
 
     idleMove(dt) {

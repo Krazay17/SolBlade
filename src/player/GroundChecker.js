@@ -69,9 +69,6 @@ export default class GroundChecker {
 
     isGrounded() {
         const result = this.floorTrace();
-        if (result) {
-            console.log(result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0)));
-        }
         return result ? Math.abs(result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0))) > 0.6 : false;
     }
 
