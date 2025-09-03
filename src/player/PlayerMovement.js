@@ -15,65 +15,21 @@ export default class PlayerMovement {
         const savedValues = LocalData.movementValues;
         this.values = savedValues ?? {
             ground: {
-                friction: 12,
+                friction: 9,
                 accel: 10,
-                speed: 10,
-                tap: .2
+                speed: 7,
+                tap: .15
             },
             air: {
-                friction: 0,
+                friction: 0.05,
                 accel: 2.5,
-                speed: 4,
+                speed: 3,
                 tap: .01
             },
             blade: {
-                friction: 0.1,
+                friction: 0.2,
                 accel: 1,
-                speed: 10,
-                tap: .01
-            },
-            idle: {
-                friction: 14,
-                accel: 10,
-                speed: 10,
-                tap: .01
-            },
-            attack: {
-                friction: 3,
-                accel: 1,
-                speed: 1,
-                tap: .01
-            },
-            dash: {
-                speed: 25
-            }
-        }
-
-        
-        window.addEventListener('beforeunload', () => {
-            LocalData.movementValues = this.values;
-            LocalData.save();
-        });
-    }
-
-    resetDefaultValues() {
-        this.values = {
-            ground: {
-                friction: 10,
-                accel: 10,
-                speed: 10,
-                tap: .2
-            },
-            air: {
-                friction: 0,
-                accel: 2.5,
                 speed: 4,
-                tap: .01
-            },
-            blade: {
-                friction: 0.1,
-                accel: 1,
-                speed: 10,
                 tap: .01
             },
             idle: {
@@ -83,10 +39,54 @@ export default class PlayerMovement {
                 tap: .01
             },
             attack: {
-                friction: 2,
-                accel: 2,
+                friction: 1,
+                accel: 10,
                 speed: 2,
+                tap: .15
+            },
+            dash: {
+                speed: 25
+            }
+        }
+
+
+        window.addEventListener('beforeunload', () => {
+            LocalData.movementValues = this.values;
+            LocalData.save();
+        });
+    }
+
+    resetDefaultValues() {
+        this.values = {
+            ground: {
+                friction: 9,
+                accel: 10,
+                speed: 7,
+                tap: .15
+            },
+            air: {
+                friction: 0.05,
+                accel: 2.5,
+                speed: 3,
                 tap: .01
+            },
+            blade: {
+                friction: 0.2,
+                accel: 1,
+                speed: 4,
+                tap: .01
+            },
+            idle: {
+                friction: 15,
+                accel: 10,
+                speed: 10,
+                tap: .01
+            },
+            attack: {
+                friction: 1,
+                accel: 10,
+                speed: 2,
+                tap: .15
             },
             dash: {
                 speed: 25
@@ -140,7 +140,7 @@ export default class PlayerMovement {
 
         this.accelerate(wishdir, this.values.blade.speed, this.values.blade.accel, dt, this.values.blade.tap);
 
-        this.slopeBoost(5 * dt);
+        this.slopeBoost(dt);
     }
 
     slopeBoost(amnt) {

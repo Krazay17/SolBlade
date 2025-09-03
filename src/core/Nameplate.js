@@ -15,6 +15,7 @@ export default class NamePlate extends THREE.Object3D {
         this.position.set(0, offset, 0);
         this.actor.add(this);
 
+        this.setHealth(this.health);
     }
 
     setName(newName) {

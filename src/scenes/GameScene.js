@@ -97,7 +97,7 @@ export default class GameScene extends SceneBase {
   }
 
   addPlayer(id, data) {
-    const player = new Player(this.game, this, data.pos, false, null, id);
+    const player = new Player(this.game, this, data.pos, false, null, id, data);
     this.netPlayers[id] = player;
     player.name = data.name;
     player.currentAnimState = data.state;
@@ -121,6 +121,7 @@ export default class GameScene extends SceneBase {
       pos: this.player.body.position,
       rot: this.player.rotation,
       state: this.player.getState(),
+      health: this.player.health,
       name: LocalData.name,
       money: LocalData.money,
     };

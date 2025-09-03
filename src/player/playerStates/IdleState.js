@@ -33,7 +33,7 @@ export default class IdleState extends PlayerState {
         }
     }
     exit() {
-        if (!netSocket.connected) {
+        if (!netSocket.active && netSocket.disconnected) {
             netSocket.connect();
         }
     }

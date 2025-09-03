@@ -4,8 +4,8 @@ import { Vec3 } from "cannon";
 export default class BladeState extends PlayerState {
     constructor(actor, manager, options = {}) {
         super(actor, manager, options);
-        this.enterBoost = 1.25;
-        this.maxEnterBoost = 1.25;
+        this.enterBoost = 1.3;
+        this.maxEnterBoost = 1.3;
     }
     enter() {
         this.actor.animator?.setAnimState('crouch', true);

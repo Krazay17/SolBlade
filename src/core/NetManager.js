@@ -6,7 +6,9 @@ const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
     : "solbladeserver-production.up.railway.app";
 
-const socket = io(serverURL);
+const socket = io(serverURL, {
+    reconnection: false,
+});
 export const netSocket = socket;
 
 let scene = null;
@@ -26,6 +28,11 @@ let lastPlayerData = { ...defaultPlayerData };
 
 socket.on("connect", () => {
     console.log(`I connected with id: ${socket.id}`);
+    Object.values(netPlayers).forEach(p => {
+        scene.removePlayer(p.netId);
+        delete netPlayers[p.netId];
+    });
+    socket.offAny();
     if (scene) {
         bindSocketEvents(scene.fullNetSync());
     } else {
@@ -40,6 +47,7 @@ function bindSocketEvents(myPlayerData) {
     socket.emit('joinGame', myPlayerData);
 
     socket.on('disconnect', () => {
+        socket.offAny();
         console.log("disconnected from server");
         if (scene) {
             Object.values(netPlayers).forEach(p => {
@@ -52,7 +60,6 @@ function bindSocketEvents(myPlayerData) {
     socket.on('currentPlayers', (playerList) => {
         playerList.forEach(element => {
             if (element.netId === socket.id) return;
-            console.log(element);
             if (netPlayers[element.netId]) return;
             netPlayers[element.netId] = scene.addPlayer(element.netId, element.data);
         });

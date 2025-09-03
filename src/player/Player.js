@@ -15,17 +15,19 @@ import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
 
 export default class Player extends THREE.Object3D {
-    constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, netId) {
+    constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, id, netData) {
         super();
         this.game = game;
         this.scene = scene;
         this.position.set(x, y, z);
         this.camera = camera;
         this.isLocal = isLocal;
-        this.name = LocalData.name || 'Player';
-        this.netId = netId;
+        this.name = LocalData.name || netData.name || 'Player';
+        this.netId = id || null;
         game.graphicsWorld.add(this);
         this.skinCache = {};
+
+        console.log(netData);
 
         this.isDead = false;
         this.height = 1;
@@ -41,7 +43,7 @@ export default class Player extends THREE.Object3D {
         this.setMesh();
 
 
-        this.health = 100;
+        this.health = netData?.health || LocalData.health || 100;
         this.energy = 100;
 
         this.weaponL = new Pistol(this, scene);

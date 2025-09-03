@@ -1,11 +1,10 @@
-const CURRENT_VERSION = 0.074;
+const CURRENT_VERSION = 0.075;
 
 export default {
     version: CURRENT_VERSION,
     name: "Player",
     money: 0,
     health: 100,
-    mana: 50,
     scene: 1,
     position: { x: 0, y: 5, z: 0 },
     masterVolume: 1,
@@ -18,6 +17,7 @@ export default {
             version: this.version,
             name: this.name,
             money: this.money,
+            health: this.health,
             scene: this.scene,
             position: this.position,
             masterVolume: this.masterVolume,
@@ -46,8 +46,9 @@ export default {
                 });
             return;
         }
-        this.money = parsed.money ?? this.money;
         this.name = parsed.name ?? this.name;
+        this.money = parsed.money ?? this.money;
+        this.health = parsed.health ?? this.health;
         this.scene = parsed.scene ?? this.scene;
         this.position = parsed.position ?? this.position;
         this.masterVolume = parsed.masterVolume ?? this.masterVolume;
@@ -59,14 +60,14 @@ export default {
     },
 
     reset(keep = {}) {
-        this.money = keep.money ?? 0;
-        this.health = keep.health ?? 100;
-        this.mana = keep.mana ?? 50;
-        this.scene = keep.scene ?? 1;
-        this.position = keep.position ?? { x: 0, y: 5, z: 0 };
-        this.masterVolume = keep.masterVolume ?? 1;
-        this.musicVolume = keep.musicVolume ?? 1;
-        this.sfxVolume = keep.sfxVolume ?? 1;
+        this.name = keep.name ?? this.name;
+        this.money = keep.money ?? this.money;
+        this.health = keep.health ?? this.health;
+        this.scene = keep.scene ?? this.scene;
+        this.position = keep.position ?? this.position;
+        this.masterVolume = keep.masterVolume ?? this.masterVolume;
+        this.musicVolume = keep.musicVolume ?? this.musicVolume;
+        this.sfxVolume = keep.sfxVolume ?? this.sfxVolume;
         this.movementValues = keep.movementValues ?? null;
     }
 }
