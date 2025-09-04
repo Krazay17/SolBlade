@@ -5,16 +5,22 @@ export default class BladeState extends PlayerState {
     constructor(actor, manager, options = {}) {
         super(actor, manager, options);
         this.enterBoost = 1.3;
-        this.maxEnterBoost = 1.3;
+        this.maxEnterBoost = 1.6;
+        this.cdSpeed = 1000;
     }
     enter() {
         this.actor.animator?.setAnimState('crouch', true);
+        const boost = this.lastEnter ? Math.min((performance.now() - this.lastEnter) / this.cdSpeed, this.maxEnterBoost) : this.maxEnterBoost;
+        this.actor.movement.bladeStart(Math.max(boost, 1));
+        console.log(boost);
+        this.lastEnter = performance.now();
+        this.floorTimer = null;
 
-        if (this.actor.groundChecker.isGrounded(.6)) {
-            this.enterBoost = this.lastEnter ? Math.max(1, Math.min((performance.now() - this.lastEnter) / 1000, this.maxEnterBoost)) : this.maxEnterBoost;
-            this.lastEnter = performance.now();
-            this.body.velocity.mult(this.enterBoost, this.body.velocity);
-        }
+        // if (this.actor.groundChecker.isGrounded(.6)) {
+        //     this.enterBoost = this.lastEnter ? Math.max(1, Math.min((performance.now() - this.lastEnter) / 1000, this.maxEnterBoost)) : this.maxEnterBoost;
+        //     this.lastEnter = performance.now();
+        //     this.body.velocity.mult(this.enterBoost, this.body.velocity);
+        // }
     }
     update(dt) {
         this.actor.movement.bladeMove(dt);

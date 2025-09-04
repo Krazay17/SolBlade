@@ -27,9 +27,9 @@ export default class PlayerMovement {
                 tap: .01
             },
             blade: {
-                friction: 0.2,
+                friction: 0.1,
                 accel: 1,
-                speed: 4,
+                speed: 1,
                 tap: .01
             },
             idle: {
@@ -71,9 +71,9 @@ export default class PlayerMovement {
                 tap: .01
             },
             blade: {
-                friction: 0.2,
+                friction: 0.1,
                 accel: 1,
-                speed: 4,
+                speed: 1,
                 tap: .01
             },
             idle: {
@@ -128,26 +128,45 @@ export default class PlayerMovement {
         this.accelerate(wishdir, this.values.air.speed, this.values.air.accel, dt, this.values.air.tap);
     }
 
-    bladeEnter() {
-        this.slopeBoost(this.body.velocity.length());
+    bladeStart(pwr = 1) {
+        const v = this.body.velocity.clone();
+        const n = this.actor.groundChecker.floorNormal(); // Should be a normalized Vec3
+        if (!n) return;
+        const vdot = v.dot(n);
+        let projectV = v.vsub(n.scale(vdot));
+        projectV.scale(pwr, projectV);
+        const maxBoost = 30;
+        if (projectV.length() > maxBoost) {
+            projectV.normalize();
+            projectV.scale(maxBoost, projectV);
+        }
+        this.body.velocity.copy(projectV);
     }
 
     bladeMove(dt) {
-        this.applyFriction(dt, this.values.blade.friction);
+        //this.applyFriction(dt, this.values.blade.friction);
+        this.applySlopeFriction(dt, this.values.blade.friction);
 
         const wishdir = this.getInputDirection();
-        if (wishdir.almostZero()) return;
 
         this.accelerate(wishdir, this.values.blade.speed, this.values.blade.accel, dt, this.values.blade.tap);
 
-        this.slopeBoost(dt);
     }
 
-    slopeBoost(amnt) {
-        this.tempVec.copy(this.actor.groundChecker.floorNormal());
-        this.tempVec.cross(this.tempVec2.set(0, 1, 0), this.tempVec);
-        this.actor.groundChecker.floorNormal().cross(this.tempVec, this.tempVec);
-        this.body.velocity.vadd(this.tempVec.scale(amnt), this.body.velocity);
+    slopeBoost(pwr = 1, dt) {
+        const n = this.actor.groundChecker.floorNormal();
+        if (!n) return;
+
+        // Project gravity onto the slope plane
+        const gravity = this.tempVec2.set(0, -9.8 * pwr, 0);
+        const gravityDot = gravity.dot(n);
+        const gravityAlongSlope = gravity.vsub(n.scale(gravityDot));
+
+        // Scale by dt for frame rate independence
+        gravityAlongSlope.scale(dt, gravityAlongSlope);
+
+        // Add to velocity
+        this.body.velocity.vadd(gravityAlongSlope, this.body.velocity);
     }
 
     dashStart() {
@@ -182,6 +201,30 @@ export default class PlayerMovement {
         const scale = newSpeed / speed;
         this.body.velocity.x *= scale;
         this.body.velocity.z *= scale;
+    }
+
+    applySlopeFriction(dt, friction) {
+        const n = this.actor.groundChecker.floorNormal();
+        if (!n) {
+            this.applyFriction(dt, friction);
+            return;
+        }
+        // Project velocity onto slope plane
+        const v = this.body.velocity;
+        const vdot = v.dot(n);
+        const vProj = v.vsub(n.scale(vdot));
+        const speed = vProj.length();
+        if (speed < 0.0001) return;
+
+        const drop = speed * friction * dt;
+        const newSpeed = Math.max(speed - drop, 0);
+
+        const scale = newSpeed / speed;
+        vProj.scale(scale, vProj);
+
+        // Add back the normal component
+        const newVel = vProj.vadd(n.scale(vdot));
+        this.body.velocity.copy(newVel);
     }
 
     accelerate(wishdir, wishspeed, accel, dt, tapBlend) {
@@ -234,6 +277,7 @@ export default class PlayerMovement {
     }
 
     tapStrafe(wishdir, blendFactor = 0.15) {
+        if (wishdir.isZero()) return;
         // Preserve vertical velocity separately
         const oldY = this.body.velocity.y;
 

@@ -54,6 +54,7 @@ export default class GroundChecker {
                 //only collide with world floor
                 result: result,
                 collisionFilterMask: 1,
+                skipBackfaces: true,
             });
             this.lastResult = result;
 

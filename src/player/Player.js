@@ -31,7 +31,7 @@ export default class Player extends THREE.Object3D {
 
         this.isDead = false;
         this.height = 1;
-        this.radius = .3;
+        this.radius = .2;
         this.mesh;
         this.body = null;
         this.mixer;
@@ -116,8 +116,7 @@ export default class Player extends THREE.Object3D {
 
             MyEventEmitter.on('KeyPressed', (key) => {
                 if (key === 'KeyR') {
-                    this.body.position.set(0, 5, 0);
-                    this.body.velocity.set(0, 0, 0);
+                    this.stateManager.setState('dead');
                 }
             });
         } else {
