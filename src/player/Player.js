@@ -15,7 +15,7 @@ import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
 
 export default class Player extends THREE.Object3D {
-    constructor(game, scene, { x = 0, y = 5, z = 0 }, isLocal = true, camera, id, netData) {
+    constructor(game, scene, { x = 0, y = 1, z = 0 }, isLocal = true, camera, id, netData) {
         super();
         this.game = game;
         this.scene = scene;
