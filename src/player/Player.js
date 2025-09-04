@@ -329,7 +329,7 @@ export default class Player extends THREE.Object3D {
     unDie() {
         if (!this.isLocal) return;
         this.stateManager.setState('idle');
-        this.body.position.set(0, 5, 0);
+        this.body.position.set(0, 1, 0);
         this.body.velocity.set(0, 0, 0);
 
         this.setHealth(100);
