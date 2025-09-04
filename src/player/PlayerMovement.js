@@ -10,6 +10,9 @@ export default class PlayerMovement {
         this.direction = new Vec3();
         this.tempVec = new Vec3();
         this.tempVec2 = new Vec3();
+        this.tempVec3 = new Vec3();
+        this.tempVec4 = new Vec3();
+        this.tempVec5 = new Vec3();
         this.dashValue = 0;
 
         const savedValues = LocalData.movementValues;
@@ -30,7 +33,7 @@ export default class PlayerMovement {
                 friction: 0.1,
                 accel: 1,
                 speed: 1,
-                tap: .01
+                tap: .02
             },
             idle: {
                 friction: 15,
@@ -39,10 +42,10 @@ export default class PlayerMovement {
                 tap: .01
             },
             attack: {
-                friction: 1,
-                accel: 10,
-                speed: 2,
-                tap: .15
+                friction: 2,
+                accel: 4,
+                speed: 4,
+                tap: .1
             },
             dash: {
                 speed: 25
@@ -74,7 +77,7 @@ export default class PlayerMovement {
                 friction: 0.1,
                 accel: 1,
                 speed: 1,
-                tap: .01
+                tap: .02
             },
             idle: {
                 friction: 15,
@@ -83,10 +86,10 @@ export default class PlayerMovement {
                 tap: .01
             },
             attack: {
-                friction: 1,
-                accel: 10,
-                speed: 2,
-                tap: .15
+                friction: 2,
+                accel: 4,
+                speed: 4,
+                tap: .1
             },
             dash: {
                 speed: 25
@@ -144,8 +147,8 @@ export default class PlayerMovement {
     }
 
     bladeMove(dt) {
-        //this.applyFriction(dt, this.values.blade.friction);
-        this.applySlopeFriction(dt, this.values.blade.friction);
+        this.applyFriction(dt, this.values.blade.friction);
+        //this.applySlopeFriction(dt, this.values.blade.friction);
 
         const wishdir = this.getInputDirection();
 
@@ -184,10 +187,15 @@ export default class PlayerMovement {
     }
 
     jumpStart() {
-        if (this.body.velocity.y < 0) {
-            this.body.velocity.y = 9.8;
+        const currentVY = this.body.velocity.clone().y;
+        const jumpV = 9.8;
+        if (currentVY < 0) {
+            this.body.velocity.y = jumpV;
         } else {
-            this.body.velocity.y += 9.8;
+            const scaledjumpV = Math.max(0, currentVY - jumpV);
+            const finaljumpV = jumpV + scaledjumpV;
+
+            this.body.velocity.y = Math.min(jumpV * 2, currentVY + jumpV);
         }
     }
 
@@ -236,7 +244,7 @@ export default class PlayerMovement {
         const addSpeed = (scaledWishSpeed - currentHorizSpeed);
         if (addSpeed <= 0) return;
 
-        this.tapStrafe(wishdir, tapBlend);
+        this.tapStrafe(wishdir, tapBlend, currentHorizSpeed);
 
         const accelSpeed = Math.min(accel * scaledWishSpeed * dt, addSpeed);
         this.body.velocity.x += wishdir.x * accelSpeed;
@@ -276,29 +284,27 @@ export default class PlayerMovement {
         return { rotatedX, rotatedZ };
     }
 
-    tapStrafe(wishdir, blendFactor = 0.15) {
+    tapStrafe(wishdir, blendFactor = 0.15, horizontalSpeed = 0) {
         if (wishdir.isZero()) return;
         // Preserve vertical velocity separately
+        const currentV = this.body.velocity.clone();
         const oldY = this.body.velocity.y;
 
         // Project velocity onto the wishdir (forward component)
-        const projSpeed = this.body.velocity.dot(wishdir);
-        const velProj = new Vec3();
-        wishdir.scale(projSpeed, velProj);  // velProj = wishdir * projSpeed
+        const projSpeed = currentV.dot(wishdir);
+        wishdir.scale(projSpeed, this.tempVec3);  // velProj = wishdir * projSpeed
 
         // Sideways component = velocity - projected
-        const velSide = new Vec3();
-        this.body.velocity.vsub(velProj, velSide);
+        this.body.velocity.vsub(this.tempVec3, this.tempVec4);
 
         // Blend sideways velocity back toward wishdir (tap strafe feel)
-        velSide.scale(1 - blendFactor, velSide);
+        this.tempVec4.scale(1 - blendFactor, this.tempVec4);
 
-        // New horizontal velocity = velProj + adjusted side
-        const newVel = new Vec3();
-        velProj.vadd(velSide, newVel);
+        // New horizontal velocity = velProj + adjusted sideways
+        this.tempVec3.vadd(this.tempVec4, this.tempVec5);
 
         // Write back to body, preserving Y
-        this.body.velocity.copy(newVel);
+        this.body.velocity.copy(this.tempVec5);
         this.body.velocity.y = oldY;
     }
 

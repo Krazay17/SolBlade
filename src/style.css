@@ -4,7 +4,8 @@
     box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
     height: 100%;
 }
 
@@ -19,8 +20,40 @@ canvas {
 
 #particles {
     z-index: 10;
-    pointer-events: auto; /* ensures it can receive clicks */
+    pointer-events: auto;
+    /* ensures it can receive clicks */
 }
+
 #webgl {
     z-index: 1;
+}
+
+#discord-section {
+    background-color: rgba(0, 0, 0, 0);
+    display: flex;
+    position: fixed;
+    overflow-x: hidden;
+    top: 100px;
+    right: 0%;
+    gap: 2px;
+    z-index: 4;
+    transform: translateX(calc(100% - 410px));
+    transition: transform 0.5s ease;
+}
+
+#discord-section.hidden {
+    transform: translateX(calc(100% - 60px));
+}
+
+#discordHideButton {
+    background-image: url(/assets/DiscordToggle.png);
+    background-size: cover;
+    width: 60px;
+    height: 50px;
+    background-color: black;
+    cursor: move;
+}
+
+#discordHideButton:hover {
+    background-color: white;
 }

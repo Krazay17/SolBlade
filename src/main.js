@@ -4,6 +4,7 @@ import GameScene from "./scenes/GameScene";
 import { initSocket } from "./core/NetManager";
 import Menu from "./ui/Menu";
 import soundPlayer from "./core/SoundPlayer";
+import { setupDiscordWindow } from "./ui/DiscordStuff";
 
 LocalData.load();
 soundPlayer.setInitVolume();
@@ -15,6 +16,9 @@ const menu = new Menu();
 
 game.setScene(gameScene);
 game.start();
+
+
+setupDiscordWindow();
 
 window.addEventListener('beforeunload', () => {
     LocalData.save();

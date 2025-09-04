@@ -5,7 +5,10 @@ const sec = document.getElementById("discord-section");
 export function setupDiscordWindow() {
     const moveDiscordButton = document.getElementById("discordHideButton");
 
-    setTimeout(()=>sec.classList.toggle('hidden'), 5000);
+    setTimeout(() => {
+        if (sec.classList.contains('hidden')) return;
+        sec.classList.toggle('hidden');
+    }, 4000);
 
     moveDiscordButton.addEventListener('mousedown', (e) => {
         e.stopPropagation();
