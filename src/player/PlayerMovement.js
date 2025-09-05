@@ -1,5 +1,6 @@
 import { Vec3 } from "cannon";
 import LocalData from "../core/LocalData";
+import { projectOnPlane } from "../utils/Utils";
 
 export default class PlayerMovement {
     constructor(actor) {
@@ -19,20 +20,20 @@ export default class PlayerMovement {
         this.values = savedValues ?? {
             ground: {
                 friction: 9,
-                accel: 10,
-                speed: 7,
+                accel: 7,
+                speed: 6,
                 tap: .15
             },
             air: {
-                friction: 0.05,
-                accel: 2.5,
-                speed: 3,
+                friction: 0,
+                accel: 3,
+                speed: 4,
                 tap: .01
             },
             blade: {
-                friction: 0.1,
-                accel: 1,
-                speed: 1,
+                friction: 0.2,
+                accel: 2,
+                speed: 3,
                 tap: .02
             },
             idle: {
@@ -63,20 +64,20 @@ export default class PlayerMovement {
         this.values = {
             ground: {
                 friction: 9,
-                accel: 10,
-                speed: 7,
+                accel: 7,
+                speed: 6,
                 tap: .15
             },
             air: {
-                friction: 0.05,
-                accel: 2.5,
-                speed: 3,
+                friction: 0,
+                accel: 3,
+                speed: 4,
                 tap: .01
             },
             blade: {
-                friction: 0.1,
-                accel: 1,
-                speed: 1,
+                friction: 0.2,
+                accel: 2,
+                speed: 3,
                 tap: .02
             },
             idle: {
@@ -110,16 +111,13 @@ export default class PlayerMovement {
     }
 
     groundMove(dt) {
-        this.applyFriction(dt, this.values.ground.friction);
-        // 1. Friction
-        this.applyFriction(dt, this.values.ground.friction);
+        this.applySlopeFriction(dt, this.values.ground.friction);
 
-        // 2. Get input direction
-        const wishdir = this.getInputDirection(); // normalized Vector3 (x,z)
+        let wishdir = this.getInputDirection();
         if (wishdir.almostZero()) return;
+        wishdir = projectOnPlane(wishdir, this.actor.groundChecker.floorNormal());
 
-        // 3. Accelerate
-        this.accelerate(wishdir, this.values.ground.speed, this.values.ground.accel, dt, this.values.ground.tap);
+        this.accelerate(wishdir, this.values.ground.speed + this.actor.runBooster.getBoost(), this.values.ground.accel, dt, this.values.ground.tap);
     }
 
     airMove(dt) {
@@ -147,12 +145,15 @@ export default class PlayerMovement {
     }
 
     bladeMove(dt) {
-        this.applyFriction(dt, this.values.blade.friction);
-        //this.applySlopeFriction(dt, this.values.blade.friction);
+        //this.applyFriction(dt, this.values.blade.friction);
+        this.applySlopeFriction(dt, this.values.blade.friction);
 
-        const wishdir = this.getInputDirection();
+        let wishdir = this.getInputDirection();
+        if (wishdir.almostZero()) return;
+        // Project wishdir onto slope plane
+        wishdir = projectOnPlane(wishdir, this.actor.groundChecker.floorNormal());
 
-        this.accelerate(wishdir, this.values.blade.speed, this.values.blade.accel, dt, this.values.blade.tap);
+        this.accelerate(wishdir, this.values.blade.speed + this.actor.runBooster.getBoost(), this.values.blade.accel, dt, this.values.blade.tap);
 
     }
 
@@ -188,7 +189,7 @@ export default class PlayerMovement {
 
     jumpStart() {
         const currentVY = this.body.velocity.clone().y;
-        const jumpV = 9.8;
+        const jumpV = 6.66;
         if (currentVY < 0) {
             this.body.velocity.y = jumpV;
         } else {
@@ -200,15 +201,18 @@ export default class PlayerMovement {
     }
 
     applyFriction(dt, friction) {
-        const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
+        //const speed = Math.hypot(this.body.velocity.x, this.body.velocity.z);
+        const speed = this.body.velocity.length();
         if (speed < 0.0001) return;
 
         const drop = speed * friction * dt;
         const newSpeed = Math.max(speed - drop, 0);
 
         const scale = newSpeed / speed;
-        this.body.velocity.x *= scale;
-        this.body.velocity.z *= scale;
+        // this.body.velocity.x *= scale;
+        // this.body.velocity.y *= scale;
+        // this.body.velocity.z *= scale;
+        this.body.velocity.mult(scale, this.body.velocity)
     }
 
     applySlopeFriction(dt, friction) {
@@ -236,7 +240,7 @@ export default class PlayerMovement {
     }
 
     accelerate(wishdir, wishspeed, accel, dt, tapBlend) {
-        const scaledWishSpeed = wishspeed + this.actor.runBooster.getBoost();
+        const scaledWishSpeed = wishspeed;
         const currentVelocity = this.body.velocity.clone(); // speed in that direction
         currentVelocity.y = 0;
         const currentHorizSpeed = currentVelocity.dot(wishdir);
@@ -244,11 +248,13 @@ export default class PlayerMovement {
         const addSpeed = (scaledWishSpeed - currentHorizSpeed);
         if (addSpeed <= 0) return;
 
-        this.tapStrafe(wishdir, tapBlend, currentHorizSpeed);
+        //this.tapStrafe(wishdir, tapBlend);
+        //this.momentumDrift(wishdir, tapBlend);
 
         const accelSpeed = Math.min(accel * scaledWishSpeed * dt, addSpeed);
         this.body.velocity.x += wishdir.x * accelSpeed;
         this.body.velocity.z += wishdir.z * accelSpeed;
+        this.body.velocity.y += wishdir.y * accelSpeed;
     }
 
     getInputDirection(z = 0) {
@@ -284,28 +290,83 @@ export default class PlayerMovement {
         return { rotatedX, rotatedZ };
     }
 
-    tapStrafe(wishdir, blendFactor = 0.15, horizontalSpeed = 0) {
+
+
+    // tapStrafe(wishdir, blendFactor = 0.15) {
+    //     if (wishdir.isZero()) return;
+    //     // Preserve vertical velocity separately
+    //     const currentV = this.body.velocity.clone();
+    //     currentV.y = 0;
+    //     const oldY = this.body.velocity.y;
+
+    //     // Project velocity onto the wishdir (forward component)
+    //     const projSpeed = currentV.dot(wishdir);
+    //     wishdir.scale(projSpeed, this.tempVec3);
+
+    //     // Sideways component = velocity - projected
+    //     this.body.velocity.vsub(this.tempVec3, this.tempVec4);
+
+    //     // Blend sideways velocity back toward wishdir (tap strafe feel)
+    //     this.tempVec4.scale(1 - blendFactor, this.tempVec4);
+
+    //     // New horizontal velocity = velProj + adjusted sideways
+    //     this.tempVec3.vadd(this.tempVec4, this.tempVec5);
+
+    //     // Write back to body, preserving Y
+    //     this.body.velocity.x = this.tempVec5.x;
+    //     this.body.velocity.z = this.tempVec5.z;
+    //     //this.body.velocity.y = oldY;
+    // }
+    tapStrafe(wishdir, blendFactor = 0.15) {
         if (wishdir.isZero()) return;
-        // Preserve vertical velocity separately
+
+        // Get current horizontal velocity
         const currentV = this.body.velocity.clone();
-        const oldY = this.body.velocity.y;
+        currentV.y = 0;
+        const speed = currentV.length();
+        if (speed < 0.0001) return;
+        if (blendFactor <= 0) return;
 
-        // Project velocity onto the wishdir (forward component)
-        const projSpeed = currentV.dot(wishdir);
-        wishdir.scale(projSpeed, this.tempVec3);  // velProj = wishdir * projSpeed
+        this.tempVec3.copy(currentV).scale(1 - blendFactor);
+        this.tempVec4.copy(wishdir).scale(blendFactor);
+        this.tempVec3.vadd(this.tempVec4, this.tempVec3);
 
-        // Sideways component = velocity - projected
-        this.body.velocity.vsub(this.tempVec3, this.tempVec4);
-
-        // Blend sideways velocity back toward wishdir (tap strafe feel)
-        this.tempVec4.scale(1 - blendFactor, this.tempVec4);
-
-        // New horizontal velocity = velProj + adjusted sideways
-        this.tempVec3.vadd(this.tempVec4, this.tempVec5);
-
-        // Write back to body, preserving Y
-        this.body.velocity.copy(this.tempVec5);
-        this.body.velocity.y = oldY;
+        // Apply blended direction, preserve speed and Y
+        this.body.velocity.x = this.tempVec3.x
+        this.body.velocity.z = this.tempVec3.z
     }
+
+    momentumDrift(wishdir, blendFactor = 0.15) {
+        if (wishdir.isZero()) return;
+        // Get current horizontal velocity
+        const currentV = this.body.velocity.clone();
+        currentV.y = 0;
+        const projectV = currentV.dot(wishdir);
+        console.log(projectV)
+    }
+
+    // tapStrafe2(wishdir, blendFactor = 0.15, horizontalSpeed = 0) {
+    //     if (wishdir.isZero()) return;
+    //     // Preserve vertical velocity separately
+    //     const currentV = this.body.velocity.clone();
+    //     const oldY = this.body.velocity.y;
+
+    //     // Project velocity onto the wishdir (forward component)
+    //     const projSpeed = currentV.dot(wishdir);
+    //     wishdir.scale(projSpeed, this.tempVec3);
+
+    //     // Sideways component = velocity - projected
+    //     this.body.velocity.vsub(this.tempVec3, this.tempVec4);
+
+    //     // Blend sideways velocity back toward wishdir (tap strafe feel)
+    //     this.tempVec4.scale(1 - blendFactor, this.tempVec4);
+
+    //     // New horizontal velocity = velProj + adjusted sideways
+    //     this.tempVec3.vadd(this.tempVec4, this.tempVec5);
+
+    //     // Write back to body, preserving Y
+    //     this.body.velocity.copy(this.tempVec5);
+    //     this.body.velocity.y = oldY;
+    // }
 
 }

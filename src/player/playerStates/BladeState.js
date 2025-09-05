@@ -4,8 +4,8 @@ import { Vec3 } from "cannon";
 export default class BladeState extends PlayerState {
     constructor(actor, manager, options = {}) {
         super(actor, manager, options);
-        this.enterBoost = 1.3;
-        this.maxEnterBoost = 1.6;
+        this.enterBoost = 1.5;
+        this.maxEnterBoost = 1.5;
         this.cdSpeed = 1000;
     }
     enter() {
@@ -39,7 +39,7 @@ export default class BladeState extends PlayerState {
             this.manager.setState('dash');
             return;
         }
-        if (!this.actor.groundChecker.isGrounded(.6)) {
+        if (!this.actor.groundChecker.isGrounded(.1)) {
             if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {
                     this.manager.setState('fall');

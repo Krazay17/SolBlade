@@ -31,7 +31,7 @@ export default class Player extends THREE.Object3D {
 
         this.isDead = false;
         this.height = 1;
-        this.radius = .2;
+        this.radius = .25;
         this.mesh;
         this.body = null;
         this.mixer;
@@ -95,7 +95,7 @@ export default class Player extends THREE.Object3D {
             // });
             this.body.id = 'player';
             game.physicsWorld.addBody(this.body);
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .3, this.radius);
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .2, this.radius);
 
             const contactMaterial = new CANNON.ContactMaterial(
                 material,

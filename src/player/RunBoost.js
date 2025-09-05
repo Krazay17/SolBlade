@@ -11,14 +11,10 @@ export default class RunBoost {
         this.lastSpeed = 0;
 
         this.alignmentLax = 0;
-        this.maxRunBoost = 5000;
-        this.boostAccel = 10;
+        this.maxRunBoost = 10;
+        this.boostAccel = 7.5;
     }
-    getalignment() {
-        const currentVelocity = this.body.velocity.clone();
-        currentVelocity.y = 0;
-        currentVelocity.normalize();
-
+    getalignment(currentVelocity) {
         //const alignment = this.actor.getInputDirection().clone();
 
         this.lastAlignment = Math.max(0, Math.min(1, currentVelocity.dot(this.lastVelocity)));
@@ -33,8 +29,8 @@ export default class RunBoost {
         if (currentVelocity.length() < this.lastSpeed) {
             this.boostAmount *= 0.98;
         }
-        const currentAlignment = this.getalignment();
-        let misAlign = Math.pow(currentAlignment, 10);
+        const currentAlignment = this.getalignment(currentVelocity);
+        let misAlign = Math.pow(currentAlignment, 14);
         if (state === 'run'|| state === 'blade') {
             this.boostAmount = Math.min(this.maxRunBoost, this.boostAmount + this.boostAccel * misAlign * dt);
         }
