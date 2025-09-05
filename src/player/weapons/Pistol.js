@@ -37,7 +37,7 @@ export default class Pistol extends BaseWeapon {
                 soundPlayer.playSound('gunshoot');
             }
             fx();
-            this.meshTracer.lineTrace(cameraPos, dir, this.range, (hits) => {
+            this.meshTracer.lineTrace(cameraPos, dir, this.range, this.actor.position, (hits) => {
                 for (const hit of hits) {
                     const actor = hit.object.userData.owner;
                     if (actor && actor !== this.actor && !this.hitActors.has(actor)) {

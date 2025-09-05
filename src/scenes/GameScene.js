@@ -27,6 +27,7 @@ export default class GameScene extends SceneBase {
 
     this.meshManager = new MeshManager();
     this.actorMeshes = [];
+    this.mapWalls = [];
     this.crosshair = new Crosshair(this.game.graphicsWorld);
 
     this.player = new Player(this.game, this, playerPosBuffer, true, this.game.camera);
@@ -137,6 +138,7 @@ export default class GameScene extends SceneBase {
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
+          this.mapWalls.push(child);
         }
       });
       this.game.graphicsWorld.add(model);

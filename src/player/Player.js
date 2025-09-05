@@ -61,6 +61,7 @@ export default class Player extends THREE.Object3D {
             this.cameraArm = new THREE.Object3D();
             this.cameraArm.position.set(.5, 1, 0);
             this.add(this.cameraArm);
+            this.camera.position.z = 1.5;
             this.cameraArm.add(this.camera);
             CameraFX.init(this.camera);
             this.createBody();
@@ -179,7 +180,7 @@ export default class Player extends THREE.Object3D {
         //const topSphere = new CANNON.Sphere(this.radius);
 
         this.body = new CANNON.Body({
-            shape:sphere,
+            shape: sphere,
             position: this.currentPosition,
             mass: 1,
             fixedRotation: true,

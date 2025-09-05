@@ -43,7 +43,6 @@ export default class Game {
       0.1,
       5000
     );
-    this.camera.position.z = 2;
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     this.spawnLights();

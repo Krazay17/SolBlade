@@ -1,7 +1,7 @@
 #game-data {
     position: absolute;
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr;
     top: 0;
     left: 0;
     background: rgba(0, 0, 0, 0.5);

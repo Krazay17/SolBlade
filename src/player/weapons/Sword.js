@@ -28,7 +28,7 @@ export default class Sword extends BaseWeapon {
 
     update() {
         this.meleeTrace(this.actor.position, this.actor.getCameraDirection(), this.range, 0.5, (target, camDir) => {
-            const scaledCamDir = camDir.clone().normalize().multiplyScalar(30);
+            const scaledCamDir = camDir.clone().normalize().multiplyScalar(20);
             target.takeCC?.('knockback', scaledCamDir);
             target.changeHealth?.('damage', this.damage);
             soundPlayer.playSound('swordHit');

@@ -4,10 +4,11 @@ export default class MeshTrace {
     constructor(scene) {
         this.scene = scene;
         this.raycaster = new Raycaster();
+        this.raycaster2 = new Raycaster();
         this.tempVector = new Vector3();
     }
 
-    lineTrace(start, direction, length, callback) {
+    lineTrace(start, direction, length, losStart, callback) {
         let savedStart = start;
         if (savedStart instanceof Object3D) {
             savedStart = savedStart.position.clone();
@@ -31,11 +32,21 @@ export default class MeshTrace {
                 return;
             }
         });
-        
+
         this.raycaster.set(savedStart, savedDir);
         const intersects = this.raycaster.intersectObjects(actorMeshes, false);
         for (const hit of intersects) {
             if (hit.distance <= length) {
+                const losDir = hit.point.clone().sub(losStart);
+                const losLength = losDir.length();
+                losDir.normalize();
+                this.raycaster2.set(losStart, losDir);
+                const losIntersects = this.raycaster2.intersectObjects(this.scene.mapWalls, false);
+                if (losIntersects.length > 0) {
+                    for (const losHit of losIntersects) {
+                        if (losHit.distance < hit.distance) return;
+                    }
+                }
                 hits.push(hit);
             }
         }
