@@ -27,13 +27,10 @@ export default class Player extends THREE.Object3D {
         game.graphicsWorld.add(this);
         this.skinCache = {};
 
-        console.log(netData);
-
         this.isDead = false;
         this.height = 1;
-        this.radius = .25;
+        this.radius = 0.5;
         this.mesh;
-        this.body = null;
         this.mixer;
         this.animations = {};
         this.currentAnimState = null;
@@ -66,47 +63,9 @@ export default class Player extends THREE.Object3D {
             this.add(this.cameraArm);
             this.cameraArm.add(this.camera);
             CameraFX.init(this.camera);
+            this.createBody();
+            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.radius + .1, this.radius);
 
-            const material = getMaterial('playerMaterial');
-            const sphere = new CANNON.Sphere(.65);
-
-            const body = new CANNON.Body({
-                position: this.currentPosition,
-                mass: 1,
-                fixedRotation: true,
-                shape: sphere,
-                material: material,
-                collisionFilterGroup: 2,
-                collisionFilterMask: -1,
-
-            });
-            if (!scene.levelLoaded) {
-                body.sleep();
-                MyEventEmitter.once('levelLoaded', () => {
-                    body.wakeUp();
-                });
-            }
-            this.body = body;
-            // this.body.addEventListener('collide', (event) => {
-            //     this.isTouching = true;
-            // });
-            // MyEventEmitter.on('preUpdate', () => {
-            //     this.isTouching = false;
-            // });
-            this.body.id = 'player';
-            game.physicsWorld.addBody(this.body);
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.height + .2, this.radius);
-
-            const contactMaterial = new CANNON.ContactMaterial(
-                material,
-                getMaterial('defaultMaterial'),
-                {
-                    friction: 0,
-                    restitution: 0,
-                    contactEquationRelaxation: 50,
-                    id: 'playerGroundContact',
-                });
-            this.game.physicsWorld.addContactMaterial(contactMaterial);
 
             this.movement = new PlayerMovement(this);
             this.runBooster = new RunBoost(this);
@@ -202,6 +161,59 @@ export default class Player extends THREE.Object3D {
         meshBody.userData.owner = this;
         this.scene.actorMeshes.push(meshBody);
         this.animator = new PlayerAnimator(this, newMesh, newMesh.animations);
+    }
+
+    createBody() {
+        const material = getMaterial('playerMaterial');
+        const contactMaterial = new CANNON.ContactMaterial(
+            material,
+            getMaterial('defaultMaterial'),
+            {
+                friction: 0,
+                restitution: 0,
+                contactEquationRelaxation: 50,
+                id: 'playerGroundContact',
+            });
+        this.game.physicsWorld.addContactMaterial(contactMaterial);
+        const sphere = new CANNON.Sphere(this.radius);
+        //const topSphere = new CANNON.Sphere(this.radius);
+
+        this.body = new CANNON.Body({
+            shape:sphere,
+            position: this.currentPosition,
+            mass: 1,
+            fixedRotation: true,
+            material: material,
+            collisionFilterGroup: 2,
+            collisionFilterMask: -1,
+        });
+        // this.body.addShape(topSphere, new CANNON.Vec3(0, this.radius * 2, 0));
+        this.game.physicsWorld.addBody(this.body);
+        this.body.id = 'player';
+        if (!this.scene.levelLoaded) {
+            this.body.sleep();
+            MyEventEmitter.once('levelLoaded', () => {
+                this.body.wakeUp();
+            });
+        }
+        // this.body.addShape(sphere, new CANNON.Vec3(0, this.radius * 2, 0));
+        // this.body.addShape(sphere, new CANNON.Vec3(0, this.radius * 4, 0));
+        // this.scene.glbLoader.load('/assets/capsule.glb', (gltf) => {
+        //     let poly;
+        //     gltf.scene.traverse((child) => {
+        //         if (child.isMesh) {
+        //             poly = glbToPoly(child);
+        //             this.body.addShape(poly, new CANNON.Vec3(0, this.height / 2, 0));
+        //         }
+        //     });
+        // });
+
+        // this.body.addEventListener('collide', (event) => {
+        //     this.isTouching = true;
+        // });
+        // MyEventEmitter.on('preUpdate', () => {
+        //     this.isTouching = false;
+        // });
     }
 
     getCameraDirection() {

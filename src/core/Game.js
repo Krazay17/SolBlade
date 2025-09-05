@@ -29,6 +29,7 @@ export default class Game {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     this.physicsWorld = new CANNON.World({
+      iterations: 20,
       defaultMaterial: getMaterial('defaultMaterial'),
     });
     this.physicsWorld.gravity = new CANNON.Vec3(0, -15, 0);

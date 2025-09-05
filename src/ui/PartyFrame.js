@@ -8,7 +8,7 @@ export default class PartyFrame {
 
         this.container = document.createElement('div');
         this.container.id = 'party-frame';
-        document.body.appendChild(this.container);
+        document.getElementById('game-data').appendChild(this.container);
 
         // MyEventEmitter.on('playerHealthChange', (player, health) => {
         //     const playerElement = this.players.get(player);

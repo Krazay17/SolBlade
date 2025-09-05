@@ -13,6 +13,7 @@ export default class PlayerInfo {
     createUI() {
         const container = document.createElement('div');
         container.id = 'player-info-container';
+        document.getElementById('game-data').appendChild(container);
 
         const nameBarElem = document.createElement('div');
         nameBarElem.id = 'name-bar';
@@ -57,7 +58,5 @@ export default class PlayerInfo {
         manaBar.style.width = `${this.mana}%`;
         manaBarContainer.appendChild(manaBar);
         container.appendChild(manaBarContainer);
-
-        document.body.appendChild(container);
     }
 }

@@ -19,6 +19,7 @@ import MyEventEmitter from '../core/MyEventEmitter.js';
 export default class GameScene extends SceneBase {
   onEnter() {
     this.name = 'level1';
+    this.glbLoader = new GLTFLoader();
     this.spawnLevel();
     this.netPlayers = {};
     let playerPosBuffer = LocalData.position;
@@ -40,7 +41,6 @@ export default class GameScene extends SceneBase {
     document.addEventListener('mousedown', playMusiconFirstClick);
 
     this.debugData = new DebugData(this.player);
-    this.partyFrame = new PartyFrame(this.player);
 
     this.makeSky();
     setNetScene(this, {
@@ -101,6 +101,7 @@ export default class GameScene extends SceneBase {
     this.netPlayers[id] = player;
     player.name = data.name;
     player.currentAnimState = data.state;
+    this.partyFrame = new PartyFrame(this.player);
     this.partyFrame.addPlayer(player);
     return player;
   }
@@ -128,9 +129,7 @@ export default class GameScene extends SceneBase {
   }
 
   spawnLevel() {
-    // Load a test world mesh
-    const loader = new GLTFLoader();
-    loader.load('/assets/Level2.glb', (gltf) => {
+    this.glbLoader.load('/assets/Level2.glb', (gltf) => {
       const model = gltf.scene;
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
@@ -170,11 +169,11 @@ export default class GameScene extends SceneBase {
     });
 
     // Loading progress bar could be added here using the onProgress callback
-    loader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    this.glbLoader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
       const progress = (itemsLoaded / itemsTotal) * 100;
       this.loadingBar(progress.toFixed(2));
     };
-    loader.manager.onLoad = () => {
+    this.glbLoader.manager.onLoad = () => {
       this.loadingBar(100);
     };
 

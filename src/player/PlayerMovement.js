@@ -9,6 +9,7 @@ export default class PlayerMovement {
         this.input = actor.input;
 
         this.direction = new Vec3();
+        this.upDir = new Vec3(0, 1, 0);
         this.tempVec = new Vec3();
         this.tempVec2 = new Vec3();
         this.tempVec3 = new Vec3();
@@ -134,9 +135,11 @@ export default class PlayerMovement {
         const n = this.actor.groundChecker.floorNormal(); // Should be a normalized Vec3
         if (!n) return;
         const vdot = v.dot(n);
+        let boost = Math.min(1.5, 1 + (1 - this.upDir.dot(n)) * 2);
         let projectV = v.vsub(n.scale(vdot));
-        projectV.scale(pwr, projectV);
-        const maxBoost = 30;
+        projectV.scale(boost, projectV);
+        console.log('boost', boost);
+        const maxBoost = 25;
         if (projectV.length() > maxBoost) {
             projectV.normalize();
             projectV.scale(maxBoost, projectV);
