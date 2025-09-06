@@ -187,7 +187,7 @@ export default class PlayerMovement {
     }
     dashStop() {
         const currentVel = this.body.velocity.clone();
-        currentVel.mult(0.4, this.body.velocity);
+        currentVel.mult(0.9, this.body.velocity);
     }
 
     jumpStart() {
