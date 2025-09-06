@@ -15,7 +15,7 @@ export default class PlayerAnimator {
     });
 
     this.currentAction = null;
-    this.setAnimState(this.actor.isLocal ? 'idle' : this.actor.currentAnimState);
+    this.setAnimState(this.actor.isRemote ? this.actor.currentAnimState : 'idle');
   }
 
   destroy() {

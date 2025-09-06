@@ -49,6 +49,7 @@ export default class Game {
 
     this.input = new Input(canvas);
     this.playerInfo = new PlayerInfo();
+    Globals.playerInfo = this.playerInfo;
 
     //this.setScene(LocalData.scene);
     this.initWindow();

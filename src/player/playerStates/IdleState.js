@@ -6,7 +6,9 @@ export default class IdleState extends PlayerState {
         this.actor.animator?.setAnimState('idle');
     }
     update(dt) {
-        this.actor.movement.idleMove(dt);
+        if (!this.actor.movement.idleMove(dt)) {
+            this.body.sleep();
+        }
 
         if (!this.actor.movement.getInputDirection().isZero()) {
             this.manager.setState('run', this.actor.floorTrace());
@@ -15,15 +17,6 @@ export default class IdleState extends PlayerState {
 
         if (this.input.keys['Space']) {
             this.manager.setState('jump');
-            return;
-        }
-
-        if (this.input.actionStates.blade) {
-            this.manager.setState('blade')
-            return;
-        }
-        if (this.input.actionStates.dash) {
-            this.manager.setState('dash');
             return;
         }
 
@@ -36,6 +29,7 @@ export default class IdleState extends PlayerState {
         if (!netSocket.active && netSocket.disconnected) {
             netSocket.connect();
         }
+        this.body.wakeUp();
     }
     canEnter() {
         if (!this.actor.groundChecker.isGrounded()) {

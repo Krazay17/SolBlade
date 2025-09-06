@@ -39,3 +39,11 @@ export function meshToPoly(mesh) {
     }
     return new CANNON.ConvexPolyhedron({ vertices, faces });
 }
+
+export function clampVector(vec, maxLength) {
+    const length = vec.length();
+    if (length > maxLength) {
+        vec.scale(maxLength / length, vec);
+    }
+    return vec;
+}

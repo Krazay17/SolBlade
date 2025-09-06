@@ -26,7 +26,7 @@ export default class DebugData {
             <p>Y: ${playerPos.y.toFixed(2)}</p>
             <p>Z: ${playerPos.z.toFixed(2)}</p>
             <p>Player State: ${this.player.stateManager.currentStateName}</p>
-            <p>Run Boost: ${this.player.runBooster?.getBoost().toFixed(2) || 0}</p>
+            <p>Run Boost: ${this.player.movement.momentumBooster?.getBoost().toFixed(2) || 0}</p>
             <p>Player Speed: ${Math.round(Math.hypot(this.player.body.velocity.x, this.player.body.velocity.z) * 10)}</p>
         `;
     }

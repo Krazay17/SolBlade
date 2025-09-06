@@ -8,3 +8,5 @@ export { default as DeadState } from './DeadState.js';
 export { default as EmoteState } from './EmoteState.js';
 export { default as StunState } from './StunState.js';
 export { default as BladeState } from './BladeState.js';
+// export { default as WallSlideState } from './WallSlideState.js';
+// export { default as WallJumpState } from './WallJumpState.js';

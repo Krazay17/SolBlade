@@ -23,4 +23,7 @@ export default class AttackState extends PlayerState {
             this.actor.stateManager.setState('idle');
         }
     }
+    canExit() {
+        return performance.now() > this.exitTimer;
+    }
 }

@@ -9,7 +9,9 @@ export default class PlayerInfo {
         this.name = LocalData.name || "Player";
         this.money = LocalData.money || 0;
         this.health = LocalData.health || 100;
-        this.mana = LocalData.mana || 50;
+        this.energy = 100;
+        this.partyFrame = null;
+        this.actor = null;
 
         this.createUI();
     }
@@ -54,13 +56,26 @@ export default class PlayerInfo {
         healthBarContainer.appendChild(healthBar);
         container.appendChild(healthBarContainer);
 
-        const manaBarContainer = document.createElement('div');
-        manaBarContainer.id = 'mana-bar-container';
-        const manaBar = document.createElement('div');
-        manaBar.id = 'mana-bar';
-        manaBar.style.width = `${this.mana}%`;
-        manaBarContainer.appendChild(manaBar);
-        container.appendChild(manaBarContainer);
+        const energyBarContainer = document.createElement('div');
+        energyBarContainer.id = 'energy-bar-container';
+        const energyBar = document.createElement('div');
+        energyBar.id = 'energy-bar';
+        energyBar.style.width = `${this.energy}%`;
+        MyEventEmitter.on('updateEnergy', (newEnergy) => {
+            this.energy = newEnergy;
+            energyBar.style.width = `${this.energy}%`;
+            if (this.energy < this.actor.dashCost || this.energy < 35) {
+                energyBar.style.backgroundColor = 'rgba(255, 102, 0, 1)';
+            } else {
+                energyBar.style.backgroundColor = 'rgba(255, 255, 0, 1)';
+            }
+        });
+        energyBarContainer.appendChild(energyBar);
+        container.appendChild(energyBarContainer);
+    }
+
+    setActor(actor) {
+        this.actor = actor;
     }
 
     createPartyFrame() {

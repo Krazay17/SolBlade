@@ -1,26 +1,29 @@
 import PlayerState from "./_PlayerState";
 
 export default class DashState extends PlayerState {
-    constructor(actor, manager, options = { cd: 1250 }) {
+    constructor(actor, manager, options = {}) {
         super(actor, manager, options);
     }
     enter() {
         this.actor.animator?.setAnimState('dash');
-        this.timer = performance.now() + 370;
-        this.cdTimer = performance.now() + this.cd;
+        this.timer = performance.now() + 350;
         this.actor.movement.dashStart();
     }
     update(dt) {
         this.actor.movement.dashMove(dt);
         if (this.timer < performance.now()) {
-            this.manager.setState('idle');
+            if(this.input.actionStates.blade) {
+            this.manager.setState('blade');
             return;
+
+            } else {
+                this.actor.energyRegen = 25;
+                this.manager.setState('idle');
+                return;
+            }
         }
     }
     exit() {
-        //this.actor.movement.dashStop();
-    }
-    canEnter() {
-        return this.cdTimer < performance.now();
+        this.actor.movement.dashStop();
     }
 }

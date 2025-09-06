@@ -6,7 +6,7 @@ import Globals from "../../utils/Globals";
 
 export default class Sword extends BaseWeapon {
     constructor(actor, scene) {
-        super(actor, 'Sword', 35, 3.2, 1.2); // name, damage, range, cooldown
+        super(actor, 'Sword', 35, 3, 1.2); // name, damage, range, cooldown
         this.scene = scene;
         this.traceDuration = 500; // duration of the sword trace in milliseconds
         soundPlayer.loadSfx('swordSwing', '/assets/HeavySword.mp3');
@@ -29,11 +29,12 @@ export default class Sword extends BaseWeapon {
     update() {
         this.meleeTrace(this.actor.position, this.actor.getCameraDirection(), this.range, 0.5, (target, camDir) => {
             const scaledCamDir = camDir.clone().normalize().multiplyScalar(20);
-            target.takeCC?.('knockback', { dir: scaledCamDir });
+            target.takeCC?.('knockback', { dir: scaledCamDir, duration: 800 });
             target.changeHealth?.('damage', this.damage);
+            // target.takeDamage(this.actor)
             soundPlayer.playSound('swordHit');
             this.actor.animator.hitFreeze();
-            CameraFX.shake(0.11, 150);
+            CameraFX.shake(0.14, 150);
             this.spawnHitParticles(target.position, 25);
         });
     }

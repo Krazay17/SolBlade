@@ -23,3 +23,22 @@ setupDiscordWindow();
 window.addEventListener('beforeunload', () => {
     LocalData.save();
 });
+
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Ctrl') {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+});
+window.addEventListener('keyup', (e) => {
+    if (e.key === 'Ctrl') {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+});
+window.addEventListener('keypress', (e) => {
+    if (e.key === 'Ctrl') {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+});

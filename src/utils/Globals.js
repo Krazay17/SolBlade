@@ -3,6 +3,7 @@ export default {
     graphicsWorld: null,
     physicsWorld: null,
     player: null,
+    playerInfo: null,
     scene: null,
     input: null,
     camera: null,

@@ -30,8 +30,9 @@ export default class GameScene extends SceneBase {
     this.mapWalls = [];
     this.crosshair = new Crosshair(this.game.graphicsWorld);
 
-    this.player = new Player(this.game, this, playerPosBuffer, true, this.game.camera);
+    this.player = new Player(this.game, this, playerPosBuffer, false, this.game.camera);
     Globals.player = this.player;
+    
 
     soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
     function playMusiconFirstClick() {
@@ -98,7 +99,7 @@ export default class GameScene extends SceneBase {
   }
 
   addPlayer(id, data) {
-    const player = new Player(this.game, this, data.pos, false, null, id, data);
+    const player = new Player(this.game, this, data.pos, true, null, id, data);
     this.netPlayers[id] = player;
     player.name = data.name;
     player.currentAnimState = data.state;

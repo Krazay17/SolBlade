@@ -2,9 +2,8 @@ import MyEventEmitter from "../core/MyEventEmitter";
 import Globals from "../utils/Globals";
 
 export default class PartyFrame {
-    constructor(scene) {
+    constructor() {
         this.players = new Map();
-        this.scene = scene;
 
         this.container = document.createElement('div');
         this.container.id = 'party-frame';
@@ -37,6 +36,7 @@ export default class PartyFrame {
         const healthFill = document.createElement('div');
         healthFill.className = 'party-healthbar-fill';
         healthFill.style.width = `${player.health}%`;
+        
         healthBar.appendChild(healthFill);
 
         playerElement.appendChild(healthBar);

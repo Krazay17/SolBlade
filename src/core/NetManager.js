@@ -116,6 +116,13 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[id].applyCC(data);
         }
     });
+    socket.on('playerBlockedUpdate', ({ id, blocking }) => {
+        if (id === socket.id) {
+            console.log('blocked');
+        } else if (netPlayers[id]) {
+            console.log('blocked');
+        }
+    });
 }
 
 setInterval(() => {
