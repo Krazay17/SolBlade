@@ -6,7 +6,7 @@ import Globals from "../../utils/Globals";
 
 export default class Sword extends BaseWeapon {
     constructor(actor, scene) {
-        super(actor, 'Sword', 35, 2, 1.2); // name, damage, range, cooldown
+        super(actor, 'Sword', 35, 3.2, 1.2); // name, damage, range, cooldown
         this.scene = scene;
         this.traceDuration = 500; // duration of the sword trace in milliseconds
         soundPlayer.loadSfx('swordSwing', '/assets/HeavySword.mp3');

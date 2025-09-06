@@ -137,7 +137,7 @@ export default class PlayerMovement {
         const vdot = v.dot(n);
         let boost = Math.min(1.5, 1 + (1 - this.upDir.dot(n)) * 2);
         let projectV = v.vsub(n.scale(vdot));
-        projectV.scale(boost, projectV);
+        projectV.scale(pwr, projectV);
         console.log('boost', boost);
         const maxBoost = 25;
         if (projectV.length() > maxBoost) {

@@ -1,9 +1,9 @@
 import MyEventEmitter from "../core/MyEventEmitter";
+import Globals from "../utils/Globals";
 
 export default class PartyFrame {
-    constructor(actor, scene) {
+    constructor(scene) {
         this.players = new Map();
-        this.actor = actor;
         this.scene = scene;
 
         this.container = document.createElement('div');
@@ -54,7 +54,7 @@ export default class PartyFrame {
     }
 
     selectPlayer(player) {
-        this.actor.body.position.copy(player.position);
+        Globals.player.body.position.copy(player.position);
     }
 
     render() {

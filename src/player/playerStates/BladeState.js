@@ -10,7 +10,7 @@ export default class BladeState extends PlayerState {
     }
     enter() {
         this.actor.animator?.setAnimState('crouch', true);
-        const boost = this.lastEnter ? Math.min((performance.now() - this.lastEnter) / this.cdSpeed, this.maxEnterBoost) : this.maxEnterBoost;
+        const boost = this.lastEnter ? Math.min((performance.now() - this.lastExit) / this.cdSpeed, this.maxEnterBoost) : this.maxEnterBoost;
         this.actor.movement.bladeStart(Math.max(boost, 1));
         this.lastEnter = performance.now();
         this.floorTimer = null;
@@ -53,5 +53,6 @@ export default class BladeState extends PlayerState {
     exit() {
         clearTimeout(this.floorTimer);
         this.floorTimer = null;
+        this.lastExit = performance.now();
     }
 }

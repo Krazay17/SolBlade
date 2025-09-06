@@ -4,7 +4,7 @@ import LocalData from './LocalData';
 import Input from './Input';
 import { setupKeybindWindow, addButton } from '../ui/KeyBinds';
 import { getMaterial } from './MaterialManager';
-import PlayerInfo from '../ui/PlayerInfo';
+import PlayerInfo from '../ui/PlayerUI';
 import MyEventEmitter from './MyEventEmitter';
 import Globals from '../utils/Globals';
 
@@ -49,7 +49,6 @@ export default class Game {
 
     this.input = new Input(canvas);
     this.playerInfo = new PlayerInfo();
-    this.playerInfo.createUI();
 
     //this.setScene(LocalData.scene);
     this.initWindow();

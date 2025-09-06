@@ -102,15 +102,14 @@ export default class GameScene extends SceneBase {
     this.netPlayers[id] = player;
     player.name = data.name;
     player.currentAnimState = data.state;
-    this.partyFrame = new PartyFrame(this.player);
-    this.partyFrame.addPlayer(player);
+    MyEventEmitter.emit('addPartyMember', player);
     return player;
   }
 
   removePlayer(id) {
     const player = this.netPlayers[id];
     if (player) {
-      this.partyFrame.removePlayer(player);
+      MyEventEmitter.emit('removePartyMember', player);
       player.destroy(id);
       delete this.netPlayers[id];
     }

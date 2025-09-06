@@ -1,7 +1,8 @@
-import MyEventEmitter from "../core/MyEventEmitter";
-import LocalData from "../core/LocalData";
+import MyEventEmitter from "../core/MyEventEmitter.js";
+import LocalData from "../core/LocalData.js";
+import PartyFrame from "./PartyFrame.js";
 import './PlayerInfoStyle.css';
-import { netSocket } from "../core/NetManager";
+import { netSocket } from "../core/NetManager.js";
 
 export default class PlayerInfo {
     constructor() {
@@ -9,6 +10,8 @@ export default class PlayerInfo {
         this.money = LocalData.money || 0;
         this.health = LocalData.health || 100;
         this.mana = LocalData.mana || 50;
+
+        this.createUI();
     }
     createUI() {
         const container = document.createElement('div');
@@ -58,5 +61,17 @@ export default class PlayerInfo {
         manaBar.style.width = `${this.mana}%`;
         manaBarContainer.appendChild(manaBar);
         container.appendChild(manaBarContainer);
+    }
+
+    createPartyFrame() {
+        if (!this.partyFrame) {
+            this.partyFrame = new PartyFrame();
+            MyEventEmitter.on('addPartyMember', (newPlayer) => {
+                this.partyFrame.addPlayer(newPlayer);
+            });
+            MyEventEmitter.on('removePartyMember', (removedPlayer) => {
+                this.partyFrame.removePlayer(removedPlayer);
+            });
+        }
     }
 }

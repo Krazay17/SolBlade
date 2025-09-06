@@ -22,7 +22,7 @@ export default class Player extends THREE.Object3D {
         this.position.set(x, y, z);
         this.camera = camera;
         this.isLocal = isLocal;
-        this.name = LocalData.name || netData.name || 'Player';
+        this.name = isLocal ? LocalData.name || 'Player' : netData.name || 'Player';
         this.netId = id || null;
         game.graphicsWorld.add(this);
         this.skinCache = {};
@@ -349,13 +349,13 @@ export default class Player extends THREE.Object3D {
         netSocket.emit('playerHealthSend', { targetId: netSocket.id, reason: 'reset', amount: 100 });
     }
 
-    takeCC(type, dir) {
+    takeCC(type, { dir, duration = 1000 }) {
         if (this.isLocal) {
             this.stateManager.setState('stunned');
         }
         if (!this.isLocal) {
-            const cc = { type, dir };
-            tryApplyCC(this, cc);
+            const cc = { type, dir, duration: 1000 };
+            netSocket.emit('playerCCSend', { targetId: this.netId, cc });
         }
     }
     applyCC({ type, dir }) {
