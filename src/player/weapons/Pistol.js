@@ -42,7 +42,7 @@ export default class Pistol extends BaseWeapon {
                     const actor = hit.object.userData.owner;
                     if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
                         this.hitActors.add(actor);
-                        actor.takeCC?.('knockback', this.tempVector.set(dir.x, 5, dir.z));
+                        actor.takeCC?.('knockback', { dir: this.tempVector.set(dir.x, 5, dir.z), duration: 100 });
                         actor.changeHealth?.('damage', this.damage);
                         soundPlayer.playSound('gunshoot');
                         this.spawnHitParticles(actor.position);

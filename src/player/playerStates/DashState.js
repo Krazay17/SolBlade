@@ -18,7 +18,7 @@ export default class DashState extends PlayerState {
         }
     }
     exit() {
-        this.actor.movement.dashStop();
+        //this.actor.movement.dashStop();
     }
     canEnter() {
         return this.cdTimer < performance.now();

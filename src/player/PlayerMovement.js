@@ -181,7 +181,7 @@ export default class PlayerMovement {
         this.dashValue = this.values.dash.speed;
     }
     dashMove(dt) {
-        this.dashValue -= 60 * dt;
+        this.dashValue = Math.max(this.dashValue - 60 * dt, 12);
         const dashVelocity = this.direction.scale(this.dashValue);
         this.body.velocity.copy(dashVelocity);
     }

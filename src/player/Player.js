@@ -354,18 +354,18 @@ export default class Player extends THREE.Object3D {
             this.stateManager.setState('stunned');
         }
         if (!this.isLocal) {
-            const cc = { type, dir, duration: 1000 };
-            netSocket.emit('playerCCSend', { targetId: this.netId, cc });
+            const cc = { type, dir, duration: 800 };
+            netSocket.emit('playerCCSend', { targetId: this.netId, ...cc });
         }
     }
-    applyCC({ type, dir }) {
+    applyCC({ type, dir, duration }) {
         this.tempVector.copy(dir);
         switch (type) {
             case 'stun':
-                this.stateManager.setState?.('stun', { type, dir: this.tempVector });
+                this.stateManager.setState?.('stun', { type, dir: this.tempVector, duration });
                 break;
             case 'knockback':
-                this.stateManager.setState?.('stun', { type, dir: this.tempVector });
+                this.stateManager.setState?.('stun', { type, dir: this.tempVector, duration: 300 });
                 this.body.velocity.copy(this.tempVector);
                 break;
             default:
