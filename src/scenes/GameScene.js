@@ -177,6 +177,7 @@ export default class GameScene extends SceneBase {
 
     // Loading progress bar could be added here using the onProgress callback
     this.glbLoader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+      console.log(`Loading file: ${url}`);
       const progress = (itemsLoaded / itemsTotal) * 100;
       this.loadingBar(progress.toFixed(2));
     };

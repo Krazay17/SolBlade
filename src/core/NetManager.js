@@ -111,11 +111,11 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[targetId].applyDamage(data);
         }
     });
-    socket.on('playerBlockedUpdate', ({ id, blocking }) => {
+    socket.on('playerBlockedUpdate', ({ id, blocking, health }) => {
         if (id === socket.id) {
             console.log('blocked');
         } else if (netPlayers[id]) {
-            console.log('blocked');
+            netPlayers[id].setHealth(health);
         }
     });
     socket.on('playerRespawnUpdate', ({ id, data }) => {

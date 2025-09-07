@@ -293,11 +293,11 @@ export default class Player extends THREE.Object3D {
     }
 
     applyDamage({ health, dmg, cc }) {
+        this.setHealth(health);
+        if (this.isRemote) return;
         const { type, amount } = dmg;
         const { stun, dir } = cc;
         if (amount > 0) {
-            this.setHealth(health);
-            if (this.isRemote) return;
 
             if (type === 'melee') {
                 CameraFX.shake(0.2, 125);
@@ -305,7 +305,6 @@ export default class Player extends THREE.Object3D {
             if (stun > 0) {
                 this.stateManager.setState('stun', stun);
             }
-            console.log(dir);
             if (dir) {
                 this.body.wakeUp();
                 this.body.velocity.copy(dir);

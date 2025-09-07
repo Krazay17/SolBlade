@@ -16,17 +16,18 @@ export default class BladeState extends PlayerState {
         this.timer = 0;
     }
     enter(neutral) {
+        this.lastEnter = performance.now();
+        this.floorTimer = null;
+
         if (!neutral) {
             this.dashTimer = performance.now() + 300;
             this.actor.movement.dashStart();
             this.actor.animator?.setAnimState('dash');
-
+            return;
         }
         this.actor.animator?.setAnimState('crouch', true);
         // const boost = this.lastEnter ? Math.min((performance.now() - this.lastExit) / this.cdSpeed, this.maxEnterBoost) : this.maxEnterBoost;
         // this.actor.movement.bladeStart(Math.max(boost, 1));
-        this.lastEnter = performance.now();
-        this.floorTimer = null;
 
         //netSocket.emit('playerBlockUpdate', true);
 
