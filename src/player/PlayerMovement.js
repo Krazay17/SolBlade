@@ -264,8 +264,10 @@ export default class PlayerMovement {
 
     accelerate(wishdir, wishspeed, accel, dt, tapBlend) {
         const currentVelocity = this.body.velocity.clone(); // speed in that direction
+        const horiz = Math.hypot(currentVelocity.x, currentVelocity.z);
         currentVelocity.y = 0;
         const currentHorizSpeed = currentVelocity.dot(wishdir);
+        //console.log({ horiz, currentHorizSpeed, wishspeed });
 
         const addSpeed = (wishspeed - currentHorizSpeed);
         if (addSpeed <= 0) return false;
@@ -277,9 +279,7 @@ export default class PlayerMovement {
         this.body.velocity.x += wishdir.x * accelSpeed;
         this.body.velocity.z += wishdir.z * accelSpeed;
         this.body.velocity.y += wishdir.y * accelSpeed;
-
-        
-        this.clampHorizontalSpeed(wishspeed, .02);
+        this.clampHorizontalSpeed(wishspeed, .0175);
 
     }
     clampHorizontalSpeed(maxSpeed, pwr = 1) {

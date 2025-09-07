@@ -122,7 +122,7 @@ export default class Game {
     this.graphicsWorld.add(dirLight);
 
     // Ambient Light
-    const ambientLight = new THREE.AmbientLight(0xffffff, .2);
+    const ambientLight = new THREE.AmbientLight(0xffffff, .3);
     this.graphicsWorld.add(ambientLight);
 
     // Optional: see shadow frustum

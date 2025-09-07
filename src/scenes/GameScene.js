@@ -11,7 +11,6 @@ import Globals from '../utils/Globals.js';
 import SkyBox from '../actors/SkyBox.js';
 import soundPlayer from '../core/SoundPlayer.js';
 import DebugData from '../ui/DebugData.js';
-import PartyFrame from '../ui/PartyFrame.js';
 import MeshManager from '../core/MeshManager.js';
 import Crosshair from '../ui/Crosshair.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
@@ -134,7 +133,7 @@ export default class GameScene extends SceneBase {
   }
 
   spawnLevel() {
-    this.glbLoader.load('/assets/Level2.glb', (gltf) => {
+    this.glbLoader.load('/assets/Level1.glb', (gltf) => {
       const model = gltf.scene;
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
@@ -144,13 +143,13 @@ export default class GameScene extends SceneBase {
           child.castShadow = true;
           child.receiveShadow = true;
           this.mapWalls.push(child);
-        }
-      });
-      this.game.graphicsWorld.add(model);
+          //   }
+          // });
+          this.game.graphicsWorld.add(model);
 
-      // Create a static physics body for the level
-      gltf.scene.traverse((child) => {
-        if (child.isMesh) {
+          // Create a static physics body for the level
+          // gltf.scene.traverse((child) => {
+          //   if (child.isMesh) {
           let shape;
           try {
             shape = createTrimesh(child.geometry);
