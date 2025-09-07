@@ -32,7 +32,7 @@ export default class GameScene extends SceneBase {
 
     this.player = new Player(this.game, this, playerPosBuffer, false, this.game.camera);
     Globals.player = this.player;
-    
+
 
     soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
     function playMusiconFirstClick() {
@@ -71,6 +71,10 @@ export default class GameScene extends SceneBase {
     }
     if (this.skyBox) this.skyBox.update();
     this.debugData.update(dt, time);
+  }
+
+  getRespawnPoint() {
+    return new THREE.Vector3(0, 1, 0);
   }
 
   makeSky() {
@@ -135,6 +139,7 @@ export default class GameScene extends SceneBase {
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
       model.traverse((child) => {
+        console.log(child);
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;

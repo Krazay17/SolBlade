@@ -28,8 +28,8 @@ export default class StateManager {
 
     setState(state, enterParams) {
         if ((this.currentStateName === state && !this.activeState.reEnter) && this.activeState) return false;
-        if (!this.activeState?.canExit(state, enterParams)) return false;
         if (!this.states[state]?.canEnter(state, enterParams)) return false;
+        if (!this.activeState?.canExit(state, enterParams)) return false;
 
         let newState = state;
         if (this.states[newState]) {
@@ -38,7 +38,6 @@ export default class StateManager {
             this.activeState = this.states[newState];
             this.activeState?.enter(enterParams);
             this.currentStateName = newState;
-            console.log(newState);
             return true;
         }
     }

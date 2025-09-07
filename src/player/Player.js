@@ -287,65 +287,38 @@ export default class Player extends THREE.Object3D {
         } else {
             netId = netSocket.id;
         }
-
-        netSocket.emit('playerDamageSend', { targetId: netId, attacker, dmg, cc });
+        netSocket.emit('playerDamageSend', { targetId: netId, dmg, cc });
     }
 
-    // from local
-    changeHealth(reason, amount) {
-        let netId;
-        if (!this.isRemote) {
-            // Local player
-            netId = netSocket.id;
+    applyDamage({ health, dmg, cc }) {
+        const { type, amount } = dmg;
+        const { stun, dir } = cc;
+        if (amount > 0) {
+            this.setHealth(health);
+            if (this.isRemote) return;
 
-            switch (reason) {
-                case "damage":
-                    this.setHealth(amount);
-                    break;
-                case "reset":
-                    this.setHealth(100);
-                    break;
+            if (type === 'melee') {
+                CameraFX.shake(0.2, 125);
             }
-        } else {
-            // Remote player
-            netId = this.netId;
-
-            switch (reason) {
-                case "damage":
-                    this.setHealth(amount);
-                    break;
-                case "reset":
-                    this.setHealth(100);
-                    break;
+            if (stun > 0) {
+                this.stateManager.setState('stun', stun);
+            }
+            console.log(dir);
+            if (dir) {
+                this.body.wakeUp();
+                this.body.velocity.copy(dir);
             }
         }
-
-        netSocket.emit('playerHealthSend', { targetId: netId, reason, amount });
     }
-    // from server
-    applyHealth({ targetId, reason, amount, health }) {
-        this.setHealth(health);
-        switch (reason) {
-            case "damage":
-                console.log('damage!');
-                break;
-            case "reset":
-                console.log('reset!');
-                break;
-        }
-    }
-
     // call twice from local and server
     setHealth(newHealth) {
         this.health = newHealth;
-
         if (!this.isRemote) {
             if (this.health === 0) {
                 this.die();
             }
             LocalData.health = newHealth;
             MyEventEmitter.emit('updateHealth', LocalData.health);
-
         } else {
             this.namePlate?.setHealth(newHealth);
         }
@@ -360,11 +333,12 @@ export default class Player extends THREE.Object3D {
     unDie() {
         if (this.isRemote) return;
         this.stateManager.setState('idle');
-        this.body.position.set(0, 1, 0);
+        const spawnPoint = this.scene.getRespawnPoint();
+        this.body.position.set(spawnPoint.x, spawnPoint.y, spawnPoint.z);
         this.body.velocity.set(0, 0, 0);
 
         this.setHealth(100);
-        netSocket.emit('playerHealthSend', { targetId: netSocket.id, reason: 'reset', amount: 100 });
+        netSocket.emit('playerRespawnUpdate', { id: this.netId, health: this.health, pos: this.position });
     }
 
     takeCC(type, cc = { dir, duration: 1000 }) {
@@ -441,11 +415,21 @@ export default class Player extends THREE.Object3D {
         MyEventEmitter.emit('updateEnergy', this.energy);
     }
     tryEnterBlade() {
-        if (this.energy < this.dashCost) return false;
-        if (this.stateManager.setState('blade')) {
-            this.tryUseEnergy(this.dashCost);
+        if (this.stateManager.currentStateName === 'blade') return;
+        const neutral = this.movement.getInputDirection().clone().isZero();
+        const energyCost = neutral ? 0 : this.dashCost;
+        if (this.energy < energyCost) return false;
+        if (this.stateManager.setState('blade', neutral)) {
+            this.tryUseEnergy(energyCost);
             this.energyRegen = this.bladeDrain;
             MyEventEmitter.emit('updateEnergy', this.energy);
+            return true;
+        }
+        return false;
+    }
+    tryExitBlade() {
+        if (this.stateManager.setState('idle')) {
+            this.energyRegen = 25;
             return true;
         }
         return false;

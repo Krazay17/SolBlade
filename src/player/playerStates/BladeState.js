@@ -15,9 +15,13 @@ export default class BladeState extends PlayerState {
         this.lastExit = null;
         this.timer = 0;
     }
-    enter() {
-        this.dashTimer = performance.now() + 300;
-        this.actor.movement.dashStart();
+    enter(neutral) {
+        if (!neutral) {
+            this.dashTimer = performance.now() + 300;
+            this.actor.movement.dashStart();
+            this.actor.animator?.setAnimState('dash');
+
+        }
         this.actor.animator?.setAnimState('crouch', true);
         // const boost = this.lastEnter ? Math.min((performance.now() - this.lastExit) / this.cdSpeed, this.maxEnterBoost) : this.maxEnterBoost;
         // this.actor.movement.bladeStart(Math.max(boost, 1));
@@ -35,7 +39,6 @@ export default class BladeState extends PlayerState {
     update(dt) {
         if (this.dashTimer > performance.now()) {
             this.actor.movement.dashMove(dt, 22, 10);
-            this.actor.animator?.setAnimState('dash');
             return;
         }
         this.actor.movement.bladeMove(dt);

@@ -22,7 +22,7 @@ export default class PlayerMovement {
         const savedValues = LocalData.movementValues;
         this.values = savedValues ?? {
             idle: {
-                friction: 15,
+                friction: 20,
             },
             ground: {
                 friction: 8,
@@ -37,9 +37,9 @@ export default class PlayerMovement {
                 tap: 0
             },
             blade: {
-                friction: 0.25,
-                accel: 4,
-                speed: 6,
+                friction: 0.1,
+                accel: 2,
+                speed: 8,
                 tap: 0
             },
             attack: {
@@ -67,7 +67,7 @@ export default class PlayerMovement {
     resetDefaultValues() {
         this.values = {
             idle: {
-                friction: 15,
+                friction: 20,
             },
             ground: {
                 friction: 8,
@@ -82,9 +82,9 @@ export default class PlayerMovement {
                 tap: 0
             },
             blade: {
-                friction: 0.25,
-                accel: 4,
-                speed: 6,
+                friction: 0.1,
+                accel: 2,
+                speed: 8,
                 tap: 0
             },
             attack: {

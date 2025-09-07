@@ -15,7 +15,7 @@ export default class Sword extends BaseWeapon {
     use(currentTime) {
         if (this.canUse(currentTime) &&
             this.actor.stateManager.setState('attack', {
-                weapon: this, anim: 'attack', duration: 500, damageDelay: 280
+                weapon: this, anim: 'attack', duration: 500, damageDelay: 200
             })) {
             this.lastUsed = currentTime;
             soundPlayer.playSound('swordSwing');
@@ -29,9 +29,7 @@ export default class Sword extends BaseWeapon {
     update() {
         this.meleeTrace(this.actor.position, this.actor.getCameraDirection(), this.range, 0.5, (target, camDir) => {
             const scaledCamDir = camDir.clone().normalize().multiplyScalar(20);
-            target.takeCC?.('knockback', { dir: scaledCamDir, duration: 800 });
-            target.changeHealth?.('damage', this.damage);
-            // target.takeDamage(this.actor)
+            target.takeDamage(this.actor, { type: 'melee', amount: this.damage }, { stun: 800, dir: scaledCamDir });
             soundPlayer.playSound('swordHit');
             this.actor.animator.hitFreeze();
             CameraFX.shake(0.14, 150);

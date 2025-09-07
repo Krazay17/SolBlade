@@ -100,6 +100,15 @@ function bindSocketEvents(myPlayerData) {
             MyEventEmitter.emit('chatMessage', { player: 'Server', message: data.message, color: data.color });
         }
     });
+
+    socket.on('playerDamageUpdate', ({ targetId, data }) => {
+        if (targetId === socket.id) {
+            scene.player.applyDamage(data);
+        }
+        else if (netPlayers[targetId]) {
+            netPlayers[targetId].applyDamage(data);
+        }
+    });
     socket.on('playerHealthUpdate', ({ id, data }) => {
         const { targetId } = data;
         console.log('localSocket: ', socket.id, 'targetSocket: ', targetId, data);
@@ -121,6 +130,12 @@ function bindSocketEvents(myPlayerData) {
             console.log('blocked');
         } else if (netPlayers[id]) {
             console.log('blocked');
+        }
+    });
+    socket.on('playerRespawnUpdate', ({ id, data }) => {
+        if (netPlayers[id]) {
+            netPlayers[id].position.set(data.pos.x, data.pos.y, data.pos.z);
+            netPlayers[id].setHealth(data.health);
         }
     });
 }

@@ -7,7 +7,8 @@ export default class IdleState extends PlayerState {
     }
     update(dt) {
         if (!this.actor.movement.idleMove(dt)) {
-            this.body.sleep();
+            this.body.velocity.set(0, 0, 0);
+            this.body.angularVelocity.set(0, 0, 0);
         }
 
         if (!this.actor.movement.getInputDirection().isZero()) {

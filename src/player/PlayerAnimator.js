@@ -104,7 +104,6 @@ export default class PlayerAnimator {
   hitFreeze(duration = 170) {
     if (this.currentAction) {
       this.currentAction.timeScale = 0.025;
-      console.log("Hit freeze activated", this.currentAction.timeScale);
       setTimeout(() => {
         this.currentAction.timeScale = 1;
       }, duration);
