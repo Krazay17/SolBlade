@@ -1,5 +1,3 @@
-import './StyleUI.css';
-
 export default class DebugData {
     constructor(player) {
         this.player = player;

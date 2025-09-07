@@ -14,6 +14,7 @@ import DebugData from '../ui/DebugData.js';
 import MeshManager from '../core/MeshManager.js';
 import Crosshair from '../ui/Crosshair.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
+import PartyFrame from '../ui/PartyFrame.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -31,6 +32,8 @@ export default class GameScene extends SceneBase {
 
     this.player = new Player(this.game, this, playerPosBuffer, false, this.game.camera);
     Globals.player = this.player;
+
+    this.partyFrame = new PartyFrame();
 
 
     soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
@@ -106,14 +109,14 @@ export default class GameScene extends SceneBase {
     this.netPlayers[id] = player;
     player.name = data.name;
     player.currentAnimState = data.state;
-    MyEventEmitter.emit('addPartyMember', player);
+    MyEventEmitter.emit('playerJoined', player);
     return player;
   }
 
   removePlayer(id) {
     const player = this.netPlayers[id];
     if (player) {
-      MyEventEmitter.emit('removePartyMember', player);
+      MyEventEmitter.emit('playerLeft', player);
       player.destroy(id);
       delete this.netPlayers[id];
     }

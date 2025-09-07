@@ -1,7 +1,6 @@
 import MyEventEmitter from "../core/MyEventEmitter.js";
 import LocalData from "../core/LocalData.js";
 import PartyFrame from "./PartyFrame.js";
-import './PlayerInfoStyle.css';
 import { netSocket } from "../core/NetManager.js";
 
 export default class PlayerInfo {

@@ -9,16 +9,23 @@ export default class PartyFrame {
         this.container.id = 'party-frame';
         document.getElementById('game-data').appendChild(this.container);
 
-        // MyEventEmitter.on('playerHealthChange', (player, health) => {
-        //     const playerElement = this.players.get(player);
-        //     if (playerElement) {
-        //         const healthFill = playerElement.querySelector('.party-healthbar-fill');
-        //         if (healthFill) {
-        //             healthFill.style.width = `${health}%`;
-        //         }
-        //     }
-        // });
-        MyEventEmitter.on('playerNameUpdate', ({player, name}) => {
+        MyEventEmitter.on('playerJoined', (player) => {
+            this.addPlayer(player);
+        });
+        MyEventEmitter.on('playerLeft', (player) => {
+            this.removePlayer(player);
+        });
+        MyEventEmitter.on('playerHealthChange', ({player, health}) => {
+            console.log('Health change event received for', player.name, 'new health:', health);
+            const playerElement = this.players.get(player);
+            if (playerElement) {
+                const healthFill = playerElement.querySelector('.party-healthbar-fill');
+                if (healthFill) {
+                    healthFill.style.width = `${health}%`;
+                }
+            }
+        });
+        MyEventEmitter.on('playerNameUpdate', ({ player, name }) => {
             const playerElement = this.players.get(player);
             if (playerElement) {
                 playerElement.innerText = name;
@@ -36,7 +43,7 @@ export default class PartyFrame {
         const healthFill = document.createElement('div');
         healthFill.className = 'party-healthbar-fill';
         healthFill.style.width = `${player.health}%`;
-        
+
         healthBar.appendChild(healthFill);
 
         playerElement.appendChild(healthBar);

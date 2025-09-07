@@ -24,7 +24,6 @@ export default class Sword extends BaseWeapon {
         });
     }
     useFx(pos) {
-        console.log('sword use fx at', pos);
         soundPlayer.playPosAudio('swordUse', pos);
     }
     hitFx(pos) {

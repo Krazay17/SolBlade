@@ -286,9 +286,10 @@ export default class Player extends THREE.Object3D {
         if (this.isRemote) {
             netId = this.netId;
             this.setHealth(this.health - dmg.amount);
+            this.namePlate?.setHealth(this.health - dmg.amount);
         } else {
             netId = netSocket.id;
-            this.namePlate?.setHealth(this.health - dmg.amount);
+            this.setHealth(this.health - dmg.amount);
         }
         netSocket.emit('playerDamageSend', { targetId: netId, dmg, cc });
     }
@@ -320,10 +321,11 @@ export default class Player extends THREE.Object3D {
                 this.die();
             }
             LocalData.health = newHealth;
-            MyEventEmitter.emit('updateHealth', LocalData.health);
+            MyEventEmitter.emit('updateHealth', this.health);
         } else {
             this.namePlate?.setHealth(newHealth);
         }
+        MyEventEmitter.emit('playerHealthChange', { player: this, health: this.health });
     }
     // only local
     die() {

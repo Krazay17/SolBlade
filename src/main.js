@@ -4,6 +4,7 @@ import GameScene from "./scenes/GameScene";
 import { initSocket } from "./core/NetManager";
 import Menu from "./ui/Menu";
 import soundPlayer from "./core/SoundPlayer";
+import './ui/StyleUI.css';
 import { setupDiscordWindow } from "./ui/DiscordStuff";
 
 LocalData.load();
