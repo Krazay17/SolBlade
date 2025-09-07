@@ -1,5 +1,7 @@
+import * as THREE from 'three';
 import LocalData from "./LocalData";
 import MyEventEmitter from "./MyEventEmitter";
+import Globals from '../utils/Globals';
 
 class SoundPlayer {
     constructor() {
@@ -10,6 +12,8 @@ class SoundPlayer {
         this.musics = [];
         this.sfx = [];
         this.musicPlaying = null;
+        this.posSoundPools = new Map();
+        this.threeAudioLoader = new THREE.AudioLoader();
     }
 
     loadSound(name, url) {
@@ -112,6 +116,55 @@ class SoundPlayer {
             SoundPlayer.instance = new SoundPlayer();
         }
         return SoundPlayer.instance;
+    }
+
+    setPosAudio(listener) {
+        this.audioListener = listener;
+    }
+    loadPosAudio(name, url, poolSize = 5, play = false, position) {
+        if (!this.posSoundPools.has(name)) {
+            this.posSoundPools.set(name, []);
+        }
+        for (let i = 0; i < poolSize; i++) {
+            const posAudio = new THREE.PositionalAudio(this.audioListener);
+            this.threeAudioLoader.load(url, (buffer) => {
+                posAudio.setBuffer(buffer);
+                posAudio.setRefDistance(10);
+                posAudio.setMaxDistance(100);
+                posAudio.setRolloffFactor(2);
+                posAudio.setVolume(this.sfxVolume * this.masterVolume);
+                Globals.graphicsWorld.add(posAudio);
+                if (play) this.playPosAudio(name, position);
+            });
+            this.posSoundPools.get(name).push(posAudio);
+        }
+    }
+    playPosAudio(name, position, url) {
+        const pool = this.posSoundPools.get(name);
+        if (!pool) {
+            if (url) {
+                this.loadPosAudio(name, url, 1, true, position);
+                return;
+            }
+            return;
+        }
+        const audio = pool.find(a => !a.isPlaying);
+        if (audio && audio.buffer) {
+            if (position) audio.position.copy(position);
+            console.log(audio.position, this.audioListener.getWorldPosition(new THREE.Vector3()));
+            audio.setVolume(this.sfxVolume * this.masterVolume);
+            audio.play();
+        } else if (url) {
+            this.loadPosAudio(name, url, 1, true, position);
+        }
+    }
+    stopPosAudio(name) {
+        const pool = this.posSoundPools.get(name);
+        if (!pool) return;
+        const audio = pool.find(a => a.isPlaying);
+        if (audio) {
+            audio.stop();
+        }
     }
 }
 const soundPlayer = SoundPlayer.getSoundInstance();

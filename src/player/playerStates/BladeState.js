@@ -1,4 +1,6 @@
+import MyEventEmitter from "../../core/MyEventEmitter";
 import { netSocket } from "../../core/NetManager";
+import soundPlayer from "../../core/SoundPlayer";
 import PlayerState from "./_PlayerState";
 import { Vec3 } from "cannon";
 
@@ -14,6 +16,13 @@ export default class BladeState extends PlayerState {
         this.lastEnter = null;
         this.lastExit = null;
         this.timer = 0;
+
+        soundPlayer.loadPosAudio('dash', '/assets/Dash.wav');
+        netSocket.on('fx', (data) => {
+            if (data.type === 'dash') {
+                soundPlayer.playPosAudio('dash', new Vec3(data.pos.x, data.pos.y, data.pos.z));
+            }
+        });
     }
     enter(neutral) {
         this.lastEnter = performance.now();
@@ -23,6 +32,12 @@ export default class BladeState extends PlayerState {
             this.dashTimer = performance.now() + 300;
             this.actor.movement.dashStart();
             this.actor.animator?.setAnimState('dash');
+
+            const dashFX = () => {
+                soundPlayer.playPosAudio('dash', this.actor.position);
+            }
+
+            MyEventEmitter.emit('playerDash', dashFX);
             return;
         }
         this.actor.animator?.setAnimState('crouch', true);

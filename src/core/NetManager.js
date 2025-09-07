@@ -11,6 +11,7 @@ const socket = io(serverURL, {
     reconnection: false,
 });
 export const netSocket = socket;
+export const onlineSocket = socket;
 
 let scene = null;
 let netPlayers = {};
@@ -124,7 +125,14 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[id].setHealth(data.health);
         }
     });
+    socket.on('fx', (data) => {
+        MyEventEmitter.emit('netFx', data);
+    });
 }
+
+MyEventEmitter.on('fx', (data) => {
+    netSocket.emit('fx', data);
+});
 
 setInterval(() => {
     socket.emit('heartbeat');

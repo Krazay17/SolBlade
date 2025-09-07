@@ -7,6 +7,7 @@ import { getMaterial } from './MaterialManager';
 import PlayerInfo from '../ui/PlayerUI';
 import MyEventEmitter from './MyEventEmitter';
 import Globals from '../utils/Globals';
+import soundPlayer from './SoundPlayer';
 
 export default class Game {
   constructor(canvas) {
@@ -44,6 +45,11 @@ export default class Game {
       5000
     );
     this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+    this.audioListener = new THREE.AudioListener();
+    this.camera.add(this.audioListener);
+    soundPlayer.setPosAudio(this.audioListener);
+
 
     this.spawnLights();
 
@@ -95,7 +101,7 @@ export default class Game {
       this.physicsWorld.step(this.timeStep, dt, 6);
       this.scene.update(dt, time);
       MyEventEmitter.emit('postUpdate', dt, time);
-      
+
       this.renderer.render(this.graphicsWorld, this.camera);
     }
 

@@ -46,8 +46,6 @@ export default class Player extends THREE.Object3D {
         this.dashCost = 30;
         this.bladeDrain = -5; // per second
 
-        this.weaponL = new Pistol(this, scene);
-        this.weaponR = new Sword(this, scene);
 
         // Local Player setup
         if (!isRemote) {
@@ -61,6 +59,9 @@ export default class Player extends THREE.Object3D {
 
             this.direction = new CANNON.Vec3();
             this.tempVector = new THREE.Vector3();
+
+            this.weaponL = new Pistol(this, scene);
+            this.weaponR = new Sword(this, scene);
 
             this.cameraArm = new THREE.Object3D();
             this.cameraArm.position.set(.5, 1, 0);

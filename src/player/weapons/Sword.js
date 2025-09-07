@@ -2,15 +2,34 @@ import BaseWeapon from "./_BaseWeapon";
 import soundPlayer from "../../core/SoundPlayer";
 import CameraFX from "../../core/CameraFX";
 import * as THREE from "three";
-import Globals from "../../utils/Globals";
+import MyEventEmitter from "../../core/MyEventEmitter";
 
 export default class Sword extends BaseWeapon {
     constructor(actor, scene) {
-        super(actor, 'Sword', 35, 3, 1.2); // name, damage, range, cooldown
+        super(actor, 'Sword', 35, 2.8, 1.2); // name, damage, range, cooldown
         this.scene = scene;
         this.traceDuration = 500; // duration of the sword trace in milliseconds
-        soundPlayer.loadSfx('swordSwing', '/assets/HeavySword.mp3');
-        soundPlayer.loadSfx('swordHit', '/assets/HeavySwordHit.mp3');
+        soundPlayer.loadPosAudio('swordUse', '/assets/HeavySword.mp3');
+        soundPlayer.loadPosAudio('swordHit', '/assets/HeavySwordHit.mp3');
+
+        MyEventEmitter.on('netFx', (data) => {
+            if (data.type === 'swordHit') {
+                const fxPos = new THREE.Vector3(data.pos.x, data.pos.y, data.pos.z);
+                this.hitFx(fxPos);
+            }
+            if (data.type === 'swordUse') {
+                const fxPos = new THREE.Vector3(data.pos.x, data.pos.y, data.pos.z);
+                this.useFx(fxPos);
+            }
+        });
+    }
+    useFx(pos) {
+        console.log('sword use fx at', pos);
+        soundPlayer.playPosAudio('swordUse', pos);
+    }
+    hitFx(pos) {
+        soundPlayer.playPosAudio('swordHit', pos);
+        this.spawnHitParticles(pos, 25);
     }
     use(currentTime) {
         if (this.canUse(currentTime) &&
@@ -18,22 +37,24 @@ export default class Sword extends BaseWeapon {
                 weapon: this, anim: 'attack', duration: 500, damageDelay: 200
             })) {
             this.lastUsed = currentTime;
-            soundPlayer.playSound('swordSwing');
             this.enemyActors = this.scene.actorMeshes;
             this.enemyActors = this.enemyActors.filter(actor => actor !== this.actor);
             this.hitActors.clear();
 
+            this.useFx(this.actor.position);
+            MyEventEmitter.emit('fx', { type: 'swordUse', pos: this.actor.position });
         }
     }
 
     update() {
         this.meleeTrace(this.actor.position, this.actor.getCameraDirection(), this.range, 0.5, (target, camDir) => {
-            const scaledCamDir = camDir.clone().normalize().multiplyScalar(15);
-            target.takeDamage(this.actor, { type: 'melee', amount: this.damage }, { stun: 800, dir: scaledCamDir });
-            soundPlayer.playSound('swordHit');
+            const scaledCamDir = camDir.clone().normalize().multiplyScalar(12.5);
+            target.takeDamage(this.actor, { type: 'melee', amount: this.damage }, { stun: 700, dir: scaledCamDir });
             this.actor.animator.hitFreeze();
             CameraFX.shake(0.14, 150);
-            this.spawnHitParticles(target.position, 25);
+
+            this.hitFx(target.position, scaledCamDir);
+            MyEventEmitter.emit('fx', { type: 'swordHit', pos: target.position });
         });
     }
 }
