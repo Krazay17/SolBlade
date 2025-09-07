@@ -28,7 +28,7 @@ export default class BladeState extends PlayerState {
         this.lastEnter = performance.now();
         this.floorTimer = null;
 
-        netSocket.emit('playerBlockUpdate', true);
+        //netSocket.emit('playerBlockUpdate', true);
 
         // if (this.actor.groundChecker.isGrounded(.6)) {
         //     this.enterBoost = this.lastEnter ? Math.max(1, Math.min((performance.now() - this.lastEnter) / 1000, this.maxEnterBoost)) : this.maxEnterBoost;
@@ -85,6 +85,6 @@ export default class BladeState extends PlayerState {
 
         this.actor.energyRegen = 25;
 
-        netSocket.emit('playerBlockUpdate', false);
+        //netSocket.emit('playerBlockUpdate', false);
     }
 }
