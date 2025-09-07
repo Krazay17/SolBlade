@@ -39,6 +39,30 @@ export default class RunState extends PlayerState {
                 this.actor.animator?.setAnimState('strafeRight');
             }
         }
+                // Jump
+        if (this.input.keys['Space'] && this.grounded &&
+            this.jumpCD < performance.now()) {
+            //if (!this.actor.tryUseEnergy(10)) return;
+            this.jumpCD = performance.now() + 300;
+            this.manager.setState('jump');
+            return;
+        }
+        if (!this.actor.groundChecker.isGrounded(.1)) {
+            if (!this.floorTimer) {
+                this.floorTimer = setTimeout(() => {
+                    this.floorTimer = null;
+                    this.grounded = false;
+                }, 200);
+            }
+        } else {
+            clearTimeout(this.floorTimer);
+            this.floorTimer = null;
+            if (!this.grounded) {
+                // do once on landing
+            }
+
+            this.grounded = true;
+        }
 
     }
 

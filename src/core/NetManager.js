@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
 import MyEventEmitter from "./MyEventEmitter";
 import { Vector3 } from "three";
+import Globals from "../utils/Globals";
 
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
@@ -45,6 +46,7 @@ function bindSocketEvents(myPlayerData) {
     lastPlayerData = { ...myPlayerData };
 
     socket.emit('joinGame', myPlayerData);
+    Globals.player.netId = socket.id;
 
     socket.on('disconnect', () => {
         socket.offAny();
@@ -107,22 +109,6 @@ function bindSocketEvents(myPlayerData) {
         }
         else if (netPlayers[targetId]) {
             netPlayers[targetId].applyDamage(data);
-        }
-    });
-    socket.on('playerHealthUpdate', ({ id, data }) => {
-        const { targetId } = data;
-        console.log('localSocket: ', socket.id, 'targetSocket: ', targetId, data);
-        if (targetId === socket.id) {
-            scene.player.applyHealth(data);
-        } else if (netPlayers[targetId]) {
-            netPlayers[targetId].applyHealth(data);
-        }
-    });
-    socket.on('playerCCUpdate', ({ id, data }) => {
-        if (id === socket.id) {
-            scene.player.applyCC(data);
-        } else if (netPlayers[id]) {
-            netPlayers[id].applyCC(data);
         }
     });
     socket.on('playerBlockedUpdate', ({ id, blocking }) => {

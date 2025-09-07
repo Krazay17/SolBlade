@@ -13,4 +13,8 @@ export default class StunState extends PlayerState {
         if (this.timer > performance.now()) return;
         this.manager.setState('idle');
     }
+
+    canExit(stance) {
+        return this.timer < performance.now() || stance === 'stun';
+    }
 }

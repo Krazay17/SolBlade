@@ -28,7 +28,7 @@ export default class BladeState extends PlayerState {
         this.lastEnter = performance.now();
         this.floorTimer = null;
 
-        netSocket.emit('playerBlockUpdate', { id: this.actor.netId, blocking: true });
+        netSocket.emit('playerBlockUpdate', true);
 
         // if (this.actor.groundChecker.isGrounded(.6)) {
         //     this.enterBoost = this.lastEnter ? Math.max(1, Math.min((performance.now() - this.lastEnter) / 1000, this.maxEnterBoost)) : this.maxEnterBoost;
@@ -52,7 +52,7 @@ export default class BladeState extends PlayerState {
         }
 
         // Jump
-        if (this.input.keys['Space'] && this.actor.groundChecker.isGrounded(.1) &&
+        if (this.input.keys['Space'] && this.grounded &&
             this.jumpCD < performance.now()) {
             //if (!this.actor.tryUseEnergy(10)) return;
             this.jumpCD = performance.now() + 300;
@@ -60,24 +60,22 @@ export default class BladeState extends PlayerState {
             this.actor.animator?.setAnimState('jump');
             return;
         }
-        if (this.actor.groundChecker.isGrounded(.1) && !this.grounded) {
+        if (!this.actor.groundChecker.isGrounded(.1)) {
+            if (!this.floorTimer) {
+                this.floorTimer = setTimeout(() => {
+                    this.floorTimer = null;
+                    this.grounded = false;
+                }, 200);
+            }
+        } else {
+            clearTimeout(this.floorTimer);
+            this.floorTimer = null;
+            if (!this.grounded) {
+                this.actor.movement.bladeStart();
+            }
+
             this.grounded = true;
-            this.actor.movement.bladeStart();
         }
-        if (!this.actor.groundChecker.isGrounded(.1) && this.grounded) {
-            this.grounded = false;
-        }
-        // if (!this.actor.groundChecker.isGrounded(.1)) {
-        //     if (!this.floorTimer) {
-        //         this.floorTimer = setTimeout(() => {
-        //             this.manager.setState('fall');
-        //             this.floorTimer = null;
-        //         }, 300);
-        //     }
-        // } else {
-        //     clearTimeout(this.floorTimer);
-        //     this.floorTimer = null;
-        // }
     }
     exit() {
         console.log('exit blade');
@@ -87,6 +85,6 @@ export default class BladeState extends PlayerState {
 
         this.actor.energyRegen = 25;
 
-        netSocket.emit('playerBlockUpdate', { id: this.actor.netId, blocking: false });
+        netSocket.emit('playerBlockUpdate', false);
     }
 }

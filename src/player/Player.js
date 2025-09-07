@@ -284,8 +284,10 @@ export default class Player extends THREE.Object3D {
         let netId;
         if (this.isRemote) {
             netId = this.netId;
+            this.setHealth(this.health - dmg.amount);
         } else {
             netId = netSocket.id;
+            this.namePlate?.setHealth(this.health - dmg.amount);
         }
         netSocket.emit('playerDamageSend', { targetId: netId, dmg, cc });
     }
@@ -314,7 +316,7 @@ export default class Player extends THREE.Object3D {
     setHealth(newHealth) {
         this.health = newHealth;
         if (!this.isRemote) {
-            if (this.health === 0) {
+            if (this.health <= 0) {
                 this.die();
             }
             LocalData.health = newHealth;
@@ -341,28 +343,6 @@ export default class Player extends THREE.Object3D {
         netSocket.emit('playerRespawnUpdate', { id: this.netId, health: this.health, pos: this.position });
     }
 
-    takeCC(type, cc = { dir, duration: 1000 }) {
-        if (!this.isRemote) {
-            this.stateManager.setState('stunned');
-        }
-        if (this.isRemote) {
-            netSocket.emit('playerCCSend', { targetId: this.netId, cc });
-        }
-    }
-    applyCC({ type, dir, duration }) {
-        this.tempVector.copy(dir);
-        switch (type) {
-            case 'stun':
-                this.stateManager.setState?.('stun', { type, dir: this.tempVector, duration });
-                break;
-            case 'knockback':
-                this.stateManager.setState?.('stun', { type, dir: this.tempVector, duration: 300 });
-                this.body.velocity.copy(this.tempVector);
-                break;
-            default:
-                console.warn(`Unknown CC type: ${type}`);
-        }
-    }
     floorTrace() {
         return this.groundChecker.isGrounded();
     }
@@ -417,8 +397,8 @@ export default class Player extends THREE.Object3D {
     tryEnterBlade() {
         if (this.stateManager.currentStateName === 'blade') return;
         const neutral = this.movement.getInputDirection().clone().isZero();
+        if (this.energy < this.dashCost) return false;
         const energyCost = neutral ? 0 : this.dashCost;
-        if (this.energy < energyCost) return false;
         if (this.stateManager.setState('blade', neutral)) {
             this.tryUseEnergy(energyCost);
             this.energyRegen = this.bladeDrain;
