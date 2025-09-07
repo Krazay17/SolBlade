@@ -17,6 +17,6 @@ export default class StunState extends PlayerState {
     }
 
     canExit(stance) {
-        return this.timer < performance.now() || stance === 'stun';
+        return this.timer < performance.now() || stance === 'stun' || stance === 'dead';
     }
 }
