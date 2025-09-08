@@ -128,6 +128,12 @@ function bindSocketEvents(myPlayerData) {
     socket.on('fx', (data) => {
         MyEventEmitter.emit('netFx', data);
     });
+    socket.on('gameStart', (data) => {
+        MyEventEmitter.emit('gameStart', data);
+    });
+    socket.on('scoreUpdate', (data) => {
+        MyEventEmitter.emit('scoreUpdate', data);
+    });
 }
 
 MyEventEmitter.on('fx', (data) => {

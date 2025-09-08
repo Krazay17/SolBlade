@@ -11,6 +11,7 @@ export default {
     musicVolume: 1,
     sfxVolume: 1,
     movementValues: null,
+    flags: {},
 
     save() {
         const data = {
@@ -24,6 +25,7 @@ export default {
             musicVolume: this.musicVolume,
             sfxVolume: this.sfxVolume,
             movementValues: this.movementValues,
+            flags: this.flags,
         }
         localStorage.setItem('SolBladeSave', JSON.stringify(data));
     },
@@ -55,6 +57,7 @@ export default {
         this.musicVolume = parsed.musicVolume ?? this.musicVolume;
         this.sfxVolume = parsed.sfxVolume ?? this.sfxVolume;
         this.movementValues = parsed.movementValues ?? null;
+        this.flags = parsed.flags ?? {};
         console.log('Loaded local data:', this);
 
     },
@@ -69,5 +72,6 @@ export default {
         this.musicVolume = keep.musicVolume ?? this.musicVolume;
         this.sfxVolume = keep.sfxVolume ?? this.sfxVolume;
         this.movementValues = keep.movementValues ?? null;
+        this.flags = keep.flags ?? {};
     }
 }

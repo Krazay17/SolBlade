@@ -12,9 +12,9 @@ import SkyBox from '../actors/SkyBox.js';
 import soundPlayer from '../core/SoundPlayer.js';
 import DebugData from '../ui/DebugData.js';
 import MeshManager from '../core/MeshManager.js';
-import Crosshair from '../ui/Crosshair.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import PartyFrame from '../ui/PartyFrame.js';
+import GameMode from '../core/GameMode.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -27,8 +27,8 @@ export default class GameScene extends SceneBase {
 
     this.meshManager = new MeshManager();
     this.actorMeshes = [];
+    this.pickupMeshes = [];
     this.mapWalls = [];
-    this.crosshair = new Crosshair(this.game.graphicsWorld);
 
     this.player = new Player(this.game, this, playerPosBuffer, false, this.game.camera);
     Globals.player = this.player;
@@ -55,6 +55,11 @@ export default class GameScene extends SceneBase {
       health: LocalData.health,
     });
     setupChat();
+
+    MyEventEmitter.on('gameStart', (data) => {
+      this.gameMode = new GameMode(data.mode);
+      //this.gameMode.startGame();
+    });
   }
 
   update(dt, time) {
@@ -140,19 +145,14 @@ export default class GameScene extends SceneBase {
       const model = gltf.scene;
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
+      this.game.graphicsWorld.add(model);
       model.traverse((child) => {
         console.log(child);
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
           this.mapWalls.push(child);
-          //   }
-          // });
-          this.game.graphicsWorld.add(model);
 
-          // Create a static physics body for the level
-          // gltf.scene.traverse((child) => {
-          //   if (child.isMesh) {
           let shape;
           try {
             shape = createTrimesh(child.geometry);
@@ -170,6 +170,7 @@ export default class GameScene extends SceneBase {
           body.position.copy(child.getWorldPosition(new THREE.Vector3()));
           body.quaternion.copy(child.getWorldQuaternion(new THREE.Quaternion()));
           this.game.physicsWorld.addBody(body);
+
         }
       });
       this.levelLoaded = true;

@@ -57,3 +57,27 @@ canvas {
 #discordHideButton:hover {
     background-color: white;
 }
+
+#gamemode-ui {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(0, 0, 165);
+    color: white;
+    padding: 25px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 1000;
+}
+
+.gamemode-player {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 5px;
+}

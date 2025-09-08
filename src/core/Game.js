@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon';
-import LocalData from './LocalData';
+import Crosshair from '../ui/Crosshair';
 import Input from './Input';
 import { setupKeybindWindow, addButton } from '../ui/KeyBinds';
 import { getMaterial } from './MaterialManager';
@@ -49,6 +49,8 @@ export default class Game {
     this.audioListener = new THREE.AudioListener();
     this.camera.add(this.audioListener);
     soundPlayer.setPosAudio(this.audioListener);
+
+    this.crosshair = new Crosshair(this.graphicsWorld);
 
 
     this.spawnLights();

@@ -4,16 +4,24 @@ import LocalData from "../core/LocalData";
 const sec = document.getElementById("discord-section");
 export function setupDiscordWindow() {
     const moveDiscordButton = document.getElementById("discordHideButton");
-
-    setTimeout(() => {
-        if (sec.classList.contains('hidden')) return;
-        sec.classList.toggle('hidden');
-    }, 4000);
-
     moveDiscordButton.addEventListener('mousedown', (e) => {
         e.stopPropagation();
         sec.classList.toggle('hidden');
-    })
+        LocalData.flags.discordHidden = true;
+        LocalData.save();
+    });
+
+    if (LocalData.flags.discordHidden) {
+        console.log('Hiding discord section from previous setting');
+        sec.classList.add('hidden');
+        return;
+    }
+    setTimeout(() => {
+        if (sec.classList.contains('hidden')) return;
+        sec.classList.toggle('hidden');
+        LocalData.flags.discordHidden = true;
+        LocalData.save();
+    }, 4000);
 }
 
 

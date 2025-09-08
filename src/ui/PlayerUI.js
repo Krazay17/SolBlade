@@ -76,16 +76,4 @@ export default class PlayerInfo {
     setActor(actor) {
         this.actor = actor;
     }
-
-    createPartyFrame() {
-        if (!this.partyFrame) {
-            this.partyFrame = new PartyFrame();
-            MyEventEmitter.on('addPartyMember', (newPlayer) => {
-                this.partyFrame.addPlayer(newPlayer);
-            });
-            MyEventEmitter.on('removePartyMember', (removedPlayer) => {
-                this.partyFrame.removePlayer(removedPlayer);
-            });
-        }
-    }
 }
