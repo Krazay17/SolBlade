@@ -15,7 +15,6 @@ export function meshToPoly(mesh) {
     mesh.deleteAttribute('uv');
     mesh.deleteAttribute('normal');
     const merged = mergeVertices(mesh);
-    console.log(merged);
     const pos = merged.attributes.position;
     let vertices = [];
     let faces = [];

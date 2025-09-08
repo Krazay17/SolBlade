@@ -11,5 +11,10 @@ export default class FallState extends PlayerState {
             this.manager.setState('idle');
             return;
         }
+
+        if (this.input.actionStates.jump && this.actor.tryUseEnergy(50)) {
+            this.manager.setState('jump');
+            return;
+        }
     }
 }

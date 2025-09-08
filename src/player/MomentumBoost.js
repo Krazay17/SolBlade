@@ -16,10 +16,9 @@ export default class MomentumBoost {
 
     }
     getalignment(currentVelocity) {
-        this.lastAlignment = Math.max(0, Math.min(1, currentVelocity.dot(this.lastVelocity)));
-
+        //this.lastAlignment = Math.max(0, Math.min(1, currentVelocity.dot(this.lastVelocity)));
         this.lastVelocity = currentVelocity.clone();
-        return Math.pow(this.lastAlignment, 50);
+        return Math.pow(this.lastAlignment, 25);
     }
     increaseBoost(amount, max = this.maxRunBoost) {
         if (this.boostAmount < this.boostAmount + amount) {
@@ -35,13 +34,17 @@ export default class MomentumBoost {
     update(dt, velocity) {
         const currentVelocity = velocity.clone();
         currentVelocity.y = 0;
+        const currentSpeed = currentVelocity.clone().length();
         currentVelocity.normalize();
-        if (currentVelocity.length() < this.lastSpeed) {
-            this.boostAmount *= 0.98;
-        }
-        const currentAlignment = this.getalignment(currentVelocity);
-        this.boostAmount *= currentAlignment;
 
+        if (currentSpeed < 5) {
+            this.boostAmount *= 0.99;
+        }
+        this.lastAlignment = Math.max(0, Math.min(1, currentVelocity.dot(this.lastVelocity)));
+        this.boostAmount *= Math.pow(this.lastAlignment, 6);
+
+        this.lastVelocity = currentVelocity.clone();
+        this.lastSpeed = currentSpeed
     }
 
     setBoost(amount) {

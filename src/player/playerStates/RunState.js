@@ -42,7 +42,6 @@ export default class RunState extends PlayerState {
                 // Jump
         if (this.input.keys['Space'] && this.grounded &&
             this.jumpCD < performance.now()) {
-            //if (!this.actor.tryUseEnergy(10)) return;
             this.jumpCD = performance.now() + 300;
             this.manager.setState('jump');
             return;

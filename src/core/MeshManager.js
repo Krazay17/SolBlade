@@ -2,9 +2,9 @@ import { Vector3 } from "three";
 import { GLTFLoader, SkeletonUtils } from "three/examples/jsm/Addons.js";
 
 export default class MeshManager {
-    constructor(scene) {
-        this.scene = scene;
-        this.loader = new GLTFLoader();
+    constructor(game) {
+        this.game = game;
+        this.loader = game.glbLoader;
         this.meshPool = {};
         this.skinCache = {};
         this.skinMap = new Map();

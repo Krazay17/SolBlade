@@ -124,7 +124,7 @@ export default class PlayerMovement {
         wishdir = projectOnPlane(wishdir, this.actor.groundChecker.floorNormal());
 
         this.accelerate(wishdir, wishspeed, this.values.ground.accel, dt, this.values.ground.tap);
-        this.clampHorizontalSpeed(wishspeed, 1);
+        this.clampHorizontalSpeed(wishspeed, .02);
     }
 
     airMove(dt) {
@@ -134,7 +134,7 @@ export default class PlayerMovement {
         if (wishdir.almostZero()) return;
 
         this.accelerate(wishdir, this.values.air.speed, this.values.air.accel, dt, this.values.air.tap);
-        this.clampHorizontalSpeed(this.values.air.speed, .01);
+        //this.clampHorizontalSpeed(this.values.air.speed, .01);
     }
 
     bladeStart(pwr = 1) {
@@ -147,7 +147,7 @@ export default class PlayerMovement {
         if (!n) return;
         const vdot = v.dot(n);
         let boost = 1 + ((1 - this.upDir.dot(n)) * (1 - Math.abs(vN.dot(n))));
-        this.momentumBooster.increaseBoost((1 - boost) * 50, 50);
+        this.momentumBooster.increaseBoost(boost);
         let projectV = v.vsub(n.scale(vdot));
         projectV.scale(boost, projectV);
         const maxBoost = 25;
@@ -159,11 +159,11 @@ export default class PlayerMovement {
     }
 
     bladeMove(dt) {
-        this.applyFriction(dt, this.values.blade.friction);
-        //this.applySlopeFriction(dt, this.values.blade.friction);
+        // this.applyFriction(dt, this.values.blade.friction);
+        this.applySlopeFriction(dt, this.values.blade.friction);
 
         let wishdir = this.getInputDirection();
-        let wishspeed = this.values.blade.speed + this.momentumBooster.increaseBoost(dt, 10);
+        let wishspeed = this.values.blade.speed + this.momentumBooster.increaseBoost(dt);
         if (wishdir.almostZero()) return;
         // Project wishdir onto slope plane
         wishdir = projectOnPlane(wishdir, this.actor.groundChecker.floorNormal());
@@ -200,7 +200,6 @@ export default class PlayerMovement {
     }
     dashMove(dt, decay = 40, min = 10) {
         this.dashValue = Math.max(min, this.dashValue - decay * dt);
-        console.log(this.dashValue);
         const dashVelocity = this.direction.scale(this.dashValue);
         this.body.velocity.copy(dashVelocity);
     }
@@ -213,14 +212,7 @@ export default class PlayerMovement {
     jumpStart() {
         const currentVY = this.body.velocity.clone().y;
         const jumpV = 6.66;
-        if (currentVY < 0) {
-            this.body.velocity.y = jumpV;
-        } else {
-            const scaledjumpV = Math.max(0, currentVY - jumpV);
-            const finaljumpV = jumpV + scaledjumpV;
-
-            this.body.velocity.y = Math.min(jumpV * 2, currentVY + jumpV);
-        }
+        this.body.velocity.y = Math.max(jumpV, currentVY + jumpV * 0.75);
     }
 
     applyFriction(dt, friction) {
@@ -376,7 +368,6 @@ export default class PlayerMovement {
         const currentV = this.body.velocity.clone();
         currentV.y = 0;
         const projectV = currentV.dot(wishdir);
-        console.log(projectV)
     }
 
     // tapStrafe2(wishdir, blendFactor = 0.15, horizontalSpeed = 0) {

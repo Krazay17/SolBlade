@@ -148,10 +148,10 @@ class SoundPlayer {
             }
             return;
         }
+        console.log(pool.length);
         const audio = pool.find(a => !a.isPlaying);
         if (audio && audio.buffer) {
             if (position) audio.position.copy(position);
-            console.log(audio.position, this.audioListener.getWorldPosition(new THREE.Vector3()));
             audio.setVolume(this.sfxVolume * this.masterVolume);
             audio.play();
         } else if (url) {

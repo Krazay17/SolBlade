@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import * as CANNON from 'cannon';
 import SceneBase from './_SceneBase.js';
 import Player from '../player/Player.js';
-import { GLTFLoader, SkeletonUtils } from 'three/examples/jsm/Addons.js';
 import { getMaterial } from '../core/MaterialManager.js';
 import { setNetScene } from '../core/NetManager.js';
 import LocalData from '../core/LocalData.js';
@@ -15,19 +14,19 @@ import MeshManager from '../core/MeshManager.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import PartyFrame from '../ui/PartyFrame.js';
 import GameMode from '../core/GameMode.js';
+import Pickup from '../actors/Pickup.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
     this.name = 'level1';
-    this.glbLoader = new GLTFLoader();
     this.spawnLevel();
     this.netPlayers = {};
     let playerPosBuffer = LocalData.position;
     playerPosBuffer.y += 0.1; //start a bit above ground
 
-    this.meshManager = new MeshManager();
+    this.meshManager = new MeshManager(this.game);
     this.actorMeshes = [];
-    this.pickupMeshes = [];
+    this.pickupActors = [];
     this.mapWalls = [];
 
     this.player = new Player(this.game, this, playerPosBuffer, false, this.game.camera);
@@ -56,10 +55,8 @@ export default class GameScene extends SceneBase {
     });
     setupChat();
 
-    MyEventEmitter.on('gameStart', (data) => {
-      this.gameMode = new GameMode(data.mode);
-      //this.gameMode.startGame();
-    });
+    this.gameMode = new GameMode('crown');
+
   }
 
   update(dt, time) {
@@ -70,6 +67,18 @@ export default class GameScene extends SceneBase {
       if (this.player.body.position.y < -100) {
         this.player.die();
       }
+
+      // Look for pickups
+      if (this.pickupActors.length > 0) {
+        const playerPos = this.player.body.position;
+        const pickupRadius = 1.75;
+        this.pickupActors.forEach(pickup => {
+          const dist = playerPos.distanceTo(pickup.position);
+          if (dist < pickupRadius) {
+            pickup.onCollect(this.player);
+          }
+        });
+      }
     }
     if (this.netPlayers) {
       Object.values(this.netPlayers).forEach(player => {
@@ -78,6 +87,25 @@ export default class GameScene extends SceneBase {
     }
     if (this.skyBox) this.skyBox.update();
     this.debugData.update(dt, time);
+  }
+
+  spawnPickup(type, position, itemId) {
+    if (this.getPickup(itemId)) return;
+    const pickup = new Pickup(this, type, new THREE.Vector3(position.x, position.y, position.z), itemId);
+    this.game.graphicsWorld.add(pickup);
+    this.pickupActors.push(pickup);
+  }
+
+  getPickup(itemId) {
+    return this.pickupActors.find(p => p.itemId === itemId);
+  }
+
+  removePickup(item, itemId) {
+    const pickup = item ? item : this.pickupActors.find(p => p.itemId === itemId);
+    if (pickup) {
+      this.game.graphicsWorld.remove(pickup);
+      this.pickupActors.splice(this.pickupActors.indexOf(pickup), 1);
+    }
   }
 
   getRespawnPoint() {
@@ -141,13 +169,23 @@ export default class GameScene extends SceneBase {
   }
 
   spawnLevel() {
-    this.glbLoader.load('/assets/Level1.glb', (gltf) => {
+    this.game.glbLoader.load('/assets/Level1.glb', (gltf) => {
       const model = gltf.scene;
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
       this.game.graphicsWorld.add(model);
       model.traverse((child) => {
-        console.log(child);
+        if (child.name === "SpawnPoint") {
+          child.visible = false;
+          return;
+        }
+        // console.log(child.name);
+        // if (child.name.includes('spawnEnergy')) {
+        //   child.visible = false;
+        //   this.spawnEnergyPickup(child.position);
+        //   return;
+        // }
+        // console.log(child);
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;
@@ -174,17 +212,16 @@ export default class GameScene extends SceneBase {
         }
       });
       this.levelLoaded = true;
-      console.log('Level loaded');
       MyEventEmitter.emit('levelLoaded');
     });
 
     // Loading progress bar could be added here using the onProgress callback
-    this.glbLoader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-      console.log(`Loading file: ${url}`);
+    this.game.glbLoader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+      // console.log(`Loading file: ${url}`);
       const progress = (itemsLoaded / itemsTotal) * 100;
       this.loadingBar(progress.toFixed(2));
     };
-    this.glbLoader.manager.onLoad = () => {
+    this.game.glbLoader.manager.onLoad = () => {
       this.loadingBar(100);
     };
 

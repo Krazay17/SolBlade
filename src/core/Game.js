@@ -8,6 +8,7 @@ import PlayerInfo from '../ui/PlayerUI';
 import MyEventEmitter from './MyEventEmitter';
 import Globals from '../utils/Globals';
 import soundPlayer from './SoundPlayer';
+import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
 export default class Game {
   constructor(canvas) {
@@ -37,6 +38,7 @@ export default class Game {
     this.timeStep = 1 / 120;
 
     this.graphicsWorld = new THREE.Scene();
+    this.glbLoader = new GLTFLoader();
 
     this.camera = new THREE.PerspectiveCamera(
       80,

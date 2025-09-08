@@ -11,7 +11,6 @@ const socket = io(serverURL, {
     reconnection: false,
 });
 export const netSocket = socket;
-export const onlineSocket = socket;
 
 let scene = null;
 let netPlayers = {};
@@ -47,14 +46,13 @@ function bindSocketEvents(myPlayerData) {
     lastPlayerData = { ...myPlayerData };
 
     socket.emit('joinGame', myPlayerData);
-    Globals.player.netId = socket.id;
+    scene.player.netId = socket.id;
 
     socket.on('disconnect', () => {
         socket.offAny();
         console.log("disconnected from server");
         if (scene) {
             Object.values(netPlayers).forEach(p => {
-                console.log(p);
                 scene.removePlayer(p.netId);
                 delete netPlayers[p.netId];
             });
@@ -134,10 +132,29 @@ function bindSocketEvents(myPlayerData) {
     socket.on('scoreUpdate', (data) => {
         MyEventEmitter.emit('scoreUpdate', data);
     });
+    socket.on('currentPickups', (pickupList) => {
+        pickupList.forEach(element => {
+            scene.spawnPickup(element.type, element.position, element.itemId);
+        });
+    });
+    socket.on('spawnPickup', (data) => {
+        scene.spawnPickup(data.type, data.position, data.itemId);
+    });
+    socket.on('pickupCollected', ({ playerId, itemId }) => {
+        const pickup = scene.getPickup(itemId);
+        if (!pickup) return;
+        if (socket.id === playerId) {
+            pickup.applyCollect(scene.player);
+        }
+        scene.removePickup(pickup);
+    });
 }
 
 MyEventEmitter.on('fx', (data) => {
-    netSocket.emit('fx', data);
+    socket.emit('fx', data);
+});
+MyEventEmitter.on('pickupCollected', (data) => {
+    socket.emit('pickupCollected', data);
 });
 
 setInterval(() => {

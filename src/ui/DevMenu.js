@@ -158,7 +158,6 @@ export default class DevMenu {
         const newValues = this.movementComp.resetDefaultValues();
         for (const [key, value] of Object.entries(this.movementSliders)) {
             for (const [key2, elements] of Object.entries(value)) {
-                console.log(key2);
                 const {slider, valueDisplay} = elements;
                 slider.value = newValues[key][key2];
                 valueDisplay.value = newValues[key][key2];

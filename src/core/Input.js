@@ -52,7 +52,6 @@ export default class Input {
 
   bindings() {
     this.domElement.addEventListener('keypress', (e) => {
-      console.log(`Key pressed: ${e.code}`);
       if (this.inputBlocked) return;
       MyEventEmitter.emit('KeyPressed', e.code);
     });

@@ -12,7 +12,6 @@ export function setupDiscordWindow() {
     });
 
     if (LocalData.flags.discordHidden) {
-        console.log('Hiding discord section from previous setting');
         sec.classList.add('hidden');
         return;
     }

@@ -98,7 +98,7 @@ export default class Player extends THREE.Object3D {
         if (!this.isRemote) {
             tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
             tryUpdateState(this.getAnimState());
-            this.regenEnergy(this.energyRegen, dt);
+            this.addEnergy(this.energyRegen, dt);
             if (this.body) {
                 if (this.movement) this.movement.update(dt);
                 if (this.stateManager) this.stateManager.update(dt, time);
@@ -109,8 +109,8 @@ export default class Player extends THREE.Object3D {
             }
         } else {
             // Remote Player
-            this.position.lerp(this.targetPos, 25 * dt);
-            this.rotation.y += (this.targetRot - this.rotation.y) * 25 * dt;
+            this.position.lerp(this.targetPos, 60 * dt);
+            this.rotation.y += (this.targetRot - this.rotation.y) * 60 * dt;
         }
 
         // Local and Remote Player
@@ -352,7 +352,6 @@ export default class Player extends THREE.Object3D {
         return this.stateManager.currentStateName ? this.stateManager.currentStateName : null;
     }
     destroy(id) {
-        console.log(`Removing player ${id} from world`);
         if (this.body) {
             this.game.physicsWorld.removeBody(this.body);
             this.body = null;
@@ -390,8 +389,8 @@ export default class Player extends THREE.Object3D {
         MyEventEmitter.emit('updateEnergy', this.energy);
         return true;
     }
-    regenEnergy(amount, dt) {
-        this.energy += amount * dt;
+    addEnergy(amount, dt) {
+        this.energy += dt ? amount * dt : amount;
         if (this.energy > 100) this.energy = 100;
         if (this.energy < 0) this.energy = 0;
         MyEventEmitter.emit('updateEnergy', this.energy);

@@ -16,7 +16,6 @@ export default class PartyFrame {
             this.removePlayer(player);
         });
         MyEventEmitter.on('playerHealthChange', ({player, health}) => {
-            console.log('Health change event received for', player.name, 'new health:', health);
             const playerElement = this.players.get(player);
             if (playerElement) {
                 const healthFill = playerElement.querySelector('.party-healthbar-fill');

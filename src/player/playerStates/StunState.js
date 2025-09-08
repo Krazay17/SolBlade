@@ -11,7 +11,6 @@ export default class StunState extends PlayerState {
         this.actor.animator?.setAnimState('knockback', true);
     }
     update(dt) {
-        console.log(this.timer);
         if (this.timer > performance.now()) return;
         this.manager.setState('idle');
     }

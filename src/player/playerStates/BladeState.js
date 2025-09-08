@@ -1,8 +1,7 @@
+import { Vector3 } from "three";
 import MyEventEmitter from "../../core/MyEventEmitter";
-import { netSocket } from "../../core/NetManager";
 import soundPlayer from "../../core/SoundPlayer";
 import PlayerState from "./_PlayerState";
-import { Vec3 } from "cannon";
 
 export default class BladeState extends PlayerState {
     constructor(actor, manager, options = {}) {
@@ -16,11 +15,12 @@ export default class BladeState extends PlayerState {
         this.lastEnter = null;
         this.lastExit = null;
         this.timer = 0;
+        this.tempVector = new Vector3();
 
-        soundPlayer.loadPosAudio('dash', '/assets/Dash.wav');
-        netSocket.on('fx', (data) => {
+        soundPlayer.loadPosAudio('dash', '/assets/Dash.mp3');
+        MyEventEmitter.on('netFx', (data) => {
             if (data.type === 'dash') {
-                soundPlayer.playPosAudio('dash', new Vec3(data.pos.x, data.pos.y, data.pos.z));
+                this.dashFx(this.tempVector.set(data.pos.x, data.pos.y, data.pos.z));
             }
         });
     }
@@ -33,11 +33,8 @@ export default class BladeState extends PlayerState {
             this.actor.movement.dashStart();
             this.actor.animator?.setAnimState('dash');
 
-            const dashFX = () => {
-                soundPlayer.playPosAudio('dash', this.actor.position);
-            }
-
-            MyEventEmitter.emit('playerDash', dashFX);
+            this.dashFx(this.actor.position);
+            MyEventEmitter.emit('fx', { type: 'dash', pos: this.actor.position });
             return;
         }
         this.actor.animator?.setAnimState('crouch', true);
@@ -58,6 +55,7 @@ export default class BladeState extends PlayerState {
             return;
         }
         this.actor.movement.bladeMove(dt);
+        
         if (this.jumpCD < performance.now()) {
             this.actor.animator?.setAnimState('crouch', true);
         }
@@ -81,7 +79,7 @@ export default class BladeState extends PlayerState {
                 this.floorTimer = setTimeout(() => {
                     this.floorTimer = null;
                     this.grounded = false;
-                }, 200);
+                }, 150);
             }
         } else {
             clearTimeout(this.floorTimer);
@@ -94,7 +92,6 @@ export default class BladeState extends PlayerState {
         }
     }
     exit() {
-        console.log('exit blade');
         clearTimeout(this.floorTimer);
         this.floorTimer = null;
         this.lastExit = performance.now();
@@ -102,5 +99,8 @@ export default class BladeState extends PlayerState {
         this.actor.energyRegen = 25;
 
         //netSocket.emit('playerBlockUpdate', false);
+    }
+    dashFx(pos) {
+        soundPlayer.playPosAudio('dash', pos);
     }
 }
