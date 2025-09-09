@@ -102,7 +102,7 @@ export default class PlayerMovement {
 
     idleMove(dt) {
         this.applyFriction(dt, this.values.idle.friction);
-        if (this.body.velocity.almostZero(.1)) {
+        if (this.body.velocity.almostZero(.25)) {
             return false;
         }
         return true;
