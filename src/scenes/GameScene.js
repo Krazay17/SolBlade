@@ -52,7 +52,7 @@ export default class GameScene extends SceneBase {
       health: LocalData.health,
     });
 
-    this.gameMode = new GameMode('crown');
+    this.gameMode = new GameMode('crown', this.player);
 
   }
 

@@ -32,6 +32,7 @@ export default class PlayerInfo {
                 this.name = newName;
                 nameElem.textContent = this.name;
                 netSocket.emit('playerNameSend', this.name);
+                MyEventEmitter.emit('playerNameUpdate', { netId: netSocket.id, name: this.name })
                 LocalData.name = this.name;
                 LocalData.save();
             }
@@ -68,7 +69,7 @@ export default class PlayerInfo {
             } else if (this.energy < this.actor.doubleJumpCost || this.energy < 50) {
                 energyBar.style.backgroundColor = 'rgba(255, 145, 0, 1)';
             } else {
-                
+
                 energyBar.style.backgroundColor = 'rgba(255, 255, 0, 1)';
             }
         });

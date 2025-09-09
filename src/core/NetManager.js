@@ -49,6 +49,7 @@ function bindSocketEvents(myPlayerData) {
 
     socket.emit('joinGame', myPlayerData);
     scene.player.netId = socket.id;
+    MyEventEmitter.emit('joinGame', scene.player);
 
     socket.on('disconnect', () => {
         socket.offAny();
@@ -61,6 +62,7 @@ function bindSocketEvents(myPlayerData) {
         }
     });
     socket.on('currentPlayers', (playerList) => {
+        MyEventEmitter.emit('currentPlayers', playerList);
         playerList.forEach(element => {
             if (element.netId === socket.id) return;
             if (netPlayers[element.netId]) return;
@@ -69,10 +71,12 @@ function bindSocketEvents(myPlayerData) {
     });
     socket.on('newPlayer', ({ netId, data }) => {
         if (netId === socket.id) return;
+        MyEventEmitter.emit('newPlayer', { netId, data });
         netPlayers[netId] = scene.addPlayer(netId, data);
     });
     socket.on('playerDisconnected', (netId) => {
         if (netPlayers[netId]) {
+            MyEventEmitter.emit('dcPlayer', netId);
             scene.removePlayer(netId);
             delete netPlayers[netId];
         }
@@ -93,7 +97,7 @@ function bindSocketEvents(myPlayerData) {
     socket.on('playerNameUpdate', ({ id, name }) => {
         if (netPlayers[id]) {
             netPlayers[id].setName(name);
-            MyEventEmitter.emit('playerNameUpdate', { player: netPlayers[id], name });
+            MyEventEmitter.emit('playerNameUpdate', { netId: id, player: netPlayers[id], name });
         }
     });
     socket.on('chatMessageUpdate', ({ id, data }) => {
@@ -131,6 +135,9 @@ function bindSocketEvents(myPlayerData) {
     socket.on('gameStart', (data) => {
         MyEventEmitter.emit('gameStart', data);
     });
+    socket.on('gameEnd', (data) => {
+        MyEventEmitter.emit('gameEnd', data);
+    })
     socket.on('scoreUpdate', (data) => {
         MyEventEmitter.emit('scoreUpdate', data);
     });
@@ -157,14 +164,22 @@ function bindSocketEvents(myPlayerData) {
         } else {
             netPlayers[playerId].pickupCrown();
         }
+        MyEventEmitter.emit('gameStart');
     });
     socket.on('dropCrown', ({ playerId }) => {
+        if (!playerId) {
+            player.dropCrown();
+            return;
+        }
         if (playerId === socket.id) {
             player.dropCrown();
         } else {
             netPlayers[playerId].dropCrown();
         }
     });
+    socket.on('crownScoreIncrease', ({ playerId, score }) => {
+        MyEventEmitter.emit('crownScoreIncrease', { playerId, score });
+    })
 }
 
 MyEventEmitter.on('fx', (data) => {
@@ -190,8 +205,8 @@ MyEventEmitter.on('playerDied', ({ player, source }) => {
             dropPos = player.position.clone();
     }
     if (player.hasCrown) {
-        player.hasCrown = false;
         dropPos.y += 1;
+        player.dropCrown()
         socket.emit('dropCrown', dropPos);
     }
 });
