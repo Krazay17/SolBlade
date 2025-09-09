@@ -148,7 +148,6 @@ class SoundPlayer {
             }
             return;
         }
-        console.log(pool.length);
         const audio = pool.find(a => !a.isPlaying);
         if (audio && audio.buffer) {
             if (position) audio.position.copy(position);

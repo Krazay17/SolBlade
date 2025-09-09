@@ -92,6 +92,14 @@ export default class Input {
 
     });
 
+    window.addEventListener('blur', () => {
+      Object.keys(this.keys).forEach(key => {
+        this.keys[key] = false;
+        const action = this.actions[key];
+        if (action) this.actionStates[action] = false;
+      });
+    });
+
   }
 
   addKeys() {

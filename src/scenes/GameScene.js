@@ -5,7 +5,6 @@ import Player from '../player/Player.js';
 import { getMaterial } from '../core/MaterialManager.js';
 import { setNetScene } from '../core/NetManager.js';
 import LocalData from '../core/LocalData.js';
-import setupChat from '../ui/Chat.js';
 import Globals from '../utils/Globals.js';
 import SkyBox from '../actors/SkyBox.js';
 import soundPlayer from '../core/SoundPlayer.js';
@@ -21,15 +20,14 @@ export default class GameScene extends SceneBase {
     this.name = 'level1';
     this.spawnLevel();
     this.netPlayers = {};
-    let playerPosBuffer = LocalData.position;
-    playerPosBuffer.y += 0.1; //start a bit above ground
 
     this.meshManager = new MeshManager(this.game);
+    this.meshMap = new Map();
     this.actorMeshes = [];
     this.pickupActors = [];
     this.mapWalls = [];
 
-    this.player = new Player(this.game, this, playerPosBuffer, false, this.game.camera);
+    this.player = new Player(this.game, this, LocalData.position, false, this.game.camera);
     Globals.player = this.player;
 
     this.partyFrame = new PartyFrame();
@@ -53,7 +51,6 @@ export default class GameScene extends SceneBase {
       money: LocalData.money,
       health: LocalData.health,
     });
-    setupChat();
 
     this.gameMode = new GameMode('crown');
 
@@ -64,11 +61,12 @@ export default class GameScene extends SceneBase {
       this.player.update(dt, time);
 
       // KillFloor
-      if (this.player.body.position.y < -100) {
-        this.player.die();
+      if (this.player.body.position.y < -30 && !this.player.isDead) {
+        this.player.die('the void');
       }
 
       // Look for pickups
+      if (this.player.isDead) return;
       if (this.pickupActors.length > 0) {
         const playerPos = this.player.body.position;
         const pickupRadius = 1.75;
@@ -90,8 +88,8 @@ export default class GameScene extends SceneBase {
   }
 
   spawnPickup(type, position, itemId) {
-    if (this.getPickup(itemId)) return;
-    const pickup = new Pickup(this, type, new THREE.Vector3(position.x, position.y, position.z), itemId);
+    const pickup = this.getPickup(itemId) ? this.getPickup(itemId) :
+      new Pickup(this, type, new THREE.Vector3(position.x, position.y, position.z), itemId);
     this.game.graphicsWorld.add(pickup);
     this.pickupActors.push(pickup);
   }
@@ -109,35 +107,19 @@ export default class GameScene extends SceneBase {
   }
 
   getRespawnPoint() {
-    return new THREE.Vector3(0, 1, 0);
+    if (this.spawnPoints && this.spawnPoints.length > 0) {
+      const index = Math.floor(Math.random() * this.spawnPoints.length);
+      return this.spawnPoints[index];
+    }
   }
 
   makeSky() {
     this.skyBox = new SkyBox();
     this.game.graphicsWorld.add(this.skyBox);
-    // const skyGeo = new THREE.SphereGeometry(2500, 25, 25);
-    // const myTexture = new THREE.TextureLoader().load('assets/RedSky0.webp');
-    // const myMaterial = new THREE.MeshBasicMaterial({
-    //   map: myTexture,
-    //   side: THREE.BackSide
-    // });
-    // const sky = new THREE.Mesh(skyGeo, myMaterial);
-    // this.game.graphicsWorld.add(sky);
-  }
-
-  makeFloor() {
-    //make a cannon floor plane
-    const groundBody = new CANNON.Body({
-      position: new CANNON.Vec3(0, 1, 0),
-      quaternion: new CANNON.Quaternion().setFromEuler(-Math.PI / 2, 0, 0),
-      mass: 0, // mass == 0 makes the body static
-      shape: new CANNON.Plane(),
-      material: getMaterial('defaultMaterial'),
-    });
-    this.game.physicsWorld.addBody(groundBody);
   }
 
   addPlayer(id, data) {
+    if (this.netPlayers[id]) return this.netPlayers[id];
     const player = new Player(this.game, this, data.pos, true, null, id, data);
     this.netPlayers[id] = player;
     player.name = data.name;
@@ -175,17 +157,12 @@ export default class GameScene extends SceneBase {
       model.scale.set(1, 1, 1); // Adjust size if needed
       this.game.graphicsWorld.add(model);
       model.traverse((child) => {
-        if (child.name === "SpawnPoint") {
+        if (child.name.startsWith("SpawnPoint")) {
           child.visible = false;
+          if (!this.spawnPoints) this.spawnPoints = [];
+          this.spawnPoints.push(child.position.clone());
           return;
         }
-        // console.log(child.name);
-        // if (child.name.includes('spawnEnergy')) {
-        //   child.visible = false;
-        //   this.spawnEnergyPickup(child.position);
-        //   return;
-        // }
-        // console.log(child);
         if (child.isMesh) {
           child.castShadow = true;
           child.receiveShadow = true;

@@ -19,9 +19,10 @@ export default class Player extends THREE.Object3D {
         super();
         this.game = game;
         this.scene = scene;
-        this.position.set(x, y, z);
         this.camera = camera;
         this.isRemote = isRemote;
+        this.currentPosition = new CANNON.Vec3(x, y + 0.1, z);
+        this.position.copy(this.currentPosition);
         this.name = isRemote ? netData.name || 'Player' : LocalData.name || 'Player';
         this.netId = id || null;
         game.graphicsWorld.add(this);
@@ -34,7 +35,6 @@ export default class Player extends THREE.Object3D {
         this.mixer;
         this.animations = {};
         this.currentAnimState = null;
-        this.currentPosition = new CANNON.Vec3(x, y, z);
         this.bodyMesh = null;
         this.meshes = [];
         this.setMesh();
@@ -80,7 +80,7 @@ export default class Player extends THREE.Object3D {
 
             MyEventEmitter.on('KeyPressed', (key) => {
                 if (key === 'KeyR') {
-                    this.stateManager.setState('dead');
+                    this.die();
                 }
             });
         } else {
@@ -88,6 +88,23 @@ export default class Player extends THREE.Object3D {
             this.targetPos = new THREE.Vector3(x, y, z);
             this.targetRot = 0;
             this.namePlate = new NamePlate(this, this.height + 0.5);
+        }
+    }
+
+    pickupCrown() {
+        this.hasCrown = true;
+        if (this.crownMesh) return;
+        if (!this.scene.meshMap.get('crown')) return;
+        this.crownMesh = this.scene.meshMap.get('crown');
+        this.add(this.crownMesh);
+        this.crownMesh.position.set(0, 2, 0);
+    }
+
+    dropCrown() {
+        if (this.crownMesh) {
+            this.hasCrown = false;
+            this.remove(this.crownMesh);
+            this.crownMesh = null;
         }
     }
 
@@ -161,7 +178,7 @@ export default class Player extends THREE.Object3D {
 
     async setMesh(skinName = 'KnightGirl') {
         if (this.meshName === skinName) return;
-        const newMesh = await this.scene.meshManager.createMesh(skinName);
+        const newMesh = await this.scene.meshManager.createSkeleMesh(skinName);
         this.meshName = skinName;
         this.remove(this.mesh);
         this.mesh = newMesh;
@@ -291,11 +308,11 @@ export default class Player extends THREE.Object3D {
             netId = netSocket.id;
             this.setHealth(this.health - dmg.amount);
         }
-        netSocket.emit('playerDamageSend', { targetId: netId, dmg, cc });
+        netSocket.emit('playerDamageSend', { attacker: attacker.name, targetId: netId, dmg, cc });
     }
 
-    applyDamage({ health, dmg, cc }) {
-        this.setHealth(health);
+    applyDamage({ attacker, health, dmg, cc }) {
+        this.setHealth(health, attacker);
         if (this.isRemote) return;
         const { type, amount } = dmg;
         const { stun, dir } = cc;
@@ -314,11 +331,11 @@ export default class Player extends THREE.Object3D {
         }
     }
     // call twice from local and server
-    setHealth(newHealth) {
+    setHealth(newHealth, attacker = null) {
         this.health = newHealth;
         if (!this.isRemote) {
             if (this.health <= 0) {
-                this.die();
+                this.die(attacker);
             }
             LocalData.health = newHealth;
             MyEventEmitter.emit('updateHealth', this.health);
@@ -328,10 +345,11 @@ export default class Player extends THREE.Object3D {
         MyEventEmitter.emit('playerHealthChange', { player: this, health: this.health });
     }
     // only local
-    die() {
+    die(source = null) {
         if (this.isRemote) return;
         this.stateManager.setState('dead');
         netSocket.emit('playerDieSend', { targetId: netSocket.id });
+        MyEventEmitter.emit('playerDied', { player: this, source });
     }
     // only local
     unDie() {

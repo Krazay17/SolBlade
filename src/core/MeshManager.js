@@ -5,12 +5,14 @@ export default class MeshManager {
     constructor(game) {
         this.game = game;
         this.loader = game.glbLoader;
+        this.meshMap = new Map();
         this.meshPool = {};
         this.skinCache = {};
         this.skinMap = new Map();
+        this.tempVec = new Vector3();
+
         this.skinMap.set('KnightGirl', '/assets/KnightGirl.glb');
         this.skinMap.set('NinjaDude', '/assets/NinjaDude.glb');
-        this.tempVec = new Vector3();
     }
 
     meshInitProperties(meshName) {
@@ -42,7 +44,7 @@ export default class MeshManager {
         return this.meshPool[meshName] ? this.meshPool[meshName].pop() : null;
     }
 
-    async loadMesh(skinName) {
+    async loadSkeleMesh(skinName) {
         if (this.skinCache[skinName]) {
             return this.skinCache[skinName];
         }
@@ -68,13 +70,13 @@ export default class MeshManager {
         });
     }
 
-    async createMesh(skinName) {
+    async createSkeleMesh(skinName) {
         const pooledMesh = this.getMesh(skinName);
         if (pooledMesh) {
             return pooledMesh;
         }
 
-        const { model, animations } = await this.loadMesh(skinName);
+        const { model, animations } = await this.loadSkeleMesh(skinName);
         const clonedMesh = SkeletonUtils.clone(model);
         clonedMesh.animations = animations;
         let meshBody = null;
@@ -89,5 +91,9 @@ export default class MeshManager {
 
     releaseMesh(skinName, mesh) {
         this.addMesh(skinName, mesh);
+    }
+
+    async createMesh(name) {
+
     }
 }

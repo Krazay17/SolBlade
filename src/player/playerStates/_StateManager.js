@@ -29,7 +29,7 @@ export default class StateManager {
     setState(state, enterParams) {
         if ((this.currentStateName === state && !this.activeState.reEnter) && this.activeState) return false;
         if (!this.states[state]?.canEnter(state, enterParams)) return false;
-        if (!this.activeState?.canExit(state, enterParams)) return false;
+        if (!this.activeState?.canExit(state, enterParams) && state !== 'dead') return false;
 
         let newState = state;
         if (this.states[newState]) {

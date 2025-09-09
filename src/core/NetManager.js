@@ -14,6 +14,7 @@ export const netSocket = socket;
 
 let scene = null;
 let netPlayers = {};
+let player = null;
 
 export const defaultPlayerData = {
     scene: null,
@@ -44,6 +45,7 @@ socket.on("connect", () => {
 function bindSocketEvents(myPlayerData) {
     if (!scene) return;
     lastPlayerData = { ...myPlayerData };
+    player = scene.player;
 
     socket.emit('joinGame', myPlayerData);
     scene.player.netId = socket.id;
@@ -134,6 +136,7 @@ function bindSocketEvents(myPlayerData) {
     });
     socket.on('currentPickups', (pickupList) => {
         pickupList.forEach(element => {
+            if (!element.active) return;
             scene.spawnPickup(element.type, element.position, element.itemId);
         });
     });
@@ -148,6 +151,20 @@ function bindSocketEvents(myPlayerData) {
         }
         scene.removePickup(pickup);
     });
+    socket.on('pickupCrown', ({ playerId }) => {
+        if (playerId === socket.id) {
+            player.pickupCrown();
+        } else {
+            netPlayers[playerId].pickupCrown();
+        }
+    });
+    socket.on('dropCrown', ({ playerId }) => {
+        if (playerId === socket.id) {
+            player.dropCrown();
+        } else {
+            netPlayers[playerId].dropCrown();
+        }
+    });
 }
 
 MyEventEmitter.on('fx', (data) => {
@@ -155,6 +172,28 @@ MyEventEmitter.on('fx', (data) => {
 });
 MyEventEmitter.on('pickupCollected', (data) => {
     socket.emit('pickupCollected', data);
+});
+MyEventEmitter.on('pickupCrown', () => {
+    socket.emit('pickupCrown');
+});
+MyEventEmitter.on('playerDied', ({ player, source }) => {
+    let dropPos;
+    switch (source) {
+        case 'the void':
+            dropPos = { x: 0, y: 1, z: 0 };
+            MyEventEmitter.emit('chatMessage', { player: 'Server', message: `${player.name} fell into the void!`, color: 'orange' });
+            socket.emit('chatMessageSend', { player: 'Server', message: `${player.name} fell into the void!`, color: 'orange' });
+            break;
+        default:
+            MyEventEmitter.emit('chatMessage', { player: 'Server', message: `${player.name} was slain by ${source}!`, color: 'red' });
+            socket.emit('chatMessageSend', { player: 'Server', message: `${player.name} was slain by ${source}!`, color: 'red' });
+            dropPos = player.position.clone();
+    }
+    if (player.hasCrown) {
+        player.hasCrown = false;
+        dropPos.y += 1;
+        socket.emit('dropCrown', dropPos);
+    }
 });
 
 setInterval(() => {

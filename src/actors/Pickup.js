@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { netSocket } from '../core/NetManager.js';
 import Globals from '../utils/Globals.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import soundPlayer from '../core/SoundPlayer.js';
@@ -42,12 +41,13 @@ export default class Pickup extends THREE.Object3D {
                     this.mesh.children[0].receiveShadow = true;
                     this.mesh.children[0].castShadow = true;
                     this.add(this.mesh);
+                    this.scene.meshMap.set('crown', this.mesh.clone());
                 });
         }
     }
 
     onCollect(player) {
-        if(!this.active) return;
+        if (!this.active) return;
         this.active = false;
         Pickup.pickupFx(this.position);
         MyEventEmitter.emit('fx', { type: 'pickup', pos: this.position });
@@ -58,9 +58,13 @@ export default class Pickup extends THREE.Object3D {
         soundPlayer.playPosAudio('pickup', pos, '/assets/Pickup.mp3');
     }
 
+    static crownFx(mesh) {
+        Globals.player.add(mesh);
+    }
+
     applyCollect(player) {
         if (this.type === 'crown') {
-            this.scene.gameMode.startGame();
+            MyEventEmitter.emit('pickupCrown');
         }
 
         if (this.type === 'energy') {
