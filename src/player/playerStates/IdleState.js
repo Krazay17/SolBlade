@@ -27,7 +27,7 @@ export default class IdleState extends PlayerState {
         }
     }
     exit() {
-        if (!netSocket.active && netSocket.disconnected) {
+        if (netSocket.disconnected) {
             netSocket.connect();
         }
         this.body.wakeUp();

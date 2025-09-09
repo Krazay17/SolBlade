@@ -66,16 +66,17 @@ export default class GameScene extends SceneBase {
       }
 
       // Look for pickups
-      if (this.player.isDead) return;
-      if (this.pickupActors.length > 0) {
-        const playerPos = this.player.body.position;
-        const pickupRadius = 1.75;
-        this.pickupActors.forEach(pickup => {
-          const dist = playerPos.distanceTo(pickup.position);
-          if (dist < pickupRadius) {
-            pickup.onCollect(this.player);
-          }
-        });
+      if (!this.player.isDead) {
+        if (this.pickupActors.length > 0) {
+          const playerPos = this.player.body.position;
+          const pickupRadius = 1.75;
+          this.pickupActors.forEach(pickup => {
+            const dist = playerPos.distanceTo(pickup.position);
+            if (dist < pickupRadius) {
+              pickup.onCollect(this.player);
+            }
+          });
+        }
       }
     }
     if (this.netPlayers) {

@@ -8,7 +8,6 @@ const serverURL = location.hostname === "localhost" ?
     : "solbladeserver-production.up.railway.app";
 
 const socket = io(serverURL, {
-    reconnection: false,
 });
 export const netSocket = socket;
 
@@ -213,7 +212,7 @@ MyEventEmitter.on('playerDied', ({ player, source }) => {
 
 setInterval(() => {
     socket.emit('heartbeat');
-}, 1000);
+}, 500);
 
 export function setNetScene(s, myPlayerData) {
     scene = s;
