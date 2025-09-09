@@ -28,7 +28,7 @@ export default class BladeState extends PlayerState {
         this.lastEnter = performance.now();
         this.floorTimer = null;
 
-        if (!neutral) {
+        if (!neutral && this.manager.lastState !== 'stun') {
             this.dashTimer = performance.now() + 300;
             this.actor.movement.dashStart();
             this.actor.animator?.setAnimState('dash');

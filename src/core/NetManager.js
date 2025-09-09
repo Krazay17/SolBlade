@@ -172,7 +172,7 @@ function bindSocketEvents(myPlayerData) {
         }
         if (playerId === socket.id) {
             player.dropCrown();
-        } else {
+        } else if (netPlayers[playerId]) {
             netPlayers[playerId].dropCrown();
         }
     });

@@ -88,6 +88,9 @@ export default class Player extends THREE.Object3D {
             this.targetPos = new THREE.Vector3(x, y, z);
             this.targetRot = 0;
             this.namePlate = new NamePlate(this, this.height + 0.5);
+            if (netData && netData.hasCrown) {
+                this.pickupCrown();
+            }
         }
     }
 
