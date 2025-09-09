@@ -28,7 +28,7 @@ export default class BladeState extends PlayerState {
         this.lastEnter = performance.now();
         this.floorTimer = null;
 
-        if (!neutral && this.manager.lastState !== 'stun') {
+        if (!neutral) {
             this.dashTimer = performance.now() + 300;
             this.actor.movement.dashStart();
             this.actor.animator?.setAnimState('dash');
@@ -99,6 +99,9 @@ export default class BladeState extends PlayerState {
         this.actor.energyRegen = 25;
 
         //netSocket.emit('playerBlockUpdate', false);
+    }
+    canEnter() {
+        return !this.actor.getDimmed();
     }
     dashFx(pos) {
         soundPlayer.playPosAudio('dash', pos);

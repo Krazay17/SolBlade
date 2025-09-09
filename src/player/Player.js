@@ -111,6 +111,14 @@ export default class Player extends THREE.Object3D {
         }
     }
 
+    setDimmed(duration) {
+        this.dimmed = performance.now() + duration;
+    }
+
+    getDimmed() {
+        return this.dimmed ? this.dimmed > performance.now() : false;
+    }
+
     update(dt, time) {
         if (!this.mesh) return;
 
@@ -318,14 +326,14 @@ export default class Player extends THREE.Object3D {
         this.setHealth(health, attacker);
         if (this.isRemote) return;
         const { type, amount } = dmg;
-        const { stun, dir } = cc;
+        const { stun, dir, dim } = cc;
         if (amount > 0) {
 
             if (type === 'melee') {
                 CameraFX.shake(0.2, 125);
             }
             if (stun > 0) {
-                this.stateManager.setState('stun', stun);
+                this.stateManager.setState('stun', { stun, dim });
             }
             if (dir) {
                 this.body.wakeUp();

@@ -6,8 +6,9 @@ export default class StunState extends PlayerState {
         this.reEnter = true;
         this.timer = 0;
     }
-    enter(duration = 1000) {
-        this.timer = performance.now() + duration;
+    enter({ stun = 500, dim = 0 } = {}) {
+        this.timer = performance.now() + stun;
+        this.actor.setDimmed(dim);
         this.actor.animator?.setAnimState('knockback', true);
     }
     update(dt) {
