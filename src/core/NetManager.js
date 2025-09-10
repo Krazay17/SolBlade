@@ -45,6 +45,7 @@ function bindSocketEvents(myPlayerData) {
     if (!scene) return;
     lastPlayerData = { ...myPlayerData };
     player = scene.player;
+    netPlayers[socket.id] = scene.player;
 
     socket.emit('joinGame', myPlayerData);
     scene.player.netId = socket.id;
@@ -52,6 +53,7 @@ function bindSocketEvents(myPlayerData) {
 
     socket.on('disconnect', () => {
         socket.offAny();
+        MyEventEmitter.emit('disconnect');
         console.log("disconnected from server");
         if (scene) {
             Object.values(netPlayers).forEach(p => {
@@ -131,12 +133,7 @@ function bindSocketEvents(myPlayerData) {
     socket.on('fx', (data) => {
         MyEventEmitter.emit('netFx', data);
     });
-    socket.on('gameStart', (data) => {
-        MyEventEmitter.emit('gameStart', data);
-    });
-    socket.on('gameEnd', (data) => {
-        MyEventEmitter.emit('gameEnd', data);
-    })
+
     socket.on('scoreUpdate', (data) => {
         MyEventEmitter.emit('scoreUpdate', data);
     });
@@ -157,22 +154,19 @@ function bindSocketEvents(myPlayerData) {
         }
         scene.removePickup(pickup);
     });
+    socket.on('crownGameStarted', (players) => {
+        MyEventEmitter.emit('crownGameStarted', players);
+    });
+    socket.on('crownGameEnded', (winner) => {
+        MyEventEmitter.emit('crownGameEnded', winner);
+    })
     socket.on('pickupCrown', ({ playerId }) => {
-        if (playerId === socket.id) {
-            player.pickupCrown();
-        } else {
+        if (netPlayers[playerId]) {
             netPlayers[playerId].pickupCrown();
         }
-        MyEventEmitter.emit('gameStart');
     });
     socket.on('dropCrown', ({ playerId }) => {
-        if (!playerId) {
-            player.dropCrown();
-            return;
-        }
-        if (playerId === socket.id) {
-            player.dropCrown();
-        } else if (netPlayers[playerId]) {
+        if (netPlayers[playerId]) {
             netPlayers[playerId].dropCrown();
         }
     });
@@ -190,23 +184,18 @@ MyEventEmitter.on('pickupCollected', (data) => {
 MyEventEmitter.on('pickupCrown', () => {
     socket.emit('pickupCrown');
 });
+MyEventEmitter.on('crownGameStart', () => {
+    socket.emit('crownGameStart');
+});
 MyEventEmitter.on('playerDied', ({ player, source }) => {
-    let dropPos;
     switch (source) {
         case 'the void':
-            dropPos = { x: 0, y: 1, z: 0 };
             MyEventEmitter.emit('chatMessage', { player: 'Server', message: `${player.name} fell into the void!`, color: 'orange' });
             socket.emit('chatMessageSend', { player: 'Server', message: `${player.name} fell into the void!`, color: 'orange' });
             break;
         default:
             MyEventEmitter.emit('chatMessage', { player: 'Server', message: `${player.name} was slain by ${source}!`, color: 'red' });
             socket.emit('chatMessageSend', { player: 'Server', message: `${player.name} was slain by ${source}!`, color: 'red' });
-            dropPos = player.position.clone();
-    }
-    if (player.hasCrown) {
-        dropPos.y += 1;
-        player.dropCrown()
-        socket.emit('dropCrown', dropPos);
     }
 });
 

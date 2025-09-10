@@ -19,10 +19,9 @@ export default class GameScene extends SceneBase {
   onEnter() {
     this.name = 'level1';
     this.spawnLevel();
-    this.netPlayers = {};
+    this.players = {};
 
     this.meshManager = new MeshManager(this.game);
-    this.meshMap = new Map();
     this.actorMeshes = [];
     this.pickupActors = [];
     this.mapWalls = [];
@@ -52,7 +51,7 @@ export default class GameScene extends SceneBase {
       health: LocalData.health,
     });
 
-    this.gameMode = new GameMode('crown', this.player);
+    this.gameMode = new GameMode(this, 'crown', this.player);
 
   }
 
@@ -61,7 +60,7 @@ export default class GameScene extends SceneBase {
       this.player.update(dt, time);
 
       // KillFloor
-      if (this.player.body.position.y < -30 && !this.player.isDead) {
+      if (this.player.body.position.y < -10 && !this.player.isDead) {
         this.player.die('the void');
       }
 
@@ -79,8 +78,8 @@ export default class GameScene extends SceneBase {
         }
       }
     }
-    if (this.netPlayers) {
-      Object.values(this.netPlayers).forEach(player => {
+    if (this.players) {
+      Object.values(this.players).forEach(player => {
         player.update(dt, time);
       });
     }
@@ -120,21 +119,20 @@ export default class GameScene extends SceneBase {
   }
 
   addPlayer(id, data) {
-    if (this.netPlayers[id]) return this.netPlayers[id];
+    console.log('Adding player', id, data);
+    if (this.players[id]) return this.players[id];
     const player = new Player(this.game, this, data.pos, true, null, id, data);
-    this.netPlayers[id] = player;
-    player.name = data.name;
-    player.currentAnimState = data.state;
+    this.players[id] = player;
     MyEventEmitter.emit('playerJoined', player);
     return player;
   }
 
   removePlayer(id) {
-    const player = this.netPlayers[id];
+    const player = this.players[id];
     if (player) {
       MyEventEmitter.emit('playerLeft', player);
       player.destroy(id);
-      delete this.netPlayers[id];
+      delete this.players[id];
     }
   }
 
@@ -230,7 +228,7 @@ export default class GameScene extends SceneBase {
       this.loadingBarFill.style.zIndex = '1000';
     }
     this.loadingBarFill.style.width = `${progress}%`;
-    if (progress >= 100) {
+    if (progress >= 95) {
       setTimeout(() => {
         if (this.loadingBarContainer) {
           document.body.removeChild(this.loadingBarContainer);

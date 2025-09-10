@@ -34,7 +34,7 @@ export default class Player extends THREE.Object3D {
         this.mesh;
         this.mixer;
         this.animations = {};
-        this.currentAnimState = null;
+        this.currentAnimState = isRemote ? netData.state || 'idle' : 'idle';
         this.bodyMesh = null;
         this.meshes = [];
         this.setMesh();
@@ -80,7 +80,7 @@ export default class Player extends THREE.Object3D {
 
             MyEventEmitter.on('KeyPressed', (key) => {
                 if (key === 'KeyR') {
-                    this.die();
+                    this.die('the void');
                 }
             });
         } else {
@@ -88,26 +88,25 @@ export default class Player extends THREE.Object3D {
             this.targetPos = new THREE.Vector3(x, y, z);
             this.targetRot = 0;
             this.namePlate = new NamePlate(this, this.height + 0.5);
+
+            // !!!!pre load crown for net player!!!!
             if (netData && netData.hasCrown) {
                 this.pickupCrown();
             }
         }
     }
 
-    pickupCrown() {
-        this.hasCrown = true;
-        if (this.crownMesh) return;
-        if (!this.scene.meshMap.get('crown')) return;
-        this.crownMesh = this.scene.meshMap.get('crown');
+    async pickupCrown() {
+        if (!this.crownMesh) {
+            this.crownMesh = await this.scene.meshManager.getMesh('crown');
+            this.crownMesh.position.set(0, 2, 0);
+        }
         this.add(this.crownMesh);
-        this.crownMesh.position.set(0, 2, 0);
     }
 
     dropCrown() {
-        if (this.crownMesh && this.hasCrown) {
-            this.hasCrown = false;
+        if (this.crownMesh) {
             this.remove(this.crownMesh);
-            this.crownMesh = null;
         }
     }
 
@@ -359,7 +358,6 @@ export default class Player extends THREE.Object3D {
     die(source = null) {
         if (this.isRemote) return;
         this.stateManager.setState('dead');
-        netSocket.emit('playerDieSend', { targetId: netSocket.id });
         MyEventEmitter.emit('playerDied', { player: this, source });
     }
     // only local
@@ -371,6 +369,7 @@ export default class Player extends THREE.Object3D {
         this.body.velocity.set(0, 0, 0);
 
         this.setHealth(100);
+        MyEventEmitter.emit('playerRespawn', { health: this.health });
         netSocket.emit('playerRespawnUpdate', { id: this.netId, health: this.health, pos: this.position });
     }
 

@@ -26,7 +26,7 @@ export default class Pickup extends THREE.Object3D {
         }
     }
 
-    createPickupMesh() {
+    async createPickupMesh(scale = 1) {
         switch (this.type) {
             case 'energy':
                 const geometry = new THREE.SphereGeometry(0.5, 16, 16);
@@ -35,14 +35,10 @@ export default class Pickup extends THREE.Object3D {
                 this.add(this.mesh);
                 break;
             default:
-                Globals.game.glbLoader.load(`assets/${this.type}.glb`, (gltf) => {
-                    this.mesh = gltf.scene;
-                    this.mesh.scale.set(0.5, 0.5, 0.5);
-                    this.mesh.children[0].receiveShadow = true;
-                    this.mesh.children[0].castShadow = true;
-                    this.add(this.mesh);
-                    this.scene.meshMap.set('crown', this.mesh.clone());
-                });
+                const sceneMesh = await this.scene.meshManager.getMesh(this.type);
+                if (sceneMesh) {
+                    this.add(sceneMesh);
+                }
         }
     }
 

@@ -2,46 +2,80 @@ import MyEventEmitter from "./MyEventEmitter";
 import { netSocket } from "./NetManager";
 
 export default class GameMode {
-    constructor(name) {
+    constructor(scene, name, actor) {
+        this.scene = scene;
         this.name = name;
+        this.actor = actor;
+        this.hasCrown = false;
         this.players = {};
         this.gamemodeUI = null;
-        this.playerScore = 0;
-        this.winningScore = 100;
         this.gameOn = false;
 
-        MyEventEmitter.on('joinGame', player => {
-            this.players[player.netId] = { data: { name: player.name }, score: 0 }
-        })
+        MyEventEmitter.on('joinGame', () => {
+            this.hasCrown = false;
+            this.actor.dropCrown();
+        });
+        MyEventEmitter.on('disconnect', () => {
+            this.hasCrown = false;
+            for (const player of Object.values(this.players)) {
+                this.removePlayer(player);
+            }
+            this.players = {};
+        });
         MyEventEmitter.on('currentPlayers', playerList => {
             for (const player of playerList) {
-                this.players[player.netId] = { data: player.data, score: 0 };
+                this.players[player.netId] = { data: player.data, score: player.score || 0, element: null };
             }
-        })
+        });
         MyEventEmitter.on('newPlayer', ({ netId, data }) => {
-            this.players[netId] = { data, score: 0 };
+            this.players[netId] = { data, score: 0, element: null };
         });
         MyEventEmitter.on('dcPlayer', (netId) => {
             this.removePlayer(this.players[netId]);
             delete this.players[netId];
-        })
+        });
         MyEventEmitter.on('playerNameUpdate', ({ netId, player, name }) => {
             const playerName = this.players[netId];
             playerName.data.name = name;
             playerName.element.innerText = `${playerName.data.name}: ${playerName.score}`;
-        })
+        });
         MyEventEmitter.on('pickupCrown', () => {
+            this.hasCrown = true;
+            this.actor.pickupCrown();
             this.startGame();
-        })
+        });
+        MyEventEmitter.on('playerDied', ({ player, source }) => {
+            if (!this.hasCrown) return;
+            this.hasCrown = false;
+            let pos;
+            switch (source) {
+                case 'the void':
+                    pos = { x: 0, y: 0, z: 0 };
+                    break;
+                default:
+                    pos = this.actor.position;
+            }
+            pos.y += 1;
+            this.actor.dropCrown();
+            netSocket.emit('dropCrown', pos);
+        });
+        MyEventEmitter.on('dropCrown', () => {
+        });
         MyEventEmitter.on('crownScoreIncrease', ({ playerId, score }) => {
             this.changeScore(playerId, score);
-        })
-        MyEventEmitter.on('gameStart', () => {
+        });
+        MyEventEmitter.on('crownGameStarted', ( players ) => {
             this.startGame();
-        })
-        MyEventEmitter.on('gameEnd', (winner) => {
+            if (!players) return;
+            for (const player of players) {
+                this.changeScore(player.id, player.score || 0);
+            }
+        });
+        MyEventEmitter.on('crownGameEnded', (winner) => {
+            this.actor.dropCrown();
+            this.hasCrown = false;
             this.endGame(winner);
-        })
+        });
     }
 
     startGame() {
@@ -49,6 +83,7 @@ export default class GameMode {
         this.gameOn = true;
         if (!this.gamemodeUI) this.gamemodeUI = this.createGamemodeUI();
         else this.gamemodeUI.style.display = 'flex';
+
         for (const player of Object.values(this.players)) {
             if (!player.element) {
                 player.element = this.addPlayer(player);

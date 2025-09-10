@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import { GLTFLoader, SkeletonUtils } from "three/examples/jsm/Addons.js";
+import { SkeletonUtils } from "three/examples/jsm/Addons.js";
 
 export default class MeshManager {
     constructor(game) {
@@ -40,7 +40,7 @@ export default class MeshManager {
         this.meshPool[meshName].push(mesh);
     }
 
-    getMesh(meshName) {
+    getSkeleMesh(meshName) {
         return this.meshPool[meshName] ? this.meshPool[meshName].pop() : null;
     }
 
@@ -71,7 +71,7 @@ export default class MeshManager {
     }
 
     async createSkeleMesh(skinName) {
-        const pooledMesh = this.getMesh(skinName);
+        const pooledMesh = this.getSkeleMesh(skinName);
         if (pooledMesh) {
             return pooledMesh;
         }
@@ -93,7 +93,36 @@ export default class MeshManager {
         this.addMesh(skinName, mesh);
     }
 
-    async createMesh(name) {
+    async createMesh(name, scale = 1) {
+        return new Promise((resolve, reject) => {
+            this.loader.load(`assets/${name}.glb`, (gltf) => {
+                const mesh = gltf.scene;
+                mesh.scale.set(scale, scale, scale);
+                mesh.traverse((child) => {
+                    if (child.isMesh) {
+                        child.receiveShadow = true;
+                        child.castShadow = true;
+                    }
+                });
+                this.meshMap.set(name, mesh);
+                resolve(mesh);
+            }, undefined, reject);
+        });
+    }
 
+    async getMesh(name, scale) {
+        let mesh = this.meshMap.get(name);
+        if (mesh) {
+            return mesh.clone();
+        } else {
+            let newScale = scale;
+            switch (name) {
+                case 'crown':
+                    newScale = newScale || 0.5;
+                    break;
+            }
+            mesh = await this.createMesh(name, newScale);
+            return mesh.clone();
+        }
     }
 }
