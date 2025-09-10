@@ -33,7 +33,6 @@ socket.on("connect", () => {
         scene.removePlayer(p.netId);
         delete netPlayers[p.netId];
     });
-    socket.offAny();
     if (scene) {
         bindSocketEvents(scene.fullNetSync());
     } else {
@@ -42,6 +41,8 @@ socket.on("connect", () => {
 });
 
 function bindSocketEvents(myPlayerData) {
+    if (socket.bound) return;
+    socket.bound = true;
     if (!scene) return;
     lastPlayerData = { ...myPlayerData };
     player = scene.player;
@@ -52,7 +53,6 @@ function bindSocketEvents(myPlayerData) {
     MyEventEmitter.emit('joinGame', scene.player);
 
     socket.on('disconnect', () => {
-        socket.offAny();
         MyEventEmitter.emit('disconnect');
         console.log("disconnected from server");
         Object.values(netPlayers).forEach(p => {
@@ -199,7 +199,7 @@ MyEventEmitter.on('playerDied', ({ player, source }) => {
 
 setInterval(() => {
     socket.emit('heartbeat');
-}, 500);
+}, 5000);
 
 export function setNetScene(s, myPlayerData) {
     scene = s;
