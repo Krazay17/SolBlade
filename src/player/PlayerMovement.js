@@ -141,9 +141,7 @@ export default class PlayerMovement {
         const v = this.body.velocity.clone();
         const vN = v.clone();
         vN.normalize();
-        const n = this.actor.groundChecker.floorNormal(); // Should be a normalized Vec3
-        //n.cross(this.upDir, this.tempVec);
-        //n.cross(this.tempVec, this.tempVec); // Re-orthogonalize to ensure precision
+        const n = this.actor.groundChecker.floorNormal();
         if (!n) return;
         const vdot = v.dot(n);
         let boost = 1 + ((1 - this.upDir.dot(n)) * (1 - Math.abs(vN.dot(n))));
@@ -163,7 +161,7 @@ export default class PlayerMovement {
         this.applySlopeFriction(dt, this.values.blade.friction);
 
         let wishdir = this.getInputDirection();
-        let wishspeed = this.values.blade.speed + this.momentumBooster.increaseBoost(dt);
+        let wishspeed = this.values.blade.speed //+ this.momentumBooster.increaseBoost(dt);
         if (wishdir.almostZero()) return;
         // Project wishdir onto slope plane
         wishdir = projectOnPlane(wishdir, this.actor.groundChecker.floorNormal());
@@ -256,12 +254,12 @@ export default class PlayerMovement {
 
     accelerate(wishdir, wishspeed, accel, dt, tapBlend) {
         const currentVelocity = this.body.velocity.clone(); // speed in that direction
-        const horiz = Math.hypot(currentVelocity.x, currentVelocity.z);
         currentVelocity.y = 0;
-        const currentHorizSpeed = currentVelocity.dot(wishdir);
-        //console.log({ horiz, currentHorizSpeed, wishspeed });
+        const currentSpeed = currentVelocity.length();
 
-        const addSpeed = (wishspeed - currentHorizSpeed);
+        const wishDirSpeed = currentVelocity.dot(wishdir);
+        const addSpeed = (wishspeed - wishDirSpeed);
+
         if (addSpeed <= 0) return false;
 
         //this.tapStrafe(wishdir, tapBlend);
@@ -271,14 +269,36 @@ export default class PlayerMovement {
         this.body.velocity.x += wishdir.x * accelSpeed;
         this.body.velocity.z += wishdir.z * accelSpeed;
         this.body.velocity.y += wishdir.y * accelSpeed;
-        this.clampHorizontalSpeed(wishspeed, .0175);
+        if (wishDirSpeed > wishspeed) {
+            this.adjustVelocityDirection(wishdir);
+        }
 
+    }
+    adjustVelocityDirection(wishdir, blendFactor = 1) {
+        if (wishdir.isZero()) return;
+
+        // Get current horizontal velocity
+        const currentV = this.body.velocity.clone();
+        currentV.y = 0;
+        const speed = currentV.length();
+        if (speed < 0.0001) return;
+
+        // Blend direction
+        this.tempVec3.copy(currentV).normalize().scale(1 - blendFactor);
+        this.tempVec4.copy(wishdir).normalize().scale(blendFactor);
+        this.tempVec3.vadd(this.tempVec4, this.tempVec3);
+        this.tempVec3.normalize().scale(speed, this.tempVec3);
+
+        // Apply blended direction, preserve Y
+        this.body.velocity.x = this.tempVec3.x;
+        this.body.velocity.z = this.tempVec3.z;
     }
     clampHorizontalSpeed(maxSpeed, pwr = 1) {
         const v = this.body.velocity;
         const horizSpeed = Math.hypot(v.x, v.z);
         if (horizSpeed > maxSpeed) {
-            const scale = Math.pow(maxSpeed / horizSpeed, pwr);
+            //const scale = Math.pow(maxSpeed / horizSpeed, pwr);
+            const scale = maxSpeed / horizSpeed;
             v.x *= scale;
             v.z *= scale;
         }
