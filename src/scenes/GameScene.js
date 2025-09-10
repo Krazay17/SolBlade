@@ -19,7 +19,7 @@ export default class GameScene extends SceneBase {
   onEnter() {
     this.name = 'level1';
     this.spawnLevel();
-    this.players = {};
+    this.scenePlayers = {};
 
     this.meshManager = new MeshManager(this.game);
     this.actorMeshes = [];
@@ -78,8 +78,8 @@ export default class GameScene extends SceneBase {
         }
       }
     }
-    if (this.players) {
-      Object.values(this.players).forEach(player => {
+    if (this.scenePlayers) {
+      Object.values(this.scenePlayers).forEach(player => {
         player.update(dt, time);
       });
     }
@@ -120,19 +120,19 @@ export default class GameScene extends SceneBase {
 
   addPlayer(id, data) {
     console.log('Adding player', id, data);
-    if (this.players[id]) return this.players[id];
+    if (this.scenePlayers[id]) return this.scenePlayers[id];
     const player = new Player(this.game, this, data.pos, true, null, id, data);
-    this.players[id] = player;
+    this.scenePlayers[id] = player;
     MyEventEmitter.emit('playerJoined', player);
     return player;
   }
 
   removePlayer(id) {
-    const player = this.players[id];
+    const player = this.scenePlayers[id];
     if (player) {
       MyEventEmitter.emit('playerLeft', player);
       player.destroy(id);
-      delete this.players[id];
+      delete this.scenePlayers[id];
     }
   }
 

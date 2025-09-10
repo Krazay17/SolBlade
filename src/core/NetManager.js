@@ -55,12 +55,10 @@ function bindSocketEvents(myPlayerData) {
         socket.offAny();
         MyEventEmitter.emit('disconnect');
         console.log("disconnected from server");
-        if (scene) {
-            Object.values(netPlayers).forEach(p => {
-                scene.removePlayer(p.netId);
-                delete netPlayers[p.netId];
-            });
-        }
+        Object.values(netPlayers).forEach(p => {
+            if (scene) scene.removePlayer(p.netId);
+            delete netPlayers[p.netId];
+        });
     });
     socket.on('currentPlayers', (playerList) => {
         MyEventEmitter.emit('currentPlayers', playerList);

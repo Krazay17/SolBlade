@@ -17,6 +17,8 @@ export default class GameMode {
         });
         MyEventEmitter.on('disconnect', () => {
             this.hasCrown = false;
+            this.actor.dropCrown();
+            this.gameOn = false;
             for (const player of Object.values(this.players)) {
                 this.removePlayer(player);
             }

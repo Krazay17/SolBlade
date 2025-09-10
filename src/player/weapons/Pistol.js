@@ -61,7 +61,8 @@ export default class Pistol extends BaseWeapon {
                     const actor = hit.object.userData.owner;
                     if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
                         this.hitActors.add(actor);
-                        actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 100, dir: this.tempVector.set(0, 5, 0), dim: 1000 });
+                        const scaledDir = dir.clone().normalize().multiplyScalar(4);
+                        actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 100, dir: scaledDir, dim: 1000 });
 
                         this.hitFx(hit.point, dir);
                         MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
