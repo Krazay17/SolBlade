@@ -14,6 +14,7 @@ import MyEventEmitter from '../core/MyEventEmitter.js';
 import PartyFrame from '../ui/PartyFrame.js';
 import GameMode from '../core/GameMode.js';
 import Pickup from '../actors/Pickup.js';
+import voiceChat from '../core/VoiceChat.js';
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -52,7 +53,16 @@ export default class GameScene extends SceneBase {
     });
 
     this.gameMode = new GameMode(this, 'crown', this.player);
+    voiceChat.setScene(this);
 
+  }
+
+  getScenePlayersPos() {
+    const positions = {};
+    Object.values(this.scenePlayers).forEach(player => {
+      positions[player.netId] = player.position;
+    });
+    return positions;
   }
 
   update(dt, time) {

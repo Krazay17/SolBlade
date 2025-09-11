@@ -2,19 +2,23 @@ import { menuButton } from "../ui/Menu";
 import MyEventEmitter from "./MyEventEmitter";
 import { netSocket } from "./NetManager";
 import soundPlayer from "./SoundPlayer";
+import * as THREE from "three";
 
 const config = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
 class VoiceChat {
     constructor() {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
         this.localStream = null;
         this.peers = {}; // peerId -> RTCPeerConnection
         this.voiceActive = false;
         this.gainNode = null;
         this.compressNode = null;
         this.scene = null;
-        this.audioContext = null;
         this.voicesVolume = 1;
+        this.tempVector = new THREE.Vector3();
+
+
 
         // Listen for new peers
         netSocket.on("new-peer", async peerId => {
@@ -53,13 +57,47 @@ class VoiceChat {
 
         MyEventEmitter.on('micVolumeChanged', (value) => {
             if (this.gainNode) {
-                this.gainNode.gain.value = value;
+                this.gainNode.gain.value = value * 2;
             }
         })
 
         MyEventEmitter.on('voicesVolumeChanged', (value) => {
-            this.voicesVolume = value;
+            this.voicesVolume = value * 4;
         });
+
+        setInterval(() => {
+            if (!this.scene) return;
+            if (!this.scene.player) return;
+            const players = this.scene.getScenePlayersPos();
+            if (!players) return;
+            Object.keys(players).forEach(id => {
+                if (id === netSocket.id) return; // don't update our own
+                const pos = players[id];
+                if (!this.voiceMap) return;
+                const audio = this.voiceMap[id];
+                if (!audio) return;
+                const playerPos = this.scene.player.position;
+                if (audio.gain) {
+                    audio.gain.gain.value = this.voicesVolume;
+                }
+                if (audio.panner) {
+                    const playerRot = this.scene.player.rotation.y;
+                    const forward = this.tempVector.set(0, 0, -1);
+                    forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerRot);
+                    this.audioContext.listener.forwardX.setValueAtTime(forward.x, this.audioContext.currentTime);
+                    this.audioContext.listener.forwardY.setValueAtTime(forward.y, this.audioContext.currentTime);
+                    this.audioContext.listener.forwardZ.setValueAtTime(forward.z, this.audioContext.currentTime);
+                    this.audioContext.listener.positionX.setValueAtTime(playerPos.x, this.audioContext.currentTime);
+                    this.audioContext.listener.positionY.setValueAtTime(playerPos.y, this.audioContext.currentTime);
+                    this.audioContext.listener.positionZ.setValueAtTime(playerPos.z, this.audioContext.currentTime);
+
+                    audio.panner.positionX.setValueAtTime(pos.x, this.audioContext.currentTime);
+                    audio.panner.positionY.setValueAtTime(pos.y, this.audioContext.currentTime);
+                    audio.panner.positionZ.setValueAtTime(pos.z, this.audioContext.currentTime);
+                    //console.log('Updated panner for', id, 'from', this.audioContext.listener.positionX.value, this.audioContext.listener.positionY.value, this.audioContext.listener.positionZ.value, 'to', audio.panner.positionX.value, audio.panner.positionY.value, audio.panner.positionZ.value, 'audio', audio);
+                }
+            });
+        }, 100);
     }
 
     setScene(scene) {
@@ -71,6 +109,10 @@ class VoiceChat {
             if (!this.voiceActive) {
                 this.voiceActive = true;
                 button.classList.add('active');
+                if (this.audioContext.state === "suspended") {
+                    this.audioContext.resume();
+                }
+
                 await this.initMic();
                 netSocket.emit("join-voice"); // Notify others to connect
             } else {
@@ -95,7 +137,7 @@ class VoiceChat {
                 }
             });
 
-            this.audioContext = new AudioContext();
+            //this.audioContext = new AudioContext();
 
             // Source from mic
             const source = this.audioContext.createMediaStreamSource(originalStream);
@@ -105,29 +147,28 @@ class VoiceChat {
             highPass.type = "highpass";
             highPass.frequency.setValueAtTime(150, this.audioContext.currentTime);
 
-            // // Compressor (tame spikes)
-            // this.compressNode = this.audioContext.createDynamicsCompressor();
-            // this.compressNode.threshold.setValueAtTime(-35, this.audioContext.currentTime);
-            // this.compressNode.knee.setValueAtTime(20, this.audioContext.currentTime);
-            // this.compressNode.ratio.setValueAtTime(6, this.audioContext.currentTime);
-            // this.compressNode.attack.setValueAtTime(0.02, this.audioContext.currentTime);
-            // this.compressNode.release.setValueAtTime(0.05, this.audioContext.currentTime);
+            // Compressor (tame spikes)
+            this.compressNode = this.audioContext.createDynamicsCompressor();
+            this.compressNode.threshold.setValueAtTime(-35, this.audioContext.currentTime);
+            this.compressNode.knee.setValueAtTime(20, this.audioContext.currentTime);
+            this.compressNode.ratio.setValueAtTime(6, this.audioContext.currentTime);
+            this.compressNode.attack.setValueAtTime(0.02, this.audioContext.currentTime);
+            this.compressNode.release.setValueAtTime(0.05, this.audioContext.currentTime);
 
-            // // Make a constant low-level signal
-            // const noiseFloor = this.audioContext.createConstantSource();
-            // noiseFloor.offset.value = 0.0003; // very tiny DC offset
+            // Make a constant low-level signal
+            const noiseFloor = this.audioContext.createConstantSource();
+            noiseFloor.offset.value = 0.0003; // very tiny DC offset
 
-            // // Gain to make sure it's inaudible but present
-            // const noiseGain = this.audioContext.createGain();
-            // noiseGain.gain.value = 0.2;
+            // Gain to make sure it's inaudible but present
+            const noiseGain = this.audioContext.createGain();
+            noiseGain.gain.value = 0.2;
 
-            // // Route it into the compressor along with mic
-            // noiseFloor.connect(noiseGain).connect(this.compressNode);
-            // noiseFloor.start();
+            // Route it into the compressor along with mic
+            noiseFloor.connect(noiseGain).connect(this.compressNode);
+            noiseFloor.start();
 
             this.gainNode = this.audioContext.createGain();
-            this.gainNode.gain.value = soundPlayer.micVolume * soundPlayer.masterVolume;
-
+            this.gainNode.gain.value = soundPlayer.micVolume;
 
             // Destination stream (for WebRTC)
             const destination = this.audioContext.createMediaStreamDestination();
@@ -143,6 +184,12 @@ class VoiceChat {
     }
 
     async connectToPeer(peerId, initiator, remoteOffer = null) {
+        if (this.audioContext.state === "suspended") {
+            console.log("Resuming audio context for new peer");
+            await this.audioContext.resume();
+            console.log("Audio context resumed");
+        }
+
         const pc = new RTCPeerConnection(config);
         this.peers[peerId] = pc;
 
@@ -154,15 +201,49 @@ class VoiceChat {
             pc.addTrack(createSilentTrack(), new MediaStream());
         }
 
-        // Remote audio
-        const audio = document.createElement("audio");
-        audio.autoplay = true;
-        document.body.appendChild(audio);
-
         pc.ontrack = e => {
-            audio.srcObject = e.streams[0];
-            audio.volume = this.voicesVolume;
+            const stream = e.streams[0];
+            if (!stream || stream.getAudioTracks().length === 0) return;
+
+            // --- 1) Raw playback for guaranteed audio ---
+            const audioElement = document.createElement("audio");
+            audioElement.autoplay = true;
+            audioElement.srcObject = stream;
+            audioElement.volume = 0;
+            document.body.appendChild(audioElement);
+            audioElement.play().catch(() => console.log("Playback blocked until user interacts"));
+
+            // --- 2) AudioContext for effects / spatialization ---
+            if (!this.audioContext) this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (this.audioContext.state === "suspended") this.audioContext.resume();
+
+            const source = this.audioContext.createMediaStreamSource(stream);
+
+            // Gain node (per-voice volume)
+            const gain = this.audioContext.createGain();
+            gain.gain.value = this.voicesVolume;
+
+            // Optional panner for spatial audio
+            const panner = this.audioContext.createPanner();
+            panner.panningModel = 'HRTF';
+            panner.distanceModel = 'inverse';
+            panner.refDistance = 2;
+            panner.maxDistance = 25;
+            panner.rolloffFactor = 1;
+            panner.orientationX.setValueAtTime(0, this.audioContext.currentTime);
+            panner.orientationY.setValueAtTime(0, this.audioContext.currentTime);
+            panner.orientationZ.setValueAtTime(-1, this.audioContext.currentTime);
+
+            // Connect graph: source -> panner -> gain -> destination
+            source.connect(panner).connect(gain).connect(this.audioContext.destination);
+
+            // Save references if you want to update volume / position later
+            if (!this.voiceMap) this.voiceMap = {};
+            this.voiceMap[peerId] = { source, gain, panner, stream };
         };
+
+
+
 
         // ICE
         pc.onicecandidate = e => {
@@ -192,6 +273,30 @@ function createSilentTrack() {
     const track = dst.stream.getAudioTracks()[0];
     return track;
 }
+
+function debugStream(stream, audioContext) {
+    const src = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 512;
+    src.connect(analyser);
+
+    const data = new Uint8Array(analyser.frequencyBinCount);
+
+    setInterval(() => {
+        analyser.getByteTimeDomainData(data);
+
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) {
+            const v = (data[i] - 128) / 128;
+            sum += v * v;
+        }
+        const rms = Math.sqrt(sum / data.length);
+        console.log("stream RMS:", rms.toFixed(4));
+    }, 500);
+}
+
+
+
 
 
 const voiceChat = new VoiceChat();
