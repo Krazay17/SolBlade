@@ -17,15 +17,7 @@ class VoiceChat {
         this.scene = null;
         this.voicesVolume = 1;
         this.tempVector = new THREE.Vector3();
-        window.addEventListener('click', () => {
-            if (this.audioContext.state === "suspended") {
-                this.audioContext.resume();
-            }
-            this.init();
-            netSocket.emit("join-voice"); // Notify others to connect
-            console.log("Audio context resumed after user interaction");
-            window.removeEventListener('click', this); // one-time
-        });
+        this.init();
     }
 
     init() {
@@ -66,12 +58,12 @@ class VoiceChat {
 
         MyEventEmitter.on('micVolumeChanged', (value) => {
             if (this.gainNode) {
-                this.gainNode.gain.value = value * 2;
+                this.gainNode.gain.value = value * 1.5;
             }
         })
 
         MyEventEmitter.on('voicesVolumeChanged', (value) => {
-            this.voicesVolume = value * 4;
+            this.voicesVolume = value * 2;
         });
 
         setInterval(() => {
@@ -115,7 +107,6 @@ class VoiceChat {
                     } else {
                         audio.panner.setPosition(pos.x, pos.y, pos.z);
                     }
-                    //console.log('Updated panner for', id, 'from', this.audioContext.listener.positionX.value, this.audioContext.listener.positionY.value, this.audioContext.listener.positionZ.value, 'to', audio.panner.positionX.value, audio.panner.positionY.value, audio.panner.positionZ.value, 'audio', audio);
                 }
             });
         }, 100);
@@ -141,12 +132,12 @@ class VoiceChat {
             } else {
                 this.voiceActive = false;
                 button.classList.remove('active');
-                // Object.values(this.peers).forEach(pc => {
-                //     pc.close();
-                // });
-                // this.peers = {};
-                // this.localStream.getTracks().forEach(track => track.stop());
-                // this.localStream = null;
+                Object.values(this.peers).forEach(pc => {
+                    pc.close();
+                });
+                this.peers = {};
+                this.localStream.getTracks().forEach(track => track.stop());
+                this.localStream = null;
             }
         });
     }
@@ -154,9 +145,9 @@ class VoiceChat {
         if (!this.localStream) {
             const originalStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    noiseSuppression: true,
-                    sampleSize: 32,
-                    autoGainControl: false   // we’re doing our own
+                    noiseSuppression: false,
+                    echoCancellation: false,
+                    autoGainControl: false,
                 }
             });
 
@@ -166,7 +157,7 @@ class VoiceChat {
             // High-pass filter (remove low rumbles)
             const highPass = this.audioContext.createBiquadFilter();
             highPass.type = "highpass";
-            highPass.frequency.setValueAtTime(225, this.audioContext.currentTime);
+            highPass.frequency.setValueAtTime(100, this.audioContext.currentTime);
 
             const lowPass = this.audioContext.createBiquadFilter();
             lowPass.type = "lowpass";
@@ -175,7 +166,7 @@ class VoiceChat {
 
             // // Compressor (tame spikes)
             // this.compressNode = this.audioContext.createDynamicsCompressor();
-            // this.compressNode.threshold.setValueAtTime(-50, this.audioContext.currentTime);
+            // this.compressNode.threshold.setValueAtTime(-10, this.audioContext.currentTime);
             // this.compressNode.knee.setValueAtTime(20, this.audioContext.currentTime);
             // this.compressNode.ratio.setValueAtTime(6, this.audioContext.currentTime);
             // this.compressNode.attack.setValueAtTime(0.02, this.audioContext.currentTime);
@@ -214,7 +205,6 @@ class VoiceChat {
             await this.audioContext.resume();
             console.log("Audio context resumed");
         }
-        if (this.peers[peerId]) return; // already connected
         const pc = new RTCPeerConnection(config);
         this.peers[peerId] = pc;
 
@@ -235,7 +225,7 @@ class VoiceChat {
             audioElement.autoplay = true;
             audioElement.srcObject = stream;
             audioElement.volume = 0;
-            document.body.appendChild(audioElement);
+            //document.body.appendChild(audioElement);
             audioElement.play().catch(() => console.log("Playback blocked until user interacts"));
 
             // --- 2) AudioContext for effects / spatialization ---
