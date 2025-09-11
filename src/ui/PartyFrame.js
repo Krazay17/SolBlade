@@ -50,6 +50,13 @@ export default class PartyFrame {
             this.selectPlayer(player);
         });
 
+        playerElement.addEventListener('mousedown', (e) => {
+            if (e.button === 1) {
+                e.preventDefault();
+                MyEventEmitter.emit('bootPlayer', player);
+            }
+        });
+
         this.container.appendChild(playerElement);
         this.players.set(player, playerElement);
     }

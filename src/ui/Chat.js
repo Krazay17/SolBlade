@@ -77,9 +77,8 @@ export default function setupChat() {
                     return;
                 };
                 sendDiscordMessage(message);
-                message = LocalData.name + ": " + textInput.value; // use .value for input/textarea
-                addChatMessage(message);
-                sendChatMessage(LocalData.name, textInput.value);
+                addChatMessage(LocalData.name, message);
+                sendChatMessage(LocalData.name, message);
                 textInput.value = ""; // clear after sending
                 textInput.blur();
             }
@@ -91,12 +90,19 @@ export default function setupChat() {
 }
 
 
-export function addChatMessage(tx, color) {
+export function addChatMessage(player, message, color) {
+    let cutMessage = message;
+    if (cutMessage.length > 256) {
+        cutMessage = cutMessage.substring(0, 256) + '...';
+    }
+    if (cutMessage.startsWith('/tts ')) {
+        cutMessage = cutMessage.substring(5);
+        soundPlayer.playTTS(cutMessage);
+    }
     const newMessage = document.createElement('div');
     newMessage.className = 'chatMessage';
-    newMessage.textContent = tx;
+    newMessage.textContent = `${player}: ${cutMessage}`;
     newMessage.style.color = color;
     messages.appendChild(newMessage);
     messages.scrollTop = messages.scrollHeight;
-    //soundPlayer.playTTS(tx);
 }

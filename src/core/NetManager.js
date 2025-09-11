@@ -2,6 +2,7 @@ import { io } from "socket.io-client";
 import MyEventEmitter from "./MyEventEmitter";
 import { Vector3 } from "three";
 import Globals from "../utils/Globals";
+import LocalData from "./LocalData";
 
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
@@ -194,6 +195,12 @@ MyEventEmitter.on('playerDied', ({ player, source }) => {
             MyEventEmitter.emit('chatMessage', { player: 'Server', message: `${player.name} was slain by ${source}!`, color: 'red' });
             socket.emit('chatMessageSend', { player: 'Server', message: `${player.name} was slain by ${source}!`, color: 'red' });
     }
+});
+MyEventEmitter.on('bootPlayer', (targetPlayer) => {
+    if (LocalData.name !== 'Krazzay') return;
+    if (!targetPlayer || !targetPlayer.netId) return;
+
+    socket.emit('bootPlayer', targetPlayer.netId);
 });
 
 setInterval(() => {
