@@ -17,9 +17,12 @@ class VoiceChat {
         this.scene = null;
         this.voicesVolume = 1;
         this.tempVector = new THREE.Vector3();
+        this.init();
+    }
 
-
-
+    init() {
+        if (this.voiceBound) return;
+        this.voiceBound = true;
         // Listen for new peers
         netSocket.on("new-peer", async peerId => {
             //if (!this.voiceActive) return;
@@ -84,20 +87,33 @@ class VoiceChat {
                     const playerRot = this.scene.player.rotation.y;
                     const forward = this.tempVector.set(0, 0, -1);
                     forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerRot);
-                    this.audioContext.listener.forwardX.setValueAtTime(forward.x, this.audioContext.currentTime);
-                    this.audioContext.listener.forwardY.setValueAtTime(forward.y, this.audioContext.currentTime);
-                    this.audioContext.listener.forwardZ.setValueAtTime(forward.z, this.audioContext.currentTime);
-                    this.audioContext.listener.positionX.setValueAtTime(playerPos.x, this.audioContext.currentTime);
-                    this.audioContext.listener.positionY.setValueAtTime(playerPos.y, this.audioContext.currentTime);
-                    this.audioContext.listener.positionZ.setValueAtTime(playerPos.z, this.audioContext.currentTime);
+                    if (this.audioContext.listener.forwardX) {
+                        this.audioContext.listener.forwardX.setValueAtTime(forward.x, this.audioContext.currentTime);
+                        this.audioContext.listener.forwardY.setValueAtTime(forward.y, this.audioContext.currentTime);
+                        this.audioContext.listener.forwardZ.setValueAtTime(forward.z, this.audioContext.currentTime);
+                    } else {
+                        this.audioContext.listener.setOrientation(forward.x, forward.y, forward.z, 0, 1, 0);
+                    }
+                    if (this.audioContext.listener.positionX) {
+                        this.audioContext.listener.positionX.setValueAtTime(playerPos.x, this.audioContext.currentTime);
+                        this.audioContext.listener.positionY.setValueAtTime(playerPos.y, this.audioContext.currentTime);
+                        this.audioContext.listener.positionZ.setValueAtTime(playerPos.z, this.audioContext.currentTime);
+                    } else {
+                        this.audioContext.listener.setPosition(playerPos.x, playerPos.y, playerPos.z);
+                    }
 
-                    audio.panner.positionX.setValueAtTime(pos.x, this.audioContext.currentTime);
-                    audio.panner.positionY.setValueAtTime(pos.y, this.audioContext.currentTime);
-                    audio.panner.positionZ.setValueAtTime(pos.z, this.audioContext.currentTime);
+                    if (audio.panner.positionX) {
+                        audio.panner.positionX.setValueAtTime(pos.x, this.audioContext.currentTime);
+                        audio.panner.positionY.setValueAtTime(pos.y, this.audioContext.currentTime);
+                        audio.panner.positionZ.setValueAtTime(pos.z, this.audioContext.currentTime);
+                    } else {
+                        audio.panner.setPosition(pos.x, pos.y, pos.z);
+                    }
                     //console.log('Updated panner for', id, 'from', this.audioContext.listener.positionX.value, this.audioContext.listener.positionY.value, this.audioContext.listener.positionZ.value, 'to', audio.panner.positionX.value, audio.panner.positionY.value, audio.panner.positionZ.value, 'audio', audio);
                 }
             });
         }, 100);
+
     }
 
     setScene(scene) {
@@ -114,6 +130,7 @@ class VoiceChat {
                 }
 
                 await this.initMic();
+                this.init();
                 netSocket.emit("join-voice"); // Notify others to connect
             } else {
                 this.voiceActive = false;
@@ -136,8 +153,6 @@ class VoiceChat {
                     autoGainControl: false   // we’re doing our own
                 }
             });
-
-            //this.audioContext = new AudioContext();
 
             // Source from mic
             const source = this.audioContext.createMediaStreamSource(originalStream);
