@@ -17,7 +17,13 @@ class VoiceChat {
         this.scene = null;
         this.voicesVolume = 1;
         this.tempVector = new THREE.Vector3();
-        this.init();
+        window.addEventListener('click', () => {
+            if (this.audioContext.state === "suspended") {
+                this.audioContext.resume();
+            }
+            this.init();
+            window.removeEventListener('click', this); // one-time
+        });
     }
 
     init() {
@@ -194,7 +200,6 @@ class VoiceChat {
                 .connect(destination);
 
             this.localStream = destination.stream;
-
         }
     }
 
@@ -242,8 +247,8 @@ class VoiceChat {
             const panner = this.audioContext.createPanner();
             panner.panningModel = 'HRTF';
             panner.distanceModel = 'inverse';
-            panner.refDistance = 2;
-            panner.maxDistance = 25;
+            panner.refDistance = 1;
+            panner.maxDistance = 15;
             panner.rolloffFactor = 1;
             panner.orientationX.setValueAtTime(0, this.audioContext.currentTime);
             panner.orientationY.setValueAtTime(0, this.audioContext.currentTime);
