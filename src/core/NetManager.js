@@ -102,9 +102,10 @@ function bindSocketEvents(myPlayerData) {
     socket.on('chatMessageUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
             MyEventEmitter.emit('chatMessage', { player: data.player, message: data.message, color: 'white' });
-        } else if (id === 111) {
-            MyEventEmitter.emit('chatMessage', { player: 'Server', message: data.message, color: data.color });
         }
+    });
+    socket.on('serverMessage', (data) => {
+        MyEventEmitter.emit('chatMessage', { player: 'Server', message: data.message, color: data.color });
     });
 
     socket.on('playerDamageUpdate', ({ targetId, data }) => {
@@ -186,15 +187,7 @@ MyEventEmitter.on('crownGameStart', () => {
     socket.emit('crownGameStart');
 });
 MyEventEmitter.on('playerDied', ({ player, source }) => {
-    switch (source) {
-        case 'the void':
-            MyEventEmitter.emit('chatMessage', { player: 'Server', message: `${player.name} fell into the void!`, color: 'orange' });
-            socket.emit('chatMessageSend', { player: 'Server', message: `${player.name} fell into the void!`, color: 'orange' });
-            break;
-        default:
-            MyEventEmitter.emit('chatMessage', { player: 'Server', message: `${player.name} was slain by ${source}!`, color: 'red' });
-            socket.emit('chatMessageSend', { player: 'Server', message: `${player.name} was slain by ${source}!`, color: 'red' });
-    }
+    netSocket.emit('playerDied', { playerId: player.netId, source });
 });
 MyEventEmitter.on('bootPlayer', (targetPlayer) => {
     if (LocalData.name !== 'Krazzay') return;
@@ -214,10 +207,6 @@ export function setNetScene(s, myPlayerData) {
 
 export function initSocket() {
     return socket;
-}
-
-export function sendChatMessage(player, message) {
-    socket.emit("chatMessageSend", { player, message });
 }
 
 let lastSentPosition = new Vector3();

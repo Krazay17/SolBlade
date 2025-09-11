@@ -22,6 +22,8 @@ class VoiceChat {
                 this.audioContext.resume();
             }
             this.init();
+            netSocket.emit("join-voice"); // Notify others to connect
+            console.log("Audio context resumed after user interaction");
             window.removeEventListener('click', this); // one-time
         });
     }
@@ -29,15 +31,13 @@ class VoiceChat {
     init() {
         if (this.voiceBound) return;
         this.voiceBound = true;
-        // Listen for new peers
+
         netSocket.on("new-peer", async peerId => {
-            //if (!this.voiceActive) return;
             await this.connectToPeer(peerId, true); // we are initiator
         });
 
         // Handle offer
         netSocket.on("offer", async ({ from, offer }) => {
-            //if (!this.voiceActive) return;
             await this.connectToPeer(from, false, offer);
         });
 
@@ -141,12 +141,12 @@ class VoiceChat {
             } else {
                 this.voiceActive = false;
                 button.classList.remove('active');
-                Object.values(this.peers).forEach(pc => {
-                    pc.close();
-                });
-                this.peers = {};
-                this.localStream.getTracks().forEach(track => track.stop());
-                this.localStream = null;
+                // Object.values(this.peers).forEach(pc => {
+                //     pc.close();
+                // });
+                // this.peers = {};
+                // this.localStream.getTracks().forEach(track => track.stop());
+                // this.localStream = null;
             }
         });
     }
@@ -154,8 +154,8 @@ class VoiceChat {
         if (!this.localStream) {
             const originalStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    echoCancellation: true,
                     noiseSuppression: true,
+                    sampleSize: 32,
                     autoGainControl: false   // we’re doing our own
                 }
             });
@@ -166,27 +166,32 @@ class VoiceChat {
             // High-pass filter (remove low rumbles)
             const highPass = this.audioContext.createBiquadFilter();
             highPass.type = "highpass";
-            highPass.frequency.setValueAtTime(150, this.audioContext.currentTime);
+            highPass.frequency.setValueAtTime(225, this.audioContext.currentTime);
 
-            // Compressor (tame spikes)
-            this.compressNode = this.audioContext.createDynamicsCompressor();
-            this.compressNode.threshold.setValueAtTime(-35, this.audioContext.currentTime);
-            this.compressNode.knee.setValueAtTime(20, this.audioContext.currentTime);
-            this.compressNode.ratio.setValueAtTime(6, this.audioContext.currentTime);
-            this.compressNode.attack.setValueAtTime(0.02, this.audioContext.currentTime);
-            this.compressNode.release.setValueAtTime(0.05, this.audioContext.currentTime);
+            const lowPass = this.audioContext.createBiquadFilter();
+            lowPass.type = "lowpass";
+            lowPass.frequency.setValueAtTime(7000, this.audioContext.currentTime);
+            highPass.connect(lowPass);
 
-            // Make a constant low-level signal
-            const noiseFloor = this.audioContext.createConstantSource();
-            noiseFloor.offset.value = 0.0003; // very tiny DC offset
+            // // Compressor (tame spikes)
+            // this.compressNode = this.audioContext.createDynamicsCompressor();
+            // this.compressNode.threshold.setValueAtTime(-50, this.audioContext.currentTime);
+            // this.compressNode.knee.setValueAtTime(20, this.audioContext.currentTime);
+            // this.compressNode.ratio.setValueAtTime(6, this.audioContext.currentTime);
+            // this.compressNode.attack.setValueAtTime(0.02, this.audioContext.currentTime);
+            // this.compressNode.release.setValueAtTime(0.05, this.audioContext.currentTime);
 
-            // Gain to make sure it's inaudible but present
-            const noiseGain = this.audioContext.createGain();
-            noiseGain.gain.value = 0.2;
+            // // Make a constant low-level signal
+            // const noiseFloor = this.audioContext.createConstantSource();
+            // noiseFloor.offset.value = 0.0003; // very tiny DC offset
 
-            // Route it into the compressor along with mic
-            noiseFloor.connect(noiseGain).connect(this.compressNode);
-            noiseFloor.start();
+            // // Gain to make sure it's inaudible but present
+            // const noiseGain = this.audioContext.createGain();
+            // noiseGain.gain.value = 0.1;
+
+            // // Route it into the compressor along with mic
+            // noiseFloor.connect(noiseGain).connect(this.compressNode);
+            // noiseFloor.start();
 
             this.gainNode = this.audioContext.createGain();
             this.gainNode.gain.value = soundPlayer.micVolume;
@@ -209,7 +214,7 @@ class VoiceChat {
             await this.audioContext.resume();
             console.log("Audio context resumed");
         }
-
+        if (this.peers[peerId]) return; // already connected
         const pc = new RTCPeerConnection(config);
         this.peers[peerId] = pc;
 
@@ -247,8 +252,8 @@ class VoiceChat {
             const panner = this.audioContext.createPanner();
             panner.panningModel = 'HRTF';
             panner.distanceModel = 'inverse';
-            panner.refDistance = 1;
-            panner.maxDistance = 15;
+            panner.refDistance = 2;
+            panner.maxDistance = 16;
             panner.rolloffFactor = 1;
             panner.orientationX.setValueAtTime(0, this.audioContext.currentTime);
             panner.orientationY.setValueAtTime(0, this.audioContext.currentTime);

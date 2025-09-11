@@ -1,6 +1,6 @@
 import LocalData from "../core/LocalData";
 import MyEventEmitter from "../core/MyEventEmitter";
-import { sendChatMessage, netSocket } from "../core/NetManager";
+import { netSocket } from "../core/NetManager";
 import soundPlayer from "../core/SoundPlayer";
 import Globals from "../utils/Globals";
 import { sendDiscordMessage } from "./DiscordStuff";
@@ -78,14 +78,15 @@ export default function setupChat() {
                 };
                 sendDiscordMessage(message);
                 addChatMessage(LocalData.name, message);
-                sendChatMessage(LocalData.name, message);
+                netSocket.emit('chatMessageSend', { player: LocalData.name, message, color: 'white' });
                 textInput.value = ""; // clear after sending
                 textInput.blur();
             }
         }
     });
+
     MyEventEmitter.on('chatMessage', ({ player, message, color }) => {
-        addChatMessage(`${player}: ${message}`, color);
+        addChatMessage(player, message, color);
     });
 }
 
