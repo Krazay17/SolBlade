@@ -1,6 +1,7 @@
 import LocalData from "../core/LocalData";
 import MyEventEmitter from "../core/MyEventEmitter";
 import { sendChatMessage, netSocket } from "../core/NetManager";
+import soundPlayer from "../core/SoundPlayer";
 import Globals from "../utils/Globals";
 import { sendDiscordMessage } from "./DiscordStuff";
 import './StyleChat.css';
@@ -97,4 +98,5 @@ export function addChatMessage(tx, color) {
     newMessage.style.color = color;
     messages.appendChild(newMessage);
     messages.scrollTop = messages.scrollHeight;
+    //soundPlayer.playTTS(tx);
 }

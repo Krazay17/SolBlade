@@ -7,7 +7,7 @@ import MyEventEmitter from '../../core/MyEventEmitter.js';
 
 export default class Pistol extends BaseWeapon {
     constructor(actor, scene) {
-        super(actor, 'Pistol', 20, 250, .7); // name, damage, range, cooldown
+        super(actor, 'Pistol', 20, 250, .55); // name, damage, range, cooldown
         this.scene = scene;
         //soundPlayer.loadSfx('gunshoot', '/assets/GunShoot.wav');
         soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');
@@ -45,7 +45,7 @@ export default class Pistol extends BaseWeapon {
     use(currentTime, pos, dir) {
         if (this.canUse(currentTime) &&
             this.actor.stateManager.setState('attack', {
-                weapon: this, anim: 'gunshoot', duration: 350
+                weapon: this, anim: 'gunshoot', duration: 250
             })) {
             this.lastUsed = currentTime;
             const offSetPos = pos.clone().add(this.tempVector.set(0, .4, 0));
@@ -62,7 +62,7 @@ export default class Pistol extends BaseWeapon {
                     if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
                         this.hitActors.add(actor);
                         const scaledDir = dir.clone().normalize().multiplyScalar(4);
-                        actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 100, dir: scaledDir, dim: 1000 });
+                        actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 80, dir: scaledDir, dim: 1000 });
 
                         this.hitFx(hit.point, dir);
                         MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });

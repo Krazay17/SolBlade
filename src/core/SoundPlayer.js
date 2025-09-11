@@ -9,11 +9,32 @@ class SoundPlayer {
         this.masterVolume = LocalData.masterVolume;
         this.musicVolume = LocalData.musicVolume;
         this.sfxVolume = LocalData.sfxVolume;
+        this.micVolume = LocalData.micVolume;
+        this.voicesVolume = LocalData.voicesVolume;
+        this.audioListener = null;
         this.musics = [];
         this.sfx = [];
         this.musicPlaying = null;
         this.posSoundPools = new Map();
         this.threeAudioLoader = new THREE.AudioLoader();
+    }
+
+    setMicVolume(value) {
+        this.micVolume = value;
+        MyEventEmitter.emit('micVolumeChanged', value * this.masterVolume);
+    }
+
+    setVoicesVolume(value) {
+        this.voicesVolume = value;
+        MyEventEmitter.emit('voicesVolumeChanged', value * this.masterVolume);
+    }
+
+    playTTS(text) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.volume = this.masterVolume;
+            window.speechSynthesis.speak(utterance);
+        }
     }
 
     loadSound(name, url) {
@@ -99,6 +120,8 @@ class SoundPlayer {
         this.setMasterVolume(LocalData.masterVolume);
         this.setMusicVolume(LocalData.musicVolume);
         this.setSfxVolume(LocalData.sfxVolume);
+        this.setMicVolume(LocalData.micVolume);
+        this.setVoicesVolume(LocalData.voicesVolume);
     }
 
     getCurrentTrackName() {

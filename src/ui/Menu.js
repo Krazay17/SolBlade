@@ -4,6 +4,19 @@ import soundPlayer from '../core/SoundPlayer';
 import Globals from '../utils/Globals';
 import './StyleMenu.css';
 
+const menuSection = document.createElement('div');
+menuSection.id = 'menu-section';
+menuSection.innerHTML = `
+            <h1>Menu <button class="close-button">X</button></h1>
+        `;
+document.body.appendChild(menuSection);
+const menuElement = document.createElement('div');
+menuElement.classList.add('menu-element');
+menuSection.appendChild(menuElement);
+const menuElement2 = document.createElement('div');
+menuElement2.classList.add('menu-element');
+menuSection.appendChild(menuElement2);
+
 export default class Menu {
     static instance;
     constructor() {
@@ -12,20 +25,14 @@ export default class Menu {
         }
         this.isOpen = false;
 
-        this.menuElement = document.createElement('div');
-        this.menuElement.id = 'menu-section';
-        this.menuElement.innerHTML = `
-            <h2>Menu <button class="close-button">X</button></h2>
-        `;
-        document.body.appendChild(this.menuElement);
 
-        this.menuElement.querySelector('.close-button').addEventListener('click', () => {
+        menuSection.querySelector('.close-button').addEventListener('click', () => {
             this.close();
         });
 
         window.addEventListener('keydown', (event) => {
             if (Globals.input.inputBlocked) return;
-            if (event.code === 'KeyB') {
+            if (event.code === 'KeyB' || event.code === 'Escape') {
                 this.isOpen = !this.isOpen;
                 if (this.isOpen) {
                     this.open();
@@ -51,19 +58,22 @@ export default class Menu {
         });
         this.sensitivityText = document.createElement('p');
         this.sensitivityText.innerText = 'Mouse Sensitivity: ' + Globals.input.sensitivity;
-        this.menuElement.appendChild(this.sensitivityText);
+        menuElement.appendChild(this.sensitivityText);
 
+        const skinGrid = document.createElement('div');
+        skinGrid.classList.add('menu-button-grid');
+        menuElement.appendChild(skinGrid);
         this.skinButton = document.createElement('button');
         this.skinButton.innerText = 'Ninja';
-        this.menuElement.appendChild(this.skinButton);
         this.skinButton.classList.add('menu-button');
+        skinGrid.appendChild(this.skinButton);
         this.skinButton.addEventListener('click', () => {
             Globals.player.setMesh('NinjaDude');
         });
         this.skinButton2 = document.createElement('button');
         this.skinButton2.innerText = 'Girl';
-        this.menuElement.appendChild(this.skinButton2);
         this.skinButton2.classList.add('menu-button');
+        skinGrid.appendChild(this.skinButton2);
         this.skinButton2.addEventListener('click', () => {
             Globals.player.setMesh('KnightGirl');
         });
@@ -72,33 +82,58 @@ export default class Menu {
     createAudioSection() {
         this.masterVolumeSlider = this.createSlider(LocalData.masterVolume * 100);
         this.masterVolumeSlider.addEventListener('input', (event) => {
-            soundPlayer.setMasterVolume(event.target.value / 100);
-            LocalData.masterVolume = event.target.value / 100;
+            const scaledValue = event.target.value / 100;
+            soundPlayer.setMasterVolume(scaledValue);
+            LocalData.masterVolume = scaledValue;
             this.masterVolumeLabel.innerText = 'Master Volume: ' + LocalData.masterVolume;
         });
         this.masterVolumeLabel = document.createElement('p');
         this.masterVolumeLabel.innerText = 'Master Volume: ' + LocalData.masterVolume;
-        this.menuElement.appendChild(this.masterVolumeLabel);
+        menuElement.appendChild(this.masterVolumeLabel);
 
         this.musicVolumeSlider = this.createSlider(LocalData.musicVolume * 100);
         this.musicVolumeSlider.addEventListener('input', (event) => {
-            soundPlayer.setMusicVolume(event.target.value / 100);
-            LocalData.musicVolume = event.target.value / 100;
+            const scaledValue = event.target.value / 100;
+            soundPlayer.setMusicVolume(scaledValue);
+            LocalData.musicVolume = scaledValue;
             this.musicVolumeLabel.innerText = 'Music Volume: ' + LocalData.musicVolume;
         });
         this.musicVolumeLabel = document.createElement('p');
         this.musicVolumeLabel.innerText = 'Music Volume: ' + LocalData.musicVolume;
-        this.menuElement.appendChild(this.musicVolumeLabel);
+        menuElement.appendChild(this.musicVolumeLabel);
 
         this.sfxVolumeSlider = this.createSlider(LocalData.sfxVolume * 100);
         this.sfxVolumeSlider.addEventListener('input', (event) => {
-            soundPlayer.setSfxVolume(event.target.value / 100);
-            LocalData.sfxVolume = event.target.value / 100;
+            const scaledValue = event.target.value / 100;
+            soundPlayer.setSfxVolume(scaledValue);
+            LocalData.sfxVolume = scaledValue;
             this.sfxVolumeLabel.innerText = 'SFX Volume: ' + LocalData.sfxVolume;
         });
         this.sfxVolumeLabel = document.createElement('p');
         this.sfxVolumeLabel.innerText = 'SFX Volume: ' + LocalData.sfxVolume;
-        this.menuElement.appendChild(this.sfxVolumeLabel);
+        menuElement.appendChild(this.sfxVolumeLabel);
+
+        this.micVolumeSlider = this.createSlider(LocalData.micVolume * 100);
+        this.micVolumeSlider.addEventListener('input', (event) => {
+            const scaledValue = event.target.value / 100;
+            soundPlayer.setMicVolume(scaledValue);
+            LocalData.micVolume = scaledValue;
+            this.micVolumeLabel.innerText = 'Microphone: ' + LocalData.micVolume;
+        });
+        this.micVolumeLabel = document.createElement('p');
+        this.micVolumeLabel.innerText = 'Microphone: ' + LocalData.micVolume;
+        menuElement.appendChild(this.micVolumeLabel);
+
+        this.voiceVolumeSlider = this.createSlider(LocalData.voicesVolume * 100);
+        this.voiceVolumeSlider.addEventListener('input', (event) => {
+            const scaledValue = event.target.value / 100;
+            soundPlayer.setVoicesVolume(scaledValue);
+            LocalData.voicesVolume = scaledValue;
+            this.voiceVolumeLabel.innerText = 'Voices: ' + LocalData.voicesVolume;
+        });
+        this.voiceVolumeLabel = document.createElement('p');
+        this.voiceVolumeLabel.innerText = 'Voices: ' + LocalData.voicesVolume;
+        menuElement.appendChild(this.voiceVolumeLabel);
 
         let seekValue = 0;
         this.seekSlider = this.createSlider(0);
@@ -108,7 +143,7 @@ export default class Menu {
 
         this.seekLabel = document.createElement('p');
         this.seekLabel.innerText = 'Music Seek: 0';
-        this.menuElement.appendChild(this.seekLabel);
+        menuElement.appendChild(this.seekLabel);
         setInterval(() => {
             if (soundPlayer.musicPlaying) {
                 this.seekSlider.value = (soundPlayer.musicPlaying.currentTime / soundPlayer.musicPlaying.duration) * 100;
@@ -117,8 +152,8 @@ export default class Menu {
         }, 10);
 
         const buttonGrid = document.createElement('div');
-        buttonGrid.classList.add('menu-music-button-grid');
-        this.menuElement.appendChild(buttonGrid);
+        buttonGrid.classList.add('menu-button-grid');
+        menuElement.appendChild(buttonGrid);
 
         const playButton = document.createElement('button');
         playButton.classList.add('menu-button');
@@ -146,23 +181,23 @@ export default class Menu {
 
         this.trackName = document.createElement('p');
         this.trackName.innerText = 'Current Track: ' + soundPlayer.getCurrentTrackName();
-        this.menuElement.appendChild(this.trackName);
+        menuElement.appendChild(this.trackName);
         MyEventEmitter.on('musicChanged', (trackName) => {
             this.trackName.innerText = 'Current Track: ' + trackName;
         });
     }
 
-    createSlider(start = 50) {
+    createSlider(start = 50, min = 0, max = 100) {
         const slider = document.createElement('input');
         slider.addEventListener('mousedown', (e) => {
             e.stopPropagation();
         })
         slider.classList.add('menu-slider');
         slider.type = 'range';
-        slider.min = 0;
-        slider.max = 100;
+        slider.min = min;
+        slider.max = max;
         slider.value = start;
-        this.menuElement.appendChild(slider);
+        menuElement.appendChild(slider);
         return slider;
     }
 
@@ -170,17 +205,26 @@ export default class Menu {
         const button = document.createElement('button');
         button.classList.add('menu-button');
         button.innerText = text;
-        this.menuElement.appendChild(button);
+        menuElement.appendChild(button);
         return button;
     }
 
+
     open() {
-        this.menuElement.style.display = 'block';
+        menuSection.style.display = 'grid';
         this.isOpen = true;
     }
 
     close() {
-        this.menuElement.style.display = 'none';
+        menuSection.style.display = 'none';
         this.isOpen = false;
     }
+}
+export function menuButton(text = 'Button', callback = () => { }) {
+    const button = document.createElement('button');
+    button.classList.add('menu-button');
+    button.innerText = text;
+    button.addEventListener('click', callback);
+    menuElement2.appendChild(button);
+    return button;
 }

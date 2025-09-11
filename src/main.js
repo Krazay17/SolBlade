@@ -7,11 +7,13 @@ import soundPlayer from "./core/SoundPlayer";
 import './ui/StyleUI.css';
 import { setupDiscordWindow } from "./ui/DiscordStuff";
 import setupChat from "./ui/Chat";
+import voiceChat from "./core/VoiceChat";
 
 LocalData.load();
 soundPlayer.setInitVolume();
 initSocket();
 setupChat();
+voiceChat.createButton();
 const canvas = document.getElementById('webgl');
 const game = new Game(canvas);
 const gameScene = new GameScene(game);

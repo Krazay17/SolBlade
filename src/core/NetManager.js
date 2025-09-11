@@ -14,6 +14,7 @@ export const netSocket = socket;
 let scene = null;
 let netPlayers = {};
 let player = null;
+let socketBound = false;
 
 export const defaultPlayerData = {
     scene: null,
@@ -41,8 +42,8 @@ socket.on("connect", () => {
 });
 
 function bindSocketEvents(myPlayerData) {
-    if (socket.bound) return;
-    socket.bound = true;
+    if (socketBound) return;
+    socketBound = true;
     if (!scene) return;
     lastPlayerData = { ...myPlayerData };
     player = scene.player;
@@ -84,8 +85,6 @@ function bindSocketEvents(myPlayerData) {
         if (netPlayers[id]) {
             netPlayers[id].targetPos.copy(data.pos);
             netPlayers[id].targetRot = data.rot;
-            // netPlayers[id].position.copy(data.pos);
-            // netPlayers[id].rotation.y = data.rot;
         }
     });
     socket.on('playerStateUpdate', ({ id, data }) => {

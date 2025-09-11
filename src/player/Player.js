@@ -136,8 +136,8 @@ export default class Player extends THREE.Object3D {
             }
         } else {
             // Remote Player
-            this.position.lerp(this.targetPos, 60 * dt);
-            this.rotation.y += (this.targetRot - this.rotation.y) * 60 * dt;
+            this.position.lerp(this.targetPos, 40 * dt);
+            this.rotation.y += (this.targetRot - this.rotation.y) * 40 * dt;
         }
 
         // Local and Remote Player

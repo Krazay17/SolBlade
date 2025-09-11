@@ -36,10 +36,12 @@ export default class GameMode {
             this.removePlayer(this.players[netId]);
             delete this.players[netId];
         });
-        MyEventEmitter.on('playerNameUpdate', ({ netId, player, name }) => {
-            const playerName = this.players[netId];
-            playerName.data.name = name;
-            playerName.element.innerText = `${playerName.data.name}: ${playerName.score}`;
+        MyEventEmitter.on('playerNameUpdate', ({ netId, name }) => {
+            const player = this.players[netId];
+            if (!player) return;
+            player.data.name = name;
+            if (!player.element) return;
+            player.element.innerText = `${player.data.name}: ${player.score}`;
         });
         MyEventEmitter.on('pickupCrown', () => {
             this.hasCrown = true;
@@ -66,7 +68,7 @@ export default class GameMode {
         MyEventEmitter.on('crownScoreIncrease', ({ playerId, score }) => {
             this.changeScore(playerId, score);
         });
-        MyEventEmitter.on('crownGameStarted', ( players ) => {
+        MyEventEmitter.on('crownGameStarted', (players) => {
             this.startGame();
             if (!players) return;
             for (const player of players) {

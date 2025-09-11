@@ -10,6 +10,8 @@ export default {
     masterVolume: 1,
     musicVolume: 1,
     sfxVolume: 1,
+    micVolume: 1,
+    voicesVolume: 1,
     movementValues: null,
     flags: {},
 
@@ -23,6 +25,8 @@ export default {
             position: this.position,
             masterVolume: this.masterVolume,
             musicVolume: this.musicVolume,
+            micVolume: this.micVolume,
+            voicesVolume: this.voicesVolume,
             sfxVolume: this.sfxVolume,
             movementValues: this.movementValues,
             flags: this.flags,
@@ -56,6 +60,8 @@ export default {
         this.masterVolume = parsed.masterVolume ?? this.masterVolume;
         this.musicVolume = parsed.musicVolume ?? this.musicVolume;
         this.sfxVolume = parsed.sfxVolume ?? this.sfxVolume;
+        this.micVolume = parsed.micVolume ?? this.micVolume;
+        this.voicesVolume = parsed.voicesVolume ?? this.voicesVolume;
         this.movementValues = parsed.movementValues ?? null;
         this.flags = parsed.flags ?? {};
         console.log('Loaded local data:', this);
@@ -71,6 +77,8 @@ export default {
         this.masterVolume = keep.masterVolume ?? this.masterVolume;
         this.musicVolume = keep.musicVolume ?? this.musicVolume;
         this.sfxVolume = keep.sfxVolume ?? this.sfxVolume;
+        this.micVolume = keep.micVolume ?? this.micVolume;
+        this.voicesVolume = keep.voicesVolume ?? this.voicesVolume;
         this.movementValues = keep.movementValues ?? null;
         this.flags = keep.flags ?? {};
     }
