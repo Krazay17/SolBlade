@@ -7,7 +7,7 @@ export default {
         this.cameraOriginalPosition = camera.position.clone();
         this.active = false;
     },
-    shake(intensity = 1, duration = 500) {
+    shake(intensity = 1, duration = 500, speed = 0.05) {
         const originalPosition = this.camera.position.clone();
         const shakeStart = performance.now();
         this.active = true;
@@ -16,12 +16,12 @@ export default {
             const elapsed = time - shakeStart;
             if (elapsed < duration) {        
                 // Use angle for circular motion
-                const angle = elapsed * 0.05; // Adjust speed
+                const angle = elapsed * speed;
                 const x = Math.cos(angle) * intensity;
                 const y = Math.sin(angle) * intensity;
                 const z = Math.sin(angle) * intensity;
                 this.camera.position.set(
-                    originalPosition.x ,
+                    originalPosition.x,
                     originalPosition.y + y,
                     originalPosition.z - z
                 );

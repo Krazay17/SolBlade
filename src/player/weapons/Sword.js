@@ -47,7 +47,7 @@ export default class Sword extends BaseWeapon {
                 weapon: this,
                 anim: 'attack',
                 damageDelay: 200,
-                damageDuration: 150,
+                damageDuration: 160,
                 duration: 600,
                 doesParry: true,
             })) {
@@ -68,7 +68,7 @@ export default class Sword extends BaseWeapon {
             this.actor.animator.hitFreeze();
             CameraFX.shake(0.14, 150);
 
-            this.hitFx(target.position, scaledCamDir);
+            //this.hitFx(target.position, scaledCamDir);
             MyEventEmitter.emit('fx', { type: 'swordHit', pos: target.position });
         });
     }

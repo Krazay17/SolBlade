@@ -41,18 +41,22 @@ export default class Player extends THREE.Object3D {
         this.meshes = [];
         this.setMesh();
 
-
         this.health = netData?.health || LocalData.health || 100;
         this.energy = 100;
         this.energyRegen = 25;
         this.dashCost = 30;
         this.bladeDrain = -5; // per second
 
+        soundPlayer.loadPosAudio('playerHit', '/assets/PlayerHit.mp3');
 
         // Local Player setup
         if (!isRemote) {
             this.input = game.input;
             Globals.playerInfo.setActor(this);
+            
+            MyEventEmitter.on('debugTest', () => {
+                this.parried({x: 0, y: 0, z: 0});
+            })
 
             this.maxSpeed = 5;
             this.acceleration = 300;
@@ -139,8 +143,16 @@ export default class Player extends THREE.Object3D {
             }
         } else {
             // Remote Player
-            this.position.lerp(this.targetPos, 40 * dt);
-            this.rotation.y += (this.targetRot - this.rotation.y) * 40 * dt;
+            if (this.position.distanceToSquared(this.targetPos) > 2) {
+                this.position.copy(this.targetPos);
+            } else {
+                this.position.lerp(this.targetPos, 60 * dt);
+            }
+            if (Math.abs(this.rotation.y - this.targetRot) > 5) {
+                this.rotation.y = this.targetRot;
+            } else {
+                this.rotation.y += (this.targetRot - this.rotation.y) * 60 * dt;
+            }
         }
 
         // Local and Remote Player
@@ -180,6 +192,12 @@ export default class Player extends THREE.Object3D {
         }
         if (this.input.keys['Digit2']) {
             this.stateManager.tryEmote('twerk');
+        }
+        if (this.input.keys['Digit3']) {
+            this.stateManager.tryEmote('wave');
+        }
+        if (this.input.keys['Digit4']) {
+            this.stateManager.tryEmote('cheer');
         }
 
         // Damage test
@@ -318,18 +336,21 @@ export default class Player extends THREE.Object3D {
         }
     }
 
+
     parried(attacker) {
+        const pos = attacker.position || attacker;
+        if (!pos) return;
         if (this.isRemote) {
-            this.animator?.hitFreeze(550, -2, 1);
+            this.animator?.hitFreeze(550, -.4, 1);
         } else {
-            this.animator?.hitFreeze(550, -2, 1);
+            this.animator?.hitFreeze(550, -.4, 1);
             this.stateManager.setState('stun', { stun: 550 });
             const direction = this.tempVector;
-            direction.subVectors(this.position, attacker.position);
+            direction.subVectors(this.position, pos);
             direction.normalize();
-            direction.multiplyScalar(8);
+            direction.multiplyScalar(6);
             this.body.velocity.set(direction.x, direction.y, direction.z); // Knockback away from attacker
-            CameraFX.shake(0.3, 250);
+            CameraFX.shake(0.25, 450, .02);
             soundPlayer.playSound('parry');
         }
     }
@@ -349,11 +370,11 @@ export default class Player extends THREE.Object3D {
 
     applyDamage({ attacker, health, dmg, cc }) {
         this.setHealth(health, attacker);
+        soundPlayer.playPosAudio('playerHit', this.position);
         if (this.isRemote) return;
         const { type, amount } = dmg;
         const { stun, dir, dim } = cc;
         if (amount > 0) {
-
             if (type === 'melee') {
                 CameraFX.shake(0.2, 125);
             }

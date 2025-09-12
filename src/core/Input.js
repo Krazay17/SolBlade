@@ -10,6 +10,9 @@ export default class Input {
     this.pointerLocked = false;
     this.sensitivity = 0.0016;
     this.moveSpeed = 5;
+    this.testFunction = () => {
+      console.log('Test function called');
+    };
 
     this.yaw = 0;
     this.pitch = 0;
@@ -54,6 +57,9 @@ export default class Input {
     this.domElement.addEventListener('keypress', (e) => {
       if (this.inputBlocked) return;
       MyEventEmitter.emit('KeyPressed', e.code);
+      if (e.code === 'Digit5') {
+        MyEventEmitter.emit('debugTest');
+      }
     });
     this.domElement.addEventListener('keydown', (e) => {
       if (this.inputBlocked) return;
@@ -100,7 +106,7 @@ export default class Input {
       });
     });
 
-  }
+  };
 
   addKeys() {
     addButton('KeyUnpressed', 'KeyW', 'Fwd', 1, 2);
@@ -112,5 +118,5 @@ export default class Input {
     addButton('KeyUnpressed', 'KeyB', 'Menu', 2, 10);
     addButton('KeyUnpressed', 'KeyT', 'Pause', 1, 10);
     addButton('KeyUnpressed', 'KeyR', 'Respawn', 1, 9);
-  }
+  };
 }

@@ -9,7 +9,7 @@ export default class AttackState extends PlayerState {
         this.weapon = weapon;
         this.exitTimer = performance.now() + duration;
         this.airFriction = 6;
-        this.actor.animator?.setAnimState(anim);
+        this.actor.animator?.setAnimState(anim, true);
         this.damageDelay = performance.now() + damageDelay;
         this.damageDuration = damageDuration;
         this.doesParry = doesParry;
