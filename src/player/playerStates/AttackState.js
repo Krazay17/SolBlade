@@ -5,22 +5,36 @@ export default class AttackState extends PlayerState {
         super(actor, manager, options);
         this.weapon = null;
     }
-    enter({ weapon, anim, damageDelay = 0, duration = 610 }) {
+    enter({ weapon, anim, damageDelay = 0, damageDuration = 300, duration = 610, doesParry = false }) {
         this.weapon = weapon;
         this.exitTimer = performance.now() + duration;
         this.airFriction = 6;
         this.actor.animator?.setAnimState(anim);
         this.damageDelay = performance.now() + damageDelay;
+        this.damageDuration = damageDuration;
+        this.doesParry = doesParry;
     }
     update(dt) {
         this.actor.movement.attackMove(dt);
 
-        if (performance.now() > this.damageDelay) {
+        if ((performance.now() > this.damageDelay) && (performance.now() < this.damageDelay + this.damageDuration)) {
             this.weapon.update();
+            if (this.doesParry) {
+                this.actor.setParry(true);
+            }
+        } else {
+            if (this.doesParry) {
+                this.actor.setParry(false);
+            }
         }
 
         if (performance.now() > this.exitTimer) {
             this.actor.stateManager.setState('idle');
+        }
+    }
+    exit() {
+        if (this.doesParry) {
+            this.actor.setParry(false);
         }
     }
     canExit(state) {

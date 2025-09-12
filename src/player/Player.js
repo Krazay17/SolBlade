@@ -13,6 +13,7 @@ import PlayerMovement from './PlayerMovement';
 import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
 import Globals from '../utils/Globals';
+import soundPlayer from '../core/SoundPlayer';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 1, z = 0 }, isRemote = false, camera, id, netData) {
@@ -31,6 +32,7 @@ export default class Player extends THREE.Object3D {
         this.isDead = false;
         this.height = 1;
         this.radius = 0.5;
+        this.parry = false;
         this.mesh;
         this.mixer;
         this.animations = {};
@@ -111,6 +113,7 @@ export default class Player extends THREE.Object3D {
     }
 
     setDimmed(duration) {
+        if (duration <= 0) return;
         this.dimmed = performance.now() + duration;
     }
 
@@ -308,6 +311,29 @@ export default class Player extends THREE.Object3D {
         });
     }
 
+    setParry(doesParry) {
+        if (this.parry !== doesParry) {
+            this.parry = doesParry;
+            MyEventEmitter.emit('updateParry', this.parry);
+        }
+    }
+
+    parried(attacker) {
+        if (this.isRemote) {
+            this.animator?.hitFreeze(550, -2, 1);
+        } else {
+            this.animator?.hitFreeze(550, -2, 1);
+            this.stateManager.setState('stun', { stun: 550 });
+            const direction = this.tempVector;
+            direction.subVectors(this.position, attacker.position);
+            direction.normalize();
+            direction.multiplyScalar(8);
+            this.body.velocity.set(direction.x, direction.y, direction.z); // Knockback away from attacker
+            CameraFX.shake(0.3, 250);
+            soundPlayer.playSound('parry');
+        }
+    }
+
     takeDamage(attacker, dmg = {}, cc = {}) {
         let netId;
         if (this.isRemote) {
@@ -318,7 +344,7 @@ export default class Player extends THREE.Object3D {
             netId = netSocket.id;
             this.setHealth(this.health - dmg.amount);
         }
-        netSocket.emit('playerDamageSend', { attacker: attacker.name, targetId: netId, dmg, cc });
+        netSocket.emit('playerDamageSend', { attacker: attacker.netId, targetId: netId, dmg, cc });
     }
 
     applyDamage({ attacker, health, dmg, cc }) {
@@ -332,7 +358,7 @@ export default class Player extends THREE.Object3D {
                 CameraFX.shake(0.2, 125);
             }
             if (stun > 0) {
-                this.stateManager.setState('stun', { stun, dim });
+                this.stateManager.setState('stun', { stun, dim, anim: 'knockback' });
             }
             if (dir) {
                 this.body.wakeUp();

@@ -3,6 +3,7 @@ import soundPlayer from "../../core/SoundPlayer";
 import CameraFX from "../../core/CameraFX";
 import * as THREE from "three";
 import MyEventEmitter from "../../core/MyEventEmitter";
+import Globals from "../../utils/Globals";
 
 export default class Sword extends BaseWeapon {
     constructor(actor, scene) {
@@ -11,6 +12,7 @@ export default class Sword extends BaseWeapon {
         this.traceDuration = 500; // duration of the sword trace in milliseconds
         soundPlayer.loadPosAudio('swordUse', '/assets/HeavySword.mp3');
         soundPlayer.loadPosAudio('swordHit', '/assets/HeavySwordHit.mp3');
+        soundPlayer.loadSound('parry', '/assets/Parry.mp3');
 
         MyEventEmitter.on('netFx', (data) => {
             if (data.type === 'swordHit') {
@@ -22,6 +24,15 @@ export default class Sword extends BaseWeapon {
                 this.useFx(fxPos);
             }
         });
+
+        this.debugMesh = null;
+        if (Globals.DEBUG) {
+            const geometry = new THREE.BoxGeometry(this.range, 1, 0.5);
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+            this.debugMesh = new THREE.Mesh(geometry, material);
+            this.debugMesh.visible = false;
+            Globals.graphicsWorld.add(this.debugMesh);
+        }
     }
     useFx(pos) {
         soundPlayer.playPosAudio('swordUse', pos);
@@ -33,7 +44,12 @@ export default class Sword extends BaseWeapon {
     use(currentTime) {
         if (this.canUse(currentTime) &&
             this.actor.stateManager.setState('attack', {
-                weapon: this, anim: 'attack', duration: 500, damageDelay: 200
+                weapon: this,
+                anim: 'attack',
+                damageDelay: 200,
+                damageDuration: 150,
+                duration: 600,
+                doesParry: true,
             })) {
             this.lastUsed = currentTime;
             this.enemyActors = this.scene.actorMeshes;

@@ -101,11 +101,12 @@ export default class PlayerAnimator {
 
   }
 
-  hitFreeze(duration = 170) {
+  hitFreeze(duration = 170, scale = 0.025, scaleAfter = 1) {
+    clearTimeout(this.hitFreezeTimeout);
     if (this.currentAction) {
-      this.currentAction.timeScale = 0.025;
-      setTimeout(() => {
-        this.currentAction.timeScale = 1;
+      this.currentAction.timeScale = scale;
+      this.hitFreezeTimeout = setTimeout(() => {
+        this.currentAction.timeScale = scaleAfter;
       }, duration);
     }
   }

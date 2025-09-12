@@ -81,7 +81,7 @@ function bindSocketEvents(myPlayerData) {
             scene.removePlayer(netId);
             delete netPlayers[netId];
         }
-    })
+    });
     socket.on('playerPositionUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
             netPlayers[id].targetPos.copy(data.pos);
@@ -123,6 +123,18 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[id].setHealth(health);
         }
     });
+    socket.on('playerParried', ({ id, attacker, health }) => {
+        if(netPlayers[id]) {
+            netPlayers[id].parried(netPlayers[attacker]);
+            netPlayers[id].setHealth(health);
+        }
+        // if (id === socket.id) {
+        //     scene.player.animator?.hitFreeze(450, -.5, 0.1);
+        // } else if (netPlayers[id]) {
+        //     netPlayers[id].animator?.hitFreeze(450, -.5, 0.1);
+        //     netPlayers[id].setHealth(health);
+        // }
+    });
     socket.on('playerRespawnUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
             netPlayers[id].position.set(data.pos.x, data.pos.y, data.pos.z);
@@ -158,7 +170,7 @@ function bindSocketEvents(myPlayerData) {
     });
     socket.on('crownGameEnded', (winner) => {
         MyEventEmitter.emit('crownGameEnded', winner);
-    })
+    });
     socket.on('pickupCrown', ({ playerId }) => {
         if (netPlayers[playerId]) {
             netPlayers[playerId].pickupCrown();
@@ -171,7 +183,7 @@ function bindSocketEvents(myPlayerData) {
     });
     socket.on('crownScoreIncrease', ({ playerId, score }) => {
         MyEventEmitter.emit('crownScoreIncrease', { playerId, score });
-    })
+    });
 }
 
 MyEventEmitter.on('fx', (data) => {
@@ -194,6 +206,11 @@ MyEventEmitter.on('bootPlayer', (targetPlayer) => {
     if (!targetPlayer || !targetPlayer.netId) return;
 
     socket.emit('bootPlayer', targetPlayer.netId);
+});
+MyEventEmitter.on('updateParry', (doesParry) => {
+    if (player) {
+        socket.emit('playerParryUpdate', doesParry);
+    }
 });
 
 setInterval(() => {
