@@ -7,7 +7,7 @@ import MyEventEmitter from '../../core/MyEventEmitter.js';
 
 export default class Pistol extends BaseWeapon {
     constructor(actor, scene) {
-        super(actor, 'Pistol', 20, 250, .55); // name, damage, range, cooldown
+        super(actor, 'Pistol', 20, 250, .7); // name, damage, range, cooldown
         this.scene = scene;
         //soundPlayer.loadSfx('gunshoot', '/assets/GunShoot.wav');
         soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');
@@ -48,15 +48,16 @@ export default class Pistol extends BaseWeapon {
                 weapon: this, anim: 'gunshoot', duration: 250
             })) {
             this.lastUsed = currentTime;
-            const offSetPos = pos.clone().add(this.tempVector.set(0, .4, 0));
-            let cameraPos = new THREE.Vector3();
+            const offSetPos = pos.clone().add(this.tempVector.set(0, .8, 0));
+            let cameraPos = this.tempVector2;
             this.actor.cameraArm.getWorldPosition(cameraPos);
             this.hitActors.clear();
 
             this.useFx(offSetPos, dir);
             MyEventEmitter.emit('fx', { type: 'pistolUse', pos: offSetPos, dir: dir });
 
-            this.meshTracer.lineTrace(cameraPos, dir, this.range, this.actor.position, (hits) => {
+            const endPos = offSetPos.clone().add(dir.clone().normalize().multiplyScalar(this.range));
+            this.meshTracer.lineTrace(cameraPos, endPos, this.range, offSetPos, (hits) => {
                 for (const hit of hits) {
                     const actor = hit.object.userData.owner;
                     if (actor && actor !== this.actor && !this.hitActors.has(actor)) {

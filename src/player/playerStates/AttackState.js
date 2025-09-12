@@ -8,7 +8,6 @@ export default class AttackState extends PlayerState {
     enter({ weapon, anim, damageDelay = 0, damageDuration = 300, duration = 610, doesParry = false }) {
         this.weapon = weapon;
         this.exitTimer = performance.now() + duration;
-        this.airFriction = 6;
         this.actor.animator?.setAnimState(anim, true);
         this.damageDelay = performance.now() + damageDelay;
         this.damageDuration = damageDuration;
@@ -23,9 +22,7 @@ export default class AttackState extends PlayerState {
                 this.actor.setParry(true);
             }
         } else {
-            if (this.doesParry) {
-                this.actor.setParry(false);
-            }
+            this.actor.setParry(false);
         }
 
         if (performance.now() > this.exitTimer) {

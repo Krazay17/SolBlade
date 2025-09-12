@@ -15,6 +15,9 @@ import PartyFrame from '../ui/PartyFrame.js';
 import GameMode from '../core/GameMode.js';
 import Pickup from '../actors/Pickup.js';
 import voiceChat from '../core/VoiceChat.js';
+import { MeshBVH, acceleratedRaycast } from 'three-mesh-bvh';
+
+THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 export default class GameScene extends SceneBase {
   onEnter() {
@@ -173,6 +176,7 @@ export default class GameScene extends SceneBase {
           return;
         }
         if (child.isMesh) {
+          child.geometry.boundsTree = new MeshBVH(child.geometry, { lazyGeneration: false });
           child.castShadow = true;
           child.receiveShadow = true;
           this.mapWalls.push(child);

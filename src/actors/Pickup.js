@@ -29,16 +29,25 @@ export default class Pickup extends THREE.Object3D {
     async createPickupMesh(scale = 1) {
         switch (this.type) {
             case 'energy':
-                const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-                const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-                this.mesh = new THREE.Mesh(geometry, material);
+                this.mesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.5, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 0xffff00 })
+                );
+                this.add(this.mesh);
+                break;
+            case 'health':
+                this.mesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.5, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+                );
                 this.add(this.mesh);
                 break;
             default:
-                const sceneMesh = await this.scene.meshManager.getMesh(this.type);
-                if (sceneMesh) {
-                    this.add(sceneMesh);
-                }
+                this.mesh = await this.scene.meshManager.getMesh(this.type);
+                break;
+        }
+        if (this.mesh) {
+            this.add(this.mesh);
         }
     }
 
@@ -59,12 +68,18 @@ export default class Pickup extends THREE.Object3D {
     }
 
     applyCollect(player) {
-        if (this.type === 'crown') {
-            MyEventEmitter.emit('pickupCrown');
-        }
-
-        if (this.type === 'energy') {
-            player.addEnergy(100);
+        switch (this.type) {
+            case 'crown':
+                MyEventEmitter.emit('pickupCrown');
+                break;
+            case 'energy':
+                player.addEnergy(100);
+                break;
+            case 'health':
+                player.takeHealing('HealthOrb', { amount: 25 });
+                break;
+            default:
+                console.log(`no pickup type: ${this.type}`);
         }
     }
 }

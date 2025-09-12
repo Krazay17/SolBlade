@@ -124,7 +124,7 @@ function bindSocketEvents(myPlayerData) {
         }
     });
     socket.on('playerParried', ({ id, attacker, health }) => {
-        if(netPlayers[id]) {
+        if (netPlayers[id]) {
             netPlayers[id].parried(netPlayers[attacker]);
             netPlayers[id].setHealth(health);
         }
@@ -184,8 +184,16 @@ function bindSocketEvents(myPlayerData) {
     socket.on('crownScoreIncrease', ({ playerId, score }) => {
         MyEventEmitter.emit('crownScoreIncrease', { playerId, score });
     });
+    socket.on('healingUpdate', ({ id, health, data }) => {
+        if (netPlayers[id]) {
+            netPlayers[id].applyHealing(health, data);
+        }
+    })
 }
 
+MyEventEmitter.on('takeHealing', (data) => {
+    socket.emit('takeHealing', data);
+})
 MyEventEmitter.on('fx', (data) => {
     socket.emit('fx', data);
 });

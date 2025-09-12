@@ -53,9 +53,9 @@ export default class Player extends THREE.Object3D {
         if (!isRemote) {
             this.input = game.input;
             Globals.playerInfo.setActor(this);
-            
+
             MyEventEmitter.on('debugTest', () => {
-                this.parried({x: 0, y: 0, z: 0});
+                this.parried({ x: 0, y: 0, z: 0 });
             })
 
             this.maxSpeed = 5;
@@ -357,13 +357,11 @@ export default class Player extends THREE.Object3D {
 
     takeDamage(attacker, dmg = {}, cc = {}) {
         let netId;
+        this.setHealth(this.health - dmg.amount);
         if (this.isRemote) {
             netId = this.netId;
-            this.setHealth(this.health - dmg.amount);
-            this.namePlate?.setHealth(this.health - dmg.amount);
         } else {
             netId = netSocket.id;
-            this.setHealth(this.health - dmg.amount);
         }
         netSocket.emit('playerDamageSend', { attacker: attacker.netId, targetId: netId, dmg, cc });
     }
@@ -387,12 +385,19 @@ export default class Player extends THREE.Object3D {
             }
         }
     }
+    takeHealing(dealer, heal = {}) {
+        this.setHealth(this.health + heal.amount);
+        MyEventEmitter.emit('takeHealing', { dealer, heal });
+    }
+    applyHealing(health, { dealer, heal }) {
+        this.setHealth(health, dealer)
+    }
     // call twice from local and server
-    setHealth(newHealth, attacker = null) {
-        this.health = newHealth;
+    setHealth(newHealth, dealer = null) {
+        this.health = Math.min(100, newHealth);
         if (!this.isRemote) {
             if (this.health <= 0) {
-                this.die(attacker);
+                this.die(dealer);
             }
             LocalData.health = newHealth;
             MyEventEmitter.emit('updateHealth', this.health);
@@ -410,12 +415,13 @@ export default class Player extends THREE.Object3D {
     // only local
     unDie() {
         if (this.isRemote) return;
-        this.stateManager.setState('idle');
         const spawnPoint = this.scene.getRespawnPoint();
         this.body.position.set(spawnPoint.x, spawnPoint.y, spawnPoint.z);
         this.body.velocity.set(0, 0, 0);
-
         this.setHealth(100);
+
+        this.stateManager.setState('idle');
+
         MyEventEmitter.emit('playerRespawn', { health: this.health });
         netSocket.emit('playerRespawnUpdate', { id: this.netId, health: this.health, pos: this.position });
     }
