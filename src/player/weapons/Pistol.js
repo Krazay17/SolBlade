@@ -56,20 +56,31 @@ export default class Pistol extends BaseWeapon {
             this.useFx(offSetPos, dir);
             MyEventEmitter.emit('fx', { type: 'pistolUse', pos: offSetPos, dir: dir });
 
-            const endPos = offSetPos.clone().add(dir.clone().normalize().multiplyScalar(this.range));
-            this.meshTracer.lineTrace(cameraPos, endPos, this.range, offSetPos, (hits) => {
-                for (const hit of hits) {
-                    const actor = hit.object.userData.owner;
-                    if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
-                        this.hitActors.add(actor);
-                        const scaledDir = dir.clone().normalize().multiplyScalar(4);
-                        actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 80, dir: scaledDir, dim: 1000 });
+            const endPos = cameraPos.clone().add(dir.clone().normalize().multiplyScalar(this.range));
+            // this.meshTracer.lineTrace(cameraPos, dir, this.range, offSetPos, (hit) => {
+            //     const actor = hit.object.userData.owner;
+            //     if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
+            //         this.hitActors.add(actor);
+            //         const scaledDir = dir.clone().normalize().multiplyScalar(4);
+            //         actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 80, dir: scaledDir, dim: 1000 });
 
-                        this.hitFx(hit.point, dir);
-                        MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
-                    }
+            //         this.hitFx(hit.point, dir);
+            //         MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
+            //     }
+            // }, 8, 1);
+
+            this.meshTracer.multiLineTrace(cameraPos, dir, this.range, offSetPos, (hit) => {
+                const actor = hit.object.userData.owner;
+                if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
+                    this.hitActors.add(actor);
+                    const scaledDir = dir.clone().normalize().multiplyScalar(4);
+                    actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 80, dir: scaledDir, dim: 1000 });
+
+                    this.hitFx(hit.point, dir);
+                    MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
                 }
-            });
+            }, 5, .1);
+
             return true;
         }
         return false;

@@ -7,6 +7,6 @@ export default {
     scene: null,
     input: null,
     camera: null,
-    DEBUG: true,
+    DEBUG: false,
     socket: null,
 }

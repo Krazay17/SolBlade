@@ -33,7 +33,8 @@ export default class Player extends THREE.Object3D {
         this.height = 1;
         this.radius = 0.5;
         this.parry = false;
-        this.mesh;
+        this.mesh = null;
+        this.meshBody = null;
         this.mixer;
         this.animations = {};
         this.currentAnimState = isRemote ? netData.state || 'idle' : 'idle';
@@ -216,6 +217,7 @@ export default class Player extends THREE.Object3D {
         this.add(this.mesh);
         const meshBody = newMesh.meshBody;
         meshBody.userData.owner = this;
+        this.meshBody = meshBody;
         this.scene.actorMeshes.push(meshBody);
         this.animator = new PlayerAnimator(this, newMesh, newMesh.animations);
     }

@@ -60,6 +60,13 @@ export default class GameScene extends SceneBase {
 
   }
 
+  getOtherActorMeshes() {
+    return this.actorMeshes.filter(a => a !== this.player.meshBody);
+  }
+  getOtherActors() {
+    return Object.values(this.scenePlayers).filter(p => p !== this.player);
+  }
+
   getScenePlayersPos() {
     const positions = {};
     Object.values(this.scenePlayers).forEach(player => {
