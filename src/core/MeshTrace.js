@@ -123,7 +123,6 @@ export default class MeshTrace {
                     }
                 }
                 callback(hit);
-                //Globals.graphicsWorld.remove(debugLine);
             }
         }
     }

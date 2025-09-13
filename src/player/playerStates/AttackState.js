@@ -29,12 +29,15 @@ export default class AttackState extends PlayerState {
             this.actor.stateManager.setState('idle');
         }
     }
-    exit() {
-        if (this.doesParry) {
+    exit(state) {
+        if (state !== 'parry') {
             this.actor.setParry(false);
         }
     }
     canExit(state) {
-        return performance.now() > this.exitTimer || state === 'dead' || state === 'stun';
+        return performance.now() > this.exitTimer
+            || state === 'dead'
+            || state === 'stun'
+            || state === 'parry';
     }
 }

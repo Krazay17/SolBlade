@@ -14,6 +14,10 @@ export default class StateManager {
             emote: new States.EmoteState(actor, this),
             blade: new States.BladeState(actor, this),
             dead: new States.DeadState(actor, this),
+            parry: new States.ParryState(actor, this),
+            // wallCling: new States.WallClingState(actor, this),
+            // wallSlide: new States.WallSlideState(actor, this),
+            // wallJump: new States.WallJumpState(actor, this),
         };
         this.activeState = this.states.idle;
         this.actionState = null;
@@ -33,7 +37,7 @@ export default class StateManager {
 
         let newState = state;
         if (this.states[newState]) {
-            this.activeState?.exit();
+            this.activeState?.exit(newState);
             this.lastState = this.currentStateName;
             this.activeState = this.states[newState];
             this.activeState?.enter(enterParams);

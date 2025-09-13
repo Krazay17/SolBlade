@@ -123,17 +123,14 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[id].setHealth(health);
         }
     });
-    socket.on('playerParried', ({ id, attacker, health }) => {
+    socket.on('playerParried', ({ id, attacker, health, dmgType }) => {
         if (netPlayers[id]) {
             netPlayers[id].parried(netPlayers[attacker]);
             netPlayers[id].setHealth(health);
+            if (dmgType === 'melee') {
+                netPlayers[attacker].parried(netPlayers[id]);
+            }
         }
-        // if (id === socket.id) {
-        //     scene.player.animator?.hitFreeze(450, -.5, 0.1);
-        // } else if (netPlayers[id]) {
-        //     netPlayers[id].animator?.hitFreeze(450, -.5, 0.1);
-        //     netPlayers[id].setHealth(health);
-        // }
     });
     socket.on('playerRespawnUpdate', ({ id, data }) => {
         if (netPlayers[id]) {

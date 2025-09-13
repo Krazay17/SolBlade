@@ -338,22 +338,13 @@ export default class Player extends THREE.Object3D {
         }
     }
 
-
     parried(attacker) {
         const pos = attacker.position || attacker;
-        if (!pos) return;
-        if (this.isRemote) {
-            this.animator?.hitFreeze(550, -.4, 1);
-        } else {
-            this.animator?.hitFreeze(550, -.4, 1);
-            this.stateManager.setState('stun', { stun: 550 });
-            const direction = this.tempVector;
-            direction.subVectors(this.position, pos);
-            direction.normalize();
-            direction.multiplyScalar(6);
-            this.body.velocity.set(direction.x, direction.y, direction.z); // Knockback away from attacker
-            CameraFX.shake(0.25, 450, .02);
-            soundPlayer.playSound('parry');
+        soundPlayer.playPosAudio('parry', this.position, 'assets/Parry.mp3');
+        this.animator?.hitFreeze(600, 0, 1);
+
+        if (!this.isRemote) {
+            this.stateManager.setState('parry', { duration: 600, pos });
         }
     }
 
