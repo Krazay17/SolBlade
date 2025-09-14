@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
 import * as THREE from "three";
 import { SkeletonUtils } from "three/examples/jsm/Addons.js";
-import { MeshBVH } from 'three-mesh-bvh';
+import { MeshBVH, SAH } from 'three-mesh-bvh';
 
 export default class MeshManager {
     constructor(game) {
@@ -61,7 +61,11 @@ export default class MeshManager {
                 model.scale.set(scale, scale, scale);
                 model.traverse((child) => {
                     if (child.isMesh) {
-                        child.geometry.boundsTree = new MeshBVH(child.geometry, { lazyGeneration: false });
+                        child.geometry.computeBoundsTree({
+                            strategy: SAH,
+                            maxLeafTris: 2,   // each leaf holds just 2 triangles
+                            verbose: true,
+                        });
                         child.castShadow = true;
                         child.receiveShadow = true;
                     }

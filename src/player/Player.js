@@ -111,6 +111,10 @@ export default class Player extends THREE.Object3D {
         this.add(this.crownMesh);
     }
 
+    getMeshBody() {
+        return this.meshBody;
+    }
+
     dropCrown() {
         if (this.crownMesh) {
             this.remove(this.crownMesh);

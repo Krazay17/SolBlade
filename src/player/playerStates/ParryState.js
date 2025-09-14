@@ -6,7 +6,6 @@ import { toVector3 } from "../../utils/Utils";
 export default class ParryState extends PlayerState {
     enter({ pos }) {
         this.actor.setParry(true);
-        MyEventEmitter.emit('playerParryUpdate', true);
         this.startTime = performance.now();
         this.duration = 300;
         this.actor.body.sleep();
@@ -20,7 +19,6 @@ export default class ParryState extends PlayerState {
     }
     update(dt) {
         if (performance.now() > this.startTime + this.duration) {
-
             this.manager.setState('stun', { duration: 300 });
             return;
         }

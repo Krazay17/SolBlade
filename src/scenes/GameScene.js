@@ -15,8 +15,11 @@ import PartyFrame from '../ui/PartyFrame.js';
 import GameMode from '../core/GameMode.js';
 import Pickup from '../actors/Pickup.js';
 import voiceChat from '../core/VoiceChat.js';
-import { MeshBVH, acceleratedRaycast } from 'three-mesh-bvh';
+import { MeshBVH, acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
+THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
+THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 export default class GameScene extends SceneBase {
@@ -29,6 +32,7 @@ export default class GameScene extends SceneBase {
     this.actorMeshes = [];
     this.pickupActors = [];
     this.mapWalls = [];
+    this.enemyActors = [];
 
     this.player = new Player(this.game, this, LocalData.position, false, this.game.camera);
     Globals.player = this.player;
@@ -65,6 +69,10 @@ export default class GameScene extends SceneBase {
   }
   getOtherActors() {
     return Object.values(this.scenePlayers).filter(p => p !== this.player);
+  }
+
+  getMapWalls() {
+    return this.mapWalls;
   }
 
   getScenePlayersPos() {
@@ -143,6 +151,7 @@ export default class GameScene extends SceneBase {
     if (this.scenePlayers[id]) return this.scenePlayers[id];
     const player = new Player(this.game, this, data.pos, true, null, id, data);
     this.scenePlayers[id] = player;
+    this.enemyActors.push(player);
     MyEventEmitter.emit('playerJoined', player);
     return player;
   }
@@ -151,6 +160,7 @@ export default class GameScene extends SceneBase {
     const player = this.scenePlayers[id];
     if (player) {
       MyEventEmitter.emit('playerLeft', player);
+      this.enemyActors.splice(this.enemyActors.indexOf(player), 1);
       player.destroy(id);
       delete this.scenePlayers[id];
     }
@@ -183,7 +193,8 @@ export default class GameScene extends SceneBase {
           return;
         }
         if (child.isMesh) {
-          child.geometry.boundsTree = new MeshBVH(child.geometry, { lazyGeneration: false });
+          child.geometry.computeBoundsTree();
+
           child.castShadow = true;
           child.receiveShadow = true;
           this.mapWalls.push(child);

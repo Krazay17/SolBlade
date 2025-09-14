@@ -67,7 +67,7 @@ export default class Pistol extends BaseWeapon {
             //         this.hitFx(hit.point, dir);
             //         MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
             //     }
-            // }, 8, 1);
+            // });
 
             this.meshTracer.multiLineTrace(cameraPos, dir, this.range, offSetPos, (hit) => {
                 const actor = hit.object.userData.owner;
@@ -79,7 +79,7 @@ export default class Pistol extends BaseWeapon {
                     this.hitFx(hit.point, dir);
                     MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
                 }
-            }, 5, .1);
+            }, 3, .15);
 
             return true;
         }

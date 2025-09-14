@@ -9,7 +9,7 @@ import { int } from "three/tsl";
 export default class MeshTrace {
     constructor(scene) {
         this.scene = scene;
-        this.actorMeshes = this.scene.actorMeshes;
+        this.actorMeshes = this.scene.enemyActors.map(a => a.getMeshBody()).filter(m => m !== null);
         this.mapWalls = this.scene.mapWalls;
         this.raycaster = new Raycaster();
         this.raycaster2 = new Raycaster();
@@ -24,21 +24,19 @@ export default class MeshTrace {
         this.tempSphere = new Sphere();
     }
 
-    lineTrace(start, direction, length, losStart, callback, numRays = 1, radius = 0) {
+    lineTrace(start, direction, length, losStart, callback) {
         let savedStart = start instanceof Object3D ? start.position.clone() : start.clone();
         let savedDir = direction instanceof Object3D ? direction.position.clone().sub(savedStart).normalize() : direction.clone().normalize();
         let hits = [];
 
-        if (this.actorMeshes.length === 0) {
-            return;
-        }
-        this.actorMeshes.forEach(mesh => {
-            mesh.updateWorldMatrix(true, false);
-            const distance = mesh.position.distanceTo(savedStart);
-            if (distance > length) {
-                return;
-            }
-        });
+        // const actors = this.scene.getOtherActors().filter(a => {
+        //     const direction = a.position.clone().sub(start);
+        //     direction.normalize();
+        //     return savedDir.dot(direction) > .33 && a.position.distanceTo(start) < length && !a.isDead;
+        // });
+        // if (actors.length === 0) return;
+        // this.actorMeshes = this.scene.getOtherActorMeshes();
+        // if (this.actorMeshes.length === 0) return;
 
         this.raycaster.set(savedStart, savedDir);
         this.raycaster.far = length;
@@ -63,7 +61,7 @@ export default class MeshTrace {
         return hits;
     }
 
-    multiLineTrace(start, dir, length, actorEyes, callback, numRays = 3, radius = .05) {
+    multiLineTrace(start, dir, length, actorEyes, callback, numRays = 5, radius = .1) {
         let savedStart = start instanceof Object3D ? start.position.clone() : start.clone();
         let savedDir = dir instanceof Object3D ? dir.position.clone().sub(savedStart).normalize() : dir.clone().normalize();
 
@@ -73,7 +71,7 @@ export default class MeshTrace {
             return savedDir.dot(direction) > .33 && a.position.distanceTo(actorEyes) < length && !a.isDead;
         });
         if (actors.length === 0) return;
-        this.actorMeshes = this.scene.getOtherActorMeshes();
+        this.actorMeshes = this.scene.enemyActors.map(a => a.getMeshBody()).filter(m => m !== null);
         if (this.actorMeshes.length === 0) return;
 
         const right = this.tempVector.crossVectors(this.worldUp, savedDir).normalize();
@@ -81,8 +79,10 @@ export default class MeshTrace {
         const up = this.tempVector2.crossVectors(savedDir, right).normalize();
         if (up.length() === 0) up.set(0, 1, 0);
 
-
         this.raycaster.far = length;
+        this.raycaster2.far = length;
+        this.mapWalls = this.scene.getMapWalls();
+
         for (let i = 0; i < numRays; i++) {
             let offset = this.tempVector3.set(0, 0, 0);
 
@@ -93,36 +93,35 @@ export default class MeshTrace {
                 offset.copy(right).multiplyScalar(cos * radius)
                     .addScaledVector(up, sin * radius);
             }
+            const startPos = this.tempVector4.copy(savedStart).add(offset);
 
-            const startPos = savedStart.clone().add(offset);
-
-            if (Globals.DEBUG) {
-                const debugLine = new Line(
-                    new BufferGeometry().setFromPoints([
-                        startPos,
-                        startPos.clone().add(savedDir.clone().multiplyScalar(length)),
-                    ]),
-                    new LineBasicMaterial({ color: 0x00ff00 })
-                );
-                Globals.graphicsWorld.add(debugLine);
-            }
-
-
+            // if (Globals.DEBUG) {
+            //     const debugLine = new Line(
+            //         new BufferGeometry().setFromPoints([
+            //             startPos,
+            //             startPos.clone().add(savedDir.clone().multiplyScalar(length)),
+            //         ]),
+            //         new LineBasicMaterial({ color: 0x00ff00 })
+            //     );
+            //     Globals.graphicsWorld.add(debugLine);
+            // }
+            if (this.actorMeshes.length === 0) break; // nothing left to hit
             this.raycaster.set(startPos, dir);
-            const intersects = this.raycaster.intersectObjects(this.actorMeshes, false);
-            if (intersects.length === 0) continue;
-            for (const hit of intersects) {
-                const losDir = hit.point.clone().sub(actorEyes);
-                losDir.normalize();
+            const hit = this.raycaster.intersectObjects(this.actorMeshes, false)[0];
+            if (hit) {
+                this.actorMeshes.splice(this.actorMeshes.indexOf(hit.object), 1); // remove so we don't hit same actor multiple times
+
+                // LOS check...
+                const losDir = this.tempVector5.copy(hit.point).sub(actorEyes).normalize();
                 this.raycaster2.set(actorEyes, losDir);
                 this.raycaster2.far = actorEyes.distanceTo(hit.point);
-                const losIntersects = this.raycaster2.intersectObjects(this.mapWalls, false);
-                if (losIntersects.length > 0) {
-                    for (const losHit of losIntersects) {
-                        if (losHit.distance < hit.distance) return;
-                    }
-                }
-                callback(hit);
+
+                //this.mapWalls = this.scene.getMapWalls().filter(w => actorEyes.sub(w.position).dot(losDir) < 0);
+                const losHit = this.raycaster2.intersectObjects(this.mapWalls, false)[0];
+                if (!losHit || losHit.distance >= hit.distance) {
+                    callback(hit);
+                    this.mapWalls = [];
+                } else return; // blocked, stop checking further rays
             }
         }
     }
