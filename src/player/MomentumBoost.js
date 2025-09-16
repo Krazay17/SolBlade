@@ -12,7 +12,7 @@ export default class MomentumBoost {
         this.misAlign = 0;
 
         this.alignmentLax = 0;
-        this.maxRunBoost = 4;
+        this.maxRunBoost = 25;
 
     }
     getalignment(currentVelocity) {

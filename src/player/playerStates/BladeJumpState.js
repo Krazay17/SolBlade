@@ -21,4 +21,8 @@ export default class BladeJumpState extends PlayerState {
             }
         }
     }
+    exit(state) {
+        if (state === 'blade') return;
+        this.actor.energyRegen = 25;
+    }
 }

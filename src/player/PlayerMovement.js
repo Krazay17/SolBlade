@@ -44,7 +44,7 @@ export default class PlayerMovement {
             blade: {
                 friction: 0.1,
                 accel: 2,
-                speed: 8,
+                speed: 6,
                 tap: 0
             },
             attack: {
@@ -103,7 +103,7 @@ export default class PlayerMovement {
             blade: {
                 friction: 0.1,
                 accel: 2,
-                speed: 8,
+                speed: 6,
                 tap: 0
             },
             attack: {
@@ -180,7 +180,7 @@ export default class PlayerMovement {
         this.applySlopeFriction(dt, this.values.blade.friction);
 
         let wishdir = this.getInputDirection();
-        let wishspeed = this.values.blade.speed + this.momentumBooster.increaseBoost(dt);
+        let wishspeed = this.values.blade.speed + this.momentumBooster.increaseBoost(dt / 2);
         if (wishdir.almostZero()) return;
         // Project wishdir onto slope plane
         wishdir = projectOnPlane(wishdir, this.groundChecker.floorNormal());
@@ -229,8 +229,8 @@ export default class PlayerMovement {
         const currentVY = this.body.velocity.clone().y;
         const jumpV = 6.66;
         this.body.velocity.y = Math.max(jumpV, currentVY
-             + jumpV * addJump
-            );
+            + jumpV * addJump
+        );
     }
 
     jumpMove(dt) {
