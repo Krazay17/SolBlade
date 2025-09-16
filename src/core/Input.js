@@ -28,7 +28,12 @@ export default class Input {
       'KeyD': 'moveRight',
       'KeyE': 'dash',
       'Space': 'jump',
-      'ShiftLeft': 'blade'
+      'ShiftLeft': 'blade',
+      'KeyC': 'openInventory',
+      'Digit1': 'castSpell1',
+      'Digit2': 'castSpell2',
+      'Digit3': 'castSpell3',
+      'Digit4': 'castSpell4',
     };
 
     this.actionStates = {
@@ -60,6 +65,8 @@ export default class Input {
       if (e.code === 'Digit5') {
         MyEventEmitter.emit('debugTest');
       }
+      const action = this.actions[e.code];
+      if (action) this.buttonPressed(action);
     });
     this.domElement.addEventListener('keydown', (e) => {
       if (this.inputBlocked) return;
@@ -74,17 +81,18 @@ export default class Input {
       if (action) this.actionStates[action] = false;
     });
     this.domElement.addEventListener('mousedown', (e) => {
-      if (this.gameElement === e.target) {
-        if (!this.pointerLocked) {
-          this.gameElement.requestPointerLock();
-        }
-      }
       this.mice[e.button] = true;
     });
     this.domElement.addEventListener('mouseup', (e) => {
       this.mice[e.button] = false;
     });
-
+    this.domElement.addEventListener('click', (e) => {
+      if (this.gameElement === e.target) {
+        if (!this.pointerLocked) {
+          this.gameElement.requestPointerLock();
+        }
+      }
+    });
     this.domElement.addEventListener('mousemove', (e) => {
       if (document.pointerLockElement !== this.gameElement) return;
 
@@ -105,8 +113,11 @@ export default class Input {
         if (action) this.actionStates[action] = false;
       });
     });
-
   };
+
+  buttonPressed(action) {
+    MyEventEmitter.emit(action);
+  }
 
   addKeys() {
     addButton('KeyUnpressed', 'KeyW', 'Fwd', 1, 2);
@@ -115,8 +126,9 @@ export default class Input {
     addButton('KeyUnpressed', 'KeyD', 'Right', 2, 3);
     addButton('KeyUnpressed', 'ShiftLeft', 'Blade', 2, 4, '100px', 'Shift');
     addButton('KeyUnpressed', 'Space', 'Jump', 2, 6, '140px');
-    addButton('KeyUnpressed', 'KeyB', 'Menu', 2, 10);
-    addButton('KeyUnpressed', 'KeyT', 'Pause', 1, 10);
-    addButton('KeyUnpressed', 'KeyR', 'Respawn', 1, 9);
+    addButton('KeyUnpressed', 'KeyC', 'Inventory', 1, 7);
+    addButton('KeyUnpressed', 'KeyB', 'Menu', 1, 6);
+    addButton('KeyUnpressed', 'KeyT', 'Pause', 1, 5);
+    addButton('KeyUnpressed', 'KeyR', 'Respawn', 1, 4);
   };
 }

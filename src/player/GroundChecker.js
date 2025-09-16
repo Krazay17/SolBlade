@@ -3,9 +3,10 @@ import * as THREE from "three";
 import Globals from "../utils/Globals";
 
 export default class GroundChecker {
-    constructor(world, playerBody, rayLength = 1.3, spread = 0.3) {
-        this.world = world;
-        this.playerBody = playerBody;
+    constructor(actor, rayLength = .6, spread = 0.3) {
+        this.actor = actor;
+        this.body = actor.body;
+        this.world = Globals.physicsWorld;
         this.rayLength = rayLength;
         this.spread = spread;
         this.lastHit = null;
@@ -42,7 +43,7 @@ export default class GroundChecker {
     }
 
     floorTrace() {
-        const origin = this.playerBody.position.clone();
+        const origin = this.body.position.clone();
 
         for (let offset of this.offsets) {
             const from = origin.vadd(offset);
@@ -73,9 +74,28 @@ export default class GroundChecker {
         return result ? Math.abs(result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0))) > slope : false;
     }
 
+    groundBuffer(slope = 0.7) {
+        if (!this.isGrounded(slope)) {
+            if (!this.floorTimer) {
+                this.floorTimer = setTimeout(() => {
+                    this.floorTimer = null;
+                    this.grounded = false;
+                }, 150);
+            }
+        } else {
+            clearTimeout(this.floorTimer);
+            this.floorTimer = null;
+            if (!this.grounded) {
+                //this.actor.movement.bladeStart();
+            }
+
+            this.grounded = true;
+        }
+    }
+
     visualDebugTrace() {
         // Use three js to make a visual debug for traces
-        const origin = new THREE.Vector3().copy(this.playerBody.position);
+        const origin = new THREE.Vector3().copy(this.body.position);
         for (let offset of this.offsets) {
             const from = origin.clone().add(offset);
             const to = from.clone().add(new THREE.Vector3(0, -this.rayLength, 0));

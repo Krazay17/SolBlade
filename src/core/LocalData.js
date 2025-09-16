@@ -44,6 +44,7 @@ export default {
 
             this.reset(
                 {
+                    // Dont reset these values on version change
                     money: parsed.money,
                     name: parsed.name,
                     masterVolume: parsed.masterVolume,

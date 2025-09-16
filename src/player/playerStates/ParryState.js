@@ -4,7 +4,7 @@ import MyEventEmitter from "../../core/MyEventEmitter";
 import { toVector3 } from "../../utils/Utils";
 
 export default class ParryState extends PlayerState {
-    enter({ pos }) {
+    enter(state, { pos }) {
         this.actor.setParry(true);
         this.startTime = performance.now();
         this.duration = 300;
@@ -24,11 +24,10 @@ export default class ParryState extends PlayerState {
         }
     }
     exit() {
-        this.animator?.hitFreeze(300, -.4, 1);
+        this.actor.animator?.hitFreeze(300, -.5, 1);
         this.actor.body.wakeUp();
         this.actor.body.velocity.set(this.direction.x, this.direction.y, this.direction.z);
         this.actor.setParry(false);
         MyEventEmitter.emit('playerParryUpdate', false);
-        this.actor.body.wakeUp();
     }
 }

@@ -104,7 +104,7 @@ export default class Game {
       MyEventEmitter.emit('preUpdate', dt, time);
       this.physicsWorld.step(this.timeStep, dt, 6);
       this.scene.update(dt, time);
-      MyEventEmitter.emit('postUpdate', dt, time);
+      MyEventEmitter.emit('update', dt, time);
 
       this.renderer.render(this.graphicsWorld, this.camera);
     }

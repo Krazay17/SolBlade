@@ -25,6 +25,9 @@ THREE.Mesh.prototype.raycast = acceleratedRaycast;
 export default class GameScene extends SceneBase {
   onEnter() {
     this.name = 'level1';
+    this.tickables = [];
+    this.levelLoaded = false;
+    this.spawnPoints = [];
     this.spawnLevel();
     this.scenePlayers = {};
 
@@ -34,7 +37,7 @@ export default class GameScene extends SceneBase {
     this.mapWalls = [];
     this.enemyActors = [];
 
-    this.player = new Player(this.game, this, LocalData.position, false, this.game.camera);
+    this.player = new Player(this.game, this, LocalData.position || new THREE.Vector3(0, 1, 0), false, this.game.camera);
     Globals.player = this.player;
 
     this.partyFrame = new PartyFrame();
@@ -63,6 +66,9 @@ export default class GameScene extends SceneBase {
     voiceChat.setScene(this);
 
   }
+  addTickable(tickable) {
+    this.tickables.push(tickable);
+  }
 
   getOtherActorMeshes() {
     return this.actorMeshes.filter(a => a !== this.player.meshBody);
@@ -84,6 +90,7 @@ export default class GameScene extends SceneBase {
   }
 
   update(dt, time) {
+    this.tickables.forEach(t => t.update(dt, time));
     if (this.player && this.levelLoaded) {
       this.player.update(dt, time);
 
@@ -152,6 +159,7 @@ export default class GameScene extends SceneBase {
     const player = new Player(this.game, this, data.pos, true, null, id, data);
     this.scenePlayers[id] = player;
     this.enemyActors.push(player);
+    Globals.enemyActors = this.enemyActors;
     MyEventEmitter.emit('playerJoined', player);
     return player;
   }

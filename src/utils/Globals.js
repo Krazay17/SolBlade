@@ -9,4 +9,6 @@ export default {
     camera: null,
     DEBUG: false,
     socket: null,
+    enemyActors: [],
+    mapWalls: [],
 }

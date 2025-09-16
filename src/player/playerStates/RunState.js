@@ -4,10 +4,13 @@ export default class RunState extends PlayerState {
     constructor(actor, manager, options = {}) {
         super(actor, manager, options);
     }
+    enter() {
+        this.actor.movement.grounded = true;
+    }
     update(dt) {
         this.actor.movement.groundMove(dt);
 
-        if (!this.actor.groundChecker.isGrounded()) {
+        if (!this.actor.movement.isGrounded()) {
             this.manager.setState('fall');
             return;
         }
@@ -15,11 +18,11 @@ export default class RunState extends PlayerState {
             this.manager.setState('idle');
             return;
         }
-        if (this.input.keys['Space']) {
-            this.manager.setState('jump');
+        if (this.input.keys['Space']
+            && this.manager.setState('jump')) {
             return;
         }
-        
+
         let strafe = true;
         if (this.input.keys['KeyW']) {
             strafe = false;
@@ -39,14 +42,12 @@ export default class RunState extends PlayerState {
                 this.actor.animator?.setAnimState('strafeRight');
             }
         }
-                // Jump
-        if (this.input.keys['Space'] && this.grounded &&
-            this.jumpCD < performance.now()) {
-            this.jumpCD = performance.now() + 300;
-            this.manager.setState('jump');
+        // Jump
+        if (this.input.keys['Space'] && this.grounded
+            && this.manager.setState('jump')) {
             return;
         }
-        if (!this.actor.groundChecker.isGrounded(.1)) {
+        if (!this.actor.movement.isGrounded(.1)) {
             if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {
                     this.floorTimer = null;

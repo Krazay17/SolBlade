@@ -6,7 +6,6 @@ import MyEventEmitter from '../core/MyEventEmitter';
 import { Pistol, Sword } from './weapons/index';
 import PlayerAnimator from './PlayerAnimator';
 import { tryPlayerDamage, tryUpdatePosition, tryUpdateState, tryApplyCC, netSocket } from '../core/NetManager';
-import GroundChecker from './GroundChecker';
 import StateManager from './playerStates/_StateManager';
 import CameraFX from '../core/CameraFX';
 import PlayerMovement from './PlayerMovement';
@@ -14,6 +13,8 @@ import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
 import Globals from '../utils/Globals';
 import soundPlayer from '../core/SoundPlayer';
+import Inventory from './Inventory';
+import Spells from './Spells';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 1, z = 0 }, isRemote = false, camera, id, netData) {
@@ -44,6 +45,8 @@ export default class Player extends THREE.Object3D {
 
         this.health = netData?.health || LocalData.health || 100;
         this.energy = 100;
+        this.dimmed = 0;
+        this.crownMesh = null;
         this.energyRegen = 25;
         this.dashCost = 30;
         this.bladeDrain = -5; // per second
@@ -67,6 +70,9 @@ export default class Player extends THREE.Object3D {
             this.direction = new CANNON.Vec3();
             this.tempVector = new THREE.Vector3();
 
+            this.inventory = new Inventory(this);
+            this.spells = new Spells(this);
+
             this.weaponL = new Pistol(this, scene);
             this.weaponR = new Sword(this, scene);
 
@@ -77,7 +83,6 @@ export default class Player extends THREE.Object3D {
             this.cameraArm.add(this.camera);
             CameraFX.init(this.camera);
             this.createBody();
-            this.groundChecker = new GroundChecker(this.game.physicsWorld, this.body, this.radius + .1, this.radius - .1);
 
 
             this.movement = new PlayerMovement(this);
@@ -119,6 +124,15 @@ export default class Player extends THREE.Object3D {
         if (this.crownMesh) {
             this.remove(this.crownMesh);
         }
+    }
+
+    getShootData() {
+        const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
+        const bulletDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
+        return {
+            position: bulletPosition,
+            direction: bulletDirection
+        };
     }
 
     setDimmed(duration) {
@@ -191,24 +205,11 @@ export default class Player extends THREE.Object3D {
             this.body.position = this.body.position.vadd(scaledConvertedDirection);
             this.body.velocity.y = 0;
         }
-        if (this.input.keys['Digit1']) {
+        if (this.input.keys['Digit6']) {
             this.stateManager.tryEmote('rumbaDancing');
-            CameraFX.shake(0.02, 125);
         }
-        if (this.input.keys['Digit2']) {
+        if (this.input.keys['Digit7']) {
             this.stateManager.tryEmote('twerk');
-        }
-        if (this.input.keys['Digit3']) {
-            this.stateManager.tryEmote('wave');
-        }
-        if (this.input.keys['Digit4']) {
-            this.stateManager.tryEmote('cheer');
-        }
-
-        // Damage test
-        if (this.input.keys['KeyG']) {
-            this.changeHealth(-10);
-            this.input.keys['KeyG'] = false; // Prevent continuous damage
         }
     }
 
@@ -234,7 +235,7 @@ export default class Player extends THREE.Object3D {
             {
                 friction: 0,
                 restitution: 0,
-                contactEquationRelaxation: 50,
+                contactEquationRelaxation: 100,
                 id: 'playerGroundContact',
             });
         this.game.physicsWorld.addContactMaterial(contactMaterial);
@@ -349,10 +350,15 @@ export default class Player extends THREE.Object3D {
 
         if (!this.isRemote) {
             this.stateManager.setState('parry', { duration: 600, pos });
+        } else {
+            clearTimeout(this.parryTimeoutId);
+            this.parryTimeoutId = setTimeout(() => {
+                this.animator?.hitFreeze(300, -.5, 1);
+            }, 300);
         }
     }
 
-    takeDamage(attacker, dmg = {}, cc = {}) {
+    takeDamage(attacker, dmg = {amount: 0}, cc = {}) {
         let netId;
         this.setHealth(this.health - dmg.amount);
         if (this.isRemote) {
@@ -383,7 +389,7 @@ export default class Player extends THREE.Object3D {
         }
     }
     takeHealing(dealer, heal = {}) {
-        this.setHealth(this.health + heal.amount);
+        this.setHealth(Math.min(100, this.health + heal.amount));
         MyEventEmitter.emit('takeHealing', { dealer, heal });
     }
     applyHealing(health, { dealer, heal }) {
@@ -423,9 +429,6 @@ export default class Player extends THREE.Object3D {
         netSocket.emit('playerRespawnUpdate', { id: this.netId, health: this.health, pos: this.position });
     }
 
-    floorTrace() {
-        return this.groundChecker.isGrounded();
-    }
     getState() {
         return this.stateManager.currentStateName ? this.stateManager.currentStateName : null;
     }
@@ -436,6 +439,9 @@ export default class Player extends THREE.Object3D {
         }
         if (this) {
             this.game.graphicsWorld.remove(this);
+        }
+        if (this.mesh) {
+            this.mesh = null;
         }
     }
     getAnimState() {
@@ -461,6 +467,7 @@ export default class Player extends THREE.Object3D {
         };
     }
     tryUseEnergy(amount) {
+        if (this.getDimmed()) return false;
         if (amount === 0) return true;
         if (this.energy < amount) return false;
         this.energy -= amount;
@@ -475,11 +482,13 @@ export default class Player extends THREE.Object3D {
     }
     tryEnterBlade() {
         if (this.stateManager.currentStateName === 'blade') return;
+        if (this.stateManager.currentStateName === 'bladeJump') return;
         const neutral = this.movement.getInputDirection().clone().isZero();
         if (this.energy < this.dashCost) return false;
         const energyCost = neutral ? 0 : this.dashCost;
-        if (this.stateManager.setState('blade', neutral)) {
-            this.tryUseEnergy(energyCost);
+        if (this.tryUseEnergy(energyCost)
+            && this.stateManager.setState('blade', neutral)) {
+
             this.energyRegen = this.bladeDrain;
             MyEventEmitter.emit('updateEnergy', this.energy);
             return true;

@@ -24,11 +24,11 @@ export default class BladeState extends PlayerState {
             }
         });
     }
-    enter(neutral) {
+    enter(state, neutral) {
         this.lastEnter = performance.now();
         this.floorTimer = null;
 
-        if (!neutral) {
+        if (!neutral && state !== 'bladeJump') {
             this.dashTimer = performance.now() + 300;
             this.actor.movement.dashStart();
             this.actor.animator?.setAnimState('dash');
@@ -38,16 +38,6 @@ export default class BladeState extends PlayerState {
             return;
         }
         this.actor.animator?.setAnimState('crouch', true);
-        // const boost = this.lastEnter ? Math.min((performance.now() - this.lastExit) / this.cdSpeed, this.maxEnterBoost) : this.maxEnterBoost;
-        // this.actor.movement.bladeStart(Math.max(boost, 1));
-
-        //netSocket.emit('playerBlockUpdate', true);
-
-        // if (this.actor.groundChecker.isGrounded(.6)) {
-        //     this.enterBoost = this.lastEnter ? Math.max(1, Math.min((performance.now() - this.lastEnter) / 1000, this.maxEnterBoost)) : this.maxEnterBoost;
-        //     this.lastEnter = performance.now();
-        //     this.body.velocity.mult(this.enterBoost, this.body.velocity);
-        // }
     }
     update(dt) {
         if (this.dashTimer > performance.now()) {
@@ -55,7 +45,7 @@ export default class BladeState extends PlayerState {
             return;
         }
         this.actor.movement.bladeMove(dt);
-        
+
         if (this.jumpCD < performance.now()) {
             this.actor.animator?.setAnimState('crouch', true);
         }
@@ -66,15 +56,11 @@ export default class BladeState extends PlayerState {
         }
 
         // Jump
-        if (this.input.keys['Space'] && this.grounded &&
-            this.jumpCD < performance.now()) {
-            //if (!this.actor.tryUseEnergy(10)) return;
-            this.jumpCD = performance.now() + 300;
-            this.actor.movement.jumpStart();
-            this.actor.animator?.setAnimState('jump');
+        if (this.input.keys['Space'] && this.grounded
+            && this.manager.setState('bladeJump')) {
             return;
         }
-        if (!this.actor.groundChecker.isGrounded(.1)) {
+        if (!this.actor.movement.isGrounded(.1)) {
             if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {
                     this.floorTimer = null;
@@ -87,15 +73,16 @@ export default class BladeState extends PlayerState {
             if (!this.grounded) {
                 this.actor.movement.bladeStart();
             }
-
             this.grounded = true;
         }
     }
-    exit() {
+    exit(state) {
         clearTimeout(this.floorTimer);
         this.floorTimer = null;
+        this.grounded = false;
         this.lastExit = performance.now();
 
+        if (state === 'bladeJump') return;
         this.actor.energyRegen = 25;
 
         //netSocket.emit('playerBlockUpdate', false);

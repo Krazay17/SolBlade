@@ -4,6 +4,7 @@ import PlayerState from "./_PlayerState";
 export default class IdleState extends PlayerState {
     enter() {
         this.actor.animator?.setAnimState('idle');
+        this.actor.movement.grounded = true;
     }
     update(dt) {
         if (!this.actor.movement.idleMove(dt)) {
@@ -13,16 +14,15 @@ export default class IdleState extends PlayerState {
         }
 
         if (!this.actor.movement.getInputDirection().isZero()) {
-            this.manager.setState('run', this.actor.floorTrace());
+            this.manager.setState('run', this.actor.movement.floorTrace());
             return;
         }
 
-        if (this.input.keys['Space']) {
-            this.manager.setState('jump');
+        if (this.input.keys['Space'] && this.manager.setState('jump')) {
             return;
         }
 
-        if (!this.actor.groundChecker.isGrounded()) {
+        if (!this.actor.movement.isGrounded()) {
             this.manager.setState('fall');
             return;
         }
@@ -34,12 +34,12 @@ export default class IdleState extends PlayerState {
         this.body.wakeUp();
     }
     canEnter() {
-        if (!this.actor.groundChecker.isGrounded()) {
+        if (!this.actor.movement.isGrounded()) {
             this.manager.setState('fall');
             return false;
         }
         if (!this.actor.movement.getInputDirection().isZero()) {
-            this.manager.setState('run', this.actor.floorTrace());
+            this.manager.setState('run', this.actor.movement.floorTrace());
             return false;
         }
         return true;

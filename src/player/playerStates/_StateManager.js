@@ -15,6 +15,7 @@ export default class StateManager {
             blade: new States.BladeState(actor, this),
             dead: new States.DeadState(actor, this),
             parry: new States.ParryState(actor, this),
+            bladeJump: new States.BladeJumpState(actor, this),
             // wallCling: new States.WallClingState(actor, this),
             // wallSlide: new States.WallSlideState(actor, this),
             // wallJump: new States.WallJumpState(actor, this),
@@ -22,6 +23,7 @@ export default class StateManager {
         this.activeState = this.states.idle;
         this.actionState = null;
         this.currentStateName = 'idle';
+        this.currentActionStateName = null;
         this.lastState = null;
     }
 
@@ -31,7 +33,7 @@ export default class StateManager {
     }
 
     setState(state, enterParams) {
-        if ((this.currentStateName === state && !this.activeState.reEnter) && this.activeState) return false;
+        if ((this.currentStateName === state && !this.activeState?.reEnter) && this.activeState) return false;
         if (!this.states[state]?.canEnter(state, enterParams)) return false;
         if (!this.activeState?.canExit(state, enterParams) && state !== 'dead') return false;
 
@@ -40,15 +42,22 @@ export default class StateManager {
             this.activeState?.exit(newState);
             this.lastState = this.currentStateName;
             this.activeState = this.states[newState];
-            this.activeState?.enter(enterParams);
+            //console.log(`State change: ${this.lastState} -> ${newState}`);
+            this.activeState?.enter(this.lastState, enterParams);
             this.currentStateName = newState;
             return true;
         }
     }
 
     setActionState(state, enterParams) {
-        if (!this.states[state]?.canEnter(enterParams)) return false;
-        if (!this.actionState?.canExit(enterParams)) return false;
+        if(!state && this.actionState?.canExit()) {
+            this.actionState?.exit();
+            this.actionState = null;
+            return true;
+        }
+        if (this.actionState && (this.currentActionStateName === state && !this.actionState?.reEnter)) return false;
+        if (!this.states[state]?.canEnter(state, enterParams)) return false;
+        if (this.actionState && !this.actionState?.canExit(state, enterParams) && this.activeState !== 'dead') return false;
 
         if (this.states[state]) {
             this.actionState?.exit();

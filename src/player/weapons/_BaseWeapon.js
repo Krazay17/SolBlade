@@ -71,9 +71,9 @@ export default class BaseWeapon {
                 }
             });
         }
-        MyEventEmitter.on('postUpdate', loop);
+        MyEventEmitter.on('update', loop);
         setTimeout(() => {
-            MyEventEmitter.off('postUpdate', loop);
+            MyEventEmitter.off('update', loop);
         }, duration);
     }
 
@@ -119,28 +119,3 @@ export default class BaseWeapon {
         }
     }
 }
-
-// const loop = () => {
-//     const startPos = this.actor.position.clone();
-//     const camDir = this.tempVector2.copy(this.actor.getCameraDirection()).normalize();
-//     for (const mesh of actors) {
-//         const owner = mesh.userData.owner;
-//         const meshPos = owner.position.clone();
-//         const meshDist = meshPos.distanceTo(startPos);
-//         const meshDir = meshPos.clone().sub(startPos).normalize();
-
-//         if (owner === this.actor) continue;
-//         if (meshDist > this.range) continue;
-//         if (meshDir.dot(camDir) < 0.5) continue;
-//         if (hitActors.has(owner)) continue;
-
-//         hitActors.add(owner);
-//         owner.takeDamage?.(this.damage);
-//         owner.takeCC?.('knockback', camDir);
-//         soundPlayer.playSound('swordHit');
-//     }
-// }
-// MyEventEmitter.on('postUpdate', loop);
-// setTimeout(() => {
-//     MyEventEmitter.off('postUpdate', loop);
-// }, this.traceDuration);

@@ -47,3 +47,6 @@ window.addEventListener('keypress', (e) => {
         e.stopPropagation();
     }
 });
+window.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});

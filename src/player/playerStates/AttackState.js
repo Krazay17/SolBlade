@@ -5,7 +5,7 @@ export default class AttackState extends PlayerState {
         super(actor, manager, options);
         this.weapon = null;
     }
-    enter({ weapon, anim, damageDelay = 0, damageDuration = 300, duration = 610, doesParry = false }) {
+    enter(state, { weapon, anim, damageDelay = 0, damageDuration = 300, duration = 610, doesParry = false }) {
         this.weapon = weapon;
         this.exitTimer = performance.now() + duration;
         this.actor.animator?.setAnimState(anim, true);

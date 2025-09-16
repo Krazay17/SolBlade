@@ -70,6 +70,9 @@ export default class PlayerAnimator {
       case "gunshoot":
         animName = "GunShoot";
         break;
+      case "jumpSpin":
+        animName = "JumpSpin";
+        break;
       default:
         console.warn(`No animation state found for: ${state}`);
         return null;
@@ -90,7 +93,7 @@ export default class PlayerAnimator {
     }
     if (this.currentAction) {
       this.currentAction.timeScale = 1;
-      this.currentAction.crossFadeTo(action, 0.2);
+      this.currentAction.crossFadeTo(action, 0.125);
     }
     action.time = seek;
     action.reset().fadeIn(0.1).play();
