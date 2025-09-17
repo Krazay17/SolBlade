@@ -50,3 +50,9 @@ window.addEventListener('keypress', (e) => {
 window.addEventListener('contextmenu', (e) => {
     e.preventDefault();
 });
+document.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+});
+document.addEventListener('dragover', (e) => {
+    e.preventDefault();
+});

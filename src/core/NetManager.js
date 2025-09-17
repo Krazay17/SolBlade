@@ -9,6 +9,12 @@ const serverURL = location.hostname === "localhost" ?
     : "solbladeserver-production.up.railway.app";
 
 const socket = io(serverURL, {
+    autoConnect: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    transports: ["websocket"],
+    withCredentials: false,
+
 });
 export const netSocket = socket;
 

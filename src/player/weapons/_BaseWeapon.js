@@ -4,23 +4,42 @@ import MeshTrace from '../../core/MeshTrace';
 import Globals from '../../utils/Globals';
 
 export default class BaseWeapon {
-    constructor(actor, name = 'Weapon', damage = 1, range = 10, cooldown = 1) {
+    constructor(actor, name = 'Weapon', damage = 1, range = 10, cooldown = 1000, isSpell = false) {
         this.actor = actor;
         this.name = name;
         this.damage = damage;
         this.range = range;
-        this.cooldown = cooldown; // in seconds
+        this.cooldown = cooldown;
         this.lastUsed = 0; // timestamp of last use
         this.position = new THREE.Vector3();
         this.direction = new THREE.Vector3();
         this.tempVector = new THREE.Vector3();
         this.tempVector2 = new THREE.Vector3();
         this.hitActors = new Set();
+
+        this.scene = null; // To be set by subclasses if needed
+        this.isSpell = isSpell;
+
+        if(isSpell) {
+            this.cooldown *= 2; // Spells have double cooldown by default
+        }
+    }
+
+    canSpellUse(currentTime) {
+        return (currentTime - this.lastUsed) >= this.cooldown;
+    }
+
+    spellUse(currentTime) {
+        if (this.canSpellUse(currentTime)) {
+            this.lastUsed = currentTime;
+            return true; // Spell used successfully
+        }
+        return false; // Spell is on cooldown
     }
 
     canUse(currentTime) {
         const otherWeapon = this.actor.weaponR === this ? this.actor.weaponL : this.actor.weaponR;
-        return (currentTime - this.lastUsed) >= this.cooldown * 1000;
+        return (currentTime - this.lastUsed) >= this.cooldown;
     }
 
     use(currentTime) {

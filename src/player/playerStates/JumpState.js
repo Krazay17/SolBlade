@@ -4,8 +4,8 @@ export default class JumpState extends PlayerState {
     enter() {
         const anim = this.grounded ? 'jump' : 'jumpSpin';
         this.actor.animator?.setAnimState(anim, true);
-        this.jumpTimer = performance.now() + 300;
-        this.jumpCD = performance.now() + 500;
+        this.jumpTimer = performance.now() + 250;
+        this.jumpCD = performance.now() + 400;
 
         this.actor.movement.jumpStart(.666);
         this.actor.movement.grounded = false;

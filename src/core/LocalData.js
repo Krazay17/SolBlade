@@ -14,6 +14,7 @@ export default {
     voicesVolume: 1,
     movementValues: null,
     flags: {},
+    spells: {},
 
     save() {
         const data = {
@@ -30,6 +31,7 @@ export default {
             sfxVolume: this.sfxVolume,
             movementValues: this.movementValues,
             flags: this.flags,
+            spells: this.spells,
         }
         localStorage.setItem('SolBladeSave', JSON.stringify(data));
     },
@@ -50,6 +52,10 @@ export default {
                     masterVolume: parsed.masterVolume,
                     musicVolume: parsed.musicVolume,
                     sfxVolume: parsed.sfxVolume,
+                    micVolume: parsed.micVolume,
+                    voicesVolume: parsed.voicesVolume,
+                    flags: parsed.flags,
+                    spells: parsed.spells,
                 });
             return;
         }
@@ -65,6 +71,7 @@ export default {
         this.voicesVolume = parsed.voicesVolume ?? this.voicesVolume;
         this.movementValues = parsed.movementValues ?? null;
         this.flags = parsed.flags ?? {};
+        this.spells = parsed.spells ?? {};
         console.log('Loaded local data:', this);
 
     },
@@ -82,5 +89,8 @@ export default {
         this.voicesVolume = keep.voicesVolume ?? this.voicesVolume;
         this.movementValues = keep.movementValues ?? null;
         this.flags = keep.flags ?? {};
+        this.spells = keep.spells ?? {};
+        console.log('Reset local data:', this);
+        this.save();
     }
 }

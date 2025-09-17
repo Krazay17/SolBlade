@@ -6,8 +6,8 @@ import Globals from '../../utils/Globals.js';
 import MyEventEmitter from '../../core/MyEventEmitter.js';
 
 export default class Pistol extends BaseWeapon {
-    constructor(actor, scene) {
-        super(actor, 'Pistol', 20, 50, .7); // name, damage, range, cooldown
+    constructor(actor, scene, isSpell = false) {
+        super(actor, 'Pistol', 20, 50, 700, isSpell); // name, damage, range, cooldown
         this.scene = scene;
         //soundPlayer.loadSfx('gunshoot', '/assets/GunShoot.wav');
         soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');
@@ -85,5 +85,7 @@ export default class Pistol extends BaseWeapon {
         }
         return false;
     }
-
+    spellUse(currentTime, pos, dir) {
+        console.log('spellUse');
+    }
 }

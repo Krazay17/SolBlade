@@ -30,10 +30,10 @@ export default class Input {
       'Space': 'jump',
       'ShiftLeft': 'blade',
       'KeyC': 'openInventory',
-      'Digit1': 'castSpell1',
-      'Digit2': 'castSpell2',
-      'Digit3': 'castSpell3',
-      'Digit4': 'castSpell4',
+      'Digit1': 'spell1',
+      'Digit2': 'spell2',
+      'Digit3': 'spell3',
+      'Digit4': 'spell4',
     };
 
     this.actionStates = {
@@ -43,7 +43,11 @@ export default class Input {
       'moveRight': false,
       'dash': false,
       'jump': false,
-      'blade': false
+      'blade': false,
+      'spell1': false,
+      'spell2': false,
+      'spell3': false,
+      'spell4': false,
     };
 
     document.addEventListener('pointerlockchange', () => {

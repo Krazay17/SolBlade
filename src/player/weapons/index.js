@@ -1,3 +1,5 @@
 import Pistol from "./Pistol";
 import Sword from "./Sword";
-export { Pistol, Sword };
+import Fireball from "./Fireball";
+//import LaserGun from "./LaserGun";
+export { Pistol, Sword, Fireball };

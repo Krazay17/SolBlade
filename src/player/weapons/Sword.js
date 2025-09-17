@@ -6,8 +6,8 @@ import MyEventEmitter from "../../core/MyEventEmitter";
 import Globals from "../../utils/Globals";
 
 export default class Sword extends BaseWeapon {
-    constructor(actor, scene) {
-        super(actor, 'Sword', 35, 2.8, 1.2); // name, damage, range, cooldown
+    constructor(actor, scene, isSpell = false) {
+        super(actor, 'Sword', 35, 2.8, 1200, isSpell); // name, damage, range, cooldown
         this.scene = scene;
         this.traceDuration = 500; // duration of the sword trace in milliseconds
         soundPlayer.loadPosAudio('swordUse', '/assets/HeavySword.mp3');
