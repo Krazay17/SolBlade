@@ -137,10 +137,10 @@ export default class Player extends THREE.Object3D {
                 spell = new Weapon.Fireball(this, this.scene, true);
                 break;
             case 'Pistol':
-                spell = new Weapon.Pistol(this, this.scene);
+                spell = new Weapon.Pistol(this, this.scene, true);
                 break;
             case 'Sword':
-                spell = new Weapon.Sword(this, this.scene);
+                spell = new Weapon.Sword(this, this.scene, true);
                 break;
             default:
                 spell = null;
@@ -533,8 +533,8 @@ export default class Player extends THREE.Object3D {
         const neutral = this.movement.getInputDirection().clone().isZero();
         if (this.energy < this.dashCost) return false;
         const energyCost = neutral ? 0 : this.dashCost;
-        if (this.tryUseEnergy(energyCost)
-            && this.stateManager.setState('blade', neutral)) {
+        if (this.stateManager.setState('blade', neutral)
+            && this.tryUseEnergy(energyCost)) {
 
             this.energyRegen = this.bladeDrain;
             MyEventEmitter.emit('updateEnergy', this.energy);

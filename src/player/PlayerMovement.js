@@ -127,6 +127,11 @@ export default class PlayerMovement {
         return true;
     }
 
+    dashForward() {
+        const forward = this.actor.getShootData().direction;
+        this.body.velocity.copy(forward.multiplyScalar(this.values.dash.speed));
+    }
+
     attackMove(dt) {
         this.applyFriction(dt, this.values.attack.friction);
         this.body.velocity.y *= .9975;
@@ -180,7 +185,7 @@ export default class PlayerMovement {
         this.applySlopeFriction(dt, this.values.blade.friction);
 
         let wishdir = this.getInputDirection();
-        let wishspeed = this.values.blade.speed + this.momentumBooster.increaseBoost(dt / 2);
+        let wishspeed = this.values.blade.speed + this.momentumBooster.increaseBoost(dt / 4);
         if (wishdir.almostZero()) return;
         // Project wishdir onto slope plane
         wishdir = projectOnPlane(wishdir, this.groundChecker.floorNormal());

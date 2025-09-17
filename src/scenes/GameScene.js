@@ -15,8 +15,9 @@ import PartyFrame from '../ui/PartyFrame.js';
 import GameMode from '../core/GameMode.js';
 import Pickup from '../actors/Pickup.js';
 import voiceChat from '../core/VoiceChat.js';
-import { MeshBVH, acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
+import { MeshBVH, MeshBVHHelper, acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import PFireball from '../actors/PFireball.js';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -28,14 +29,16 @@ export default class GameScene extends SceneBase {
     this.tickables = [];
     this.levelLoaded = false;
     this.spawnPoints = [];
-    this.spawnLevel();
     this.scenePlayers = {};
+    this.projectiles = [];
 
     this.meshManager = new MeshManager(this.game);
     this.actorMeshes = [];
     this.pickupActors = [];
     this.mapWalls = [];
+    this.mergedLevel = null;
     this.enemyActors = [];
+    this.spawnLevel();
 
     this.player = new Player(this.game, this, LocalData.position || new THREE.Vector3(0, 1, 0), false, this.game.camera);
     Globals.player = this.player;
@@ -70,6 +73,40 @@ export default class GameScene extends SceneBase {
     this.tickables.push(tickable);
   }
 
+  removeTickable(tickable) {
+    const index = this.tickables.indexOf(tickable);
+    if (index !== -1) {
+      this.tickables.splice(index, 1);
+    }
+  }
+
+  spawnProjectile(player, data) {
+    const { type, netId, pos, dir, speed, dur } = data
+    console.log('spawnProjectile')
+    let projectile;
+    switch (type) {
+      case 'Fireball':
+        projectile = new PFireball({ pos, dir, speed, dur }, { isRemote: true, netId });
+        break;
+    }
+    this.projectiles.push(projectile);
+    return projectile;
+  }
+
+  moveProjectile(data) {
+    const { netId, pos } = data;
+    const projectile = this.projectiles.find(p => p.netId === netId);
+    if (!projectile) return;
+    projectile.setTargetPos(pos);
+  }
+
+  removeProjectile(data) {
+    const id = data;
+    const projectile = this.projectiles.find(p => p.netId === id);
+    if (!projectile) return;
+    projectile.destroy();
+  }
+
   getOtherActorMeshes() {
     return this.actorMeshes.filter(a => a !== this.player.meshBody);
   }
@@ -79,6 +116,10 @@ export default class GameScene extends SceneBase {
 
   getMapWalls() {
     return this.mapWalls;
+  }
+
+  getMergedLevel() {
+    return this.mergedLevel || null;
   }
 
   getScenePlayersPos() {
@@ -190,6 +231,7 @@ export default class GameScene extends SceneBase {
   spawnLevel() {
     this.game.glbLoader.load('/assets/Level1.glb', (gltf) => {
       const model = gltf.scene;
+      const allGeoms = [];
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
       this.game.graphicsWorld.add(model);
@@ -201,8 +243,18 @@ export default class GameScene extends SceneBase {
           return;
         }
         if (child.isMesh) {
-          child.geometry.computeBoundsTree();
+          const geomClone = child.geometry.clone(); // clone for BVH
+          geomClone.computeBoundsTree();
 
+          // remove vertex colors only from the clone
+          Object.keys(geomClone.attributes).forEach(a => {
+            if (a.startsWith('color')) {
+              geomClone.deleteAttribute(a);
+            }
+          });
+
+          allGeoms.push(geomClone);
+          
           child.castShadow = true;
           child.receiveShadow = true;
           this.mapWalls.push(child);
@@ -227,6 +279,19 @@ export default class GameScene extends SceneBase {
 
         }
       });
+      for (const geom of allGeoms) {
+        Object.keys(geom.attributes).forEach(a => {
+          if (a.startsWith('color')) {
+            geom.deleteAttribute(a);
+          }
+        })
+      }
+      const mergedGeom = mergeGeometries(allGeoms);
+      mergedGeom.computeBoundsTree();
+      this.mergedLevel = new THREE.Mesh(mergedGeom)
+      // const bvhHelper = new MeshBVHHelper(this.mergedLevel);
+      // Globals.graphicsWorld.add(bvhHelper);
+
       this.levelLoaded = true;
       MyEventEmitter.emit('levelLoaded');
     });

@@ -73,6 +73,12 @@ export default class PlayerAnimator {
       case "jumpSpin":
         animName = "JumpSpin";
         break;
+      case "fireball":
+        animName = "Fireball";
+        break;
+      case "spinSlash":
+        animName = "SpinSlash";
+        break;
       default:
         console.warn(`No animation state found for: ${state}`);
         return null;

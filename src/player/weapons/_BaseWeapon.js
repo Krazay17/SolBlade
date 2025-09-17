@@ -10,7 +10,6 @@ export default class BaseWeapon {
         this.damage = damage;
         this.range = range;
         this.cooldown = cooldown;
-        this.lastUsed = 0; // timestamp of last use
         this.position = new THREE.Vector3();
         this.direction = new THREE.Vector3();
         this.tempVector = new THREE.Vector3();
@@ -21,8 +20,9 @@ export default class BaseWeapon {
         this.isSpell = isSpell;
 
         if(isSpell) {
-            this.cooldown *= 2; // Spells have double cooldown by default
+            this.cooldown *= 8;
         }
+        this.lastUsed = -this.cooldown; // timestamp of last use
     }
 
     canSpellUse(currentTime) {

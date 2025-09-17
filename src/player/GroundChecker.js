@@ -3,7 +3,7 @@ import * as THREE from "three";
 import Globals from "../utils/Globals";
 
 export default class GroundChecker {
-    constructor(actor, rayLength = .6, spread = 0.3) {
+    constructor(actor, rayLength = .6, spread = 0.5) {
         this.actor = actor;
         this.body = actor.body;
         this.world = Globals.physicsWorld;

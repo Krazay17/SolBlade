@@ -192,8 +192,30 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[id].applyHealing(health, data);
         }
     })
+    socket.on('projectileCreated', ({id, data}) => {
+        const player = netPlayers[id];
+        if(!player) return;
+        scene.spawnProjectile(player, data);
+    })
+    socket.on('projectileMoved', ({id, data}) => {
+        const player = netPlayers[id];
+        if(!player) return;
+        scene.moveProjectile(data);
+    });
+    socket.on('projectileDestroyed', data => {
+        scene.removeProjectile(data);
+    })
 }
 
+MyEventEmitter.on('projectileDestroyed', (data) => {
+    socket.emit('projectileDestroyed', data);
+});
+MyEventEmitter.on('projectileMoved', (data) => {
+    socket.emit('projectileMoved', data);
+})
+MyEventEmitter.on('projectileCreated', (data) => {
+    socket.emit('projectileCreated', data);
+});
 MyEventEmitter.on('takeHealing', (data) => {
     socket.emit('takeHealing', data);
 })

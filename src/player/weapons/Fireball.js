@@ -1,32 +1,36 @@
 import * as THREE from 'three';
 import BaseWeapon from './_BaseWeapon';
-import Projectile from '../../actors/Projectile';
 import Globals from '../../utils/Globals';
+import PFireball from '../../actors/PFireball';
+import MyEventEmitter from '../../core/MyEventEmitter';
 
 export default class Fireball extends BaseWeapon {
     constructor(actor, scene, isSpell = false) {
         super(actor, 'Fireball', 30, 100, 1500, isSpell); // name, damage, range, cooldown
         this.scene = scene;
         this.projectiles = [];
-        this.gravity = new THREE.Vector3(0, -9.81, 0);
         this.tempVector = new THREE.Vector3();
         this.tempVector2 = new THREE.Vector3();
     }
 
     spellUse(currentTime) {
-        if (this.canSpellUse(currentTime)) {
+        if (this.canSpellUse(currentTime)
+            && this.actor.stateManager.setState('attack', { damageDelay: 800, duration: 1200, anim: 'fireball', callback: () => this.shootFireball() })) {
             this.lastUsed = currentTime;
-            const projectile = new Projectile(
-                this.actor.getShootData().position,
-                this.actor.getShootData().direction,
-                this.damage,
-            )
-            Globals.graphicsWorld.add(projectile);
-            this.projectiles.push(projectile);
-
-            return true; // Weapon used successfully
+            return true;
+        } else {
+            return false;
         }
-        return false; // Weapon is on cooldown
+    }
+
+    shootFireball() {
+        const projectile = new PFireball({
+            pos: this.actor.getShootData().position,
+            dir: this.actor.getShootData().direction,
+            speed: 30,
+            dur: 20000,
+        });
+        this.projectiles.push(projectile);
     }
 
     update() { }

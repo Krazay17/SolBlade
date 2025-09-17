@@ -21,34 +21,12 @@ export default class Inventory {
 
         this.createInventoryUI();
         this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
-        this.addItem('Sword', 'assets/Sword.png');
         this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
-        this.addItem('Sword', 'assets/Sword.png');
         this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
-        this.addItem('Sword', 'assets/Sword.png');
         this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
         this.addItem('Sword', 'assets/Sword.png');
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
         this.addItem('Sword', 'assets/Sword.png');
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
         this.addItem('Sword', 'assets/Sword.png');
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
-        this.addItem('Sword', 'assets/Sword.png');
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
-        this.addItem('Sword', 'assets/Sword.png');
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
-        this.addItem('Sword', 'assets/Sword.png');
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Pistol', 'assets/Pistol.png');
         this.addItem('Sword', 'assets/Sword.png');
         this.bindEvents();
     }

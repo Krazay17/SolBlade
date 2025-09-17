@@ -34,6 +34,26 @@ export default class Sword extends BaseWeapon {
             Globals.graphicsWorld.add(this.debugMesh);
         }
     }
+    spellUse(currentTime) {
+        if (this.canSpellUse(currentTime)
+            && this.actor.stateManager.setState('attack', {
+                duration: 1200,
+                anim: 'spinSlash',
+                damageDelay: 400,
+                damageDuration: 450,
+                weapon: this,
+                doesParry: true
+            })) {
+            this.lastUsed = currentTime;
+            this.enemyActors = this.scene.getOtherActorMeshes();
+            this.hitActors.clear();
+            this.useFx(this.actor.position);
+            MyEventEmitter.emit('fx', { type: 'swordUse', pos: this.actor.position });
+            return true;
+        } else {
+            return false;
+        }
+    }
     useFx(pos) {
         soundPlayer.playPosAudio('swordUse', pos);
     }
@@ -71,5 +91,9 @@ export default class Sword extends BaseWeapon {
             //this.hitFx(target.position, scaledCamDir);
             MyEventEmitter.emit('fx', { type: 'swordHit', pos: target.position });
         });
+        if (this.isSpell) {
+            this.actor.movement.dashForward();
+            console.log("DASHED!");
+        }
     }
 }
