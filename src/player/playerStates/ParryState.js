@@ -30,4 +30,10 @@ export default class ParryState extends PlayerState {
         this.actor.setParry(false);
         MyEventEmitter.emit('playerParryUpdate', false);
     }
+
+    canExit(state) {
+        return performance.now() > this.startTime + this.duration
+            || state === 'dead'
+            || state === 'stun';
+    }
 }
