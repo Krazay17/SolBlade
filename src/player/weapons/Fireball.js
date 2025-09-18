@@ -15,7 +15,7 @@ export default class Fireball extends BaseWeapon {
 
     spellUse(currentTime) {
         if (this.canSpellUse(currentTime)
-            && this.actor.stateManager.setState('attack', { damageDelay: 550, duration: 800, anim: 'fireball', callback: () => this.shootFireball() })) {
+            && this.actor.stateManager.setState('attack', { damageDelay: 600, duration: 1000, anim: 'fireball', callback: () => this.shootFireball() })) {
             this.lastUsed = currentTime;
             return true;
         } else {
@@ -31,7 +31,7 @@ export default class Fireball extends BaseWeapon {
         const projectile = new PFireball({
             pos: pos,
             dir: dir,
-            speed: 30,
+            speed: 11,
             dur: 20000,
             scale: { x: 2, y: 2, z: 2 },
             radius: 2
