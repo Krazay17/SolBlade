@@ -7,7 +7,7 @@ import MyEventEmitter from '../../core/MyEventEmitter.js';
 
 export default class Pistol extends BaseWeapon {
     constructor(actor, scene, isSpell = false) {
-        super(actor, 'Pistol', 20, 50, 1000, isSpell); // name, damage, range, cooldown
+        super(actor, 'Pistol', 20, 50, 800, isSpell); // name, damage, range, cooldown
         this.scene = scene;
         //soundPlayer.loadSfx('gunshoot', '/assets/GunShoot.wav');
         soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');

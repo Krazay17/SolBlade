@@ -39,7 +39,7 @@ export default class Sword extends BaseWeapon {
             && this.actor.stateManager.setState('attack', {
                 duration: 1200,
                 anim: 'spinSlash',
-                damageDelay: 400,
+                damageDelay: 415,
                 damageDuration: 450,
                 weapon: this,
                 doesParry: true

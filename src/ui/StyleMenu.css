@@ -10,7 +10,6 @@
     z-index: 1000;
     overflow: hidden;
     user-select: none;
-    pointer-events: none;
 }
 
 .menu-element {
