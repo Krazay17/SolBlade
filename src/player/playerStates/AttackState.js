@@ -5,7 +5,17 @@ export default class AttackState extends PlayerState {
         super(actor, manager, options);
         this.weapon = null;
     }
-    enter(state, { weapon, anim, damageDelay = 0, damageDuration = 300, duration = 610, doesParry = false, callback = null, friction = null } = {}) {
+    enter(state, {
+        weapon,
+        anim,
+        damageDelay = 0,
+        damageDuration = 300,
+        duration = 610,
+        doesParry = false,
+        callback = null,
+        friction = null,
+        speed = null,
+    } = {}) {
         this.weapon = weapon;
         this.exitTimer = performance.now() + duration;
         this.actor.animator?.setAnimState(anim, true);
@@ -14,9 +24,10 @@ export default class AttackState extends PlayerState {
         this.doesParry = doesParry;
         this.callback = callback;
         this.frictionOverride = friction;
+        this.speedOverride = speed;
     }
     update(dt) {
-        this.actor.movement.attackMove(dt, this.frictionOverride);
+        this.actor.movement.attackMove(dt, this.frictionOverride, this.speedOverride);
 
         if ((performance.now() > this.damageDelay) && (performance.now() < this.damageDelay + this.damageDuration)) {
             if (this.weapon) this.weapon.update();
