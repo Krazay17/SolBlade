@@ -70,6 +70,7 @@ export default class Sword extends BaseWeapon {
                 damageDuration: 160,
                 duration: 600,
                 doesParry: true,
+                friction: 0,
             })) {
             this.lastUsed = currentTime;
             this.enemyActors = this.scene.actorMeshes;

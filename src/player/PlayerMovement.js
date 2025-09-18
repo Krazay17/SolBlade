@@ -132,8 +132,8 @@ export default class PlayerMovement {
         this.body.velocity.copy(forward.multiplyScalar(13));
     }
 
-    attackMove(dt) {
-        this.applyFriction(dt, this.values.attack.friction);
+    attackMove(dt, friction = null) {
+        this.applyFriction(dt, friction ?? this.values.attack.friction);
         this.body.velocity.y *= .9975;
         const wishdir = this.getInputDirection();
         this.accelerate(wishdir, this.values.attack.speed, this.values.attack.accel, dt, this.values.attack.tap);
