@@ -31,7 +31,7 @@ export default class Fireball extends BaseWeapon {
         const projectile = new PFireball({
             pos: pos,
             dir: dir,
-            speed: 11,
+            speed: 13,
             dur: 20000,
             scale: { x: 2, y: 2, z: 2 },
             radius: 2

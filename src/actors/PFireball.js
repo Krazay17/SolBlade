@@ -10,8 +10,8 @@ export default class PFireball extends Projectile {
         super(params, net);
 
         this.createMesh();
-        this.setGravity(6);
-        this.setDamage(40);
+        this.setGravity(4.5);
+        this.setDamage(50);
 
         if (!this.isRemote) {
             this.netInit('Fireball');
