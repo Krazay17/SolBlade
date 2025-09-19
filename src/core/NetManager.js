@@ -191,12 +191,12 @@ function bindSocketEvents(myPlayerData) {
         if (netPlayers[id]) {
             netPlayers[id].applyHealing(health, data);
         }
-    })
+    });
     socket.on('projectileCreated', ({id, data}) => {
         const player = netPlayers[id];
         if(!player) return;
         scene.spawnProjectile(player, data);
-    })
+    });
     socket.on('projectileMoved', ({id, data}) => {
         const player = netPlayers[id];
         if(!player) return;
@@ -204,9 +204,12 @@ function bindSocketEvents(myPlayerData) {
     });
     socket.on('projectileDestroyed', data => {
         scene.removeProjectile(data);
-    })
+    });
 }
 
+MyEventEmitter.on('playerDropItem', (data) => {
+    socket.emit('playerDropItem', data);
+})
 MyEventEmitter.on('projectileDestroyed', (data) => {
     socket.emit('projectileDestroyed', data);
 });

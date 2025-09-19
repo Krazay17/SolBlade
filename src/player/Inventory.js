@@ -1,3 +1,4 @@
+import Item from "../core/Item";
 import MyEventEmitter from "../core/MyEventEmitter";
 
 export default class Inventory {
@@ -21,6 +22,35 @@ export default class Inventory {
 
         this.createInventoryUI();
         this.bindEvents();
+
+        this.addItem(new Item({
+            name: 'Fireball',
+            imgUrl: 'assets/Fireball.png',
+            weight: 1,
+            min: 1,
+            max: 10,
+        }));
+        this.addItem(new Item({
+            name: 'Fireball',
+            imgUrl: 'assets/Fireball.png',
+            weight: 1,
+            min: 1,
+            max: 10,
+        }));
+        this.addItem(new Item({
+            name: 'Fireball',
+            imgUrl: 'assets/Fireball.png',
+            weight: 1,
+            min: 1,
+            max: 10,
+        }));
+        this.addItem(new Item({
+            name: 'Fireball',
+            imgUrl: 'assets/Fireball.png',
+            weight: 1,
+            min: 1,
+            max: 10,
+        }));
     }
     bindEvents() {
         MyEventEmitter.on('openInventory', () => {
@@ -29,7 +59,6 @@ export default class Inventory {
         MyEventEmitter.on('spellUsed', ({ slot, cd }) => {
             const cdEl = this[`spellSlot${slot}CD`]; // e.g. this.spellSlot1CD
             if (!cdEl) return;
-            console.log(`Starting cooldown animation for slot ${slot} with duration ${cd}ms`);
 
             // reset any running animation
             cdEl.style.animation = 'none';
@@ -39,7 +68,6 @@ export default class Inventory {
 
             // start the cooldown animation with the correct duration
             cdEl.style.animation = `cooldownAnim ${cd}ms linear forwards`;
-            console.log(cdEl.style.animation);
         });
     }
 
@@ -170,11 +198,27 @@ export default class Inventory {
             // store reference globally
             e.dataTransfer.setData("text/plain", "");
             el.classList.add("dragging");
+
+            el.foundDrop = false;
         });
 
 
         container.addEventListener("dragend", (e) => {
-            e.target.classList.remove("dragging");
+            const dragged = e.target;
+            const originalParent = dragged.parentElement;
+            dragged.classList.remove("dragging");
+            if (!dragged.foundDrop) {
+                const { pos, dir } = this.actor.getShootData();
+                const frontPos = pos.add(dir.multiplyScalar(2));
+                MyEventEmitter.emit('playerDropItem', { item: dragged._item, pos: frontPos });
+
+                if (originalParent.classList.contains("spell-slot")) {
+                    originalParent.innerHTML = "";
+                    actor.setSpell(originalParent.id, null);
+                } else {
+                    originalParent.innerHTML = "";
+                }
+            }
         });
 
         container.addEventListener("dragover", (e) => {
@@ -201,6 +245,15 @@ export default class Inventory {
             const data = dragged._item;
             const originalParent = dragged.parentElement;
 
+            if (slot || isInventoryContainer) {
+                dragged.foundDrop = true;
+            }
+
+            if (originalParent.classList.contains("spell-slot")) {
+                originalParent.innerHTML = "";
+                actor.setSpell(originalParent.id, null);
+            }
+
             // If dropped on a specific slot
             if (slot) {
                 slot.classList.remove("drag-over");
@@ -217,9 +270,6 @@ export default class Inventory {
                         slotFull.classList.remove("spell");
                         originalParent.appendChild(slotFull);
                     }
-                } else if (originalParent.classList.contains("spell-slot")) {
-                    originalParent.innerHTML = "";
-                    actor.setSpell(originalParent.id, null);
                 }
 
                 if (slot.classList.contains("spell-slot")) {
@@ -240,9 +290,8 @@ export default class Inventory {
                 const newSlot = this.createInventorySlot();
                 newSlot.appendChild(dragged);
                 this.itemsUI.appendChild(newSlot);
+                return;
             }
         });
-
     }
-
 }

@@ -94,17 +94,16 @@ export default class MeshTrace {
                     .addScaledVector(up, sin * radius);
             }
             const startPos = this.tempVector4.copy(savedStart).add(offset);
+            
+            // const debugLine = new Line(
+            //     new BufferGeometry().setFromPoints([
+            //         startPos,
+            //         startPos.clone().add(savedDir.clone().multiplyScalar(length)),
+            //     ]),
+            //     new LineBasicMaterial({ color: 0x00ff00 })
+            // );
+            // Globals.graphicsWorld.add(debugLine);
 
-            // if (Globals.DEBUG) {
-            //     const debugLine = new Line(
-            //         new BufferGeometry().setFromPoints([
-            //             startPos,
-            //             startPos.clone().add(savedDir.clone().multiplyScalar(length)),
-            //         ]),
-            //         new LineBasicMaterial({ color: 0x00ff00 })
-            //     );
-            //     Globals.graphicsWorld.add(debugLine);
-            // }
             if (this.actorMeshes.length === 0) break; // nothing left to hit
             this.raycaster.set(startPos, dir);
             const hit = this.raycaster.intersectObjects(this.actorMeshes, false)[0];
@@ -116,7 +115,6 @@ export default class MeshTrace {
                 this.raycaster2.set(actorEyes, losDir);
                 this.raycaster2.far = actorEyes.distanceTo(hit.point);
 
-                //this.mapWalls = this.scene.getMapWalls().filter(w => actorEyes.sub(w.position).dot(losDir) < 0);
                 const losHit = this.raycaster2.intersectObject(this.mapWalls);
                 if (losHit[0] && losHit[0].distance < hit.distance) return;
                 callback(hit);

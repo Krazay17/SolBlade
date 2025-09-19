@@ -23,7 +23,6 @@ export default class ItemManager {
             this.items.sword,
         ];
         this.itemsOwned = [];
-
     }
 
     addItem(item) {

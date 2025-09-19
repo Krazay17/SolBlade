@@ -11,8 +11,11 @@ export default class PFireball extends Projectile {
         this.exploding = false;
         this.explodeSize = 1;
         this.shrink = true;
+        this.flashPower = 0;
 
-        this.createMesh();
+        const { texture, material } = this.createMesh();
+        this.texture = texture;
+        this.material = material;
         this.setGravity(4.5);
         this.setDamage(25);
 
@@ -36,10 +39,13 @@ export default class PFireball extends Projectile {
 
     update(dt) {
         const scaledDt = dt * 10;
+        this.texture.rotation += dt;
         if (this.exploding) {
             if (this.shrink) this.shrink = this.explodeSize <= 0 ? false : true;
             this.explodeSize = this.shrink ? this.explodeSize -= scaledDt : this.explodeSize += scaledDt;
             this.scale.set(this.explodeSize, this.explodeSize, this.explodeSize);
+            this.flashPower += dt * 80;
+            this.material.emissiveIntensity = (Math.sin(this.flashPower) + 1) / 1.5;
             if (this.explodeSize >= 2) super.destroy();
         } else super.update(dt);
     }

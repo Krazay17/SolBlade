@@ -128,7 +128,7 @@ export default class PlayerMovement {
     }
 
     dashForward() {
-        const forward = this.actor.getShootData().direction;
+        const forward = this.actor.getShootData().dir;
         this.body.velocity.copy(forward.multiplyScalar(13));
     }
 

@@ -15,8 +15,8 @@ export default class Spells {
             name: 'Fireball',
             img: 'assets/Fireball.png',
             use: () => {
-                const position = this.actor.getShootData().position;
-                const direction = this.actor.getShootData().direction;
+                const position = this.actor.getShootData().pos;
+                const direction = this.actor.getShootData().dir;
                 const spell = new Projectile(
                     position,
                     direction,
@@ -30,8 +30,8 @@ export default class Spells {
             name: 'Laser Gun',
             img: 'assets/LaserGun.png',
             use: () => {
-                const position = this.actor.getShootData().position;
-                const direction = this.actor.getShootData().direction;
+                const position = this.actor.getShootData().pos;
+                const direction = this.actor.getShootData().dir;
                 const spell = new Projectile(
                     position,
                     direction,

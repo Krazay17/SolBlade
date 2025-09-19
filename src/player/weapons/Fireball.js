@@ -25,8 +25,8 @@ export default class Fireball extends BaseWeapon {
     }
 
     shootFireball() {
-        let pos = this.actor.getShootData().position;
-        const dir = this.actor.getShootData().direction;
+        let pos = this.actor.getShootData().pos;
+        const dir = this.actor.getShootData().dir;
         pos = pos.clone().add(dir.clone().multiplyScalar(2)); // Start a bit in front of the actor
 
         const projectile = new PFireball({

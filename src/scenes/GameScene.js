@@ -175,12 +175,12 @@ export default class GameScene extends SceneBase {
     this.debugData.update(dt, time);
   }
 
-  spawnPickup(type, position, itemId) {
+  spawnPickup(type, position, itemId, itemData) {
     let pickup;
     const pos = new THREE.Vector3(position.x, position.y, position.z)
     switch (type) {
       case 'item':
-        pickup = new ItemPickup(this, pos, itemId);
+        pickup = new ItemPickup(this, pos, itemId, itemData);
         break;
       default:
         pickup = this.getPickup(itemId) ? this.getPickup(itemId) :

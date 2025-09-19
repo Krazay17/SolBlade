@@ -70,11 +70,22 @@ export default class Projectile extends THREE.Object3D {
     }
 
     createMesh() {
+        const texture = new THREE.TextureLoader().load('assets/SkyFilter2.webp')
+        const geom = new THREE.SphereGeometry(this.radius, 16, 16);
+        const material = new THREE.MeshLambertMaterial({
+            map: texture,
+            emissive: 0xff0000,
+            emissiveIntensity: 1,
+            transparent: true,
+            opacity: .9,
+        });
         this.mesh = new THREE.Mesh(
-            new THREE.SphereGeometry(this.radius, 16, 16),
-            new THREE.MeshBasicMaterial({ color: 0xff0000 }),
+            geom,
+            material,
         );
         this.add(this.mesh);
+
+        return { texture, material };
     }
 
     createBody() {

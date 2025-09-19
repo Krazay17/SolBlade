@@ -66,7 +66,6 @@ export default class Player extends THREE.Object3D {
             this.direction = new CANNON.Vec3();
             this.tempVector = new THREE.Vector3();
 
-            this.inventory = new Inventory(this);
 
             this.weaponL = new Weapon.Pistol(this, scene);
             this.weaponR = new Weapon.Sword(this, scene);
@@ -74,6 +73,7 @@ export default class Player extends THREE.Object3D {
             this.spell2 = null;
             this.spell3 = null;
             this.spell4 = null;
+            this.inventory = new Inventory(this);
 
             this.cameraArm = new THREE.Object3D();
             this.cameraArm.position.set(.5, 1, 0);
@@ -162,8 +162,8 @@ export default class Player extends THREE.Object3D {
         const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
         const bulletDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
         return {
-            position: bulletPosition,
-            direction: bulletDirection
+            pos: bulletPosition,
+            dir: bulletDirection
         };
     }
 
