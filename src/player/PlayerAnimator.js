@@ -25,7 +25,7 @@ export default class PlayerAnimator {
     this.mixer = null;
   }
 
-  setAnimState(state, once = false, callback) {
+  setAnimState(state, once = false, reset = false) {
     this.stateName = state;
     let seek = 0;
     let animName;
@@ -88,7 +88,7 @@ export default class PlayerAnimator {
       console.warn(`No animation found for state: ${state}`);
       return;
     }
-    if (this.currentAction === action) return;
+    if ((this.currentAction === action) && !reset) return;
 
     if (once) {
       action.setLoop(THREE.LoopOnce);

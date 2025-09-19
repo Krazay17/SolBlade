@@ -20,14 +20,6 @@ export default class Inventory {
         this.spellSlot4CD = null;
 
         this.createInventoryUI();
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Fireball', 'assets/Fireball.png');
-        this.addItem('Sword', 'assets/Sword.png');
-        this.addItem('Sword', 'assets/Sword.png');
-        this.addItem('Sword', 'assets/Sword.png');
-        this.addItem('Sword', 'assets/Sword.png');
         this.bindEvents();
     }
     bindEvents() {
@@ -60,35 +52,65 @@ export default class Inventory {
         MyEventEmitter.emit('inventoryToggled', this.active);
     }
 
-    addItem(name, img) {
-        const item = this.createItem(name, img);
-        this.items.push(item);
-        this.itemsUI.appendChild(item);
-    }
-
-    createItem(name, img) {
+    createInventorySlot() {
         const slot = document.createElement('div');
         slot.className = 'inventory-slot';
-        const item = document.createElement('div');
-        item.className = 'item';
-        item.draggable = true;
-        item.dataset.item = name;
-        item.dataset.img = img;
+        return slot;
+    }
+    addItem(item) {
+        this.items.push(item);
+
+        const el = this.createItemElement(item);
+
+        // try to put into spell slots first
+        const spellSlots = this.spellUI.getElementsByClassName('spell-slot');
+        for (const slot of spellSlots) {
+            if (!slot.firstChild) {
+                slot.appendChild(el);
+                el.classList.add('spell');
+                this.actor.setSpell(slot.id, item); // pass real Item, not just name
+                return;
+            }
+        }
+
+        // then try to put into inventory slots
+        const invSlots = this.inventoryUI.getElementsByClassName('inventory-slot');
+        for (const slot of invSlots) {
+            if (!slot.firstChild) {
+                slot.appendChild(el);
+                return;
+            }
+        }
+
+        // otherwise, create a new inventory slot
+        const invSlot = this.createInventorySlot();
+        invSlot.appendChild(el);
+        this.itemsUI.appendChild(invSlot);
+    }
+
+
+    createItemElement(item) {
+        const el = document.createElement('div');
+        el.className = 'item';
+        el.draggable = true;
+
+        // store reference to the actual Item object
+        el._item = item;
 
         const label = document.createElement('div');
         label.className = 'item-label';
-        label.innerText = name;
+        label.innerText = item.name;
 
         const icon = document.createElement('div');
         icon.className = 'item-icon';
-        icon.style.backgroundImage = `url(${img})`;
+        icon.style.backgroundImage = `url(${item.imgUrl})`;
 
-        item.appendChild(icon);
-        item.appendChild(label);
-        slot.appendChild(item);
+        el.appendChild(icon);
+        el.appendChild(label);
 
-        return slot;
+        return el;
     }
+
 
     createInventoryUI() {
         this.inventoryUI = document.createElement('div');
@@ -102,12 +124,12 @@ export default class Inventory {
         this.itemsUI = document.createElement('div');
         this.itemsUI.id = 'inventory-items';
         this.inventoryUI.appendChild(this.itemsUI);
-        setupDragAndDrop(this.itemsUI, this.actor);
+        this.setupDragAndDrop(this.itemsUI, this.actor);
 
         this.spellUI = document.createElement('div');
         this.spellUI.id = 'spell-ui';
         document.body.appendChild(this.spellUI);
-        setupDragAndDrop(this.spellUI, this.actor);
+        this.setupDragAndDrop(this.spellUI, this.actor);
 
         // create 4 slots + CD overlays and keep references like this.spellSlot1CD
         for (let i = 1; i <= 4; i++) {
@@ -128,85 +150,99 @@ export default class Inventory {
             // store reference to each CD overlay for later
             this[`spellSlot${i}CD`] = cd;
         }
+    }
+    setupDragAndDrop(container, actor) {
+        // container.addEventListener("dragstart", (e) => {
+        //     const spell = e.target.closest(".item");
+        //     if (!spell) return;
+        //     e.dataTransfer.setData("application/json", JSON.stringify({
+        //         name: spell.dataset.item,
+        //         img: spell.dataset.img
+        //     }));
+        //     e.dataTransfer.effectAllowed = "move";
+        //     e.target.classList.add("dragging");
+        // });
+        container.addEventListener("dragstart", (e) => {
+            const el = e.target.closest(".item");
+            if (!el) return;
+            e.dataTransfer.effectAllowed = "move";
+
+            // store reference globally
+            e.dataTransfer.setData("text/plain", "");
+            el.classList.add("dragging");
+        });
+
+
+        container.addEventListener("dragend", (e) => {
+            e.target.classList.remove("dragging");
+        });
+
+        container.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            const slot = e.target.closest(".spell-slot")
+                || e.target.closest(".inventory-slot");
+            if (slot) slot.classList.add("drag-over");
+        });
+
+        container.addEventListener("dragleave", (e) => {
+            const slot = e.target.closest(".spell-slot")
+                || e.target.closest(".inventory-slot");
+            if (slot) slot.classList.remove("drag-over");
+        });
+
+        container.addEventListener("drop", (e) => {
+            e.preventDefault();
+
+            const slot = e.target.closest(".spell-slot") || e.target.closest(".inventory-slot");
+            const isInventoryContainer = e.target.closest("#inventory-items");
+
+            const dragged = document.querySelector(`.item.dragging`);
+            if (!dragged) return;
+            const data = dragged._item;
+            const originalParent = dragged.parentElement;
+
+            // If dropped on a specific slot
+            if (slot) {
+                slot.classList.remove("drag-over");
+                const slotFull = slot.firstChild;
+
+                if (slotFull) {
+                    const slotFullData = slotFull._item ?? null;
+                    if (originalParent === slot) return; // same slot, do nothing
+                    if (originalParent.classList.contains("spell-slot")) {
+                        slotFull.classList.add("spell");
+                        originalParent.appendChild(slotFull);
+                        actor.setSpell(originalParent.id, slotFullData);
+                    } else if (originalParent.classList.contains("inventory-slot")) {
+                        slotFull.classList.remove("spell");
+                        originalParent.appendChild(slotFull);
+                    }
+                } else if (originalParent.classList.contains("spell-slot")) {
+                    originalParent.innerHTML = "";
+                    actor.setSpell(originalParent.id, null);
+                }
+
+                if (slot.classList.contains("spell-slot")) {
+                    dragged.classList.remove("dragging");
+                    dragged.classList.add("spell");
+                    slot.appendChild(dragged);
+                    actor.setSpell(slot.id, data);
+                } else if (slot.classList.contains("inventory-slot")) {
+                    dragged.classList.remove("spell");
+                    slot.appendChild(dragged);
+                }
+                return;
+            }
+
+            // If dropped onto empty inventory area
+            if (isInventoryContainer) {
+                dragged.classList.remove("spell");
+                const newSlot = this.createInventorySlot();
+                newSlot.appendChild(dragged);
+                this.itemsUI.appendChild(newSlot);
+            }
+        });
 
     }
-}
 
-export function setupDragAndDrop(container, actor) {
-    container.addEventListener("dragstart", (e) => {
-        const spell = e.target.closest(".item");
-        if (!spell) return;
-        e.dataTransfer.setData("application/json", JSON.stringify({
-            name: spell.dataset.item,
-            img: spell.dataset.img
-        }));
-        e.dataTransfer.effectAllowed = "move";
-        e.target.classList.add("dragging");
-    });
-
-    container.addEventListener("dragend", (e) => {
-        e.target.classList.remove("dragging");
-    });
-
-    container.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        const slot = e.target.closest(".spell-slot")
-            || e.target.closest(".inventory-slot");
-        if (slot) slot.classList.add("drag-over");
-    });
-
-    container.addEventListener("dragleave", (e) => {
-        const slot = e.target.closest(".spell-slot")
-            || e.target.closest(".inventory-slot");
-        if (slot) slot.classList.remove("drag-over");
-    });
-
-    container.addEventListener("drop", (e) => {
-        e.preventDefault();
-        const slot = e.target.closest(".spell-slot")
-            || e.target.closest(".inventory-slot");
-        if (!slot) return;
-        slot.classList.remove("drag-over");
-
-        const data = JSON.parse(e.dataTransfer.getData("application/json"));
-        const dragged = document.querySelector(`.item.dragging`);
-        if (!dragged) return;
-
-        const originalParent = dragged.parentElement;
-        const slotFull = slot.firstChild;
-
-        // If the slot is full, move the existing item back to inventory or original position
-        if (slotFull) {
-            const slotFullData = slotFull.dataset.item ? {
-                name: slotFull.dataset.item,
-                img: slotFull.dataset.img
-            } : null;
-            if (originalParent === slot) return; // same slot, do nothing
-            if (originalParent.classList.contains("spell-slot")) {
-                slotFull.classList.add("spell");
-                originalParent.appendChild(slotFull);
-                actor.setSpell(originalParent.id, slotFullData);
-            } else if (originalParent.classList.contains("inventory-slot")) {
-                slotFull.classList.remove("spell");
-                originalParent.appendChild(slotFull);
-            }
-        } else if (originalParent.classList.contains("spell-slot")) {
-            // Clear the original slot if moving from one slot to another
-            originalParent.innerHTML = "";
-            actor.setSpell(originalParent.id, null);
-        }
-
-        if (slot.classList.contains("spell-slot")) {
-            // Move into the spell slot
-            //slot.innerHTML = ""; // clear old contents
-            dragged.classList.remove("dragging");
-            dragged.classList.add("spell");
-            slot.appendChild(dragged);
-            actor.setSpell(slot.id, data);
-        } else if (slot.classList.contains("inventory-slot")) {
-            // Move back to inventory
-            dragged.classList.remove("spell");
-            slot.appendChild(dragged);
-        }
-    });
 }

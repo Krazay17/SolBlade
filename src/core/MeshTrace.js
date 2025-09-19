@@ -81,7 +81,7 @@ export default class MeshTrace {
 
         this.raycaster.far = length;
         this.raycaster2.far = length;
-        this.mapWalls = this.scene.getMapWalls();
+        this.mapWalls = this.scene.getMergedLevel();
 
         for (let i = 0; i < numRays; i++) {
             let offset = this.tempVector3.set(0, 0, 0);
@@ -117,11 +117,9 @@ export default class MeshTrace {
                 this.raycaster2.far = actorEyes.distanceTo(hit.point);
 
                 //this.mapWalls = this.scene.getMapWalls().filter(w => actorEyes.sub(w.position).dot(losDir) < 0);
-                const losHit = this.raycaster2.intersectObjects(this.mapWalls, false)[0];
-                if (!losHit || losHit.distance >= hit.distance) {
-                    callback(hit);
-                    this.mapWalls = [];
-                } else return; // blocked, stop checking further rays
+                const losHit = this.raycaster2.intersectObject(this.mapWalls);
+                if (losHit[0] && losHit[0].distance < hit.distance) return;
+                callback(hit);
             }
         }
     }

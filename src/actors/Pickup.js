@@ -42,6 +42,13 @@ export default class Pickup extends THREE.Object3D {
                 );
                 this.add(this.mesh);
                 break;
+            case 'item':
+                this.mesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.5, 16, 16),
+                    new THREE.MeshBasicMaterial({ color: 0xffffff })
+                );
+                this.add(this.mesh);
+                break;
             default:
                 this.mesh = await this.scene.meshManager.getMesh(this.type);
                 break;

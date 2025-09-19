@@ -71,14 +71,14 @@ export default class Projectile extends THREE.Object3D {
 
     createMesh() {
         this.mesh = new THREE.Mesh(
-            new THREE.SphereGeometry(0.666, 8, 8),
+            new THREE.SphereGeometry(this.radius, 16, 16),
             new THREE.MeshBasicMaterial({ color: 0xff0000 }),
         );
         this.add(this.mesh);
     }
 
     createBody() {
-        this.body = new THREE.Sphere(new THREE.Vector3(), this.radius / 4);
+        this.body = new THREE.Sphere(new THREE.Vector3(), this.radius / 2);
     }
 
     setTargetPos(pos) {

@@ -1,7 +1,7 @@
 import Projectile from "../actors/Projectile";
 import MyEventEmitter from "../core/MyEventEmitter";
 import Globals from "../utils/Globals";
-import { setupDragAndDrop } from "./Inventory";
+import { setupDragAndDrop } from "../player/Inventory";
 
 export default class Spells {
     constructor(actor) {

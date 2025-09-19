@@ -33,6 +33,7 @@ export default class ParryState extends PlayerState {
 
     canExit(state) {
         return performance.now() > this.startTime + this.duration
+            || state === 'parry'
             || state === 'dead'
             || state === 'stun';
     }

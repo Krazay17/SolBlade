@@ -10,6 +10,7 @@ export default class StateManager {
             fall: new States.FallState(actor, this),
             attack: new States.AttackState(actor, this),
             stun: new States.StunState(actor, this),
+            knockback: new States.KnockbackState(actor, this),
             dash: new States.DashState(actor, this),
             emote: new States.EmoteState(actor, this),
             blade: new States.BladeState(actor, this),

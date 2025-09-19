@@ -90,12 +90,11 @@ export default class Sword extends BaseWeapon {
             this.actor.animator.hitFreeze();
             CameraFX.shake(0.14, 150);
 
-            //this.hitFx(target.position, scaledCamDir);
+            this.hitFx(target.position, scaledCamDir);
             MyEventEmitter.emit('fx', { type: 'swordHit', pos: target.position });
         });
         if (this.isSpell) {
             this.actor.movement.dashForward();
-            console.log("DASHED!");
         }
     }
 }

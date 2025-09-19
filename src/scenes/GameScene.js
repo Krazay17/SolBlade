@@ -18,6 +18,7 @@ import voiceChat from '../core/VoiceChat.js';
 import { MeshBVH, MeshBVHHelper, acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import PFireball from '../actors/PFireball.js';
+import ItemPickup from '../actors/ItemPickup.js';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -114,6 +115,17 @@ export default class GameScene extends SceneBase {
     return Object.values(this.scenePlayers).filter(p => p !== this.player);
   }
 
+  getEnemiesInRange(position, range) {
+    const enemiesInRange = new Map();
+    for (const enemy of this.enemyActors) {
+      const dist = enemy.position.distanceTo(position);
+      if (dist <= range) {
+        enemiesInRange.set(enemy, dist);
+      }
+    }
+    return enemiesInRange;
+  }
+
   getMapWalls() {
     return this.mapWalls;
   }
@@ -164,8 +176,17 @@ export default class GameScene extends SceneBase {
   }
 
   spawnPickup(type, position, itemId) {
-    const pickup = this.getPickup(itemId) ? this.getPickup(itemId) :
-      new Pickup(this, type, new THREE.Vector3(position.x, position.y, position.z), itemId);
+    let pickup;
+    const pos = new THREE.Vector3(position.x, position.y, position.z)
+    switch (type) {
+      case 'item':
+        pickup = new ItemPickup(this, pos, itemId);
+        break;
+      default:
+        pickup = this.getPickup(itemId) ? this.getPickup(itemId) :
+          new Pickup(this, type, pos, itemId);
+        break;
+    }
     this.game.graphicsWorld.add(pickup);
     this.pickupActors.push(pickup);
   }
@@ -254,7 +275,7 @@ export default class GameScene extends SceneBase {
           });
 
           allGeoms.push(geomClone);
-          
+
           child.castShadow = true;
           child.receiveShadow = true;
           this.mapWalls.push(child);

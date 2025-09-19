@@ -14,6 +14,7 @@ import NamePlate from '../core/Nameplate';
 import Globals from '../utils/Globals';
 import soundPlayer from '../core/SoundPlayer';
 import Inventory from './Inventory';
+import ItemRandomizer from '../deprecated/ItemRandomizer';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 1, z = 0 }, isRemote = false, camera, id, netData) {
@@ -57,10 +58,6 @@ export default class Player extends THREE.Object3D {
             this.input = game.input;
             Globals.playerInfo.setActor(this);
 
-            MyEventEmitter.on('debugTest', () => {
-                this.parried({ x: 0, y: 0, z: 0 });
-            })
-
             this.maxSpeed = 5;
             this.acceleration = 300;
             this.deceleration = 300;
@@ -70,7 +67,6 @@ export default class Player extends THREE.Object3D {
             this.tempVector = new THREE.Vector3();
 
             this.inventory = new Inventory(this);
-            //this.spells = new Spells(this);
 
             this.weaponL = new Weapon.Pistol(this, scene);
             this.weaponR = new Weapon.Sword(this, scene);
@@ -87,10 +83,8 @@ export default class Player extends THREE.Object3D {
             CameraFX.init(this.camera);
             this.createBody();
 
-
             this.movement = new PlayerMovement(this);
             this.stateManager = new StateManager(this);
-
             this.devMenu = new DevMenu(this, this.movement);
 
             MyEventEmitter.on('KeyPressed', (key) => {
@@ -98,6 +92,11 @@ export default class Player extends THREE.Object3D {
                     this.die('the void');
                 }
             });
+
+            MyEventEmitter.on('debugTest', () => {
+                console.log(this.randomTest?.getRandomItem())
+            });
+
         } else {
             // Remote Player
             this.targetPos = new THREE.Vector3(x, y, z);
@@ -127,6 +126,12 @@ export default class Player extends THREE.Object3D {
         if (this.crownMesh) {
             this.remove(this.crownMesh);
         }
+    }
+
+    dropItem(item) {
+        const loc = this.getShootData()
+
+        MyEventEmitter.emit('dropItem', item);
     }
 
     setSpell(slot, spell) {
@@ -421,17 +426,23 @@ export default class Player extends THREE.Object3D {
         soundPlayer.playPosAudio('playerHit', this.position);
         if (this.isRemote) return;
         const { type, amount } = dmg;
-        const { stun, dir, dim } = cc;
+        const { stun, dir, dim, dur } = cc;
         if (amount > 0) {
-            if (type === 'melee') {
+            if (type === 'melee' || type === 'explosion') {
                 CameraFX.shake(0.2, 125);
             }
             if (stun > 0) {
-                this.stateManager.setState('stun', { stun, dim, anim: 'knockback' });
+                this.stateManager.setState('stun', { stun, anim: 'knockback' });
             }
             if (dir) {
+                if (!stun) {
+                    this.stateManager.setState('knockback', { dur: dur || 300 });
+                }
                 this.body.wakeUp();
                 this.body.velocity.copy(dir);
+            }
+            if (dim) {
+                this.setDimmed(dim);
             }
         }
     }

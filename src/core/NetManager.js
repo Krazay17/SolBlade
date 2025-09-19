@@ -154,11 +154,11 @@ function bindSocketEvents(myPlayerData) {
     socket.on('currentPickups', (pickupList) => {
         pickupList.forEach(element => {
             if (!element.active) return;
-            scene.spawnPickup(element.type, element.position, element.itemId);
+            scene.spawnPickup(element.type, element.position, element.itemId, element.item);
         });
     });
     socket.on('spawnPickup', (data) => {
-        scene.spawnPickup(data.type, data.position, data.itemId);
+        scene.spawnPickup(data.type, data.position, data.itemId, data.item);
     });
     socket.on('pickupCollected', ({ playerId, itemId }) => {
         const pickup = scene.getPickup(itemId);
