@@ -49,6 +49,7 @@ export default class GameMode {
             this.startGame();
         });
         MyEventEmitter.on('playerDied', ({ player, source }) => {
+            this.actor.dropCrown();
             if (!this.hasCrown) return;
             this.hasCrown = false;
             let pos;
@@ -60,7 +61,6 @@ export default class GameMode {
                     pos = this.actor.position;
             }
             pos.y += 1;
-            this.actor.dropCrown();
             netSocket.emit('dropCrown', pos);
         });
         MyEventEmitter.on('dropCrown', () => {

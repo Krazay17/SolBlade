@@ -20,6 +20,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import PFireball from '../actors/PFireball.js';
 import ItemPickup from '../actors/ItemPickup.js';
 import PowerPickup from '../actors/PowerPickup.js';
+import CrownPickup from '../actors/CrownPickup.js';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -194,6 +195,9 @@ export default class GameScene extends SceneBase {
     switch (type) {
       case 'item':
         pickup = new ItemPickup(this, pos, itemId, itemData);
+        break;
+      case 'crown':
+        pickup = new CrownPickup(this, pos, itemId);
         break;
       default:
         pickup = this.getPickup(itemId) ? this.getPickup(itemId)

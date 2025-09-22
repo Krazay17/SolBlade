@@ -4,7 +4,6 @@ import { netSocket } from "../core/NetManager";
 import soundPlayer from "../core/SoundPlayer";
 import Globals from "../utils/Globals";
 import { sendDiscordMessage } from "./DiscordStuff";
-import './StyleChat.css';
 
 const section = document.createElement('div');
 section.id = 'chat-section';

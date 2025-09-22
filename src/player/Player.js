@@ -112,8 +112,9 @@ export default class Player extends THREE.Object3D {
 
     async pickupCrown() {
         if (!this.crownMesh) {
-            this.crownMesh = await this.scene.meshManager.getMesh('crown');
+            this.crownMesh = await this.scene.meshManager.getMesh('crown', 0.4);
             this.crownMesh.position.set(0, 2, 0);
+            this.crownMesh.scale.set(.4, .4, .4);
         }
         this.add(this.crownMesh);
     }

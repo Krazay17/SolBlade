@@ -58,3 +58,42 @@ canvas {
     background-color: white;
 }
 
+#chat-section {
+    display: flex;
+    flex-direction: column-reverse;
+    position: absolute;
+    bottom: 150px;
+    height: 200px;
+    width: 450px;
+    z-index: 2;
+}
+
+#chatMessages {
+    overflow-y: auto;
+    height: 40%;
+    background-color: rgba(0, 0, 0, 0);
+    transition: background-color .5s ease;
+    scrollbar-width: none;
+}
+
+#chatMessages.active {
+    height: 100%;
+    background-color: rgba(0, 0, 0, .4);
+}
+#chatMessages::-webkit-scrollbar {
+    display: none;
+    width: 1px;
+}
+
+.chatMessage {
+    word-wrap: break-word;
+    color: aliceblue;
+}
+
+#chatInput {
+    display: flex;
+    font-size: large;
+    width: 98%;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: aliceblue;
+}

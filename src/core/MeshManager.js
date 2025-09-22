@@ -103,11 +103,10 @@ export default class MeshManager {
         this.addMesh(skinName, mesh);
     }
 
-    async createMesh(name, scale = 1) {
+    async createMesh(name) {
         return new Promise((resolve, reject) => {
             this.loader.load(`assets/${name}.glb`, (gltf) => {
                 const mesh = gltf.scene;
-                mesh.scale.set(scale, scale, scale);
                 mesh.traverse((child) => {
                     if (child.isMesh) {
                         child.receiveShadow = true;
@@ -120,18 +119,12 @@ export default class MeshManager {
         });
     }
 
-    async getMesh(name, scale) {
+    async getMesh(name) {
         let mesh = this.meshMap.get(name);
         if (mesh) {
             return mesh.clone();
         } else {
-            let newScale = scale;
-            switch (name) {
-                case 'crown':
-                    newScale = newScale || 0.5;
-                    break;
-            }
-            mesh = await this.createMesh(name, newScale);
+            mesh = await this.createMesh(name);
             return mesh.clone();
         }
     }
