@@ -3,7 +3,7 @@ import * as CANNON from 'cannon';
 import SceneBase from './_SceneBase.js';
 import Player from '../player/Player.js';
 import { getMaterial } from '../core/MaterialManager.js';
-import { setNetScene } from '../core/NetManager.js';
+import { netSocket, setNetScene } from '../core/NetManager.js';
 import LocalData from '../core/LocalData.js';
 import Globals from '../utils/Globals.js';
 import SkyBox from '../actors/SkyBox.js';
@@ -19,6 +19,7 @@ import { MeshBVH, MeshBVHHelper, acceleratedRaycast, computeBoundsTree, disposeB
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import PFireball from '../actors/PFireball.js';
 import ItemPickup from '../actors/ItemPickup.js';
+import PowerPickup from '../actors/PowerPickup.js';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -69,6 +70,14 @@ export default class GameScene extends SceneBase {
     this.gameMode = new GameMode(this, 'crown', this.player);
     voiceChat.setScene(this);
 
+    this.initListeners();
+  }
+
+  initListeners() {
+    MyEventEmitter.on('playerDropItem', ({ item, pos }) => {
+      if (netSocket.connected) return;
+      this.spawnPickup('item', pos, null, item);
+    })
   }
   addTickable(tickable) {
     this.tickables.push(tickable);
@@ -106,6 +115,10 @@ export default class GameScene extends SceneBase {
     const projectile = this.projectiles.find(p => p.netId === id);
     if (!projectile) return;
     projectile.destroy();
+  }
+
+  getIsConnected() {
+    return netSocket.connected;
   }
 
   getOtherActorMeshes() {
@@ -183,8 +196,8 @@ export default class GameScene extends SceneBase {
         pickup = new ItemPickup(this, pos, itemId, itemData);
         break;
       default:
-        pickup = this.getPickup(itemId) ? this.getPickup(itemId) :
-          new Pickup(this, type, pos, itemId);
+        pickup = this.getPickup(itemId) ? this.getPickup(itemId)
+          : new PowerPickup(this, type, pos, itemId);
         break;
     }
     this.game.graphicsWorld.add(pickup);

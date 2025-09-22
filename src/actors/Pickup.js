@@ -13,8 +13,6 @@ export default class Pickup extends THREE.Object3D {
         this.itemId = String(itemId);
         this.active = true;
 
-        this.createPickupMesh();
-
         if (!Pickup.netFx) {
             MyEventEmitter.on('netFx', (data) => {
                 if (data.type === 'pickup') {
@@ -42,15 +40,15 @@ export default class Pickup extends THREE.Object3D {
                 );
                 this.add(this.mesh);
                 break;
-            case 'item':
-                this.mesh = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.5, 16, 16),
-                    new THREE.MeshBasicMaterial({ color: 0xffffff })
-                );
-                this.add(this.mesh);
-                break;
+            // case 'item':
+            //     this.mesh = new THREE.Mesh(
+            //         new THREE.SphereGeometry(0.5, 16, 16),
+            //         new THREE.MeshBasicMaterial({ color: 0xffffff })
+            //     );
+            //     this.add(this.mesh);
+            //     break;
             default:
-                this.mesh = await this.scene.meshManager.getMesh(this.type);
+                this.mesh = await this.scene.meshManager.getMesh(this.type, scale);
                 break;
         }
         if (this.mesh) {
@@ -63,7 +61,7 @@ export default class Pickup extends THREE.Object3D {
         this.active = false;
         Pickup.pickupFx(this.position);
         MyEventEmitter.emit('fx', { type: 'pickup', pos: this.position });
-        MyEventEmitter.emit('pickupCollected', { itemId: this.itemId });
+        MyEventEmitter.emit('pickupCollected', { itemId: this.itemId, item: this });
     }
 
     static pickupFx(pos) {

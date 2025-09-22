@@ -9,12 +9,7 @@ const serverURL = location.hostname === "localhost" ?
     : "solbladeserver-production.up.railway.app";
 
 const socket = io(serverURL, {
-    autoConnect: true,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
     transports: ["websocket"],
-    withCredentials: false,
-
 });
 export const netSocket = socket;
 
@@ -192,14 +187,14 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[id].applyHealing(health, data);
         }
     });
-    socket.on('projectileCreated', ({id, data}) => {
+    socket.on('projectileCreated', ({ id, data }) => {
         const player = netPlayers[id];
-        if(!player) return;
+        if (!player) return;
         scene.spawnProjectile(player, data);
     });
-    socket.on('projectileMoved', ({id, data}) => {
+    socket.on('projectileMoved', ({ id, data }) => {
         const player = netPlayers[id];
-        if(!player) return;
+        if (!player) return;
         scene.moveProjectile(data);
     });
     socket.on('projectileDestroyed', data => {
@@ -227,6 +222,10 @@ MyEventEmitter.on('fx', (data) => {
 });
 MyEventEmitter.on('pickupCollected', (data) => {
     socket.emit('pickupCollected', data);
+    if (!socket.connected) {
+        data.item.applyCollect(scene.player);
+        scene.removePickup(data.item);
+    }
 });
 MyEventEmitter.on('pickupCrown', () => {
     socket.emit('pickupCrown');

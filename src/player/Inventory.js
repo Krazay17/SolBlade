@@ -1,4 +1,5 @@
 import Item from "../core/Item";
+import LocalData from "../core/LocalData";
 import MyEventEmitter from "../core/MyEventEmitter";
 
 export default class Inventory {
@@ -22,35 +23,20 @@ export default class Inventory {
 
         this.createInventoryUI();
         this.bindEvents();
+        this.initItems();
 
-        this.addItem(new Item({
-            name: 'Fireball',
-            imgUrl: 'assets/Fireball.png',
-            weight: 1,
-            min: 1,
-            max: 10,
-        }));
-        this.addItem(new Item({
-            name: 'Fireball',
-            imgUrl: 'assets/Fireball.png',
-            weight: 1,
-            min: 1,
-            max: 10,
-        }));
-        this.addItem(new Item({
-            name: 'Fireball',
-            imgUrl: 'assets/Fireball.png',
-            weight: 1,
-            min: 1,
-            max: 10,
-        }));
-        this.addItem(new Item({
-            name: 'Fireball',
-            imgUrl: 'assets/Fireball.png',
-            weight: 1,
-            min: 1,
-            max: 10,
-        }));
+        // this.addItem(new Item({
+        //     name: 'Fireball',
+        //     imgUrl: 'assets/Fireball.png',
+        //     weight: 1,
+        //     min: 1,
+        //     max: 10,
+        // }));
+    }
+    initItems() {
+        LocalData.items.forEach(i => {
+            this.addItem(i);
+        })
     }
     bindEvents() {
         MyEventEmitter.on('openInventory', () => {
@@ -70,16 +56,20 @@ export default class Inventory {
             cdEl.style.animation = `cooldownAnim ${cd}ms linear forwards`;
         });
     }
-
     toggleInventory() {
         this.active = !this.active;
         if (this.active) {
             document.exitPointerLock();
+        } else {
+            const slots = [...this.itemsUI.getElementsByClassName('inventory-slot')];
+            const emptySlots = slots.filter(s => !s.firstChild);
+            if (!emptySlots) return;
+            emptySlots.forEach(s => this.itemsUI.removeChild(s));
+
         }
         this.inventoryUI.style.display = this.active ? 'block' : 'none';
         MyEventEmitter.emit('inventoryToggled', this.active);
     }
-
     createInventorySlot() {
         const slot = document.createElement('div');
         slot.className = 'inventory-slot';
@@ -115,8 +105,23 @@ export default class Inventory {
         invSlot.appendChild(el);
         this.itemsUI.appendChild(invSlot);
     }
+    removeItem(dragged) {
+        const originalParent = dragged.parentElement;
+        dragged.classList.remove("dragging");
+        if (!dragged.foundDrop) {
+            const { pos, dir } = this.actor.getShootData();
+            const frontPos = pos.add(dir.multiplyScalar(2));
+            MyEventEmitter.emit('playerDropItem', { item: dragged._item, pos: frontPos });
+            LocalData.removeItem(dragged._item)
 
-
+            if (originalParent.classList.contains("spell-slot")) {
+                originalParent.innerHTML = "";
+                actor.setSpell(originalParent.id, null);
+            } else {
+                originalParent.innerHTML = "";
+            }
+        }
+    }
     createItemElement(item) {
         const el = document.createElement('div');
         el.className = 'item';
@@ -138,8 +143,6 @@ export default class Inventory {
 
         return el;
     }
-
-
     createInventoryUI() {
         this.inventoryUI = document.createElement('div');
         this.inventoryUI.id = 'inventory-ui';
@@ -205,20 +208,7 @@ export default class Inventory {
 
         container.addEventListener("dragend", (e) => {
             const dragged = e.target;
-            const originalParent = dragged.parentElement;
-            dragged.classList.remove("dragging");
-            if (!dragged.foundDrop) {
-                const { pos, dir } = this.actor.getShootData();
-                const frontPos = pos.add(dir.multiplyScalar(2));
-                MyEventEmitter.emit('playerDropItem', { item: dragged._item, pos: frontPos });
-
-                if (originalParent.classList.contains("spell-slot")) {
-                    originalParent.innerHTML = "";
-                    actor.setSpell(originalParent.id, null);
-                } else {
-                    originalParent.innerHTML = "";
-                }
-            }
+            this.removeItem(dragged);
         });
 
         container.addEventListener("dragover", (e) => {

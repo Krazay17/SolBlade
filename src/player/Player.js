@@ -161,9 +161,11 @@ export default class Player extends THREE.Object3D {
     getShootData() {
         const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
         const bulletDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
+        const camPosition = this.camera.getWorldPosition(new THREE.Vector3());
         return {
             pos: bulletPosition,
-            dir: bulletDirection
+            dir: bulletDirection,
+            camPos: camPosition,
         };
     }
 

@@ -25,16 +25,16 @@ export default class Fireball extends BaseWeapon {
     }
 
     shootFireball() {
-        let pos = this.actor.getShootData().pos;
+        let pos = this.actor.getShootData().camPos;
         const dir = this.actor.getShootData().dir;
-        pos = pos.clone().add(dir.clone().multiplyScalar(2)); // Start a bit in front of the actor
+        pos = pos.add(dir.clone().multiplyScalar(2)); // Start a bit in front of the actor
 
         const projectile = new PFireball({
             pos: pos,
             dir: dir,
-            speed: 25,
-            dur: 20000,
-            radius: 1.4,
+            speed: 35,
+            dur: 30000,
+            radius: 1.15,
         });
         this.projectiles.push(projectile);
     }

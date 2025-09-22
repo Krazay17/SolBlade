@@ -1,5 +1,6 @@
-const CURRENT_VERSION = 0.0774;
+import MyEventEmitter from "./MyEventEmitter";
 
+const CURRENT_VERSION = 0.0774;
 export default {
     version: CURRENT_VERSION,
     name: "Player",
@@ -14,7 +15,19 @@ export default {
     voicesVolume: 1,
     movementValues: null,
     flags: {},
-    spells: {},
+    items: [],
+
+    addItem(item) {
+        this.items.push(item);
+        this.save();
+    },
+    removeItem(item) {
+        const index = this.items.indexOf(item);
+        if (index !== -1) {
+            this.items.splice(index, 1);
+            this.save();
+        }
+    },
 
     save() {
         const data = {
@@ -31,7 +44,7 @@ export default {
             sfxVolume: this.sfxVolume,
             movementValues: this.movementValues,
             flags: this.flags,
-            spells: this.spells,
+            items: this.items,
         }
         localStorage.setItem('SolBladeSave', JSON.stringify(data));
     },
@@ -55,7 +68,7 @@ export default {
                     micVolume: parsed.micVolume,
                     voicesVolume: parsed.voicesVolume,
                     flags: parsed.flags,
-                    spells: parsed.spells,
+                    items: parsed.items,
                 });
             return;
         }
@@ -71,7 +84,7 @@ export default {
         this.voicesVolume = parsed.voicesVolume ?? this.voicesVolume;
         this.movementValues = parsed.movementValues ?? null;
         this.flags = parsed.flags ?? {};
-        this.spells = parsed.spells ?? {};
+        this.items = parsed.items ?? [];
         console.log('Loaded local data:', this);
 
     },
@@ -89,8 +102,15 @@ export default {
         this.voicesVolume = keep.voicesVolume ?? this.voicesVolume;
         this.movementValues = keep.movementValues ?? null;
         this.flags = keep.flags ?? {};
-        this.spells = keep.spells ?? {};
+        this.items = keep.items ?? [];
         console.log('Reset local data:', this);
         this.save();
-    }
+    },
+
+    initListeners() {
+        MyEventEmitter.on('playerDropItem', () => console.log('playerDropItem localData listener'));
+        MyEventEmitter.on('pickupItem', (item) => {
+            this.addItem(item);
+        })
+    },
 }

@@ -27,6 +27,10 @@ export default class Projectile extends THREE.Object3D {
         this.radius = radius;
 
         this.tempVector = new THREE.Vector3();
+        this.tempVector2 = new THREE.Vector3();
+        this.tempVector3 = new THREE.Vector3();
+        this.headOffset = new THREE.Vector3(0, 1, 0);
+        this.footOffset = new THREE.Vector3(0, -1, 0);
         this.active = true;
         this.gravity = 0; // Whether the projectile is affected by gravity
 
@@ -117,7 +121,10 @@ export default class Projectile extends THREE.Object3D {
 
 
             for (const enemy of Globals.enemyActors) {
-                if (this.position.distanceToSquared(enemy.position) < this.radius) {
+                const enemyHead = this.tempVector2.copy(enemy.position).add(this.headOffset);
+                const enemyFoot = this.tempVector3.copy(enemy.position).add(this.footOffset);
+                if (this.position.distanceToSquared(enemyHead) < this.radius
+                    || this.position.distanceToSquared(enemyFoot) < this.radius) {
                     enemy.takeDamage(Globals.player, { amount: this.damage });
                     this.destroy();
                     break;
@@ -128,7 +135,6 @@ export default class Projectile extends THREE.Object3D {
             if (walls) {
                 this.body.center.copy(this.position);
                 if (walls.geometry.boundsTree.intersectsSphere(this.body)) {
-                    console.log('prjoectile Hit!');
                     this.destroy();
                 }
             }

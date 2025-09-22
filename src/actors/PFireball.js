@@ -16,7 +16,7 @@ export default class PFireball extends Projectile {
         const { texture, material } = this.createMesh();
         this.texture = texture;
         this.material = material;
-        this.setGravity(4.5);
+        this.setGravity(4);
         this.setDamage(25);
 
         if (!this.isRemote) {
@@ -57,11 +57,10 @@ export default class PFireball extends Projectile {
         PFireball.hitFx(this.position);
         MyEventEmitter.emit('fx', { type: 'fireballHit', pos: this.position });
 
-        const explosionRange = 4;
+        const explosionRange = 6;
         const enemiesInRange = Globals.scene.getEnemiesInRange(this.position, explosionRange);
         for (const [enemy, range] of enemiesInRange) {
             const distance = clamp((1 - ((range - this.radius) / explosionRange)), .5, 1);
-            console.log(distance)
             const damage = this.damage * distance;
             const direction = enemy.position.clone().sub(this.position).normalize();
             const force = direction.multiplyScalar(22 * (1 - (range / explosionRange)));
