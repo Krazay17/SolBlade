@@ -1,4 +1,4 @@
-import { Vec3 } from 'cannon';
+import { Vec3 } from 'cannon-es';
 import { Vector3 } from 'three';
 export default class PlayerState {
     constructor(actor, manager, options = {}) {

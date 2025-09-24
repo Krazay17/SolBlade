@@ -1,4 +1,4 @@
-import * as CANNON from 'cannon';
+import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
@@ -14,7 +14,6 @@ import NamePlate from '../core/Nameplate';
 import Globals from '../utils/Globals';
 import soundPlayer from '../core/SoundPlayer';
 import Inventory from './Inventory';
-import ItemRandomizer from '../deprecated/ItemRandomizer';
 
 export default class Player extends THREE.Object3D {
     constructor(game, scene, { x = 0, y = 1, z = 0 }, isRemote = false, camera, id, netData) {
@@ -280,6 +279,9 @@ export default class Player extends THREE.Object3D {
         this.meshBody = meshBody;
         this.scene.actorMeshes.push(meshBody);
         this.animator = new PlayerAnimator(this, newMesh, newMesh.animations);
+        if (this.isRemote) {
+            this.scene.addEnemyMesh(meshBody);
+        }
     }
 
     createBody() {

@@ -85,6 +85,7 @@ class VoiceChat {
                 const audio = this.voiceMap[id];
                 if (!audio) return;
                 const playerPos = this.scene.player.position;
+                if (!playerPos.y) return;
                 if (audio.gain) {
                     audio.gain.gain.value = this.voicesVolume;
                 }

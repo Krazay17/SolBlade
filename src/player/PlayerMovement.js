@@ -1,4 +1,4 @@
-import { Vec3 } from "cannon";
+import { Vec3 } from "cannon-es";
 import LocalData from "../core/LocalData";
 import { projectOnPlane, clampVector } from "../utils/Utils";
 import RunBoost from "./MomentumBoost";
@@ -155,15 +155,15 @@ export default class PlayerMovement {
         this.applyFriction(dt, this.values.air.friction);
 
         const wishdir = this.getInputDirection();
-        if (wishdir.almostZero()) return;
+        if (wishdir.almostZero(0)) return;
 
         this.accelerate(wishdir, this.values.air.speed, this.values.air.accel, dt, this.values.air.tap);
         //this.clampHorizontalSpeed(this.values.air.speed, .01);
     }
 
     bladeStart(pwr = 1) {
-        const v = this.body.velocity.clone();
-        const vN = v.clone();
+        const v = this.tempVec2.copy(this.body.velocity)
+        const vN = this.tempVec3.copy(v.clone())
         vN.normalize();
         const n = this.groundChecker.floorNormal();
         if (!n) return;
@@ -251,7 +251,7 @@ export default class PlayerMovement {
         const newSpeed = Math.max(speed - drop, 0);
 
         const scale = newSpeed / speed;
-        this.body.velocity.mult(scale, this.body.velocity)
+        this.body.velocity.scale(scale, this.body.velocity)
     }
 
     applySlopeFriction(dt, friction) {

@@ -18,10 +18,11 @@ export default class MeshManager {
 
         this.skinMap.set('KnightGirl', '/assets/KnightGirl.glb');
         this.skinMap.set('NinjaDude', '/assets/NinjaDude.glb');
+        this.skinMap.set('julian', '/assets/julian.glb');
     }
 
     meshInitProperties(meshName) {
-        let offset = this.tempVec.set(0, -.65, 0);
+        let offset = this.tempVec.set(0, -.5, 0);
         let rotation = Math.PI;
         let scale = 1;
         switch (meshName) {
@@ -48,6 +49,12 @@ export default class MeshManager {
     getSkeleMesh(meshName) {
         return this.meshPool[meshName] ? this.meshPool[meshName].pop() : null;
     }
+
+    /**
+     * Loads a skeletal mesh by its skin name.
+     * @param {*} skinName 
+     * @returns {Promise<{model: THREE.Group, animations: Array}>} The loaded model and its animations.
+     */
 
     async loadSkeleMesh(skinName) {
         if (this.skinCache[skinName]) {

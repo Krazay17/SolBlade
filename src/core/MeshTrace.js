@@ -4,7 +4,6 @@ import { Capsule } from "three/examples/jsm/Addons.js";
 import { MeshBVH } from "three-mesh-bvh";
 import { MeshBVHHelper } from "three-mesh-bvh";
 import * as THREE from 'three';
-import { int } from "three/tsl";
 
 export default class MeshTrace {
     constructor(scene) {
@@ -71,7 +70,7 @@ export default class MeshTrace {
             return savedDir.dot(direction) > .33 && a.position.distanceTo(actorEyes) < length && !a.isDead;
         });
         if (actors.length === 0) return;
-        this.actorMeshes = this.scene.enemyActors.map(a => a.getMeshBody()).filter(m => m !== null);
+        this.actorMeshes = [...this.scene.getEnemyMeshes()];
         if (this.actorMeshes.length === 0) return;
 
         const right = this.tempVector.crossVectors(this.worldUp, savedDir).normalize();

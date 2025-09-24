@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as CANNON from 'cannon';
+import * as CANNON from 'cannon-es';
 import Crosshair from '../ui/Crosshair';
 import Input from './Input';
 import { setupKeybindWindow, addButton } from '../ui/KeyBinds';
@@ -9,6 +9,10 @@ import MyEventEmitter from './MyEventEmitter';
 import Globals from '../utils/Globals';
 import soundPlayer from './SoundPlayer';
 import { GLTFLoader } from 'three/examples/jsm/Addons.js';
+
+CANNON.Vec3.prototype.clone = function () {
+  return new CANNON.Vec3(this.x, this.y, this.z);
+}
 
 export default class Game {
   constructor(canvas) {

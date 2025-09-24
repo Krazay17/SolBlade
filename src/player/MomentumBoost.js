@@ -1,4 +1,4 @@
-import { Vec3 } from "cannon";
+import { Vec3 } from "cannon-es";
 
 export default class MomentumBoost {
     constructor(actor) {

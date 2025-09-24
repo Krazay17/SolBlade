@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as CANNON from 'cannon';
+import * as CANNON from 'cannon-es';
 import SceneBase from './_SceneBase.js';
 import Player from '../player/Player.js';
 import { getMaterial } from '../core/MaterialManager.js';
@@ -13,7 +13,6 @@ import MeshManager from '../core/MeshManager.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import PartyFrame from '../ui/PartyFrame.js';
 import GameMode from '../core/GameMode.js';
-import Pickup from '../actors/Pickup.js';
 import voiceChat from '../core/VoiceChat.js';
 import { MeshBVH, MeshBVHHelper, acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
@@ -21,6 +20,8 @@ import PFireball from '../actors/PFireball.js';
 import ItemPickup from '../actors/ItemPickup.js';
 import PowerPickup from '../actors/PowerPickup.js';
 import CrownPickup from '../actors/CrownPickup.js';
+import Pawn from '../actors/Pawn.js';
+import Enemy from '../actors/Enemy.js';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -41,6 +42,10 @@ export default class GameScene extends SceneBase {
     this.mapWalls = [];
     this.mergedLevel = null;
     this.enemyActors = [];
+    this.enemyMeshes = [];
+    this.enemyMeshMap = new Map();
+    Globals.enemyActors = this.enemyActors;
+
     this.spawnLevel();
 
     this.player = new Player(this.game, this, LocalData.position || new THREE.Vector3(0, 1, 0), false, this.game.camera);
@@ -48,6 +53,8 @@ export default class GameScene extends SceneBase {
 
     this.partyFrame = new PartyFrame();
 
+    this.testEnemy = new Enemy(this, new THREE.Vector3(1, 10.5, 141), 'julian');
+    this.testEnemy.scale.set(1.5, 1.5, 1.5);
 
     soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
     function playMusiconFirstClick() {
@@ -92,8 +99,7 @@ export default class GameScene extends SceneBase {
   }
 
   spawnProjectile(player, data) {
-    const { type, netId, pos, dir, speed, dur } = data
-    console.log('spawnProjectile')
+    const { type, netId, pos, dir, speed, dur } = data;
     let projectile;
     switch (type) {
       case 'Fireball':
@@ -127,6 +133,15 @@ export default class GameScene extends SceneBase {
   }
   getOtherActors() {
     return Object.values(this.scenePlayers).filter(p => p !== this.player);
+  }
+  getEnemyMeshMap() {
+    return this.enemyMeshMap;
+  }
+  addEnemyMesh(mesh) {
+    this.enemyMeshes.push(mesh);
+  }
+  getEnemyMeshes() {
+    return this.enemyMeshes;
   }
 
   getEnemiesInRange(position, range) {
@@ -162,7 +177,7 @@ export default class GameScene extends SceneBase {
       this.player.update(dt, time);
 
       // KillFloor
-      if (this.player.body.position.y < -10 && !this.player.isDead) {
+      if (this.player.body.position.y < -14 && !this.player.isDead) {
         this.player.die('the void');
       }
 
@@ -200,8 +215,7 @@ export default class GameScene extends SceneBase {
         pickup = new CrownPickup(this, pos, itemId);
         break;
       default:
-        pickup = this.getPickup(itemId) ? this.getPickup(itemId)
-          : new PowerPickup(this, type, pos, itemId);
+        pickup = this.getPickup(itemId) ?? new PowerPickup(this, type, pos, itemId);
         break;
     }
     this.game.graphicsWorld.add(pickup);
@@ -238,7 +252,6 @@ export default class GameScene extends SceneBase {
     const player = new Player(this.game, this, data.pos, true, null, id, data);
     this.scenePlayers[id] = player;
     this.enemyActors.push(player);
-    Globals.enemyActors = this.enemyActors;
     MyEventEmitter.emit('playerJoined', player);
     return player;
   }
@@ -248,6 +261,7 @@ export default class GameScene extends SceneBase {
     if (player) {
       MyEventEmitter.emit('playerLeft', player);
       this.enemyActors.splice(this.enemyActors.indexOf(player), 1);
+      this.enemyMeshes.splice(this.enemyMeshes.indexOf(player.getMeshBody()), 1);
       player.destroy(id);
       delete this.scenePlayers[id];
     }

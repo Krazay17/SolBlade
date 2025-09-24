@@ -1,6 +1,8 @@
+import * as THREE from 'three';
+
 export default {
     game: null,
-    graphicsWorld: null,
+    graphicsWorld: new THREE.Scene(),
     physicsWorld: null,
     player: null,
     playerInfo: null,
