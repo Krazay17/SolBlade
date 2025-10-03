@@ -85,8 +85,8 @@ function bindSocketEvents(myPlayerData) {
     });
     socket.on('playerPositionUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
-            netPlayers[id].targetPos.copy(data.pos);
-            netPlayers[id].targetRot = data.rot;
+            netPlayers[id].targetPosition.copy(data.pos);
+            netPlayers[id].targetRotation = data.rot;
         }
     });
     socket.on('playerStateUpdate', ({ id, data }) => {

@@ -1,5 +1,5 @@
-import Pistol from "./Pistol";
-import Sword from "./Sword";
-import Fireball from "./Fireball";
-//import LaserGun from "./LaserGun";
-export { Pistol, Sword, Fireball };
+import Weapon from "./Weapon";
+import WeaponPistol from "./WeaponPistol";
+import WeaponSword from "./WeaponSword";
+import WeaponFireball from "./WeaponFireball";
+export { Weapon, WeaponPistol, WeaponSword, WeaponFireball };

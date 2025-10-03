@@ -1,5 +1,6 @@
 // utils/MaterialRegistry.js
 import * as CANNON from 'cannon-es';
+import Globals from '../utils/Globals';
 
 const materials = {};
 
@@ -7,6 +8,7 @@ export function getMaterial(name) {
     if (!materials[name]) {
         materials[name] = new CANNON.Material(name);
     }
+    //Globals.csm?.setupMaterial(materials[name]);
     return materials[name];
 }
 

@@ -8,7 +8,7 @@ export default class ItemPickup extends Pickup {
         super(scene, 'item', pos, itemId);
         this.itemManager = new ItemManager();
         this.itemData = itemData || this.itemManager.makeRandomItem();
-        scene.addTickable(this);
+        scene.addActor(this);
 
         this.init();
     }

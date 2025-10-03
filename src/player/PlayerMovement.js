@@ -1,10 +1,13 @@
 import { Vec3 } from "cannon-es";
 import LocalData from "../core/LocalData";
-import { projectOnPlane, clampVector } from "../utils/Utils";
+import { projectOnPlane, clampVector, threeVecToCannon } from "../utils/Utils";
 import RunBoost from "./MomentumBoost";
 import GroundChecker from "./GroundChecker";
 
 export default class PlayerMovement {
+    /**
+     * @param {import('./Player').default} actor
+     */
     constructor(actor) {
         this.actor = actor;
         this.body = actor.body;
@@ -30,8 +33,8 @@ export default class PlayerMovement {
                 friction: 20,
             },
             ground: {
-                friction: 8,
-                accel: 14,
+                friction: 20,
+                accel: 20,
                 speed: 5,
                 tap: 0
             },
@@ -68,6 +71,24 @@ export default class PlayerMovement {
     update(dt) {
         this.momentumBooster.update(dt, this.body.velocity);
     }
+    jumpBuffer() {
+        const slope = 0.7;
+        if (!this.isGrounded(.1)) {
+            if (!this.floorTimer) {
+                this.floorTimer = setTimeout(() => {
+                    this.floorTimer = null;
+                    this.grounded = false;
+                }, 150);
+            }
+        } else {
+            clearTimeout(this.floorTimer);
+            this.floorTimer = null;
+            if (!this.grounded) {
+                // do once on land
+            }
+            this.grounded = true;
+        }
+    }
 
     isGrounded(slopeLimit = 0.7) {
         return this.groundChecker.isGrounded(slopeLimit);
@@ -89,8 +110,8 @@ export default class PlayerMovement {
                 friction: 20,
             },
             ground: {
-                friction: 8,
-                accel: 14,
+                friction: 20,
+                accel: 20,
                 speed: 5,
                 tap: 0
             },
@@ -133,9 +154,14 @@ export default class PlayerMovement {
     }
 
     attackMove(dt, friction = null, speed = null) {
+        const wishdir = this.getInputDirection();
+        const isStill = this.body.velocity.almostZero(.1) && wishdir.almostZero(.1);
+        if (isStill) {
+            this.body.velocity.set(0, 0, 0);
+            return;
+        }
         this.applyFriction(dt, friction ?? this.values.attack.friction);
         this.body.velocity.y *= .9975;
-        const wishdir = this.getInputDirection();
         this.accelerate(wishdir, speed ?? this.values.attack.speed, this.values.attack.accel, dt, this.values.attack.tap);
     }
 
@@ -145,7 +171,7 @@ export default class PlayerMovement {
         let wishdir = this.getInputDirection();
         let wishspeed = this.values.ground.speed + this.momentumBooster.increaseBoost(dt);
         if (wishdir.almostZero()) return;
-        wishdir = projectOnPlane(wishdir, this.groundChecker.floorNormal());
+        wishdir = projectOnPlane(wishdir, threeVecToCannon(this.groundChecker.floorNormal()));
 
         this.accelerate(wishdir, wishspeed, this.values.ground.accel, dt, this.values.ground.tap);
         this.clampHorizontalSpeed(wishspeed, .02);
@@ -165,7 +191,7 @@ export default class PlayerMovement {
         const v = this.tempVec2.copy(this.body.velocity)
         const vN = this.tempVec3.copy(v.clone())
         vN.normalize();
-        const n = this.groundChecker.floorNormal();
+        const n = threeVecToCannon(this.groundChecker.floorNormal(1));
         if (!n) return;
         const vdot = v.dot(n);
         let boost = 1 + ((1 - this.upDir.dot(n)) * (1 - Math.abs(vN.dot(n))));
@@ -188,7 +214,7 @@ export default class PlayerMovement {
         let wishspeed = this.values.blade.speed + this.momentumBooster.increaseBoost(dt / 4);
         if (wishdir.almostZero()) return;
         // Project wishdir onto slope plane
-        wishdir = projectOnPlane(wishdir, this.groundChecker.floorNormal());
+        wishdir = projectOnPlane(wishdir, threeVecToCannon(this.groundChecker.floorNormal(.9)));
         wishdir.normalize();
         this.accelerate(
             wishdir,
@@ -204,6 +230,7 @@ export default class PlayerMovement {
         const n = this.groundChecker.floorNormal();
         if (!n) return;
 
+        // Project velocity onto slope plane
         // Project gravity onto the slope plane
         const gravity = this.tempVec2.set(0, -9.8 * pwr, 0);
         const gravityDot = gravity.dot(n);
@@ -255,7 +282,7 @@ export default class PlayerMovement {
     }
 
     applySlopeFriction(dt, friction) {
-        const n = this.groundChecker.floorNormal();
+        const n = threeVecToCannon(this.groundChecker.floorNormal(1));
         if (!n) {
             this.applyFriction(dt, friction);
             return;

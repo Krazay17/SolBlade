@@ -1,12 +1,9 @@
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
-import { getMaterial } from '../core/MaterialManager';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
 import * as Weapon from './weapons/index';
-import PlayerAnimator from './PlayerAnimator';
 import { tryPlayerDamage, tryUpdatePosition, tryUpdateState, tryApplyCC, netSocket } from '../core/NetManager';
-import StateManager from './playerStates/_StateManager';
 import CameraFX from '../core/CameraFX';
 import PlayerMovement from './PlayerMovement';
 import DevMenu from '../ui/DevMenu';
@@ -14,33 +11,24 @@ import NamePlate from '../core/Nameplate';
 import Globals from '../utils/Globals';
 import soundPlayer from '../core/SoundPlayer';
 import Inventory from './Inventory';
+import GameScene from '../scenes/GameScene';
+import Pawn from '../actors/Pawn';
+import PlayerStateManager from './playerStates/PlayerStateManager';
 
-export default class Player extends THREE.Object3D {
-    constructor(game, scene, { x = 0, y = 1, z = 0 }, isRemote = false, camera, id, netData) {
-        super();
-        this.game = game;
-        this.scene = scene;
-        this.camera = camera;
-        this.isRemote = isRemote;
-        this.currentPosition = new CANNON.Vec3(x, y + 0.1, z);
-        this.position.copy(this.currentPosition);
+export default class Player extends Pawn {
+    /**
+     * @param {GameScene} scene 
+     */
+    constructor(scene, pos = { x: 0, y: 1, z: 0 }, isRemote = false, netId = null, netData = null) {
+        super(scene, pos, 'KnightGirl', .5, 1, { isRemote, netId });
+        this.camera = Globals.camera;
+
+        //this.isRemote = isRemote;
         this.name = isRemote ? netData.name || 'Player' : LocalData.name || 'Player';
-        this.netId = id || null;
-        game.graphicsWorld.add(this);
-        this.skinCache = {};
+        this.netId = netId || null;
 
         this.isDead = false;
-        this.height = 1;
-        this.radius = 0.5;
         this.parry = false;
-        this.mesh = null;
-        this.meshBody = null;
-        this.mixer;
-        this.animations = {};
-        this.currentAnimState = isRemote ? netData.state || 'idle' : 'idle';
-        this.bodyMesh = null;
-        this.meshes = [];
-        this.setMesh();
 
         this.health = netData?.health || LocalData.health || 100;
         this.energy = 100;
@@ -52,38 +40,41 @@ export default class Player extends THREE.Object3D {
 
         soundPlayer.loadPosAudio('playerHit', '/assets/PlayerHit.mp3');
 
+        // fix this later
+        this.animator = this.animationManager;
+
         // Local Player setup
         if (!isRemote) {
-            this.input = game.input;
+            this.input = Globals.input;
             Globals.playerInfo.setActor(this);
-
-            this.maxSpeed = 5;
-            this.acceleration = 300;
-            this.deceleration = 300;
-            this.jump = 9;
 
             this.direction = new CANNON.Vec3();
             this.tempVector = new THREE.Vector3();
 
-
-            this.weaponL = new Weapon.Pistol(this, scene);
-            this.weaponR = new Weapon.Sword(this, scene);
+            /**@type {Weapon.Weapon} */
+            this.weaponL = new Weapon.WeaponPistol(this, scene);
+            /**@type {Weapon.Weapon} */
+            this.weaponR = new Weapon.WeaponSword(this, scene);
+            /**@type {Weapon.Weapon} */
             this.spell1 = null;
+            /**@type {Weapon.Weapon} */
             this.spell2 = null;
+            /**@type {Weapon.Weapon} */
             this.spell3 = null;
+            /**@type {Weapon.Weapon} */
             this.spell4 = null;
+
             this.inventory = new Inventory(this);
 
             this.cameraArm = new THREE.Object3D();
-            this.cameraArm.position.set(.5, 1, 0);
+            this.cameraArm.position.set(.5, 1.1, 0);
             this.add(this.cameraArm);
             this.camera.position.z = 1.5;
             this.cameraArm.add(this.camera);
             CameraFX.init(this.camera);
-            this.createBody();
 
             this.movement = new PlayerMovement(this);
-            this.stateManager = new StateManager(this);
+            this.stateManager = new PlayerStateManager(this);
             this.devMenu = new DevMenu(this, this.movement);
 
             MyEventEmitter.on('KeyPressed', (key) => {
@@ -92,21 +83,24 @@ export default class Player extends THREE.Object3D {
                 }
             });
 
-            MyEventEmitter.on('debugTest', () => {
-                console.log(this.randomTest?.getRandomItem())
-            });
+            MyEventEmitter.on('test', () => {
+                this.parried();
+            })
 
         } else {
             // Remote Player
-            this.targetPos = new THREE.Vector3(x, y, z);
-            this.targetRot = 0;
-            this.namePlate = new NamePlate(this, this.height + 0.5);
 
+            this.namePlate = new NamePlate(this, this.height + 0.5);
             // !!!!pre load crown for net player!!!!
             if (netData && netData.hasCrown) {
                 this.pickupCrown();
             }
         }
+    }
+
+    // FIX THIS. things still reference the animator instead of the animationManager
+    meshAssigned() {
+        this.animator = this.animationManager;
     }
 
     async pickupCrown() {
@@ -116,10 +110,6 @@ export default class Player extends THREE.Object3D {
             this.crownMesh.scale.set(.4, .4, .4);
         }
         this.add(this.crownMesh);
-    }
-
-    getMeshBody() {
-        return this.meshBody;
     }
 
     dropCrown() {
@@ -139,13 +129,13 @@ export default class Player extends THREE.Object3D {
         const spellName = spell?.name || null;
         switch (spellName) {
             case 'Fireball':
-                spell = new Weapon.Fireball(this, this.scene, true);
+                spell = new Weapon.WeaponFireball(this, this.scene, true);
                 break;
             case 'Pistol':
-                spell = new Weapon.Pistol(this, this.scene, true);
+                spell = new Weapon.WeaponPistol(this, this.scene, true);
                 break;
             case 'Sword':
-                spell = new Weapon.Sword(this, this.scene, true);
+                spell = new Weapon.WeaponSword(this, this.scene, true);
                 break;
             default:
                 spell = null;
@@ -179,6 +169,7 @@ export default class Player extends THREE.Object3D {
     }
 
     update(dt, time) {
+        super.update(dt)
         if (!this.mesh) return;
 
         // Local Player
@@ -188,33 +179,15 @@ export default class Player extends THREE.Object3D {
             this.addEnergy(this.energyRegen, dt);
             if (this.body) {
                 if (this.movement) this.movement.update(dt);
-                if (this.stateManager) this.stateManager.update(dt, time);
                 this.handleInput(dt, time);
                 this.position.copy(this.body.position);
                 LocalData.position = this.position;
                 CameraFX.update(dt);
             }
-        } else {
-            // Remote Player
-            if (this.position.distanceToSquared(this.targetPos) > 2) {
-                this.position.copy(this.targetPos);
-            } else {
-                this.position.lerp(this.targetPos, 60 * dt);
-            }
-            if (Math.abs(this.rotation.y - this.targetRot) > 5) {
-                this.rotation.y = this.targetRot;
-            } else {
-                this.rotation.y += (this.targetRot - this.rotation.y) * 60 * dt;
-            }
-        }
-
-        // Local and Remote Player
-        if (this.animator) {
-            this.animator.update(dt);
         }
     }
 
-    handleInput(dt) {
+    handleInput(dt, time) {
         if (!this.input) return;
         // Rotate player
         this.rotation.y = this.input.yaw;        // Yaw
@@ -222,31 +195,37 @@ export default class Player extends THREE.Object3D {
 
         if (this.input.mice[0] && this.input.pointerLocked) {
             const direction = this.camera.getWorldDirection(new THREE.Vector3());
-            if (this.weaponL.use(performance.now(), this.position, direction)) {
+            if (this.stateManager.activeState.canExit() && this.weaponL.canUse(time)) {
+                this.weaponL.use(performance.now(), this.position, direction);
             }
         }
         if (this.input.mice[2] && this.input.pointerLocked) {
             const direction = this.camera.getWorldDirection(new THREE.Vector3());
-            if (this.weaponR.use(performance.now(), this.position, direction)) {
+            if (this.stateManager.activeState.canExit() && this.weaponR.canUse(time)) {
+                this.weaponR.use(performance.now(), this.position, direction);
             }
         }
         if (this.input.actionStates.spell1 && this.spell1) {
-            if (this.spell1.spellUse(performance.now())) {
+            if (this.stateManager.activeState.canExit() && this.spell1.canSpellUse(performance.now())) {
+                this.spell1.spellUse(performance.now());
                 MyEventEmitter.emit('spellUsed', { slot: '1', cd: this.spell1.cooldown });
             }
         }
         if (this.input.actionStates.spell2 && this.spell2) {
-            if (this.spell2.spellUse(performance.now())) {
+            if (this.stateManager.activeState.canExit() && this.spell2.canSpellUse(performance.now())) {
+                this.spell2.spellUse(performance.now());
                 MyEventEmitter.emit('spellUsed', { slot: '2', cd: this.spell2.cooldown });
             }
         }
         if (this.input.actionStates.spell3 && this.spell3) {
-            if (this.spell3.spellUse(performance.now())) {
+            if (this.stateManager.activeState.canExit() && this.stateManager.activeState.canExit() && this.spell3.canSpellUse(performance.now())) {
+                this.spell3.spellUse(performance.now());
                 MyEventEmitter.emit('spellUsed', { slot: '3', cd: this.spell3.cooldown });
             }
         }
         if (this.input.actionStates.spell4 && this.spell4) {
-            if (this.spell4.spellUse(performance.now())) {
+            if (this.stateManager.activeState.canExit() && this.spell4.canSpellUse(performance.now())) {
+                this.spell4.spellUse(performance.now());
                 MyEventEmitter.emit('spellUsed', { slot: '4', cd: this.spell4.cooldown });
             }
         }
@@ -265,76 +244,6 @@ export default class Player extends THREE.Object3D {
         if (this.input.keys['Digit7']) {
             this.stateManager.tryEmote('twerk');
         }
-    }
-
-    async setMesh(skinName = 'KnightGirl') {
-        if (this.meshName === skinName) return;
-        const newMesh = await this.scene.meshManager.createSkeleMesh(skinName);
-        this.meshName = skinName;
-        this.remove(this.mesh);
-        this.mesh = newMesh;
-        this.add(this.mesh);
-        const meshBody = newMesh.meshBody;
-        meshBody.userData.owner = this;
-        this.meshBody = meshBody;
-        this.scene.actorMeshes.push(meshBody);
-        this.animator = new PlayerAnimator(this, newMesh, newMesh.animations);
-        if (this.isRemote) {
-            this.scene.addEnemyMesh(meshBody);
-        }
-    }
-
-    createBody() {
-        const material = getMaterial('playerMaterial');
-        const contactMaterial = new CANNON.ContactMaterial(
-            material,
-            getMaterial('defaultMaterial'),
-            {
-                friction: 0,
-                restitution: 0,
-                contactEquationRelaxation: 100,
-                id: 'playerGroundContact',
-            });
-        this.game.physicsWorld.addContactMaterial(contactMaterial);
-        const sphere = new CANNON.Sphere(this.radius);
-        //const topSphere = new CANNON.Sphere(this.radius);
-
-        this.body = new CANNON.Body({
-            shape: sphere,
-            position: this.currentPosition,
-            mass: 1,
-            fixedRotation: true,
-            material: material,
-            collisionFilterGroup: 2,
-            collisionFilterMask: -1,
-        });
-        // this.body.addShape(topSphere, new CANNON.Vec3(0, this.radius * 2, 0));
-        this.game.physicsWorld.addBody(this.body);
-        this.body.id = 'player';
-        if (!this.scene.levelLoaded) {
-            this.body.sleep();
-            MyEventEmitter.once('levelLoaded', () => {
-                this.body.wakeUp();
-            });
-        }
-        // this.body.addShape(sphere, new CANNON.Vec3(0, this.radius * 2, 0));
-        // this.body.addShape(sphere, new CANNON.Vec3(0, this.radius * 4, 0));
-        // this.scene.glbLoader.load('/assets/capsule.glb', (gltf) => {
-        //     let poly;
-        //     gltf.scene.traverse((child) => {
-        //         if (child.isMesh) {
-        //             poly = glbToPoly(child);
-        //             this.body.addShape(poly, new CANNON.Vec3(0, this.height / 2, 0));
-        //         }
-        //     });
-        // });
-
-        // this.body.addEventListener('collide', (event) => {
-        //     this.isTouching = true;
-        // });
-        // MyEventEmitter.on('preUpdate', () => {
-        //     this.isTouching = false;
-        // });
     }
 
     getCameraDirection() {
@@ -401,16 +310,16 @@ export default class Player extends THREE.Object3D {
     }
 
     parried(attacker) {
-        const pos = attacker.position || attacker;
+        const pos = attacker?.position ?? attacker ?? new THREE.Vector3(0, 0, 0);
         soundPlayer.playPosAudio('parry', this.position, 'assets/Parry.mp3');
-        this.animator?.hitFreeze(600, 0, 1);
+        this.animationManager?.changeTimeScale(0, 600);
 
         if (!this.isRemote) {
             this.stateManager.setState('parry', { duration: 600, pos });
         } else {
             clearTimeout(this.parryTimeoutId);
             this.parryTimeoutId = setTimeout(() => {
-                this.animator?.hitFreeze(300, -.5, 1);
+                this.animationManager?.changeTimeScale(-.5, 300);
             }, 300);
         }
     }
@@ -497,22 +406,22 @@ export default class Player extends THREE.Object3D {
     }
     destroy(id) {
         if (this.body) {
-            this.game.physicsWorld.removeBody(this.body);
+            Globals.physicsWorld.removeBody(this.body);
             this.body = null;
         }
         if (this) {
-            this.game.graphicsWorld.remove(this);
+            Globals.graphicsWorld.remove(this);
         }
         if (this.mesh) {
             this.mesh = null;
         }
     }
     getAnimState() {
-        return this.animator ? this.animator.stateName : null;
+        return this.animationManager ? this.animationManager.currentAnimation : null;
     }
-    setAnimState(state) {
-        if (this.animator) {
-            this.animator.setAnimState(state);
+    setAnimState(anim) {
+        if (this.animationManager) {
+            this.animationManager.playAnimation(anim, true);
         }
     }
     setupCapsule(height, radius) {

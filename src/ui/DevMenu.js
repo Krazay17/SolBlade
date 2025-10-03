@@ -33,7 +33,7 @@ export default class DevMenu {
         });
 
         const frictionMax = 20;
-        const accelMax = 15;
+        const accelMax = 20;
         const speedMax = 20;
         const tapMax = 1;
         this.movementSliders = {

@@ -6,7 +6,8 @@ import { MeshBVH, SAH } from 'three-mesh-bvh';
 export default class MeshManager {
     constructor(game) {
         this.game = game;
-        this.loader = game.glbLoader;
+        this.loader = game.loadingManager.gltfLoader;
+        this.texLoader = game.loadingManager.textureLoader;
         this.meshMap = new Map();
         this.meshPool = {};
         this.skinCache = {};
@@ -14,11 +15,11 @@ export default class MeshManager {
         this.texMap = new Map();
         this.tempVec = new Vector3();
 
-        this.texLoader = new THREE.TextureLoader();
 
         this.skinMap.set('KnightGirl', '/assets/KnightGirl.glb');
         this.skinMap.set('NinjaDude', '/assets/NinjaDude.glb');
         this.skinMap.set('julian', '/assets/julian.glb');
+        this.skinMap.set('LavaGolem', '/assets/LavaGolem.glb');
     }
 
     meshInitProperties(meshName) {
@@ -29,6 +30,13 @@ export default class MeshManager {
             case 'KnightGirl':
                 break;
             case 'NinjaDude':
+                break;
+            case 'julian':
+                rotation = 0;
+                break;
+            case 'LavaGolem':
+                offset.y = -.22;
+                rotation = 0;
                 break;
             default:
                 console.log('Initializing default properties');
@@ -87,19 +95,31 @@ export default class MeshManager {
         });
     }
 
+    /**returns clonedMesh.meshBody, clonedMesh.animations */
     async createSkeleMesh(skinName) {
         const pooledMesh = this.getSkeleMesh(skinName);
         if (pooledMesh) {
+            console.log(pooledMesh);
             return pooledMesh;
         }
-
         const { model, animations } = await this.loadSkeleMesh(skinName);
         const clonedMesh = SkeletonUtils.clone(model);
         clonedMesh.animations = animations;
         let meshBody = null;
         clonedMesh.traverse((child) => {
-            if (child.isMesh && child.name.includes('BodyMesh')) {
-                meshBody = child;
+            //console.log(child.name, child.type);
+            if (child.name.includes('BodyMesh')) {
+                // If child is a Group, find its SkinnedMesh children
+                if (child.type === "Group") {
+                    const skinned = child.children.find(c => c.isSkinnedMesh);
+                    if (skinned) {
+                        meshBody = skinned;
+                        //console.log('Found SkinnedMesh in BodyMesh group:', meshBody);
+                    }
+                } else if (child.isSkinnedMesh) {
+                    meshBody = child;
+                    //console.log('Found SkinnedMesh:', meshBody);
+                }
             }
         });
         clonedMesh.meshBody = meshBody;

@@ -1,8 +1,10 @@
 import * as THREE from 'three';
+import Globals from '../utils/Globals';
 
 export default class SkyBox extends THREE.Object3D {
     constructor() {
         super();
+        this.textureLoader = Globals.game.loadingManager.textureLoader;
         this.createSkyBox();
         this.rotatingFilter1 = this.createRotatingFilter();
         this.rotatingFilter2 = this.createRotatingFilter('assets/SkyFilter2.webp', 1000);
@@ -10,7 +12,7 @@ export default class SkyBox extends THREE.Object3D {
 
     createSkyBox() {
         const geometry = new THREE.SphereGeometry(2500);
-        const myTexture = new THREE.TextureLoader().load('assets/RedSky0.webp');
+        const myTexture = this.textureLoader.load('assets/RedSky0.webp');
         const myMaterial = new THREE.MeshBasicMaterial({
             map: myTexture,
             side: THREE.BackSide
@@ -21,7 +23,7 @@ export default class SkyBox extends THREE.Object3D {
 
     createRotatingFilter(texturePath = 'assets/SkyFilter.webp', size = 1100) {
         const geometry = new THREE.SphereGeometry(size);
-        const texture = new THREE.TextureLoader().load(texturePath);
+        const texture = this.textureLoader.load(texturePath);
         const material = new THREE.MeshBasicMaterial({
             map: texture,
             side: THREE.BackSide,

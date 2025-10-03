@@ -1,11 +1,17 @@
 import * as THREE from 'three';
+import { World } from 'cannon-es';
+import GameScene from '../scenes/GameScene';
+import { CSM } from 'three/examples/jsm/Addons.js';
 
 export default {
     game: null,
-    graphicsWorld: new THREE.Scene(),
+    /**@type {THREE.Scene} */
+    graphicsWorld: null,
+    /**@type {World} */
     physicsWorld: null,
     player: null,
     playerInfo: null,
+    /**@type {GameScene} */
     scene: null,
     input: null,
     camera: null,
@@ -13,4 +19,6 @@ export default {
     socket: null,
     enemyActors: [],
     mapWalls: [],
+    /**@type {CSM} */
+    csm: null,
 }

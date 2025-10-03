@@ -9,6 +9,9 @@ export default class RunState extends PlayerState {
     }
     update(dt) {
         this.actor.movement.groundMove(dt);
+        const animScale = 1 + this.movement.momentumBooster.getBoost() / 20;
+
+        this.actor.animationManager?.changeTimeScale(animScale, 2);
 
         if (!this.actor.movement.isGrounded()) {
             this.manager.setState('fall');

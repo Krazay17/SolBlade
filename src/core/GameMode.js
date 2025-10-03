@@ -49,9 +49,6 @@ export default class GameMode {
             this.startGame();
         });
         MyEventEmitter.on('playerDied', ({ player, source }) => {
-            this.actor.dropCrown();
-            if (!this.hasCrown) return;
-            this.hasCrown = false;
             let pos;
             switch (source) {
                 case 'the void':
@@ -61,7 +58,8 @@ export default class GameMode {
                     pos = this.actor.position;
             }
             pos.y += 1;
-            netSocket.emit('dropCrown', pos);
+
+            this.dropCrown(pos);
         });
         MyEventEmitter.on('dropCrown', () => {
         });
@@ -93,6 +91,22 @@ export default class GameMode {
                 player.element = this.addPlayer(player);
             }
         };
+        this.rangeCheck();
+    }
+    rangeCheck() {
+        if (this.rangeCheckTimer) clearInterval(this.rangeCheckTimer);
+        this.rangeCheckTimer = setInterval(() => {
+            const dist = this.actor.position.length();
+            if (dist > 58) {
+                this.dropCrown({ x: 0, y: 1, z: 0 });
+            }
+        }, 500);
+    }
+    dropCrown(pos) {
+        this.actor.dropCrown();
+        if (!this.hasCrown) return;
+        this.hasCrown = false;
+        netSocket.emit('dropCrown', pos);
     }
     createGamemodeUI() {
         const ui = document.createElement('div');
@@ -128,6 +142,7 @@ export default class GameMode {
 
     endGame(winner) {
         this.gameOn = false;
+        if (this.rangeCheckTimer) clearInterval(this.rangeCheckTimer);
         if (this.gamemodeUI) {
             this.gamemodeUI.style.display = 'none';
         }

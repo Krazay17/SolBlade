@@ -2,8 +2,9 @@ import * as THREE from 'three';
 import Globals from '../utils/Globals.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import soundPlayer from '../core/SoundPlayer.js';
+import Actor from './Actor.js';
 
-export default class Pickup extends THREE.Object3D {
+export default class Pickup extends Actor {
     constructor(scene, type, position, itemId = null) {
         super();
         this.scene = scene;

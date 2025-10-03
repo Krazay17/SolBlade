@@ -37,7 +37,7 @@ export default class BladeState extends PlayerState {
             MyEventEmitter.emit('fx', { type: 'dash', pos: this.actor.position });
             return;
         }
-        this.actor.animator?.setAnimState('crouch', true);
+        this.actor.animator?.setAnimState('crouch', false);
     }
     update(dt) {
         if (this.dashTimer > performance.now()) {
@@ -47,7 +47,7 @@ export default class BladeState extends PlayerState {
         this.actor.movement.bladeMove(dt);
 
         if (this.jumpCD < performance.now()) {
-            this.actor.animator?.setAnimState('crouch', true);
+            this.actor.animator?.setAnimState('crouch', false);
         }
 
         if (!this.input.actionStates.blade || this.actor.energy <= 0) {
@@ -71,7 +71,7 @@ export default class BladeState extends PlayerState {
             clearTimeout(this.floorTimer);
             this.floorTimer = null;
             if (!this.grounded) {
-                this.actor.movement.bladeStart();
+                //this.actor.movement.bladeStart();
             }
             this.grounded = true;
         }

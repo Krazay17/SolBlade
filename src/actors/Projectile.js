@@ -1,8 +1,9 @@
 import * as THREE from 'three';
 import Globals from '../utils/Globals';
 import MyEventEmitter from '../core/MyEventEmitter';
+import Actor from './Actor';
 
-export default class Projectile extends THREE.Object3D {
+export default class Projectile extends Actor {
     constructor(params = {}, net = {}) {
         super();
 
@@ -20,6 +21,8 @@ export default class Projectile extends THREE.Object3D {
             netId = null
         } = net;
 
+        this.textureLoader = Globals.game.loadingManager.textureLoader;
+
         this.isRemote = isRemote;
         this.init(pos, dir, speed, dur, scale);
         this.mesh = null;
@@ -30,11 +33,11 @@ export default class Projectile extends THREE.Object3D {
         this.tempVector2 = new THREE.Vector3();
         this.tempVector3 = new THREE.Vector3();
         this.headOffset = new THREE.Vector3(0, 1, 0);
-        this.footOffset = new THREE.Vector3(0, -1, 0);
+        this.footOffset = new THREE.Vector3(0, -.5, 0);
         this.active = true;
         this.gravity = 0; // Whether the projectile is affected by gravity
 
-        Globals.scene.addTickable(this);
+        Globals.scene.addActor(this);
         Globals.graphicsWorld.add(this);
 
         if (this.isRemote) {
@@ -74,7 +77,7 @@ export default class Projectile extends THREE.Object3D {
     }
 
     createMesh() {
-        const texture = new THREE.TextureLoader().load('assets/SkyFilter2.webp')
+        const texture = this.textureLoader.load('assets/SkyFilter2.webp')
         const geom = new THREE.SphereGeometry(this.radius, 16, 16);
         const material = new THREE.MeshLambertMaterial({
             map: texture,
@@ -120,12 +123,16 @@ export default class Projectile extends THREE.Object3D {
             }
 
 
-            for (const enemy of Globals.enemyActors) {
+            for (const enemy of Globals.scene.getActors()) {
+                if (enemy === this) continue;
+                if (enemy === Globals.player) continue;
+                this.headOffset.set(0, enemy.height, 0);
+                this.footOffset.set(0, -enemy.radius, 0);
                 const enemyHead = this.tempVector2.copy(enemy.position).add(this.headOffset);
                 const enemyFoot = this.tempVector3.copy(enemy.position).add(this.footOffset);
                 if (this.position.distanceToSquared(enemyHead) < this.radius
                     || this.position.distanceToSquared(enemyFoot) < this.radius) {
-                    enemy.takeDamage(Globals.player, { amount: this.damage });
+                    enemy.takeDamage?.(Globals.player, { amount: this.damage });
                     this.destroy();
                     break;
                 }
@@ -150,6 +157,10 @@ export default class Projectile extends THREE.Object3D {
         this.gravity = amount;
     }
 
+    takeDamage() {
+        this.destroy()
+    }
+
     destroy() {
         this.active = false;
         if (this.parent) {
@@ -160,7 +171,7 @@ export default class Projectile extends THREE.Object3D {
             this.mesh.geometry.dispose();
             this.mesh.material.dispose();
         }
-        Globals.scene.removeTickable(this);
+        Globals.scene.removeActor(this);
         if (this.isRemote) return;
 
         MyEventEmitter.emit('projectileDestroyed', this.netId);

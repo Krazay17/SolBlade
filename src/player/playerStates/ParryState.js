@@ -24,7 +24,7 @@ export default class ParryState extends PlayerState {
         }
     }
     exit() {
-        this.actor.animator?.hitFreeze(300, -.5, 1);
+        this.actor.animator?.hitFreeze(-.5, 300);
         this.actor.body.wakeUp();
         this.actor.body.velocity.set(this.direction.x, this.direction.y, this.direction.z);
         this.actor.setParry(false);

@@ -61,13 +61,15 @@ export default class Input {
     setupKeybindWindow();
     this.addKeys();
   }
+  update(dt) {
+  }
 
   bindings() {
     this.domElement.addEventListener('keypress', (e) => {
       if (this.inputBlocked) return;
       MyEventEmitter.emit('KeyPressed', e.code);
       if (e.code === 'Digit5') {
-        MyEventEmitter.emit('debugTest');
+        MyEventEmitter.emit('test');
       }
       const action = this.actions[e.code];
       if (action) this.buttonPressed(action);

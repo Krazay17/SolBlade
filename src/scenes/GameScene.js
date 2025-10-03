@@ -16,25 +16,31 @@ import GameMode from '../core/GameMode.js';
 import voiceChat from '../core/VoiceChat.js';
 import { MeshBVH, MeshBVHHelper, acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import PFireball from '../actors/PFireball.js';
+import ProjectileFireball from '../actors/ProjectileFireball.js';
 import ItemPickup from '../actors/ItemPickup.js';
 import PowerPickup from '../actors/PowerPickup.js';
 import CrownPickup from '../actors/CrownPickup.js';
-import Pawn from '../actors/Pawn.js';
-import Enemy from '../actors/Enemy.js';
+import PawnManager from '../core/PawnManager.ts';
+import Actor from '../actors/Actor.ts';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
+
 export default class GameScene extends SceneBase {
   onEnter() {
     this.name = 'level1';
-    this.tickables = [];
     this.levelLoaded = false;
     this.spawnPoints = [];
     this.scenePlayers = {};
     this.projectiles = [];
+
+    /**@type {Actor[]} */
+    this.actors = [];
+
+    /**@type {Player[]} */
+    this.players = [];
 
     this.meshManager = new MeshManager(this.game);
     this.actorMeshes = [];
@@ -48,13 +54,19 @@ export default class GameScene extends SceneBase {
 
     this.spawnLevel();
 
-    this.player = new Player(this.game, this, LocalData.position || new THREE.Vector3(0, 1, 0), false, this.game.camera);
+    this.pawnManager = new PawnManager(this);
+    this.player = this.pawnManager.spawnPlayer(LocalData.position || new THREE.Vector3(0, 1, 0));
+    this.pawnManager.setPlayer(this.player);
+    //const enemy = this.pawnManager.spawnEnemy('LavaGolem', new THREE.Vector3(0, 13, 141));
+    // const julians = 1;
+    // for (let i = 0; i < julians; i++) {
+    //   this.pawnManager.spawnEnemy('julian', new THREE.Vector3(0, 16, 147 + i))
+    // }
+
     Globals.player = this.player;
+    this.players.push(this.player);
 
     this.partyFrame = new PartyFrame();
-
-    this.testEnemy = new Enemy(this, new THREE.Vector3(1, 10.5, 141), 'julian');
-    this.testEnemy.scale.set(1.5, 1.5, 1.5);
 
     soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
     function playMusiconFirstClick() {
@@ -80,54 +92,47 @@ export default class GameScene extends SceneBase {
 
     this.initListeners();
   }
-
   initListeners() {
     MyEventEmitter.on('playerDropItem', ({ item, pos }) => {
       if (netSocket.connected) return;
       this.spawnPickup('item', pos, null, item);
     })
   }
-  addTickable(tickable) {
-    this.tickables.push(tickable);
+  getPawnManager() { return this.pawnManager };
+  /**@param {Actor} actor */
+  addActor(actor) {
+    this.actors.push(actor);
   }
-
-  removeTickable(tickable) {
-    const index = this.tickables.indexOf(tickable);
-    if (index !== -1) {
-      this.tickables.splice(index, 1);
-    }
+  removeActor(actor) {
+    this.actors.splice(this.actors.indexOf(actor), 1);
   }
-
+  getActors() { return this.actors; }
   spawnProjectile(player, data) {
     const { type, netId, pos, dir, speed, dur } = data;
     let projectile;
     switch (type) {
       case 'Fireball':
-        projectile = new PFireball({ pos, dir, speed, dur }, { isRemote: true, netId });
+        projectile = new ProjectileFireball({ pos, dir, speed, dur }, { isRemote: true, netId });
         break;
     }
     this.projectiles.push(projectile);
     return projectile;
   }
-
   moveProjectile(data) {
     const { netId, pos } = data;
     const projectile = this.projectiles.find(p => p.netId === netId);
     if (!projectile) return;
     projectile.setTargetPos(pos);
   }
-
   removeProjectile(data) {
     const id = data;
     const projectile = this.projectiles.find(p => p.netId === id);
     if (!projectile) return;
     projectile.destroy();
   }
-
   getIsConnected() {
     return netSocket.connected;
   }
-
   getOtherActorMeshes() {
     return this.actorMeshes.filter(a => a !== this.player.meshBody);
   }
@@ -137,13 +142,15 @@ export default class GameScene extends SceneBase {
   getEnemyMeshMap() {
     return this.enemyMeshMap;
   }
+  addEnemy(actor) {
+    this.enemyActors.push(actor);
+  }
   addEnemyMesh(mesh) {
     this.enemyMeshes.push(mesh);
   }
   getEnemyMeshes() {
     return this.enemyMeshes;
   }
-
   getEnemiesInRange(position, range) {
     const enemiesInRange = new Map();
     for (const enemy of this.enemyActors) {
@@ -154,15 +161,12 @@ export default class GameScene extends SceneBase {
     }
     return enemiesInRange;
   }
-
   getMapWalls() {
     return this.mapWalls;
   }
-
   getMergedLevel() {
     return this.mergedLevel || null;
   }
-
   getScenePlayersPos() {
     const positions = {};
     Object.values(this.scenePlayers).forEach(player => {
@@ -170,40 +174,33 @@ export default class GameScene extends SceneBase {
     });
     return positions;
   }
-
   update(dt, time) {
-    this.tickables.forEach(t => t.update(dt, time));
-    if (this.player && this.levelLoaded) {
-      this.player.update(dt, time);
-
-      // KillFloor
-      if (this.player.body.position.y < -14 && !this.player.isDead) {
-        this.player.die('the void');
-      }
-
-      // Look for pickups
-      if (!this.player.isDead) {
-        if (this.pickupActors.length > 0) {
-          const playerPos = this.player.body.position;
-          const pickupRadius = 1.75;
-          this.pickupActors.forEach(pickup => {
-            const dist = playerPos.distanceTo(pickup.position);
-            if (dist < pickupRadius) {
-              pickup.onCollect(this.player);
-            }
-          });
-        }
-      }
-    }
-    if (this.scenePlayers) {
-      Object.values(this.scenePlayers).forEach(player => {
-        player.update(dt, time);
-      });
-    }
     if (this.skyBox) this.skyBox.update();
+    if (!this.levelLoaded) return;
+    for (const a of this.actors) { a.update(dt, time); }
+    if (this.pawnManager) {
+      this.pawnManager.update(dt, time);
+    }
+    if (!this.player) return;
+    // KillFloor
+    if (this.player.body.position.y < -25 && !this.player.isDead) {
+      this.player.die('the void');
+    }
+    // Look for pickups
+    if (!this.player.isDead) {
+      if (this.pickupActors.length > 0) {
+        const playerPos = this.player.body.position;
+        const pickupRadius = 1.75;
+        this.pickupActors.forEach(pickup => {
+          const dist = playerPos.distanceTo(pickup.position);
+          if (dist < pickupRadius) {
+            pickup.onCollect(this.player);
+          }
+        });
+      }
+    }
     this.debugData.update(dt, time);
   }
-
   spawnPickup(type, position, itemId, itemData) {
     let pickup;
     const pos = new THREE.Vector3(position.x, position.y, position.z)
@@ -221,7 +218,6 @@ export default class GameScene extends SceneBase {
     this.game.graphicsWorld.add(pickup);
     this.pickupActors.push(pickup);
   }
-
   getPickup(itemId) {
     return this.pickupActors.find(p => p.itemId === itemId);
   }
@@ -244,14 +240,18 @@ export default class GameScene extends SceneBase {
   makeSky() {
     this.skyBox = new SkyBox();
     this.game.graphicsWorld.add(this.skyBox);
+
+    //this.game.graphicsWorld.fog = new THREE.Fog(0xcc2211, -3000, 5000);
   }
 
   addPlayer(id, data) {
     console.log('Adding player', id, data);
     if (this.scenePlayers[id]) return this.scenePlayers[id];
-    const player = new Player(this.game, this, data.pos, true, null, id, data);
+    //const player = new Player(this, data.pos, true, id, data);
+    const player = this.pawnManager.spawnPlayer(data.pos, true, id, data)
     this.scenePlayers[id] = player;
     this.enemyActors.push(player);
+    this.players.push(player);
     MyEventEmitter.emit('playerJoined', player);
     return player;
   }
@@ -262,6 +262,7 @@ export default class GameScene extends SceneBase {
       MyEventEmitter.emit('playerLeft', player);
       this.enemyActors.splice(this.enemyActors.indexOf(player), 1);
       this.enemyMeshes.splice(this.enemyMeshes.indexOf(player.getMeshBody()), 1);
+      this.players.splice(this.players.indexOf(player), 1);
       player.destroy(id);
       delete this.scenePlayers[id];
     }
@@ -279,19 +280,47 @@ export default class GameScene extends SceneBase {
       money: LocalData.money,
     };
   }
+  createSpotLight(pos, rot) {
+    const targetDir = new THREE.Vector3().setFromEuler(rot);
+    const light = new THREE.SpotLight(0xffffff, 100, 40);
+    light.castShadow = true;
+    light.position.copy(pos);
 
+    const target = new THREE.Object3D();
+    target.position.copy(pos.add(targetDir));
+    light.target = target;
+    this.graphics.add(light);
+    this.graphics.add(target);
+  }
+  createPointLight(pos, scale) {
+    console.log(scale);
+    const light = new THREE.PointLight(0xffff00, scale.x * 10);
+    light.position.copy(pos);
+    this.graphics.add(light);
+  }
   spawnLevel() {
-    this.game.glbLoader.load('/assets/Level1.glb', (gltf) => {
+    this.game.loadingManager.gltfLoader.load('/assets/Level1.glb', (gltf) => {
       const model = gltf.scene;
       const allGeoms = [];
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
       this.game.graphicsWorld.add(model);
       model.traverse((child) => {
-        if (child.name.startsWith("SpawnPoint")) {
+        /**@type {string} */
+        const childName = child.name;
+        if (childName.startsWith("SpawnPoint")) {
           child.visible = false;
           if (!this.spawnPoints) this.spawnPoints = [];
           this.spawnPoints.push(child.position.clone());
+          return;
+        }
+        if (childName.startsWith('Visual')) return;
+        if (childName.startsWith('SpotLight')) {
+          this.createSpotLight(child.position, child.rotation);
+          return;
+        }
+        if (childName.startsWith('PointLight')) {
+          this.createPointLight(child.position, child.scale);
           return;
         }
         if (child.isMesh) {
@@ -306,7 +335,6 @@ export default class GameScene extends SceneBase {
           });
 
           allGeoms.push(geomClone);
-
           child.castShadow = true;
           child.receiveShadow = true;
           this.mapWalls.push(child);
@@ -323,7 +351,7 @@ export default class GameScene extends SceneBase {
             shape: shape,
             material: getMaterial('defaultMaterial'),
             collisionFilterGroup: 1,
-            collisionFilterMask: -1,
+            collisionFilterMask: 2,
           });
           body.position.copy(child.getWorldPosition(new THREE.Vector3()));
           body.quaternion.copy(child.getWorldQuaternion(new THREE.Quaternion()));
@@ -347,56 +375,7 @@ export default class GameScene extends SceneBase {
       this.levelLoaded = true;
       MyEventEmitter.emit('levelLoaded');
     });
-
-    // Loading progress bar could be added here using the onProgress callback
-    this.game.glbLoader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-      // console.log(`Loading file: ${url}`);
-      const progress = (itemsLoaded / itemsTotal) * 100;
-      this.loadingBar(progress.toFixed(2));
-    };
-    this.game.glbLoader.manager.onLoad = () => {
-      this.loadingBar(100);
-    };
-
   }
-
-  loadingBar(progress) {
-    if (!this.loadingBarContainer) {
-      this.loadingBarContainer = document.createElement('div');
-      this.loadingBarContainer.id = 'loadingBarContainer';
-      this.loadingBarContainer.style.position = 'absolute';
-      this.loadingBarContainer.style.top = '10%';
-      this.loadingBarContainer.style.left = '50%';
-      this.loadingBarContainer.style.transform = 'translate(-50%, -50%)';
-      this.loadingBarContainer.style.width = '50%';
-      this.loadingBarContainer.style.height = '30px';
-      this.loadingBarContainer.style.backgroundColor = '#555';
-      this.loadingBarContainer.style.border = '2px solid #000';
-      document.body.appendChild(this.loadingBarContainer);
-    }
-
-    if (!this.loadingBarFill) {
-      this.loadingBarFill = document.createElement('div');
-      this.loadingBarFill.id = 'loadingBar';
-      this.loadingBarFill.style.backgroundColor = '#0f0';
-      this.loadingBarContainer.appendChild(this.loadingBarFill);
-      this.loadingBarFill.style.height = '100%';
-      this.loadingBarFill.style.width = '0%';
-      this.loadingBarFill.style.zIndex = '1000';
-    }
-    this.loadingBarFill.style.width = `${progress}%`;
-    if (progress >= 95) {
-      setTimeout(() => {
-        if (this.loadingBarContainer) {
-          document.body.removeChild(this.loadingBarContainer);
-          this.loadingBarContainer = null;
-          this.loadingBarFill = null;
-        }
-      }, 500); // wait a bit before removing
-    }
-
-  }
-
 }
 
 

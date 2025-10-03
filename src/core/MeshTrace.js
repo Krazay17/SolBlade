@@ -4,12 +4,14 @@ import { Capsule } from "three/examples/jsm/Addons.js";
 import { MeshBVH } from "three-mesh-bvh";
 import { MeshBVHHelper } from "three-mesh-bvh";
 import * as THREE from 'three';
+import GameScene from "../scenes/GameScene";
+import Pawn from "../actors/Pawn";
 
 export default class MeshTrace {
     constructor(scene) {
+        /**@type {GameScene} */
         this.scene = scene;
-        this.actorMeshes = this.scene.enemyActors.map(a => a.getMeshBody()).filter(m => m !== null);
-        this.mapWalls = this.scene.mapWalls;
+        this.mapWalls = null;
         this.raycaster = new Raycaster();
         this.raycaster2 = new Raycaster();
         this.tempVector = new Vector3();
@@ -59,19 +61,18 @@ export default class MeshTrace {
         }
         return hits;
     }
-
-    multiLineTrace(start, dir, length, actorEyes, callback, numRays = 5, radius = .1) {
+    /**@param {Pawn[]} hostiles */
+    multiLineTrace(start, dir, hostiles, length, actorEyes, callback, numRays = 5, radius = .1) {
+        if (hostiles.length === 0) return;
         let savedStart = start instanceof Object3D ? start.position.clone() : start.clone();
         let savedDir = dir instanceof Object3D ? dir.position.clone().sub(savedStart).normalize() : dir.clone().normalize();
 
-        const actors = this.scene.getOtherActors().filter(a => {
-            const direction = a.position.clone().sub(actorEyes);
-            direction.normalize();
-            return savedDir.dot(direction) > .33 && a.position.distanceTo(actorEyes) < length && !a.isDead;
+        hostiles = hostiles.filter(h => {
+            const targetPos = this.tempVector5.copy(h.position)
+            const dot = targetPos.sub(actorEyes).normalize().dot(dir);
+            return dot > 0.5;
         });
-        if (actors.length === 0) return;
-        this.actorMeshes = [...this.scene.getEnemyMeshes()];
-        if (this.actorMeshes.length === 0) return;
+        let hostileMeshes = this.scene.getPawnManager().hostileMeshes;
 
         const right = this.tempVector.crossVectors(this.worldUp, savedDir).normalize();
         if (right.length() === 0) right.set(1, 0, 0);
@@ -80,9 +81,9 @@ export default class MeshTrace {
 
         this.raycaster.far = length;
         this.raycaster2.far = length;
-        this.mapWalls = this.scene.getMergedLevel();
 
         for (let i = 0; i < numRays; i++) {
+            if (hostileMeshes.length === 0) break; // nothing left to hit
             let offset = this.tempVector3.set(0, 0, 0);
 
             if (i > 0) {
@@ -93,28 +94,18 @@ export default class MeshTrace {
                     .addScaledVector(up, sin * radius);
             }
             const startPos = this.tempVector4.copy(savedStart).add(offset);
-            
-            // const debugLine = new Line(
-            //     new BufferGeometry().setFromPoints([
-            //         startPos,
-            //         startPos.clone().add(savedDir.clone().multiplyScalar(length)),
-            //     ]),
-            //     new LineBasicMaterial({ color: 0x00ff00 })
-            // );
-            // Globals.graphicsWorld.add(debugLine);
 
-            if (this.actorMeshes.length === 0) break; // nothing left to hit
             this.raycaster.set(startPos, dir);
-            const hit = this.raycaster.intersectObjects(this.actorMeshes, false)[0];
+            const hit = this.raycaster.intersectObjects(hostileMeshes, false)[0];
             if (hit) {
-                this.actorMeshes.splice(this.actorMeshes.indexOf(hit.object), 1); // remove so we don't hit same actor multiple times
+                hostileMeshes.splice(hostileMeshes.indexOf(hit.object), 1); // remove so we don't hit same actor multiple times
 
                 // LOS check...
                 const losDir = this.tempVector5.copy(hit.point).sub(actorEyes).normalize();
                 this.raycaster2.set(actorEyes, losDir);
                 this.raycaster2.far = actorEyes.distanceTo(hit.point);
 
-                const losHit = this.raycaster2.intersectObject(this.mapWalls);
+                const losHit = this.raycaster2.intersectObject(this.scene.getMergedLevel());
                 if (losHit[0] && losHit[0].distance < hit.distance) return;
                 callback(hit);
             }

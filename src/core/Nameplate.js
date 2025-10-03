@@ -6,7 +6,7 @@ export default class NamePlate extends THREE.Object3D {
         super();
         this.actor = actor;
         this.name = actor.name;
-        this.health = actor.health;
+        this.health = actor.health || 100;
         this.energy = actor.energy;
         this.money = actor.money;
 
