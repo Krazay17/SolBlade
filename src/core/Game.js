@@ -94,9 +94,9 @@ export default class Game {
         friction: 0,
         restitution: 0,
         contactEquationStiffness: 1e7,
-        contactEquationRelaxation: 50,
+        contactEquationRelaxation: 6,
         frictionEquationStiffness: 1e7,
-        frictionEquationRelaxation: 0,
+        frictionEquationRelaxation: 1,
         id: 'pawnGroundContact',
       });
     this.physicsWorld.addContactMaterial(contactMaterial);

@@ -168,7 +168,6 @@ export default class MeshManager {
 
     async getTex(name) {
         let tex = this.texMap.get(name);
-        console.log(tex);
         if (tex) {
             tex.flipY = false;
             tex.needsUpdate = true;

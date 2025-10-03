@@ -119,7 +119,6 @@ export default class GroundChecker {
                 // Dot with worldUp to check slope tolerance
                 if (hit) {
                     const normal = hit.normal;
-                    console.log(normal.dot(this.worldUp))
                     if (normal.dot(this.worldUp) > slope) {
                         const canNorm = threeVecToCannon(normal)
                         return { grounded: true, hit, canNorm };

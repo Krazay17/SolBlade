@@ -10,6 +10,8 @@ const serverURL = location.hostname === "localhost" ?
 
 const socket = io(serverURL, {
     transports: ["websocket"],
+    reconnection: false,
+    timeout: 5000,
 });
 export const netSocket = socket;
 
