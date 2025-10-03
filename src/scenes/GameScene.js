@@ -351,7 +351,7 @@ export default class GameScene extends SceneBase {
             shape: shape,
             material: getMaterial('defaultMaterial'),
             collisionFilterGroup: 1,
-            collisionFilterMask: 2,
+            collisionFilterMask: -1,
           });
           body.position.copy(child.getWorldPosition(new THREE.Vector3()));
           body.quaternion.copy(child.getWorldQuaternion(new THREE.Quaternion()));
@@ -368,7 +368,7 @@ export default class GameScene extends SceneBase {
       }
       const mergedGeom = mergeGeometries(allGeoms);
       mergedGeom.computeBoundsTree();
-      this.mergedLevel = new THREE.Mesh(mergedGeom)
+      this.mergedLevel = new THREE.Mesh(mergedGeom);
       // const bvhHelper = new MeshBVHHelper(this.mergedLevel);
       // Globals.graphicsWorld.add(bvhHelper);
 

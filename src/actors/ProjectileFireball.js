@@ -13,9 +13,7 @@ export default class ProjectileFireball extends Projectile {
         this.shrink = true;
         this.flashPower = 0;
 
-        const { texture, material } = this.createMesh();
-        this.texture = texture;
-        this.material = material;
+        this.createMesh();
         this.setGravity(4);
         this.setDamage(25);
 
@@ -39,13 +37,13 @@ export default class ProjectileFireball extends Projectile {
 
     update(dt) {
         const scaledDt = dt * 10;
-        this.texture.rotation += dt;
+        if (this.texture) this.texture.rotation += dt;
         if (this.exploding) {
             if (this.shrink) this.shrink = this.explodeSize <= 0 ? false : true;
             this.explodeSize = this.shrink ? this.explodeSize -= scaledDt : this.explodeSize += scaledDt;
             this.scale.set(this.explodeSize, this.explodeSize, this.explodeSize);
             this.flashPower += dt * 80;
-            this.material.emissiveIntensity = (Math.sin(this.flashPower) + 1) / 1.5;
+            if (this.material) this.material.emissiveIntensity = (Math.sin(this.flashPower) + 1) / 1.5;
             if (this.explodeSize >= 2) super.destroy();
         } else super.update(dt);
     }

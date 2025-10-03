@@ -1,22 +1,25 @@
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/Addons.js'
+import { DRACOLoader, GLTFLoader } from 'three/examples/jsm/Addons.js'
 
 export default class LoadingManager {
     textureLoader: THREE.TextureLoader = new THREE.TextureLoader();
     gltfLoader: GLTFLoader = new GLTFLoader();
     loadingBarContainer: HTMLElement | null = null;
     loadingBarFill: HTMLElement | null = null;
+    dracoLoader: DRACOLoader = new DRACOLoader();
     constructor() {
 
-        // Loading progress bar could be added here using the onProgress callback
-        this.gltfLoader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
-            // console.log(`Loading file: ${url}`);
-            const progress = Math.round((itemsLoaded / itemsTotal) * 10000) / 100;
-            this.loadingBar(progress);
-        };
-        this.gltfLoader.manager.onLoad = () => {
-            this.loadingBar(100);
-        };
+        if (this.gltfLoader) {
+            // Loading progress bar could be added here using the onProgress callback
+            this.gltfLoader.manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+                // console.log(`Loading file: ${url}`);
+                const progress = Math.round((itemsLoaded / itemsTotal) * 10000) / 100;
+                this.loadingBar(progress);
+            };
+            this.gltfLoader.manager.onLoad = () => {
+                this.loadingBar(100);
+            };
+        }
     }
     loadingBar(progress: number) {
         if (!this.loadingBarContainer) {

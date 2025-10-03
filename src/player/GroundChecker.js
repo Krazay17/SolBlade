@@ -2,9 +2,10 @@ import * as CANNON from "cannon-es";
 import * as THREE from "three";
 import Globals from "../utils/Globals";
 import Pawn from "../actors/Pawn";
+import { threeVecToCannon } from "../utils/Utils";
 
 export default class GroundChecker {
-    constructor(pawn, rayLength = .65, spread = 0.5) {
+    constructor(pawn, rayLength = .7, spread = 0.5) {
         /**@type {Pawn} */
         this.pawn = pawn;
         this.body = pawn.body;
@@ -102,11 +103,11 @@ export default class GroundChecker {
     //     }
     //     return false;
     // }
-    floorTrace(slope = 0.7) {
+    floorTrace(slope = .3) {
         const originBase = this.pawn.position;
 
         for (let offset of this.offsets) {
-            const origin =this.tempVector.copy(originBase).add(offset);
+            const origin = this.tempVector.copy(originBase).add(offset);
 
             this.raycaster.set(origin, this.worldDown);
             this.raycaster.near = 0;
@@ -118,22 +119,24 @@ export default class GroundChecker {
                 // Dot with worldUp to check slope tolerance
                 if (hit) {
                     const normal = hit.normal;
+                    console.log(normal.dot(this.worldUp))
                     if (normal.dot(this.worldUp) > slope) {
-                        return { grounded: true, hit, normal };
+                        const canNorm = threeVecToCannon(normal)
+                        return { grounded: true, hit, canNorm };
                     }
                 }
             }
         }
-        return { grounded: false, hit: null, normal: this.zeroVec };
+        return { grounded: false, hit: null, normal: null };
     }
-    floorNormal(slope = 0.7) {
+    floorNormal(slope = 0.3) {
         return this.floorTrace(slope).normal;
     }
-    isGrounded(slope = 0.7) {
+    isGrounded(slope = 0.3) {
         return this.floorTrace(slope).grounded;
     }
 
-    groundBuffer(slope = 0.7) {
+    groundBuffer(slope = 0.3) {
         if (!this.isGrounded(slope)) {
             if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {

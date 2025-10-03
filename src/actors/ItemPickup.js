@@ -16,7 +16,7 @@ export default class ItemPickup extends Pickup {
     async init() {
         await this.createPickupMesh(.5);
 
-        const tex = await this.scene.meshManager.getTex(this.itemData.name);
+        const tex = await this.scene.meshManager.getTex(this.itemData.name + '.png');
         const mesh = this.mesh.children[0];
         mesh.material = mesh.material.clone();
         mesh.material.map = tex;

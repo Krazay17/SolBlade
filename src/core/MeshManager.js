@@ -4,7 +4,11 @@ import { SkeletonUtils } from "three/examples/jsm/Addons.js";
 import { MeshBVH, SAH } from 'three-mesh-bvh';
 
 export default class MeshManager {
+    /**@type {MeshManager} */
+    static instance = null;
     constructor(game) {
+        if (MeshManager.instance) return MeshManager.instance
+        MeshManager.instance = this;
         this.game = game;
         this.loader = game.loadingManager.gltfLoader;
         this.texLoader = game.loadingManager.textureLoader;
@@ -20,6 +24,12 @@ export default class MeshManager {
         this.skinMap.set('NinjaDude', '/assets/NinjaDude.glb');
         this.skinMap.set('julian', '/assets/julian.glb');
         this.skinMap.set('LavaGolem', '/assets/LavaGolem.glb');
+    }
+    static getInstance() {
+        if (!MeshManager.instance) {
+            throw new Error('MeshManager not initialized!');
+        }
+        return MeshManager.instance;
     }
 
     meshInitProperties(meshName) {
@@ -157,8 +167,8 @@ export default class MeshManager {
     }
 
     async getTex(name) {
-        console.log('trygetTex')
         let tex = this.texMap.get(name);
+        console.log(tex);
         if (tex) {
             tex.flipY = false;
             tex.needsUpdate = true;
@@ -173,7 +183,7 @@ export default class MeshManager {
 
     async createTex(name) {
         return new Promise((resolve, reject) => {
-            this.texLoader.load(`assets/${name}.png`, (tex) => {
+            this.texLoader.load(`assets/${name}`, (tex) => {
                 this.texMap.set(name, tex)
                 resolve(tex);
             }, undefined, reject);

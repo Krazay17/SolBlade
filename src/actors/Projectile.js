@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import Globals from '../utils/Globals';
 import MyEventEmitter from '../core/MyEventEmitter';
 import Actor from './Actor';
+import MeshManager from '../core/MeshManager';
 
 export default class Projectile extends Actor {
     constructor(params = {}, net = {}) {
@@ -21,11 +22,13 @@ export default class Projectile extends Actor {
             netId = null
         } = net;
 
-        this.textureLoader = Globals.game.loadingManager.textureLoader;
+        this.meshManager = MeshManager.getInstance();
 
         this.isRemote = isRemote;
         this.init(pos, dir, speed, dur, scale);
         this.mesh = null;
+        this.material = null;
+        this.texture = null;
         this.duration = dur;
         this.radius = radius;
 
@@ -77,10 +80,8 @@ export default class Projectile extends Actor {
     }
 
     createMesh() {
-        const texture = this.textureLoader.load('assets/SkyFilter2.webp')
         const geom = new THREE.SphereGeometry(this.radius, 16, 16);
         const material = new THREE.MeshLambertMaterial({
-            map: texture,
             emissive: 0xff0000,
             emissiveIntensity: 1,
             transparent: true,
@@ -91,8 +92,14 @@ export default class Projectile extends Actor {
             material,
         );
         this.add(this.mesh);
-
-        return { texture, material };
+        this.material = material
+        this.applyTexture();
+    }
+    async applyTexture() {
+        const texture = await this.meshManager.getTex('SkyFilter2.webp');
+        this.material.map = texture;
+        this.material.needsUpdate = true;
+        this.texture = texture;
     }
 
     createBody() {
@@ -168,8 +175,8 @@ export default class Projectile extends Actor {
         }
         if (this.mesh) {
             this.mesh.visible = false;
-            this.mesh.geometry.dispose();
-            this.mesh.material.dispose();
+            //this.mesh.geometry.dispose();
+            //this.mesh.material.dispose();
         }
         Globals.scene.removeActor(this);
         if (this.isRemote) return;
