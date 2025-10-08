@@ -8,7 +8,7 @@ export default class BladeJumpState extends PlayerState {
         this.actor.movement.jumpStart(.333);
     }
     update(dt) {
-        this.actor.movement.jumpMove(dt);
+        this.actor.movement.jumpMove(dt, 6);
 
         if (this.jumpTimer < performance.now()) {
             if (this.input.actionStates.blade) {

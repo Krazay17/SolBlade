@@ -5,10 +5,12 @@ import * as THREE from "three";
 import MyEventEmitter from "../../core/MyEventEmitter";
 import Globals from "../../utils/Globals";
 import { spawnParticles } from "../../actors/ParticleEmitter";
+import GameScene from "../../scenes/GameScene";
 
 export default class WeaponSword extends Weapon {
     constructor(actor, scene, isSpell = false) {
         super(actor, 'Sword', 35, 2.9, 1200, isSpell); // name, damage, range, cooldown
+        /**@type {GameScene} */
         this.scene = scene;
         this.traceDuration = 500; // duration of the sword trace in milliseconds
         soundPlayer.loadPosAudio('swordUse', '/assets/HeavySword.mp3');
@@ -45,7 +47,7 @@ export default class WeaponSword extends Weapon {
                 doesParry: true
             })) {
             this.lastUsed = currentTime;
-            this.enemyActors = this.scene.getOtherActorMeshes();
+            this.enemyActors = this.scene.pawnManager.hostiles;
             this.hitActors.clear();
             this.useFx(this.actor.position);
             MyEventEmitter.emit('fx', { type: 'swordUse', pos: this.actor.position });
@@ -74,8 +76,7 @@ export default class WeaponSword extends Weapon {
                 speed: 2,
             })) {
             this.lastUsed = currentTime;
-            this.enemyActors = this.scene.actorMeshes;
-            this.enemyActors = this.enemyActors.filter(actor => actor !== this.actor);
+            this.enemyActors = this.scene.pawnManager.hostileMeshes;
             this.hitActors.clear();
 
             this.useFx(this.actor.position);

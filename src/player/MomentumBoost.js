@@ -1,4 +1,4 @@
-import { Vec3 } from "cannon-es";
+import { Vector3 } from 'three'
 
 export default class MomentumBoost {
     constructor(actor) {
@@ -6,7 +6,7 @@ export default class MomentumBoost {
         this.body = actor.body;
         this.input = actor.input;
         this.boostAmount = 0;
-        this.lastVelocity = new Vec3();
+        this.lastVelocity = new Vector3();
         this.lastAlignment = 0;
         this.lastSpeed = 0;
         this.misAlign = 0;
@@ -37,7 +37,7 @@ export default class MomentumBoost {
         const currentSpeed = currentVelocity.clone().length();
         currentVelocity.normalize();
 
-        if (currentSpeed < 5) {
+        if (currentSpeed < 3) {
             this.boostAmount *= 0.99;
         }
         this.lastAlignment = Math.max(0, Math.min(1, currentVelocity.dot(this.lastVelocity)));

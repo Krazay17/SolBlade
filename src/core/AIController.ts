@@ -1,17 +1,15 @@
-import Pawn from "../actors/Pawn";
-import * as CANNON from "cannon-es";
 import GameScene from "../scenes/GameScene";
 import Player from "../player/Player";
-import { threeVecToCannon } from "../utils/Utils";
 import { MovementStates } from './states/StateManager'
 import Enemy from "../actors/Enemy";
 import AIMovement from "./AIMovement";
 import { Vector2, Vector3 } from "three";
+import PawnBody from "./PawnBody";
 
 export default class AIController {
     scene: GameScene;
     pawn: Enemy;
-    body: CANNON.Body | null;
+    body: PawnBody | null;
     target: any | null = null;
     movement: AIMovement;
     homeLoc: Vector3;

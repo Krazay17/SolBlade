@@ -13,6 +13,9 @@ export default class AnimationManager {
         this.mixer = new THREE.AnimationMixer(model);
         this.animations = {};
         animations.forEach((clip) => {
+            if(clip.name.startsWith('')) {
+                // blend anims
+            }
             this.animations[clip.name] = clip;
         });
         this.playAnimation('idle');
@@ -24,7 +27,7 @@ export default class AnimationManager {
         this.animations = {};
     }
 
-    playAnimation(name: string, loop: boolean = true) {
+    playAnimation(name: string, loop: boolean = true, blend = false) {
         const clip = this.animations[name];
         if (clip) {
             if ((name === this.currentAnimation)) return;
@@ -33,7 +36,7 @@ export default class AnimationManager {
             action.clampWhenFinished = true;
             if (this.currentAction) {
                 this.currentAction.timeScale = 1;
-                this.currentAction.crossFadeTo(action, 0.125);
+                    this.currentAction.crossFadeTo(action, 0.175); // .125
             }
             action.reset().fadeIn(0.1).play();
             this.currentAction = action;

@@ -37,7 +37,7 @@
 #debug-section {
     position: absolute;
     top: 0;
-    left: 0;
+    left: 20%;
     background: rgba(105, 20, 20, 0.466);
     color: white;
     padding: 10px;

@@ -1,13 +1,14 @@
 import MyEventEmitter from "./MyEventEmitter";
 
-const CURRENT_VERSION = 0.0774;
+const CURRENT_VERSION = 0.0778;
 export default {
     version: CURRENT_VERSION,
     name: "Player",
     money: 0,
     health: 100,
-    scene: 1,
+    scene: 'Level2',
     position: { x: 0, y: 1, z: 0 },
+    rotation: 0,
     masterVolume: 1,
     musicVolume: 1,
     sfxVolume: 1,
@@ -37,6 +38,7 @@ export default {
             health: this.health,
             scene: this.scene,
             position: this.position,
+            rotation: this.rotation,
             masterVolume: this.masterVolume,
             musicVolume: this.musicVolume,
             micVolume: this.micVolume,
@@ -77,6 +79,7 @@ export default {
         this.health = parsed.health ?? this.health;
         this.scene = parsed.scene ?? this.scene;
         this.position = parsed.position ?? this.position;
+        this.rotation = parsed.rotation ?? this.rotation;
         this.masterVolume = parsed.masterVolume ?? this.masterVolume;
         this.musicVolume = parsed.musicVolume ?? this.musicVolume;
         this.sfxVolume = parsed.sfxVolume ?? this.sfxVolume;
@@ -95,6 +98,7 @@ export default {
         this.health = keep.health ?? this.health;
         this.scene = keep.scene ?? this.scene;
         this.position = keep.position ?? this.position;
+        this.rotation = keep.rotation ?? this.rotation;
         this.masterVolume = keep.masterVolume ?? this.masterVolume;
         this.musicVolume = keep.musicVolume ?? this.musicVolume;
         this.sfxVolume = keep.sfxVolume ?? this.sfxVolume;

@@ -72,7 +72,7 @@ export default class MeshTrace {
             const dot = targetPos.sub(actorEyes).normalize().dot(dir);
             return dot > 0.5;
         });
-        let hostileMeshes = this.scene.getPawnManager().hostileMeshes;
+        let hostileMeshes = hostiles.map(pawn => pawn.getMeshBody()).filter(Boolean);
 
         const right = this.tempVector.crossVectors(this.worldUp, savedDir).normalize();
         if (right.length() === 0) right.set(1, 0, 0);

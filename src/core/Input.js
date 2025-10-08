@@ -1,4 +1,5 @@
 import { setupKeybindWindow, addButton } from "../ui/KeyBinds";
+import LocalData from "./LocalData";
 import MyEventEmitter from "./MyEventEmitter";
 
 export default class Input {
@@ -14,7 +15,7 @@ export default class Input {
       console.log('Test function called');
     };
 
-    this.yaw = 0;
+    this.yaw = LocalData.rotation;
     this.pitch = 0;
     this.keys = {};
     this.mice = {};

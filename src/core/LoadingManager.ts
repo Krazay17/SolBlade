@@ -22,6 +22,14 @@ export default class LoadingManager {
         }
     }
     loadingBar(progress: number) {
+        if (progress > 99) {
+            if (this.loadingBarContainer) {
+                document.body.removeChild(this.loadingBarContainer);
+                this.loadingBarContainer = null;
+                this.loadingBarFill = null;
+            }
+            return;
+        }
         if (!this.loadingBarContainer) {
             this.loadingBarContainer = document.createElement('div');
             this.loadingBarContainer.id = 'loadingBarContainer';
@@ -46,15 +54,5 @@ export default class LoadingManager {
             this.loadingBarFill.style.zIndex = '1000';
         }
         this.loadingBarFill.style.width = `${progress}%`;
-        if (progress >= 100) {
-            setTimeout(() => {
-                if (this.loadingBarContainer) {
-                    document.body.removeChild(this.loadingBarContainer);
-                    this.loadingBarContainer = null;
-                    this.loadingBarFill = null;
-                }
-            }, 500); // wait a bit before removing
-        }
-
     }
 }

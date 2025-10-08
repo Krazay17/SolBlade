@@ -1,7 +1,6 @@
 import PlayerState from "./_PlayerState";
 import CameraFX from "../../core/CameraFX";
 import MyEventEmitter from "../../core/MyEventEmitter";
-import { toVector3 } from "../../utils/Utils";
 
 export default class ParryState extends PlayerState {
     enter(state, { pos }) {
@@ -11,7 +10,7 @@ export default class ParryState extends PlayerState {
         this.actor.body.sleep();
         CameraFX.shake(0.25, 450, .02);
         this.direction = this.actor.position.clone()
-            .sub(toVector3(pos))
+            .sub(pos)
             .normalize()
             .multiplyScalar(6);
         this.actor.body.velocity.set(0, 0, 0);

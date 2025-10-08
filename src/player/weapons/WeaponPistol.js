@@ -56,7 +56,7 @@ export default class WeaponPistol extends Weapon {
             this.useFx(offSetPos, dir);
             MyEventEmitter.emit('fx', { type: 'pistolUse', pos: offSetPos, dir: dir });
 
-            this.meshTracer.multiLineTrace(cameraPos, dir, this.hostilePawns(), this.range, offSetPos, (hit) => {
+            this.meshTracer.multiLineTrace(cameraPos, dir, this.scene.getPawnManager().hostiles, this.range, offSetPos, (hit) => {
                 const actor = hit.object.userData.owner;
                 if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
                     this.hitActors.add(actor);

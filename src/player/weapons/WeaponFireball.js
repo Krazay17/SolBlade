@@ -28,7 +28,7 @@ export default class WeaponFireball extends Weapon {
         const dir = this.actor.getShootData().dir;
         pos = pos.add(dir.clone().multiplyScalar(2)); // Start a bit in front of the actor
 
-        const projectile = new ProjectileFireball({
+        const projectile = new ProjectileFireball(this.scene, {
             pos: pos,
             dir: dir,
             speed: 35,

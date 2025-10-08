@@ -59,22 +59,20 @@ export default class Weapon {
     }
     update() { }
     meleeTrace(start, direction, length = 5, dot = 0.5, callback) {
-        const actors = this.hostilePawns();
-        const startPos = start.clone();
-        const camDir = direction.clone().normalize();
+        const actors = this.scene.getPawnManager().hostiles;
         for (const actor of actors) {
-            const meshPos = actor.position.clone();
+            const meshPos = this.tempVector.copy(actor.position);
             meshPos.y += actor.height / 2;
-            const meshDist = meshPos.distanceTo(startPos);
-            const meshDir = meshPos.clone().sub(startPos).normalize();
+            const meshDist = meshPos.distanceTo(start);
+            const meshDir = this.tempVector2.copy(meshPos).sub(start).normalize();
 
             if (actor === this.actor) continue;
             if (this.hitActors.has(actor)) continue;
             if (meshDist > length) continue;
-            if (meshDir.dot(camDir) < dot) continue;
+            if (meshDir.dot(direction) < dot) continue;
 
             this.hitActors.add(actor);
-            callback?.(actor, camDir);
+            callback?.(actor, direction);
         }
     }
     rayLoop(start, dir, length, duration, callback) {
@@ -99,8 +97,5 @@ export default class Weapon {
         setTimeout(() => {
             MyEventEmitter.off('update', loop);
         }, duration);
-    }
-    hostilePawns() {
-        return [...this.scene.getPawnManager().hostiles];
     }
 }

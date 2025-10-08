@@ -9,11 +9,10 @@ export default class IdleState extends PlayerState {
     update(dt) {
         if (!this.actor.movement.idleMove(dt)) {
             this.body.velocity.set(0, 0, 0);
-            this.body.angularVelocity.set(0, 0, 0);
             this.body.sleep();
         }
 
-        if (!this.actor.movement.getInputDirection().isZero()) {
+        if (this.actor.movement.getInputDirection().length() > 0) {
             this.manager.setState('run', this.actor.movement.floorTrace());
             return;
         }
@@ -38,7 +37,7 @@ export default class IdleState extends PlayerState {
             this.manager.setState('fall');
             return false;
         }
-        if (!this.actor.movement.getInputDirection().isZero()) {
+        if (!this.actor.movement.getInputDirection().length() === 0) {
             this.manager.setState('run', this.actor.movement.floorTrace());
             return false;
         }

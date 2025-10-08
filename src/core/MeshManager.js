@@ -33,7 +33,7 @@ export default class MeshManager {
     }
 
     meshInitProperties(meshName) {
-        let offset = this.tempVec.set(0, -.5, 0);
+        let offset = this.tempVec.set(0, -1, 0);
         let rotation = Math.PI;
         let scale = 1;
         switch (meshName) {

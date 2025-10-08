@@ -5,8 +5,8 @@ import Globals from "../utils/Globals";
 import { clamp } from "three/src/math/MathUtils.js";
 
 export default class ProjectileFireball extends Projectile {
-    constructor(params = {}, net = {}) {
-        super(params, net);
+    constructor(scene, params = {}, net = {}) {
+        super(scene, params, net);
 
         this.exploding = false;
         this.explodeSize = 1;
@@ -56,7 +56,7 @@ export default class ProjectileFireball extends Projectile {
         MyEventEmitter.emit('fx', { type: 'fireballHit', pos: this.position });
 
         const explosionRange = 6;
-        const enemiesInRange = Globals.scene.getEnemiesInRange(this.position, explosionRange);
+        const enemiesInRange = this.scene.pawnManager.getEnemiesInRange(this.position, explosionRange);
         for (const [enemy, range] of enemiesInRange) {
             const distance = clamp((1 - ((range - this.radius) / explosionRange)), .5, 1);
             const damage = this.damage * distance;

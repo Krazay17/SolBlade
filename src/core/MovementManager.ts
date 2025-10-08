@@ -1,6 +1,7 @@
+import { Vector3 } from "three";
 import Pawn from "../actors/Pawn";
-import { Body, Vec3 } from "cannon-es";
 import GroundChecker from "../player/GroundChecker";
+import PawnBody from "./PawnBody";
 
 type MovementValues = {
     [key: string]: MovementState;
@@ -12,9 +13,7 @@ type MovementState = {
 };
 export default class MovementManager {
     pawn: Pawn;
-    body: Body | null = null;
-    tempVec: Vec3;
-    tempVec2: Vec3;
+    body: PawnBody | null = null;
     groundChecker: GroundChecker;
     groundFriction: number;
     values: MovementValues;
@@ -22,8 +21,6 @@ export default class MovementManager {
     constructor(pawn: Pawn) {
         this.pawn = pawn;
         this.body = pawn.body;
-        this.tempVec = new Vec3();
-        this.tempVec2 = new Vec3();
         this.groundChecker = new GroundChecker(pawn, 1, pawn.radius)
 
         this.groundFriction = 1;
@@ -36,25 +33,26 @@ export default class MovementManager {
     }
     applyFriction(dt: number, friction: number, expo: boolean = true) {
         if(!this.body) return;
-        const speed = this.body.velocity.length();
+        const v = this.body.velocity;
+        const speed = v.length();
         if (speed < 0.0001) return;
 
         const drop = expo ? friction * dt * speed : friction * dt;
         const newSpeed = Math.max(speed - drop, 0);
 
         const scale = newSpeed / speed;
-        this.body.velocity.scale(scale, this.body.velocity);
+        this.body.velocity = v.multiplyScalar(scale);
     }
-    accelerate(dt: number, wishDir: Vec3, wishSpeed: number, accel: number) {
+    accelerate(dt: number, wishDir: Vector3, wishSpeed: number, accel: number) {
         if(!this.body) return;
-        this.tempVec.copy(this.body.velocity);
-        this.tempVec.y = 0;
-        const wishDirSpeed = this.tempVec2.dot(wishDir);
+        const v = this.body.velocity;
+        const vXY = v.clone();
+        vXY.y = 0;
+        const wishDirSpeed = vXY.dot(wishDir);
         const addSpeed = wishSpeed - wishDirSpeed;
         const accelSpeed = Math.min(accel * wishSpeed * dt, addSpeed);
 
-        this.body.velocity.addScaledVector(accelSpeed, wishDir, this.body.velocity);
-
+        this.body.velocity = {x:v.x += accelSpeed, y: v.y, z: v.z += accelSpeed};
     }
     getInputDirection() {
 
@@ -65,6 +63,5 @@ export default class MovementManager {
         // const wishSpeed = this.values['ground'].speed;
         // const accel = this.values['ground'].accel;
         // this.accelerate(dt, wishDir, wishSpeed, accel);
-        const projectOntoFloor = this.tempVec.dot(this.groundChecker.floorNormal())
     }
 }

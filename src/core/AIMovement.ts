@@ -1,18 +1,12 @@
 import { Vector3 } from "three";
 import Pawn from "../actors/Pawn";
-import { lerp } from "three/src/math/MathUtils.js";
-import { Body, Vec3 } from "cannon-es";
-import { threeVecToCannon } from "../utils/Utils";
 
 export default class AIMovement {
     pawn: Pawn;
-    body: Body | null;
-    tempVec: Vec3 = new Vec3();
     tempVector: Vector3 = new Vector3;
     speed: number = 2;
     constructor(pawn: Pawn) {
         this.pawn = pawn;
-        this.body = pawn.body;
     }
     setSpeed(speed: number) {
         this.speed = speed;
@@ -23,14 +17,14 @@ export default class AIMovement {
     }
     walkToTarget(dir: Vector3) {
         this.rotateToTarget(dir);
-        const speedToPlayer = threeVecToCannon(this.tempVector.copy(dir).multiplyScalar(this.speed));
-        if (this.body) {
-            this.body.velocity.x = speedToPlayer.x;
-            this.body.velocity.z = speedToPlayer.z;
+        const speedToPlayer =this.tempVector.copy(dir).multiplyScalar(this.speed);
+        if (this.pawn.body) {
+            this.pawn.body.body.setLinvel({ x: speedToPlayer.x, y: speedToPlayer.z, z: this.pawn.body.body.linvel().y }, true)
         }
     }
     still() {
-        this.body?.velocity.setZero();
+        if (!this.pawn.body) return;
+        this.pawn.body.body.setLinvel({ x: 0, y: 0, z: 0 }, false);
     }
 }
 function lerpAngle(a: number, b: number, t: number): number {

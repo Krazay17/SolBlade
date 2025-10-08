@@ -17,7 +17,7 @@ export default class RunState extends PlayerState {
             this.manager.setState('fall');
             return;
         }
-        if (this.actor.movement.getInputDirection().isZero()) {
+        if (this.actor.movement.getInputDirection().length() === 0) {
             this.manager.setState('idle');
             return;
         }

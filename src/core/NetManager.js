@@ -3,6 +3,7 @@ import MyEventEmitter from "./MyEventEmitter";
 import { Vector3 } from "three";
 import Globals from "../utils/Globals";
 import LocalData from "./LocalData";
+import GameScene from "../scenes/GameScene";
 
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
@@ -15,6 +16,7 @@ const socket = io(serverURL, {
 });
 export const netSocket = socket;
 
+/**@type {GameScene} */
 let scene = null;
 let netPlayers = {};
 let player = null;
@@ -22,7 +24,7 @@ let socketBound = false;
 
 export const defaultPlayerData = {
     scene: null,
-    pos: { x: 0, y: 5, z: 0 },
+    pos: { x: 0, y: 1, z: 0 },
     rot: 0,
     state: 'idle',
     name: 'Player',
@@ -149,21 +151,26 @@ function bindSocketEvents(myPlayerData) {
         MyEventEmitter.emit('scoreUpdate', data);
     });
     socket.on('currentPickups', (pickupList) => {
-        pickupList.forEach(element => {
-            if (!element.active) return;
-            scene.spawnPickup(element.type, element.position, element.itemId, element.item);
-        });
+        for (const p of pickupList) {
+            const { type, active, item, position, netId } = p;
+            if (!active) return;
+            //scene.spawnPickup(element);
+            scene.pickupManager.spawnPickup(type, position, item, netId)
+        };
     });
     socket.on('spawnPickup', (data) => {
-        scene.spawnPickup(data.type, data.position, data.itemId, data.item);
+        //scene.spawnPickup(data);
+        const { type, position, netId, active, item } = data;
+        if (!active) return;
+        scene.pickupManager.spawnPickup(type, position, item, netId);
     });
-    socket.on('pickupCollected', ({ playerId, itemId }) => {
-        const pickup = scene.getPickup(itemId);
+    socket.on('pickupCollected', ({ playerId, netId }) => {
+        const pickup = scene.pickupManager.getPickup(netId);
         if (!pickup) return;
         if (socket.id === playerId) {
             pickup.applyCollect(scene.player);
         }
-        scene.removePickup(pickup);
+        scene.pickupManager.removePickup(pickup);
     });
     socket.on('crownGameStarted', (players) => {
         MyEventEmitter.emit('crownGameStarted', players);
@@ -193,6 +200,7 @@ function bindSocketEvents(myPlayerData) {
         const player = netPlayers[id];
         if (!player) return;
         scene.spawnProjectile(player, data);
+        
     });
     socket.on('projectileMoved', ({ id, data }) => {
         const player = netPlayers[id];
@@ -204,6 +212,9 @@ function bindSocketEvents(myPlayerData) {
     });
 }
 
+MyEventEmitter.on('spawnLocations', (data) => {
+    socket.emit('spawnLocations', data);
+})
 MyEventEmitter.on('playerDropItem', (data) => {
     socket.emit('playerDropItem', data);
 })
@@ -226,7 +237,7 @@ MyEventEmitter.on('pickupCollected', (data) => {
     socket.emit('pickupCollected', data);
     if (!socket.connected) {
         data.item.applyCollect(scene.player);
-        scene.removePickup(data.item);
+        scene.pickupManager.removePickup(data.item);
     }
 });
 MyEventEmitter.on('pickupCrown', () => {

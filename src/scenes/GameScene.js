@@ -1,8 +1,5 @@
 import * as THREE from 'three';
-import * as CANNON from 'cannon-es';
-import SceneBase from './_SceneBase.js';
 import Player from '../player/Player.js';
-import { getMaterial } from '../core/MaterialManager.js';
 import { netSocket, setNetScene } from '../core/NetManager.js';
 import LocalData from '../core/LocalData.js';
 import Globals from '../utils/Globals.js';
@@ -17,56 +14,64 @@ import voiceChat from '../core/VoiceChat.js';
 import { MeshBVH, MeshBVHHelper, acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import ProjectileFireball from '../actors/ProjectileFireball.js';
-import ItemPickup from '../actors/ItemPickup.js';
-import PowerPickup from '../actors/PowerPickup.js';
-import CrownPickup from '../actors/CrownPickup.js';
 import PawnManager from '../core/PawnManager.ts';
 import Actor from '../actors/Actor.ts';
+import ItemManager from '../core/ItemManager.js';
+import PickupManager from '../core/PickupManager.ts';
+import ProjectileManager from '../core/ProjectileManager.ts';
+import Game from './Game.js';
+import { Scene } from "three";
+import Portal from '../actors/Portal.js';
+import RAPIER from '@dimforge/rapier3d-compat';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 
-export default class GameScene extends SceneBase {
+export default class GameScene {
+  constructor(game) {
+    /**@type {Game} */
+    this.game = game; // Access camera, renderer, input, etc.
+    this.name = 'Level1';
+    /** @type {Scene} */
+    this.graphics = game.graphicsWorld;
+    /** @type {World} */
+    this.physics = game.physicsWorld;
+    /**@type {RAPIER.World} */
+    this.rapier = game.rapierWorld;
+    Globals.scene = this;
+  }
   onEnter() {
-    this.name = 'level1';
+    LocalData.scene = this.name;
     this.levelLoaded = false;
+    this.allGeoms = [];
+    this.mergedLevel = null;
+    this.mapLoaded = {};
     this.spawnPoints = [];
     this.scenePlayers = {};
     this.projectiles = [];
 
     /**@type {Actor[]} */
     this.actors = [];
-
     /**@type {Player[]} */
     this.players = [];
 
     this.meshManager = new MeshManager(this.game);
-    this.actorMeshes = [];
-    this.pickupActors = [];
-    this.mapWalls = [];
-    this.mergedLevel = null;
-    this.enemyActors = [];
-    this.enemyMeshes = [];
-    this.enemyMeshMap = new Map();
-    Globals.enemyActors = this.enemyActors;
-
-    this.spawnLevel();
-
+    this.itemManager = new ItemManager(this);
     this.pawnManager = new PawnManager(this);
     this.player = this.pawnManager.spawnPlayer(LocalData.position || new THREE.Vector3(0, 1, 0));
-    this.pawnManager.setPlayer(this.player);
-    //const enemy = this.pawnManager.spawnEnemy('LavaGolem', new THREE.Vector3(0, 13, 141));
-    // const julians = 1;
-    // for (let i = 0; i < julians; i++) {
-    //   this.pawnManager.spawnEnemy('julian', new THREE.Vector3(0, 16, 147 + i))
-    // }
+    this.pickupManager = new PickupManager(this, this.player);
+    this.projectileManager = new ProjectileManager(this, this.player);
+    this.debugData = new DebugData(this.player);
+    this.gameMode = new GameMode(this, 'crown', this.player);
+    this.partyFrame = new PartyFrame();
 
     Globals.player = this.player;
     this.players.push(this.player);
+    this.pawnManager.setLocalPlayer(this.player);
 
-    this.partyFrame = new PartyFrame();
+    this.spawnLevel('Level1');
 
     soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
     function playMusiconFirstClick() {
@@ -76,8 +81,6 @@ export default class GameScene extends SceneBase {
     }
     document.addEventListener('mousedown', playMusiconFirstClick);
 
-    this.debugData = new DebugData(this.player);
-
     this.makeSky();
     setNetScene(this, {
       scene: this.name,
@@ -86,16 +89,16 @@ export default class GameScene extends SceneBase {
       money: LocalData.money,
       health: LocalData.health,
     });
-
-    this.gameMode = new GameMode(this, 'crown', this.player);
     voiceChat.setScene(this);
-
     this.initListeners();
+  }
+  add(obj) {
+    this.graphics.add(obj);
   }
   initListeners() {
     MyEventEmitter.on('playerDropItem', ({ item, pos }) => {
       if (netSocket.connected) return;
-      this.spawnPickup('item', pos, null, item);
+      this.pickupManager.spawnItem(null, pos, item);
     })
   }
   getPawnManager() { return this.pawnManager };
@@ -112,7 +115,7 @@ export default class GameScene extends SceneBase {
     let projectile;
     switch (type) {
       case 'Fireball':
-        projectile = new ProjectileFireball({ pos, dir, speed, dur }, { isRemote: true, netId });
+        projectile = new ProjectileFireball(this, { pos, dir, speed, dur }, { isRemote: true, netId });
         break;
     }
     this.projectiles.push(projectile);
@@ -145,22 +148,6 @@ export default class GameScene extends SceneBase {
   addEnemy(actor) {
     this.enemyActors.push(actor);
   }
-  addEnemyMesh(mesh) {
-    this.enemyMeshes.push(mesh);
-  }
-  getEnemyMeshes() {
-    return this.enemyMeshes;
-  }
-  getEnemiesInRange(position, range) {
-    const enemiesInRange = new Map();
-    for (const enemy of this.enemyActors) {
-      const dist = enemy.position.distanceTo(position);
-      if (dist <= range) {
-        enemiesInRange.set(enemy, dist);
-      }
-    }
-    return enemiesInRange;
-  }
   getMapWalls() {
     return this.mapWalls;
   }
@@ -183,51 +170,14 @@ export default class GameScene extends SceneBase {
     }
     if (!this.player) return;
     // KillFloor
-    if (this.player.body.position.y < -25 && !this.player.isDead) {
+    if (this.player.body.position.y < -350 && !this.player.isDead) {
       this.player.die('the void');
     }
     // Look for pickups
     if (!this.player.isDead) {
-      if (this.pickupActors.length > 0) {
-        const playerPos = this.player.body.position;
-        const pickupRadius = 1.75;
-        this.pickupActors.forEach(pickup => {
-          const dist = playerPos.distanceTo(pickup.position);
-          if (dist < pickupRadius) {
-            pickup.onCollect(this.player);
-          }
-        });
-      }
+      this.pickupManager.update(dt);
     }
     this.debugData.update(dt, time);
-  }
-  spawnPickup(type, position, itemId, itemData) {
-    let pickup;
-    const pos = new THREE.Vector3(position.x, position.y, position.z)
-    switch (type) {
-      case 'item':
-        pickup = new ItemPickup(this, pos, itemId, itemData);
-        break;
-      case 'crown':
-        pickup = new CrownPickup(this, pos, itemId);
-        break;
-      default:
-        pickup = this.getPickup(itemId) ?? new PowerPickup(this, type, pos, itemId);
-        break;
-    }
-    this.game.graphicsWorld.add(pickup);
-    this.pickupActors.push(pickup);
-  }
-  getPickup(itemId) {
-    return this.pickupActors.find(p => p.itemId === itemId);
-  }
-
-  removePickup(item, itemId) {
-    const pickup = item ? item : this.pickupActors.find(p => p.itemId === itemId);
-    if (pickup) {
-      this.game.graphicsWorld.remove(pickup);
-      this.pickupActors.splice(this.pickupActors.indexOf(pickup), 1);
-    }
   }
 
   getRespawnPoint() {
@@ -241,16 +191,14 @@ export default class GameScene extends SceneBase {
     this.skyBox = new SkyBox();
     this.game.graphicsWorld.add(this.skyBox);
 
-    //this.game.graphicsWorld.fog = new THREE.Fog(0xcc2211, -3000, 5000);
+    //this.game.graphicsWorld.fog = new THREE.FogExp2(0x000000, .002);
   }
 
   addPlayer(id, data) {
     console.log('Adding player', id, data);
     if (this.scenePlayers[id]) return this.scenePlayers[id];
-    //const player = new Player(this, data.pos, true, id, data);
     const player = this.pawnManager.spawnPlayer(data.pos, true, id, data)
     this.scenePlayers[id] = player;
-    this.enemyActors.push(player);
     this.players.push(player);
     MyEventEmitter.emit('playerJoined', player);
     return player;
@@ -260,9 +208,8 @@ export default class GameScene extends SceneBase {
     const player = this.scenePlayers[id];
     if (player) {
       MyEventEmitter.emit('playerLeft', player);
-      this.enemyActors.splice(this.enemyActors.indexOf(player), 1);
-      this.enemyMeshes.splice(this.enemyMeshes.indexOf(player.getMeshBody()), 1);
       this.players.splice(this.players.indexOf(player), 1);
+      this.pawnManager.removePawn(player);
       player.destroy(id);
       delete this.scenePlayers[id];
     }
@@ -292,38 +239,96 @@ export default class GameScene extends SceneBase {
     this.graphics.add(light);
     this.graphics.add(target);
   }
-  createPointLight(pos, scale) {
-    console.log(scale);
-    const light = new THREE.PointLight(0xffff00, scale.x * 10);
+  createPointLight(pos, scale, color = 'white') {
+    const light = new THREE.PointLight(color, scale.x * 10);
     light.position.copy(pos);
     this.graphics.add(light);
   }
-  spawnLevel() {
-    this.game.loadingManager.gltfLoader.load('/assets/Level1.glb', (gltf) => {
+  createPortal(pos, targetPos, newScene) {
+    const portal = new Portal(this);
+    portal.position.set(pos.x, pos.y, pos.z);
+    portal.init(targetPos, newScene);
+  }
+  spawnLevel(name = 'Level3') {
+    if (this.mapLoaded[name]) return;
+    this.game.loadingManager.gltfLoader.load(`/assets/${name}.glb`, (gltf) => {
       const model = gltf.scene;
-      const allGeoms = [];
+      const itemLocations = [];
+      const healthLocations = [];
+      const energyLocations = [];
+      const respawnLocations = [];
+      const enemyLocations = [];
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
       this.game.graphicsWorld.add(model);
       model.traverse((child) => {
         /**@type {string} */
         const childName = child.name;
+        const userData = child.userData;
+        if (childName.startsWith('Skip')) {
+          child.visible = false;
+          return;
+        }
+        if (childName.startsWith('itemLocation')) {
+          child.visible = false;
+          itemLocations.push(child.position);
+          return;
+        };
+        if (childName.startsWith('healthLocation')) {
+          child.visible = false;
+          healthLocations.push(child.position);
+          return;
+        };
+        if (childName.startsWith('energyLocation')) {
+          child.visible = false;
+          energyLocations.push(child.position);
+          return;
+        };
+        if (childName.startsWith("SpawnEnemy")) {
+          child.visible = false;
+          enemyLocations.push(child.position);
+          return;
+        }
         if (childName.startsWith("SpawnPoint")) {
           child.visible = false;
           if (!this.spawnPoints) this.spawnPoints = [];
           this.spawnPoints.push(child.position.clone());
           return;
         }
-        if (childName.startsWith('Visual')) return;
         if (childName.startsWith('SpotLight')) {
           this.createSpotLight(child.position, child.rotation);
           return;
         }
         if (childName.startsWith('PointLight')) {
-          this.createPointLight(child.position, child.scale);
+          this.createPointLight(child.position, child.scale, userData.color);
           return;
         }
+        if (childName.startsWith('Portal')) {
+          this.createPortal(
+            child.position,
+            { x: userData.pos[0], y: userData.pos[1], z: userData.pos[2] },
+            userData.scene
+          );
+          return;
+        }
+        if (childName.startsWith('Landscape')) {
+          child.material.map.repeat.set(40, 40);
+        }
+        if (childName.includes('Translucent')) {
+          child.material.transparent = true;
+          child.material.opacity = .2;
+        }
+        if (childName.startsWith('Visual')) return;
+        // Collision and bvh
         if (child.isMesh) {
+          // if(!child.geometry) return;
+          // child.updateMatrix(); // ensure local matrix matches position/rotation/scale
+          // child.geometry.applyMatrix4(child.matrix); // bake transform into geometry
+          // child.position.set(0, 0, 0);
+          // child.rotation.set(0, 0, 0);
+          // child.scale.set(1, 1, 1);
+          // child.updateMatrix();
+          // if (!child.visible) child.visible = true;
           const geomClone = child.geometry.clone(); // clone for BVH
           geomClone.computeBoundsTree();
 
@@ -334,94 +339,51 @@ export default class GameScene extends SceneBase {
             }
           });
 
-          allGeoms.push(geomClone);
+          this.allGeoms.push(geomClone);
           child.castShadow = true;
           child.receiveShadow = true;
-          this.mapWalls.push(child);
 
-          let shape;
-          try {
-            shape = createTrimesh(child.geometry);
-          } catch (e) {
-            console.warn('Could not create trimesh for', child);
-            return;
-          }
-          const body = new CANNON.Body({
-            mass: 0, // static
-            shape: shape,
-            material: getMaterial('defaultMaterial'),
-            collisionFilterGroup: 1,
-            collisionFilterMask: -1,
-          });
-          body.position.copy(child.getWorldPosition(new THREE.Vector3()));
-          body.quaternion.copy(child.getWorldQuaternion(new THREE.Quaternion()));
-          this.game.physicsWorld.addBody(body);
-
+          const rBody = this.rapier.createCollider(triMeshFromVerts(child.geometry));
         }
       });
-      for (const geom of allGeoms) {
+      for (const geom of this.allGeoms) {
         Object.keys(geom.attributes).forEach(a => {
           if (a.startsWith('color')) {
             geom.deleteAttribute(a);
           }
         })
       }
-      const mergedGeom = mergeGeometries(allGeoms);
+      const mergedGeom = mergeGeometries(this.allGeoms);
       mergedGeom.computeBoundsTree();
       this.mergedLevel = new THREE.Mesh(mergedGeom);
-      // const bvhHelper = new MeshBVHHelper(this.mergedLevel);
-      // Globals.graphicsWorld.add(bvhHelper);
+
+      MyEventEmitter.emit('spawnLocations', {
+        itemLocations,
+        healthLocations,
+        energyLocations,
+        enemyLocations,
+      });
 
       this.levelLoaded = true;
+      this.mapLoaded[name] = true;
       MyEventEmitter.emit('levelLoaded');
     });
   }
 }
 
-
-// Helper: Convert Three.js geometry to Cannon Trimesh
-function createTrimesh(geometry) {
+function triMeshFromVerts(geometry) {
   const vertices = geometry.attributes.position.array;
   let indices;
 
   if (geometry.index) {
-    // If the geometry already has an index buffer
     indices = geometry.index.array;
   } else {
-    let indices = [];
-    for (let i = 0; i < vertices.length / 3; i++) {
-      indices.push(i);
-    }
-    indices = new Uint16Array(indices);
+    const count = vertices.length / 3;
+    indices = new Uint16Array(count);
+    for (let i = 0; i < count; i++) indices[i] = i;
   }
-
-  return new CANNON.Trimesh(vertices, indices);
-}
-
-// Helper: Convert Three.js geometry to Cannon ConvexPolyhedron
-function createConvexHull(geometry) {
-  const position = geometry.attributes.position;
-  const vertices = [];
-  for (let i = 0; i < position.count; i++) {
-    vertices.push(new CANNON.Vec3(
-      position.getX(i),
-      position.getY(i),
-      position.getZ(i)
-    ));
-  }
-
-  // Faces: each face is an array of vertex indices
-  let faces = [];
-  if (geometry.index) {
-    const indices = geometry.index.array;
-    for (let i = 0; i < indices.length; i += 3) {
-      faces.push([indices[i], indices[i + 1], indices[i + 2]]);
-    }
-  } else {
-    for (let i = 0; i < vertices.length; i += 3) {
-      faces.push([i, i + 1, i + 2]);
-    }
-  }
-
-  return new CANNON.ConvexPolyhedron({ vertices, faces });
+  const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+  colliderDesc.setFriction(0);
+  colliderDesc.setRestitution(0);
+  return colliderDesc;
 }

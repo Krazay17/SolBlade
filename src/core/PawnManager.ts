@@ -2,7 +2,6 @@ import { SkinnedMesh, Vector3 } from "three";
 import Enemy from "../actors/Enemy";
 import Pawn from "../actors/Pawn";
 import GameScene from "../scenes/GameScene";
-import Manager from "./Manager";
 import Player from "../player/Player";
 import AIMovement from "./AIMovement";
 
@@ -38,7 +37,7 @@ export default class PawnManager {
         if (!enemy) return;
         this.addPawn(enemy, 'A');
     }
-    setPlayer(pawn: Pawn) { this.player = pawn }
+    setLocalPlayer(pawn: Pawn) { this.player = pawn }
     addPawn(pawn: Pawn, team: Team) {
         this.scene.addActor(pawn);
         this.allPawns?.push(pawn);
@@ -70,5 +69,16 @@ export default class PawnManager {
         const player = new Player(this.scene, pos, isRemote, id, data);
         this.addPawn(player, 'A');
         return player;
+    }
+    getEnemiesInRange(position: Vector3, range: number) {
+        const enemiesInRange = new Map();
+        for (const enemy of this.hostiles) {
+            const dist = enemy.position.distanceToSquared(position);
+            console.log(dist, range);
+            if (dist <= range) {
+                enemiesInRange.set(enemy, dist);
+            }
+        }
+        return enemiesInRange;
     }
 }

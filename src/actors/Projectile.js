@@ -5,9 +5,8 @@ import Actor from './Actor';
 import MeshManager from '../core/MeshManager';
 
 export default class Projectile extends Actor {
-    constructor(params = {}, net = {}) {
-        super();
-
+    constructor(scene, params = {}, net = {}) {
+        super(scene);
         const {
             pos = new THREE.Vector3(),
             dir = new THREE.Vector3(0, 0, 1),
@@ -16,11 +15,12 @@ export default class Projectile extends Actor {
             scale = { x: 1, y: 1, z: 1 },
             radius = 1,
         } = params;
-
         const {
             isRemote = false,
             netId = null
         } = net;
+        Globals.scene.addActor(this);
+        Globals.graphicsWorld.add(this);
 
         this.meshManager = MeshManager.getInstance();
 
@@ -39,9 +39,6 @@ export default class Projectile extends Actor {
         this.footOffset = new THREE.Vector3(0, -.5, 0);
         this.active = true;
         this.gravity = 0; // Whether the projectile is affected by gravity
-
-        Globals.scene.addActor(this);
-        Globals.graphicsWorld.add(this);
 
         if (this.isRemote) {
             this.targetPosition = this.position.clone();

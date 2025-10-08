@@ -3,18 +3,21 @@ import PlayerState from "./_PlayerState";
 export default class DashState extends PlayerState {
     constructor(actor, manager, options = {}) {
         super(actor, manager, options);
+        this.cd = 400;
+        this.duration = 300
     }
     enter() {
+        super.enter()
         this.actor.animator?.setAnimState('dash');
-        this.timer = performance.now() + 350;
         this.actor.movement.dashStart();
+        this.actor.energyRegen = 0;
     }
     update(dt) {
-        this.actor.movement.dashMove(dt);
-        if (this.timer < performance.now()) {
-            if(this.input.actionStates.blade) {
-            this.manager.setState('blade');
-            return;
+        this.actor.movement.dashMove(dt, 10, 7);
+        if (this.exitTimer < performance.now()) {
+            if (this.input.actionStates.blade) {
+                this.manager.setState('blade');
+                return;
 
             } else {
                 this.actor.energyRegen = 25;
@@ -25,5 +28,6 @@ export default class DashState extends PlayerState {
     }
     exit() {
         this.actor.movement.dashStop();
+        this.actor.energyRegen = 25;
     }
 }

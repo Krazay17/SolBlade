@@ -1,7 +1,10 @@
+import GameScene from "../scenes/GameScene";
 import Item from "./Item";
 
 export default class ItemManager {
-    constructor() {
+    constructor(scene) {
+        /**@type {GameScene} */
+        this.scene = scene;
         this.items = {
             fireball: {
                 name: 'Fireball',
@@ -24,26 +27,21 @@ export default class ItemManager {
         ];
         this.itemsOwned = [];
     }
-
     addItem(item) {
         const itemObj = typeof item === "string" ? this.items[item] : item;
         if (!this.itemsAvailable.includes(itemObj)) {
             this.itemsAvailable.push(itemObj);
         }
     }
-
     makeItem(name) {
         return new Item(this.items[name]);
     }
-
     makeRandomItem() {
-        return new Item(this._getRandomItem())
+        return new Item(this._getRandomItem());
     }
-
     addOwnedItem(item) {
-        this.itemsOwned.push(item)
+        this.itemsOwned.push(item);
     }
-
     _getRandomItem(luck = 0) {
         const totalWeight = this.itemsAvailable.reduce((sum, item) => sum + item.weight + luck, 0);
         let random = Math.random() * totalWeight;

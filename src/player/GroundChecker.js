@@ -1,11 +1,9 @@
-import * as CANNON from "cannon-es";
 import * as THREE from "three";
 import Globals from "../utils/Globals";
 import Pawn from "../actors/Pawn";
-import { threeVecToCannon } from "../utils/Utils";
 
 export default class GroundChecker {
-    constructor(pawn, rayLength = .7, spread = 0.5) {
+    constructor(pawn, rayLength = 1.1, spread = 0.5) {
         /**@type {Pawn} */
         this.pawn = pawn;
         this.body = pawn.body;
@@ -24,85 +22,17 @@ export default class GroundChecker {
 
         // Offsets around the player's bottom
         this.offsets = [
-            new CANNON.Vec3(0, 0, 0),                      // center
-            new CANNON.Vec3(spread, 0, 0),                 // right
-            new CANNON.Vec3(-spread, 0, 0),                // left
-            new CANNON.Vec3(0, 0, spread),                 // front
-            new CANNON.Vec3(0, 0, -spread),                // back
-            // new CANNON.Vec3(spread, 0, spread),            // front-right
-            // new CANNON.Vec3(-spread, 0, spread),           // front-left
-            // new CANNON.Vec3(spread, 0, -spread),           // back-right
-            // new CANNON.Vec3(-spread, 0, -spread),          // back-left
+            new THREE.Vector3(0, 0, 0),                      // center
+            new THREE.Vector3(spread, 0, 0),                 // right
+            new THREE.Vector3(-spread, 0, 0),                // left
+            new THREE.Vector3(0, 0, spread),                 // front
+            new THREE.Vector3(0, 0, -spread),                // back
+            // new THREE.Vector3(spread, 0, spread),            // front-right
+            // new THREE.Vector3(-spread, 0, spread),           // front-left
+            // new THREE.Vector3(spread, 0, -spread),           // back-right
+            // new THREE.Vector3(-spread, 0, -spread),          // back-left
         ];
     }
-    // floorNormal() {
-    //     const hits = this.floorTrace();
-    //     if (hits) {
-    //         for (const hit of hits) {
-    //             const checkNormal = hit.normal.dot(this.wordUp) > 0.7;
-    //             if (checkNormal) return hit.normal;
-    //         }
-    //     }
-    //     return false;
-    //     // const result = this.floorTrace();
-    //     // if (result) {
-    //     //     return result.hitNormalWorld;
-    //     // }
-    //     // return new CANNON.Vec3(0, 1, 0);
-    // }
-
-    // floorTrace(slope = 0.7) {
-    //     //const origin = this.body.position.clone();
-
-    //     // for (let offset of this.offsets) {
-    //     //     const from = origin.vadd(offset);
-    //     //     const to = from.clone().vadd(new CANNON.Vec3(0, -this.rayLength, 0));
-    //     //     const ray = new CANNON.Ray(from, to);
-
-    //     //     const result = new CANNON.RaycastResult();
-    //     //     ray.intersectWorld(this.world, {
-    //     //         //only collide with world floor
-    //     //         result: result,
-    //     //         collisionFilterMask: 1,
-    //     //         skipBackfaces: true,
-    //     //     });
-    //     //     this.lastResult = result;
-
-    //     //     //If any rays hit a walkable floor return true
-
-    //     //     if (result.hasHit) {
-    //     //         this.lastHit = result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0));
-    //     //         return result;
-    //     //     }
-    //     // }
-
-    //     const origin = this.pawn.position.clone();
-
-    //     const ray = new THREE.Raycaster(origin, this.worldDown, 0, this.rayLength);
-    //     const hits = ray.intersectObject(Globals.scene.getMergedLevel(), false);
-
-    //     if (hits) {
-    //         return hits;
-    //         for (const hit of hits) {
-    //             const checkNormal = hit.normal.dot(this.wordUp) > slope;
-    //             if (checkNormal) return checkNormal;
-    //         }
-    //     }
-    //     return null;
-    // }
-
-    // isGrounded(slope = 0.7) {
-    //     // const result = this.floorTrace();
-    //     // return result ? Math.abs(result.hitNormalWorld.dot(new CANNON.Vec3(0, 1, 0))) > slope : false;
-    //     const hits = this.floorTrace();
-    //     if (hits) {
-    //         for (const hit of hits) {
-    //             const checkNormal = hit.normal.dot(this.wordUp) > slope;
-    //             if (checkNormal) return checkNormal;
-    //         }
-    //     }
-    //     return false;
-    // }
     floorTrace(slope = .3) {
         const originBase = this.pawn.position;
 
@@ -116,12 +46,10 @@ export default class GroundChecker {
             const hit = this.raycaster.intersectObject(Globals.scene.getMergedLevel(), false)[0];
 
             if (hit) {
-                // Dot with worldUp to check slope tolerance
                 if (hit) {
-                    const normal = hit.normal;
+                    let normal = hit.normal;
                     if (normal.dot(this.worldUp) > slope) {
-                        const canNorm = threeVecToCannon(normal)
-                        return { grounded: true, hit, canNorm };
+                        return { grounded: true, hit, normal };
                     }
                 }
             }

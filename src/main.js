@@ -1,6 +1,5 @@
 import LocalData from "./core/LocalData";
-import Game from "./core/Game";
-import GameScene from "./scenes/GameScene";
+import Game from "./scenes/Game";
 import { initSocket } from "./core/NetManager";
 import Menu from "./ui/Menu";
 import soundPlayer from "./core/SoundPlayer";
@@ -16,12 +15,7 @@ setupChat();
 voiceChat.createButton();
 const canvas = document.getElementById('webgl');
 const game = new Game(canvas);
-const gameScene = new GameScene(game);
 const menu = new Menu();
-
-game.setScene(gameScene);
-game.start();
-
 
 setupDiscordWindow();
 

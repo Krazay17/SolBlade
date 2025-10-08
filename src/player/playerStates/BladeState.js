@@ -7,8 +7,6 @@ export default class BladeState extends PlayerState {
     constructor(actor, manager, options = {}) {
         super(actor, manager, options);
         this.reEnter = false;
-        this.enterBoost = 1.5;
-        this.maxEnterBoost = 1.5;
         this.jumpCD = 0;
         this.cdSpeed = 1000;
         this.dashTimer = null;
@@ -27,39 +25,34 @@ export default class BladeState extends PlayerState {
     enter(state, neutral) {
         this.lastEnter = performance.now();
         this.floorTimer = null;
-
-        if (!neutral && state !== 'bladeJump') {
-            this.dashTimer = performance.now() + 300;
-            this.actor.movement.dashStart();
-            this.actor.animator?.setAnimState('dash');
-
-            this.dashFx(this.actor.position);
-            MyEventEmitter.emit('fx', { type: 'dash', pos: this.actor.position });
-            return;
-        }
         this.actor.animator?.setAnimState('crouch', false);
+        this.actor.energyRegen = this.actor.bladeDrain;
     }
     update(dt) {
-        if (this.dashTimer > performance.now()) {
-            this.actor.movement.dashMove(dt, 22, 10);
+        // if (this.dashTimer > performance.now()) {
+        //     this.actor.movement.dashMove(dt, 6, 6);
+        //     return;
+        // }
+        // Jump
+        if (this.input.keys['Space'] && this.grounded && !this.jumping) {
+            clearTimeout(this.floorTimer);
+            this.grounded = false;
+            this.movement.jumpStart(.333);
+            this.jumping = performance.now() + 400;
+            this.actor.animationManager.playAnimation('jump')
             return;
         }
+        if (this.jumping > performance.now()) return this.movement.jumpMove(dt, 6);
+        else this.jumping = 0;
         this.actor.movement.bladeMove(dt);
 
-        if (this.jumpCD < performance.now()) {
-            this.actor.animator?.setAnimState('crouch', false);
-        }
+        this.actor.animator?.setAnimState('crouch', false);
 
         if (!this.input.actionStates.blade || this.actor.energy <= 0) {
             this.manager.setState('idle');
             return;
         }
 
-        // Jump
-        if (this.input.keys['Space'] && this.grounded
-            && this.manager.setState('bladeJump')) {
-            return;
-        }
         if (!this.actor.movement.isGrounded(.1)) {
             if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {
@@ -88,7 +81,7 @@ export default class BladeState extends PlayerState {
         //netSocket.emit('playerBlockUpdate', false);
     }
     canEnter() {
-        return !this.actor.getDimmed();
+        return !this.actor.getDimmed()
     }
     dashFx(pos) {
         soundPlayer.playPosAudio('dash', pos);

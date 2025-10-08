@@ -1,4 +1,3 @@
-import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
@@ -48,7 +47,7 @@ export default class Player extends Pawn {
             this.input = Globals.input;
             Globals.playerInfo.setActor(this);
 
-            this.direction = new CANNON.Vec3();
+            this.direction = new THREE.Vector3();
             this.tempVector = new THREE.Vector3();
 
             /**@type {Weapon.Weapon} */
@@ -67,9 +66,9 @@ export default class Player extends Pawn {
             this.inventory = new Inventory(this);
 
             this.cameraArm = new THREE.Object3D();
-            this.cameraArm.position.set(.5, 1.1, 0);
+            this.cameraArm.position.set(.333, .666, -.333);
             this.add(this.cameraArm);
-            this.camera.position.z = 1.5;
+            this.camera.position.z = 1.666;
             this.cameraArm.add(this.camera);
             CameraFX.init(this.camera);
 
@@ -117,13 +116,6 @@ export default class Player extends Pawn {
             this.remove(this.crownMesh);
         }
     }
-
-    dropItem(item) {
-        const loc = this.getShootData()
-
-        MyEventEmitter.emit('dropItem', item);
-    }
-
     setSpell(slot, spell) {
         if (slot < 1 || slot > 4) return;
         const spellName = spell?.name || null;
@@ -169,7 +161,7 @@ export default class Player extends Pawn {
     }
 
     update(dt, time) {
-        super.update(dt)
+        super.update(dt, time);
         if (!this.mesh) return;
 
         // Local Player
@@ -182,6 +174,7 @@ export default class Player extends Pawn {
                 this.handleInput(dt, time);
                 this.position.copy(this.body.position);
                 LocalData.position = this.position;
+                LocalData.rotation = this.rotation.y;
                 CameraFX.update(dt);
             }
         }
@@ -234,8 +227,8 @@ export default class Player extends Pawn {
         }
         if (this.input.keys['KeyF']) {
             const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
-            const scaledConvertedDirection = new CANNON.Vec3(direction.x, direction.y, direction.z).scale(2);
-            this.body.position = this.body.position.vadd(scaledConvertedDirection);
+            const scaledConvertedDirection = new THREE.Vector3(direction.x, direction.y, direction.z).multiplyScalar(2);
+            this.body.position = this.body.position.add(scaledConvertedDirection);
             this.body.velocity.y = 0;
         }
         if (this.input.keys['Digit6']) {
@@ -353,7 +346,7 @@ export default class Player extends Pawn {
                     this.stateManager.setState('knockback', { dur: dur || 300 });
                 }
                 this.body.wakeUp();
-                this.body.velocity.copy(dir);
+                this.body.velocity = dir;
             }
             if (dim) {
                 this.setDimmed(dim);
@@ -391,10 +384,10 @@ export default class Player extends Pawn {
     unDie() {
         if (this.isRemote) return;
         const spawnPoint = this.scene.getRespawnPoint();
-        this.body.position.set(spawnPoint.x, spawnPoint.y, spawnPoint.z);
-        this.body.velocity.set(0, 0, 0);
+        this.body.velocity = { x: 0, y: 0, z: 0 };
+        this.body.position = { x: spawnPoint.x, y: spawnPoint.y, z: spawnPoint.z };
+        this.position.copy(this.body.position);
         this.setHealth(100);
-
         this.stateManager.setState('idle');
 
         MyEventEmitter.emit('playerRespawn', { health: this.health });
@@ -454,11 +447,12 @@ export default class Player extends Pawn {
     }
     tryEnterBlade() {
         if (this.stateManager.currentStateName === 'blade') return;
-        if (this.stateManager.currentStateName === 'bladeJump') return;
-        const neutral = this.movement.getInputDirection().clone().isZero();
+        if (this.stateManager.currentStateName === 'dash') return;
+        const neutral = this.movement.getInputDirection().length() === 0;
         if (this.energy < this.dashCost) return false;
         const energyCost = neutral ? 0 : this.dashCost;
-        if (this.stateManager.setState('blade', neutral)
+        if (!neutral && this.stateManager.setState('dash') && this.tryUseEnergy(energyCost)) return;
+        if (this.stateManager.setState('blade')
             && this.tryUseEnergy(energyCost)) {
 
             this.energyRegen = this.bladeDrain;
