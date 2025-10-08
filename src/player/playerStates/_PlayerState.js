@@ -2,6 +2,7 @@ import { Vector3 } from 'three';
 import PlayerMovement from '../PlayerMovement';
 import Player from '../Player';
 import PlayerStateManager from './PlayerStateManager';
+import PawnBody from '../../core/PawnBody';
 export default class PlayerState {
     constructor(actor, manager, options = {}) {
         /**@type {Player} */
@@ -12,7 +13,7 @@ export default class PlayerState {
         this.manager = manager;
         /**@type {PlayerStateManager} */
         this.stateManager = manager;
-        this.animationManager = this.actor.animationManager;
+        /**@type {PawnBody} */
         this.body = actor.body;
         this.input = actor.input;
         this.tempVector = new Vector3();
@@ -24,6 +25,9 @@ export default class PlayerState {
         this.reEnter = false;
 
         Object.assign(this, options);
+    }
+    get animationManager() {
+        return this.actor.animationManager;
     }
 
     enter() {

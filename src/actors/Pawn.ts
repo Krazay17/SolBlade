@@ -90,7 +90,7 @@ export default class Pawn extends Actor {
         this.add(mesh);
         this.mesh = mesh.meshBody as THREE.SkinnedMesh;
         this.mesh.userData.owner = this;
-        this.animationManager = new AnimationManager(this.mesh, mesh.animations);
+        this.animationManager = new AnimationManager(this, this.mesh, mesh.animations);
         this.meshAssigned();
         MyEventEmitter.emit('newPawnMesh', this.mesh);
     }

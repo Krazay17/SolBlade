@@ -167,7 +167,7 @@ export default class Player extends Pawn {
         // Local Player
         if (!this.isRemote) {
             tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
-            tryUpdateState(this.getAnimState());
+            //tryUpdateState(this.getAnimState());
             this.addEnergy(this.energyRegen, dt);
             if (this.body) {
                 if (this.movement) this.movement.update(dt);
@@ -229,7 +229,7 @@ export default class Player extends Pawn {
             const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
             const scaledConvertedDirection = new THREE.Vector3(direction.x, direction.y, direction.z).multiplyScalar(2);
             this.body.position = this.body.position.add(scaledConvertedDirection);
-            this.body.velocity.y = 0;
+            this.body.velocity = { x: 0, y: 0, z: 0 };
         }
         if (this.input.keys['Digit6']) {
             this.stateManager.tryEmote('rumbaDancing');

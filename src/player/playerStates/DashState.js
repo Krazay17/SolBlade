@@ -11,6 +11,7 @@ export default class DashState extends PlayerState {
         this.actor.animator?.setAnimState('dash');
         this.actor.movement.dashStart();
         this.actor.energyRegen = 0;
+        this.movement.momentumBooster.increaseBoost(2);
     }
     update(dt) {
         this.actor.movement.dashMove(dt, 10, 7);
@@ -27,7 +28,7 @@ export default class DashState extends PlayerState {
         }
     }
     exit() {
-        this.actor.movement.dashStop();
+        //this.actor.movement.dashStop();
         this.actor.energyRegen = 25;
     }
 }

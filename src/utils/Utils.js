@@ -15,3 +15,18 @@ export function clampVector(vec, maxLength) {
 export function randomIntFromRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export function vectorsToLateralDegrees(vec1, vec2) {
+    const cross = vec1.x * vec2.z - vec1.z * vec2.x;
+    const dot = vec1.x * vec2.x + vec1.z * vec2.z;
+
+    const angleRad = Math.round(Math.atan2(cross, dot) * 1e6) / 1e6;
+
+    // Convert to degrees
+    let angleDeg = angleRad * 180 / Math.PI;
+
+    // Normalize to [0, 360)
+    if (angleDeg < 0) angleDeg += 360;
+
+    return angleDeg;
+}

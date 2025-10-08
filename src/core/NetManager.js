@@ -4,6 +4,7 @@ import { Vector3 } from "three";
 import Globals from "../utils/Globals";
 import LocalData from "./LocalData";
 import GameScene from "../scenes/GameScene";
+import Player from "../player/Player";
 
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
@@ -98,6 +99,13 @@ function bindSocketEvents(myPlayerData) {
             netPlayers[id].setAnimState(data.state);
         }
     });
+    socket.on('playAnimation', ({ id, data }) => {
+        /**@type {Player} */
+        const player = netPlayers[id];
+        if (player) {
+            player.animationManager.playAnimation(data.name, data.loop);
+        }
+    })
     socket.on('playerNameUpdate', ({ id, name }) => {
         if (netPlayers[id]) {
             netPlayers[id].setName(name);
@@ -200,7 +208,7 @@ function bindSocketEvents(myPlayerData) {
         const player = netPlayers[id];
         if (!player) return;
         scene.spawnProjectile(player, data);
-        
+
     });
     socket.on('projectileMoved', ({ id, data }) => {
         const player = netPlayers[id];
@@ -260,6 +268,9 @@ MyEventEmitter.on('updateParry', (doesParry) => {
         socket.emit('playerParryUpdate', doesParry);
     }
 });
+MyEventEmitter.on('playAnimation', (data) => {
+    socket.emit('playAnimation', data);
+})
 
 setInterval(() => {
     socket.emit('heartbeat');

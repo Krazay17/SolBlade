@@ -147,7 +147,7 @@ export default class Game {
     // Globals.csm = this.csm;
 
     // Directional Light (main sun)
-    const dirLight = new THREE.DirectionalLight(0xffffff, .8);
+    const dirLight = new THREE.DirectionalLight(0xffffff, .4);
     dirLight.position.set(50, 100, 50);
     const target = new THREE.Vector3().addVectors(dirLight.position, new THREE.Vector3(1, -1, 1).normalize())
     dirLight.lookAt(target);
@@ -168,7 +168,7 @@ export default class Game {
     dirLight.castShadow = true;
     this.graphicsWorld.add(dirLight);
     // Ambient Light
-    const ambientLight = new THREE.AmbientLight(0xffffff, .1);
+    const ambientLight = new THREE.AmbientLight(0xffffff, .025);
     this.graphicsWorld.add(ambientLight);
 
     // const helper = new THREE.CameraHelper(dirLight.shadow.camera);

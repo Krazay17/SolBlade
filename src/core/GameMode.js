@@ -52,7 +52,7 @@ export default class GameMode {
             let pos;
             switch (source) {
                 case 'the void':
-                    pos = { x: 0, y: 301, z: 0 };
+                    pos = { x: 0, y: 1, z: 0 };
                     break;
                 default:
                     pos = this.actor.position;
@@ -98,7 +98,7 @@ export default class GameMode {
         this.rangeCheckTimer = setInterval(() => {
             const dist = this.actor.position.length();
             if (dist > 58) {
-                this.dropCrown({ x: 0, y: 301, z: 0 });
+                this.dropCrown({ x: 0, y: 1, z: 0 });
             }
         }, 500);
     }

@@ -23,39 +23,41 @@ export default class PlayerMovement {
         this.tempVector2 = new Vector3();
         this.dashValue = 0;
 
-        const savedValues = LocalData.movementValues;
-        this.values = savedValues ?? {
+        this.defaultValues = {
             idle: {
-                friction: 20,
+                friction: 25,
             },
             ground: {
                 friction: 20,
                 accel: 20,
                 speed: 6,
-                tap: 0
+                tap: 0.01
             },
             air: {
                 friction: 0,
-                accel: 4,
+                accel: 2,
                 speed: 4,
-                tap: 0
+                tap: 0.01
             },
             blade: {
                 friction: 0,
                 accel: 1,
                 speed: 7,
-                tap: 0
+                tap: 0.01
             },
             attack: {
                 friction: 2,
                 accel: 10,
                 speed: 3,
-                tap: 0
+                tap: 0.01
             },
             dash: {
                 speed: 10
             }
         }
+
+        const savedValues = LocalData.movementValues;
+        this.values = savedValues ?? this.defaultValues
 
         window.addEventListener('beforeunload', () => {
             LocalData.movementValues = this.values;
@@ -99,43 +101,12 @@ export default class PlayerMovement {
     }
 
     resetDefaultValues() {
-        this.values = {
-            idle: {
-                friction: 20,
-            },
-            ground: {
-                friction: 20,
-                accel: 20,
-                speed: 6,
-                tap: 0
-            },
-            air: {
-                friction: 0,
-                accel: 4,
-                speed: 4,
-                tap: 0
-            },
-            blade: {
-                friction: 0,
-                accel: 1,
-                speed: 7,
-                tap: 0
-            },
-            attack: {
-                friction: 2,
-                accel: 10,
-                speed: 3,
-                tap: 0
-            },
-            dash: {
-                speed: 10
-            }
-        }
+        this.values = this.defaultValues;
         return this.values;
     }
 
     idleMove(dt) {
-        this.applyFriction(dt, this.values.idle.friction);
+        this.applyFriction(dt, this.values.idle.friction, false);
         if (this.body.velocity.length() < 1) {
             return false;
         }
@@ -199,7 +170,7 @@ export default class PlayerMovement {
     }
 
     bladeMove(dt) {
-        this.applyFriction(dt, this.values.blade.friction);
+        this.applyFriction(dt, this.values.blade.friction, false);
 
         let wishdir = this.getInputDirection();
         let wishspeed = this.values.blade.speed + this.momentumBooster.increaseBoost(dt);
@@ -224,7 +195,6 @@ export default class PlayerMovement {
     dashMove(dt, decay = 5, min = 7) {
         const d = this.tempVector.copy(this.direction)
         this.dashValue = Math.max(min, this.dashValue - decay * dt);
-        console.log(this.dashValue)
         this.body.velocity = d.multiplyScalar(this.dashValue);
     }
     dashStop() {
@@ -246,11 +216,11 @@ export default class PlayerMovement {
         this.body.velocity = { x: v.x, y: v.y += height * dt, z: v.z };
     }
 
-    applyFriction(dt, friction) {
+    applyFriction(dt, friction, expo = true) {
         const v = this.body.velocity;
         const speed = v.length();
         if (speed < 0.00001) return;
-        const drop = speed * friction * dt;
+        const drop = expo ? speed * friction * dt : friction * dt;
         const newSpeed = Math.max(0, (speed - drop));
         const scale = newSpeed / speed;
         v.x *= scale;
@@ -259,9 +229,8 @@ export default class PlayerMovement {
         this.body.velocity = v;
     }
     /**@param {Vector3} wishdir */
-    accelerate(wishdir, wishspeed, accel, dt, tapBlend) {
+    accelerate(wishdir, wishspeed, accel, dt, blendFactor = 0.01) {
         const v = this.body.velocity;
-        const speed = v.length();
         const currentVelocity = this.tempVector.copy(this.body.velocity);
         currentVelocity.y = 0;
 
@@ -272,14 +241,18 @@ export default class PlayerMovement {
         const accelSpeed = Math.min(accel * addSpeed * dt, addSpeed);
         v.add(wishdir.multiplyScalar(accelSpeed));
         this.body.velocity = v;
-        this.adjustVelocityDirection(wishdir);
+
+        if (wishDirSpeed > 0) {
+            this.adjustVelocityDirection(wishdir, blendFactor);
+        }
     }
-    adjustVelocityDirection(wishdir, blendFactor = 1) {
+    adjustVelocityDirection(wishdir, blendFactor = 0.01) {
         this.tempVector.copy(wishdir).normalize();
         if (wishdir.length() === 0) return;
 
         const v = this.body.velocity;
         const vy = v.y;
+        v.y = 0;
         const speed = Math.hypot(v.x, v.z);
         if (speed < 0.0001) return;
         const vXZ = this.tempVector2.copy(v);
@@ -287,7 +260,7 @@ export default class PlayerMovement {
 
         this.tempVector.multiplyScalar(speed);
 
-        v.lerp(this.tempVector, .01);
+        v.lerp(this.tempVector, blendFactor);
 
         this.body.velocity = { x: v.x, y: vy, z: v.z };
     }

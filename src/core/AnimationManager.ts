@@ -1,19 +1,24 @@
 import * as THREE from 'three';
+import MyEventEmitter from './MyEventEmitter';
+import Pawn from '../actors/Pawn';
 
 export default class AnimationManager {
+    pawn: Pawn;
     mixer: THREE.AnimationMixer;
     animations: { [key: string]: THREE.AnimationClip };
     currentAction: THREE.AnimationAction | null = null;
     timeScaleTimer: NodeJS.Timeout | null = null;
     currentAnimation: string | null = null;
+    _onFinishedListener: any;
     setAnimState = this.playAnimation;
     hitFreeze = this.changeTimeScale;
 
-    constructor(model: THREE.Object3D, animations: THREE.AnimationClip[]) {
+    constructor(pawn: Pawn, model: THREE.Object3D, animations: THREE.AnimationClip[]) {
+        this.pawn = pawn;
         this.mixer = new THREE.AnimationMixer(model);
         this.animations = {};
         animations.forEach((clip) => {
-            if(clip.name.startsWith('')) {
+            if (clip.name.startsWith('')) {
                 // blend anims
             }
             this.animations[clip.name] = clip;
@@ -27,7 +32,7 @@ export default class AnimationManager {
         this.animations = {};
     }
 
-    playAnimation(name: string, loop: boolean = true, blend = false) {
+    playAnimation(name: string, loop: boolean = true, onFinished: any = null) {
         const clip = this.animations[name];
         if (clip) {
             if ((name === this.currentAnimation)) return;
@@ -36,15 +41,38 @@ export default class AnimationManager {
             action.clampWhenFinished = true;
             if (this.currentAction) {
                 this.currentAction.timeScale = 1;
-                    this.currentAction.crossFadeTo(action, 0.175); // .125
+                this.currentAction.crossFadeTo(action, 0.175); // .125
             }
             action.reset().fadeIn(0.1).play();
             this.currentAction = action;
             this.currentAnimation = name;
+
+            if (this._onFinishedListener) {
+                this.mixer.removeEventListener('finished', this._onFinishedListener);
+                this._onFinishedListener = null;
+            }
+            if (!loop && onFinished && !this.pawn.isRemote) {
+                const listener = () => {
+                    try {
+                        onFinished()
+                    } catch (e) {
+                        console.log('onFinished callback failed', e);
+                    }
+                    this.mixer.removeEventListener('finished', listener);
+                    this._onFinishedListener = null;
+                }
+                this._onFinishedListener = listener;
+                this.mixer.addEventListener('finished', listener);
+            }
+
+            if (!this.pawn.isRemote) MyEventEmitter.emit('playAnimation', { name, loop });
+
             return clip;
         } else {
             console.warn(`Animation ${name} not found.`);
         }
+    }
+    queAnimation(name: string, loop: boolean = true) {
     }
 
     stopAnimation(name: string) {
