@@ -18,7 +18,7 @@ export default class AttackState extends PlayerState {
     } = {}) {
         this.weapon = weapon;
         this.exitTimer = performance.now() + duration;
-        this.actor.animator?.setAnimState(anim, false, true);
+        this.actor.animationManager?.setAnimState(anim, false, true);
         this.damageDelay = performance.now() + damageDelay;
         this.damageDuration = damageDuration;
         this.doesParry = doesParry;
@@ -30,7 +30,7 @@ export default class AttackState extends PlayerState {
         this.actor.movement.attackMove(dt, this.frictionOverride, this.speedOverride);
         // if(this.movement.isGrounded()) {
         //     this.movement.groundMove(dt);
-        //     this.actor.animator.playAnimation('BlendWalk');
+        //     this.actor.animationManager.playAnimation('BlendWalk');
         // } else {
         //     this.movement.airMove(dt);
         // }

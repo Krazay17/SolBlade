@@ -24,8 +24,8 @@ export default class GameMode {
             }
             this.players = {};
         });
-        MyEventEmitter.on('currentPlayers', playerList => {
-            for (const player of playerList) {
+        MyEventEmitter.on('currentPlayers', players => {
+            for (const player of Object.keys(players)) {
                 this.players[player.netId] = { data: player.data, score: player.score || 0, element: null };
             }
         });

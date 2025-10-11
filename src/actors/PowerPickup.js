@@ -2,8 +2,8 @@ import Pickup from "./Pickup";
 import * as THREE from 'three';
 
 export default class PowerPickup extends Pickup {
-    constructor(scene, pos, type, netId) {
-        super(scene, pos, netId);
+    constructor(scene, data) {
+        super(scene, data);
         this.type = type;
         this.color = null;
         switch (this.type) {

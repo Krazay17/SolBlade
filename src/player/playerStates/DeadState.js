@@ -5,9 +5,8 @@ export default class DeadState extends PlayerState {
         super(actor, manager, options);
     }
     enter() {
-        this.actor.animator?.setAnimState('knockback');
+        this.actor.animationManager?.playAnimation('knockback', false);
         this.actor.isDead = true;
-
         setTimeout(() => {
             this.actor.isDead = false;
             this.actor.unDie();

@@ -8,7 +8,7 @@ export default class DashState extends PlayerState {
     }
     enter() {
         super.enter()
-        this.actor.animator?.setAnimState('dash');
+        this.actor.animationManager?.playAnimation('dash', false);
         this.actor.movement.dashStart();
         this.actor.energyRegen = 0;
         this.movement.momentumBooster.increaseBoost(2);

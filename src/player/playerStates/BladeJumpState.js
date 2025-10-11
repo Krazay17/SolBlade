@@ -2,7 +2,7 @@ import PlayerState from "./_PlayerState";
 
 export default class BladeJumpState extends PlayerState {
     enter() {
-        this.actor.animator?.setAnimState('jump', true);
+        this.actor.animationManager?.playAnimation('jump', false);
         this.jumpTimer = performance.now() + 400;
 
         this.actor.movement.jumpStart(.333);

@@ -4,7 +4,6 @@ export default class Portal extends Actor {
     init(pos, newScene) {
         this.portalToPos = pos;
         this.portalToScene = newScene;
-        this.scene.addActor(this);
     }
     update() {
         const player = this.scene.player

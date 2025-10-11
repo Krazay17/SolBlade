@@ -3,6 +3,7 @@ import { projectOnPlane, clampVector } from "../utils/Utils";
 import RunBoost from "./MomentumBoost";
 import GroundChecker from "./GroundChecker";
 import { Vector3 } from "three";
+import Input from "../core/Input";
 
 export default class PlayerMovement {
     /**
@@ -275,11 +276,14 @@ export default class PlayerMovement {
     getInputDirection(z = 0) {
         this.direction.set(0, 0, 0);
 
+        /**@type {Input} */
+        const input = this.input
+
         // Gather input directions
-        if (this.input.keys['KeyW']) this.direction.z -= 1;
-        if (this.input.keys['KeyS']) this.direction.z += 1;
-        if (this.input.keys['KeyA']) this.direction.x -= 1;
-        if (this.input.keys['KeyD']) this.direction.x += 1;
+        if (input.actionStates.moveForward) this.direction.z -= 1;
+        if (input.actionStates.moveBackward) this.direction.z += 1;
+        if (input.actionStates.moveLeft) this.direction.x -= 1;
+        if (input.actionStates.moveRight) this.direction.x += 1;
 
         if (this.direction.length() === 0) {
             this.direction.z = z;

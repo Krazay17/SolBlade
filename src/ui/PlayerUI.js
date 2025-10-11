@@ -1,6 +1,5 @@
 import MyEventEmitter from "../core/MyEventEmitter.js";
 import LocalData from "../core/LocalData.js";
-import PartyFrame from "./PartyFrame.js";
 import { netSocket } from "../core/NetManager.js";
 
 export default class PlayerInfo {
@@ -49,8 +48,8 @@ export default class PlayerInfo {
         const healthBar = document.createElement('div');
         healthBar.id = 'health-bar';
         healthBar.style.width = `${this.health}%`;
-        MyEventEmitter.on('updateHealth', (newHealth) => {
-            this.health = newHealth;
+        MyEventEmitter.on('playerHealthChange', ({ player, health }) => {
+            this.health = health;
             healthBar.style.width = `${this.health}%`;
         });
         healthBarContainer.appendChild(healthBar);

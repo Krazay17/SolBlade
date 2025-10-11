@@ -14,54 +14,45 @@ import RAPIER from "@dimforge/rapier3d-compat";
 import PawnBody from "../core/PawnBody";
 
 export default class Pawn extends Actor {
-    scene: GameScene;
-    isRemote: boolean;
     body: PawnBody | null = null;
     collider: RAPIER.Collider | null = null;
     radius: number;
     height: number;
-    pawnName: string;
-    targetPosition: THREE.Vector3 = new THREE.Vector3();
+    meshName: string;
     targetRotation: number = 0;
     controller: AIController | null = null;
     movement: PlayerMovement | AIMovement | null = null;
-    netId: string | null;
     mesh: THREE.SkinnedMesh | null = null;
     stateManager: StateManager | PlayerStateManager | null = null;
     animationManager: AnimationManager | null = null;
     namePlate: NamePlate | null = null;
 
-    constructor(scene: GameScene, pos: THREE.Vector3, pawnName: string, radius: number = .5, height: number = 1,
-        net: { isRemote: boolean, netId: string | null } = { isRemote: false, netId: null }) {
-        super(scene);
-        this.scene = scene;
+    constructor(
+        scene: GameScene,
+        data: any,
+        meshName: string,
+        radius: number = .5,
+        height: number = 1
+    ) {
+        super(scene, data);
         this.radius = radius;
         this.height = height;
-        this.pawnName = pawnName;
-        pos.y += .2;
-        this.position.copy(pos);
+        this.meshName = meshName;
 
-        this.isRemote = net.isRemote;
-        this.netId = net.netId;
-        Globals.graphicsWorld.add(this);
-
-        this.assignMesh(pawnName);
+        this.assignMesh(meshName);
 
         if (!this.isRemote) {
-            //this.createBody(pos);
-            this.body = new PawnBody(this.scene.rapier, pos, height, radius);
+            this.body = new PawnBody(scene.rapier, data.pos, height, radius);
         } else {
-            this.targetPosition.copy(pos);
+            this.targetPosition = data.pos;
         }
         MyEventEmitter.emit("pawnCreated", this);
     }
-    destroy() {
-        Globals.graphicsWorld.remove(this);
-        //if (this.body) Globals.physicsWorld.removeBody(this.body);
-    }
     update(dt: number, time: number) {
+        super.update(dt, time);
         if (this.controller) this.controller.update?.(dt);
         if (this.stateManager) this.stateManager.update(dt, time);
+        if (this.movement) this.movement.update?.(dt, time);
         if (this.animationManager) this.animationManager.update(dt);
         if (!this.isRemote) {
             if (this.body) {
@@ -75,17 +66,17 @@ export default class Pawn extends Actor {
             if (this.position.distanceToSquared(this.targetPosition) > 2) {
                 this.position.copy(this.targetPosition);
             } else {
-                this.position.lerp(this.targetPosition, 60 * dt);
+                this.position.lerp(this.targetPosition, 120 * dt);
             }
             if (Math.abs(this.rotation.y - this.targetRotation) > 5) {
                 this.rotation.y = this.targetRotation;
             } else {
-                this.rotation.y += (this.targetRotation - this.rotation.y) * 60 * dt;
+                this.rotation.y += (this.targetRotation - this.rotation.y) * 120 * dt;
             }
         }
     }
-    async assignMesh(pawnName: string) {
-        const mesh = await this.scene.meshManager?.createSkeleMesh(pawnName);
+    async assignMesh(meshName: string) {
+        const mesh = await this.scene.meshManager?.createSkeleMesh(meshName);
         if (!mesh) return;
         this.add(mesh);
         this.mesh = mesh.meshBody as THREE.SkinnedMesh;
@@ -95,9 +86,6 @@ export default class Pawn extends Actor {
         MyEventEmitter.emit('newPawnMesh', this.mesh);
     }
     meshAssigned() { }
-    takeDamage(actor: any, damage: any) {
-        console.log(damage.amount);
-    }
     getMeshBody() {
         return this.mesh;
     }

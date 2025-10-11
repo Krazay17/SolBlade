@@ -9,14 +9,13 @@ export default class StunState extends PlayerState {
     enter(state, { stun = 500, anim } = {}) {
         this.timer = performance.now() + stun;
         if (anim) {
-            this.actor.animator?.setAnimState(anim, true);
+            this.actor.animationManager?.playAnimation(anim, false);
         }
     }
     update(dt) {
         if (this.timer > performance.now()) return;
         this.manager.setState('idle');
     }
-
     canExit(stance) {
         return this.timer < performance.now() || stance === 'stun' || stance === 'dead';
     }

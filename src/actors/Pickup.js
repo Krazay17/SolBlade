@@ -1,19 +1,17 @@
 import * as THREE from 'three';
-import Globals from '../utils/Globals.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import soundPlayer from '../core/SoundPlayer.js';
 import Actor from './Actor.js';
-import GameScene from '../scenes/GameScene.js';
 
 export default class Pickup extends Actor {
-    constructor(scene, position, netId) {
-        super(scene);
-        /**@type {GameScene} */
-        this.position.set(position.x, position.y, position.z);
-        this.netId = String(netId) || null;
+    constructor(scene, data) {
+        super(scene, data);
         this.active = true;
         /**@type {THREE.Mesh} */
         this.mesh = null;
+
+        this.height = 0;
+        this.tempVector = new THREE.Vector3();
 
         if (!Pickup.netFx) {
             MyEventEmitter.on('netFx', (data) => {
@@ -23,8 +21,6 @@ export default class Pickup extends Actor {
             });
             Pickup.netFx = true;
         }
-
-        this.scene.graphics.add(this);
     }
     static pickupFx(pos) {
         soundPlayer.playPosAudio('pickup', pos, '/assets/Pickup.mp3');
@@ -34,12 +30,26 @@ export default class Pickup extends Actor {
         this.mesh.scale.set(scale, scale, scale);
         this.add(this.mesh);
     }
-    onCollect(player) {
-        if (!this.active) return;
-        this.active = false;
+    touch(dealer) {
         Pickup.pickupFx(this.position);
-        MyEventEmitter.emit('fx', { type: 'pickup', pos: this.position });
-        MyEventEmitter.emit('pickupCollected', { netId: this.netId, item: this });
+
+        this.destroy();
+        super.touch(dealer);
     }
-    applyCollect(player) { }
+    applyTouch(dealer) {
+        this.destroy();
+    }
+    checkDistanceToPlayer() {
+        const player = this.scene.player;
+        const adjustPos = this.tempVector.copy(this.position);
+        adjustPos.y += this.height;
+        const dist = player.position.distanceToSquared(adjustPos)
+        if (dist < 2.55) {
+            this.touch(player);
+        }
+    }
+    update(dt, time) {
+        if (!this.active) return;
+        this.checkDistanceToPlayer();
+    }
 }

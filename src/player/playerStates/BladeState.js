@@ -25,7 +25,7 @@ export default class BladeState extends PlayerState {
     enter(state, neutral) {
         this.lastEnter = performance.now();
         this.floorTimer = null;
-        this.actor.animator?.setAnimState('crouch', false);
+        this.actor.animationManager?.setAnimState('crouch', false);
         this.actor.energyRegen = this.actor.bladeDrain;
     }
     update(dt) {
@@ -46,7 +46,7 @@ export default class BladeState extends PlayerState {
         else this.jumping = 0;
         this.actor.movement.bladeMove(dt);
 
-        this.actor.animator?.setAnimState('crouch', false);
+        this.actor.animationManager?.playAnimation('crouch', false);
 
         if (!this.input.actionStates.blade || this.actor.energy <= 0) {
             this.manager.setState('idle');

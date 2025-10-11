@@ -10,10 +10,8 @@ import MeshManager from '../core/MeshManager.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import PartyFrame from '../ui/PartyFrame.js';
 import GameMode from '../core/GameMode.js';
-import voiceChat from '../core/VoiceChat.js';
 import { MeshBVH, MeshBVHHelper, acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import ProjectileFireball from '../actors/ProjectileFireball.js';
 import PawnManager from '../core/PawnManager.ts';
 import Actor from '../actors/Actor.ts';
 import ItemManager from '../core/ItemManager.js';
@@ -23,6 +21,7 @@ import Game from './Game.js';
 import { Scene } from "three";
 import Portal from '../actors/Portal.js';
 import RAPIER from '@dimforge/rapier3d-compat';
+import ActorManager from '../core/ActorManager.ts';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -36,8 +35,6 @@ export default class GameScene {
     this.name = 'Level1';
     /** @type {Scene} */
     this.graphics = game.graphicsWorld;
-    /** @type {World} */
-    this.physics = game.physicsWorld;
     /**@type {RAPIER.World} */
     this.rapier = game.rapierWorld;
     Globals.scene = this;
@@ -59,8 +56,10 @@ export default class GameScene {
 
     this.meshManager = new MeshManager(this.game);
     this.itemManager = new ItemManager(this);
-    this.pawnManager = new PawnManager(this);
-    this.player = this.pawnManager.spawnPlayer(LocalData.position || new THREE.Vector3(0, 1, 0));
+    this._pawnManager = new PawnManager(this);
+    this.actorManager = new ActorManager(this);
+    this.player = this._pawnManager.spawnPlayer({ pos: LocalData.position || new THREE.Vector3(0, 1, 0) }, false);
+    this._pawnManager.setLocalPlayer(this.player);
     this.pickupManager = new PickupManager(this, this.player);
     this.projectileManager = new ProjectileManager(this, this.player);
     this.debugData = new DebugData(this.player);
@@ -69,70 +68,16 @@ export default class GameScene {
 
     Globals.player = this.player;
     this.players.push(this.player);
-    this.pawnManager.setLocalPlayer(this.player);
 
     this.spawnLevel('Level1');
-
-    soundPlayer.loadMusic('music1', 'assets/Music1.mp3');
-    function playMusiconFirstClick() {
-      soundPlayer.playMusic(0);
-      document.removeEventListener('mousedown', playMusiconFirstClick);
-      soundPlayer.loadAllMusic();
-    }
-    document.addEventListener('mousedown', playMusiconFirstClick);
-
+    soundPlayer.init();
     this.makeSky();
-    setNetScene(this, {
-      scene: this.name,
-      pos: LocalData.position,
-      name: LocalData.name,
-      money: LocalData.money,
-      health: LocalData.health,
-    });
-    voiceChat.setScene(this);
-    this.initListeners();
+    setNetScene(this);
   }
   add(obj) {
     this.graphics.add(obj);
   }
-  initListeners() {
-    MyEventEmitter.on('playerDropItem', ({ item, pos }) => {
-      if (netSocket.connected) return;
-      this.pickupManager.spawnItem(null, pos, item);
-    })
-  }
-  getPawnManager() { return this.pawnManager };
-  /**@param {Actor} actor */
-  addActor(actor) {
-    this.actors.push(actor);
-  }
-  removeActor(actor) {
-    this.actors.splice(this.actors.indexOf(actor), 1);
-  }
-  getActors() { return this.actors; }
-  spawnProjectile(player, data) {
-    const { type, netId, pos, dir, speed, dur } = data;
-    let projectile;
-    switch (type) {
-      case 'Fireball':
-        projectile = new ProjectileFireball(this, { pos, dir, speed, dur }, { isRemote: true, netId });
-        break;
-    }
-    this.projectiles.push(projectile);
-    return projectile;
-  }
-  moveProjectile(data) {
-    const { netId, pos } = data;
-    const projectile = this.projectiles.find(p => p.netId === netId);
-    if (!projectile) return;
-    projectile.setTargetPos(pos);
-  }
-  removeProjectile(data) {
-    const id = data;
-    const projectile = this.projectiles.find(p => p.netId === id);
-    if (!projectile) return;
-    projectile.destroy();
-  }
+  get pawnManager() { return this._pawnManager };
   getIsConnected() {
     return netSocket.connected;
   }
@@ -141,9 +86,6 @@ export default class GameScene {
   }
   getOtherActors() {
     return Object.values(this.scenePlayers).filter(p => p !== this.player);
-  }
-  getEnemyMeshMap() {
-    return this.enemyMeshMap;
   }
   addEnemy(actor) {
     this.enemyActors.push(actor);
@@ -155,26 +97,25 @@ export default class GameScene {
     return this.mergedLevel || null;
   }
   getScenePlayersPos() {
-    const positions = {};
-    Object.values(this.scenePlayers).forEach(player => {
-      positions[player.netId] = player.position;
-    });
-    return positions;
+    const pawns = [...this.pawnManager.players];
+    const posMap = new Map();
+    for (const p of pawns) {
+      posMap.set(p.netId, p.position);
+    }
+    return posMap;
   }
   update(dt, time) {
     if (this.skyBox) this.skyBox.update();
     if (!this.levelLoaded) return;
-    for (const a of this.actors) { a.update(dt, time); }
-    if (this.pawnManager) {
-      this.pawnManager.update(dt, time);
+    if (this.actorManager) this.actorManager.update(dt, time);
+    if (this._pawnManager) {
+      this._pawnManager.update(dt, time);
     }
     if (!this.player) return;
-    // KillFloor
-    if (this.player.body.position.y < -350 && !this.player.isDead) {
-      this.player.die('the void');
-    }
-    // Look for pickups
     if (!this.player.isDead) {
+      if (this.player.body.position.y < -350) {
+        this.player.die('the void');
+      }
       this.pickupManager.update(dt);
     }
     this.debugData.update(dt, time);
@@ -194,39 +135,6 @@ export default class GameScene {
     //this.game.graphicsWorld.fog = new THREE.FogExp2(0x000000, .002);
   }
 
-  addPlayer(id, data) {
-    console.log('Adding player', id, data);
-    if (this.scenePlayers[id]) return this.scenePlayers[id];
-    const player = this.pawnManager.spawnPlayer(data.pos, true, id, data)
-    this.scenePlayers[id] = player;
-    this.players.push(player);
-    MyEventEmitter.emit('playerJoined', player);
-    return player;
-  }
-
-  removePlayer(id) {
-    const player = this.scenePlayers[id];
-    if (player) {
-      MyEventEmitter.emit('playerLeft', player);
-      this.players.splice(this.players.indexOf(player), 1);
-      this.pawnManager.removePawn(player);
-      player.destroy(id);
-      delete this.scenePlayers[id];
-    }
-  }
-
-  fullNetSync() {
-    if (!this.player) return null;
-    return {
-      scene: this.name,
-      pos: this.player.body.position,
-      rot: this.player.rotation,
-      state: this.player.getState(),
-      health: this.player.health,
-      name: LocalData.name,
-      money: LocalData.money,
-    };
-  }
   createSpotLight(pos, rot) {
     const targetDir = new THREE.Vector3().setFromEuler(rot);
     const light = new THREE.SpotLight(0xffffff, 100, 40);
@@ -357,12 +265,12 @@ export default class GameScene {
       mergedGeom.computeBoundsTree();
       this.mergedLevel = new THREE.Mesh(mergedGeom);
 
-      MyEventEmitter.emit('spawnLocations', {
-        itemLocations,
-        healthLocations,
-        energyLocations,
-        enemyLocations,
-      });
+      // MyEventEmitter.emit('spawnLocations', {
+      //   itemLocations,
+      //   healthLocations,
+      //   energyLocations,
+      //   enemyLocations,
+      // });
 
       this.levelLoaded = true;
       this.mapLoaded[name] = true;

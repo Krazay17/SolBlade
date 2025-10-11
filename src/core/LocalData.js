@@ -1,6 +1,6 @@
 import MyEventEmitter from "./MyEventEmitter";
 
-const CURRENT_VERSION = 0.0778;
+const CURRENT_VERSION = 0.078;
 export default {
     version: CURRENT_VERSION,
     name: "Player",
@@ -109,12 +109,5 @@ export default {
         this.items = keep.items ?? [];
         console.log('Reset local data:', this);
         this.save();
-    },
-
-    initListeners() {
-        MyEventEmitter.on('playerDropItem', () => console.log('playerDropItem localData listener'));
-        MyEventEmitter.on('pickupItem', (item) => {
-            this.addItem(item);
-        })
     },
 }

@@ -1,17 +1,25 @@
+import { makeItem, makeRandomItem } from "../core/Item";
 import LocalData from "../core/LocalData";
+import Inventory from "../player/Inventory";
+import Player from "../player/Player";
 import GameScene from "../scenes/GameScene";
 import Pickup from "./Pickup";
 
 export default class ItemPickup extends Pickup {
     itemData: any;
-    constructor(scene: GameScene, pos: any, itemData: any, type: string | null, netId: string) {
-        super(scene, pos, netId);
-        if (itemData) this.itemData = itemData;
-        else if (type) this.itemData = scene.itemManager?.makeItem(type);
-        else this.itemData = scene.itemManager?.makeRandomItem();
+    constructor(scene: GameScene, data: any) {
+        super(scene, data);
+        const {
+            item = null,
+            itemType = null,
+        } = data;
+        if (data.item) this.itemData = data.item;
+        else if (data.itemType) this.itemData = makeItem(data.itemType);
+        else this.itemData = makeRandomItem()
+
+        this.height = 1;
 
         this.init();
-        this.scene.addActor(this);
     }
     async init() {
         await this.scene.meshManager?.getMesh('item').then((mesh) => {
@@ -46,11 +54,18 @@ export default class ItemPickup extends Pickup {
 
         })
     }
-    applyCollect(player: any) {
-        player.inventory.addItem(this.itemData);
+    applyTouch(dealer: Player): void {
+        const inv: Inventory | undefined = dealer.inventory;
+        if (inv) {
+            inv.addItem(this.itemData);
+        }
         LocalData.addItem(this.itemData);
+        LocalData.save();
+
+        super.applyTouch(dealer);
     }
-    update(dt: number) {
+    update(dt: number, time: number) {
+        super.update(dt, time)
         this.rotation.y += dt;
     }
 }

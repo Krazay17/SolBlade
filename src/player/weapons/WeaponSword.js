@@ -6,6 +6,7 @@ import MyEventEmitter from "../../core/MyEventEmitter";
 import Globals from "../../utils/Globals";
 import { spawnParticles } from "../../actors/ParticleEmitter";
 import GameScene from "../../scenes/GameScene";
+import HitData from "../../core/HitData";
 
 export default class WeaponSword extends Weapon {
     constructor(actor, scene, isSpell = false) {
@@ -86,9 +87,16 @@ export default class WeaponSword extends Weapon {
 
     update() {
         this.meleeTrace(this.actor.position, this.actor.getCameraDirection(), this.range, 0.5, (target, camDir) => {
-            const knockbackDir = this.tempVector2.copy(camDir).normalize().multiplyScalar(12.5);
-            target.takeDamage?.(this.actor, { type: 'melee', amount: this.damage }, { stun: 700, dir: knockbackDir });
-            this.actor.animator.hitFreeze();
+            const knockbackDir = this.tempVector2.copy(camDir).normalize().multiplyScalar(8);
+            target.hit?.(new HitData({
+                dealer: this.actor,
+                target,
+                type: 'physical',
+                amount: -this.damage,
+                stun: 500,
+                impulse: knockbackDir
+            }));
+            this.actor.animationManager.changeTimeScale(0, 150);
             CameraFX.shake(0.14, 150);
 
             this.hitFx(target.position);

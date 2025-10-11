@@ -2,7 +2,7 @@ import PlayerState from "./_PlayerState";
 
 export default class FallState extends PlayerState {
     enter() {
-        this.actor.animator?.setAnimState('fall');
+        this.actor.animationManager?.playAnimation('fall', true);
         this.actor.movement.fallStart();
     }
     update(dt) {

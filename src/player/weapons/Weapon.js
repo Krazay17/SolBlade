@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import MyEventEmitter from '../../core/MyEventEmitter';
 import MeshTrace from '../../core/MeshTrace';
-import Globals from '../../utils/Globals';
 import GameScene from '../../scenes/GameScene';
-import Pawn from '../../actors/Pawn';
+import Player from '../Player';
 
 export default class Weapon {
     constructor(actor, name = 'Weapon', damage = 1, range = 10, cooldown = 1000, isSpell = false) {
+        /**@type {Player} */
         this.actor = actor;
         this.name = name;
         this.damage = damage;
@@ -59,7 +59,7 @@ export default class Weapon {
     }
     update() { }
     meleeTrace(start, direction, length = 5, dot = 0.5, callback) {
-        const actors = this.scene.getPawnManager().hostiles;
+        const actors = this.scene.pawnManager.hostiles;
         for (const actor of actors) {
             const meshPos = this.tempVector.copy(actor.position);
             meshPos.y += actor.height / 2;

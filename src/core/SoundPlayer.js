@@ -19,6 +19,16 @@ class SoundPlayer {
         this.threeAudioLoader = new THREE.AudioLoader();
     }
 
+    init() {
+        this.loadMusic('music1', 'assets/Music1.mp3');
+        const playMusiconFirstClick = () => {
+            this.playMusic(0);
+            document.removeEventListener('mousedown', playMusiconFirstClick);
+            this.loadAllMusic();
+        }
+        document.addEventListener('mousedown', playMusiconFirstClick);
+    }
+
     setMicVolume(value) {
         this.micVolume = value;
         MyEventEmitter.emit('micVolumeChanged', value * this.masterVolume);

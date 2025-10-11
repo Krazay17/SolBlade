@@ -2,7 +2,6 @@ import { SkinnedMesh, Vector3 } from "three";
 import Enemy from "../actors/Enemy";
 import Pawn from "../actors/Pawn";
 import GameScene from "../scenes/GameScene";
-import Player from "../player/Player";
 import AIMovement from "./AIMovement";
 
 type Team = 'A' | 'B' | 'C';
@@ -10,6 +9,7 @@ type Team = 'A' | 'B' | 'C';
 export default class PawnManager {
     scene: GameScene;
     player: Pawn | null = null;
+    players: Pawn[] = [];
     allPawns: Pawn[] = [];
     teamMap: Map<Pawn, Team> = new Map();
     constructor(scene: GameScene) {
@@ -39,12 +39,14 @@ export default class PawnManager {
     }
     setLocalPlayer(pawn: Pawn) { this.player = pawn }
     addPawn(pawn: Pawn, team: Team) {
-        this.scene.addActor(pawn);
         this.allPawns?.push(pawn);
         this.teamMap.set(pawn, team);
     }
     removePawn(pawn: Pawn) {
-        this.allPawns?.splice(this.allPawns.indexOf(pawn), 1);
+        if (!pawn) return;
+        const indx = this.allPawns.indexOf(pawn);
+        this.allPawns?.splice(indx, 1);
+        pawn.destroy();
     }
     update(dt: number, time: number) {
     }
@@ -65,16 +67,20 @@ export default class PawnManager {
             || this.teamMap.get(pawn) !== playerTeam)
         return hostiles;
     }
-    spawnPlayer(pos: Vector3, isRemote: boolean = false, id: any, data: any) {
-        const player = new Player(this.scene, pos, isRemote, id, data);
-        this.addPawn(player, 'A');
+    spawnPlayer(data: any, isRemote: boolean = false) {
+        const player = this.scene.actorManager?.spawnActor('player', data, isRemote, true);
+        if (!player) return;
+        this.addPawn(player as Pawn, 'A');
+        this.players?.push(player as Pawn);
         return player;
+    }
+    getPawnById(id: string) {
+        return this.allPawns.find(p => p.netId === id);
     }
     getEnemiesInRange(position: Vector3, range: number) {
         const enemiesInRange = new Map();
         for (const enemy of this.hostiles) {
             const dist = enemy.position.distanceToSquared(position);
-            console.log(dist, range);
             if (dist <= range) {
                 enemiesInRange.set(enemy, dist);
             }

@@ -1,12 +1,14 @@
 import Projectile from "./Projectile";
 import { spawnParticles } from "./ParticleEmitter";
 import MyEventEmitter from "../core/MyEventEmitter";
-import Globals from "../utils/Globals";
 import { clamp } from "three/src/math/MathUtils.js";
+import HitData from "../core/HitData";
 
 export default class ProjectileFireball extends Projectile {
-    constructor(scene, params = {}, net = {}) {
-        super(scene, params, net);
+    constructor(scene, data) {
+        data.dur ??= 20000;
+        data.name ??= 'fireball';
+        super(scene, data);
 
         this.exploding = false;
         this.explodeSize = 1;
@@ -15,11 +17,9 @@ export default class ProjectileFireball extends Projectile {
 
         this.createMesh();
         this.setGravity(4);
-        this.setDamage(25);
 
-        if (!this.isRemote) {
-            this.netInit('Fireball');
-        }
+        console.log(this.isRemote);
+
 
         ProjectileFireball.netFx = ProjectileFireball.netFx || false;
         if (!ProjectileFireball.netFx) {
@@ -49,20 +49,28 @@ export default class ProjectileFireball extends Projectile {
     }
 
     destroy() {
-        //super.destroy();
+        super.destroy();
         this.exploding = true;
-        if (this.isRemote) return;
         ProjectileFireball.hitFx(this.position);
-        MyEventEmitter.emit('fx', { type: 'fireballHit', pos: this.position });
+        if (this.isRemote) return;
 
+        MyEventEmitter.emit('fx', { type: 'fireballHit', pos: this.position });
         const explosionRange = 6;
-        const enemiesInRange = this.scene.pawnManager.getEnemiesInRange(this.position, explosionRange);
+        const enemiesInRange = this.scene.actorManager.getActorsInRange(this.owner, this, this.position, explosionRange);
         for (const [enemy, range] of enemiesInRange) {
             const distance = clamp((1 - ((range - this.radius) / explosionRange)), .5, 1);
             const damage = this.damage * distance;
             const direction = enemy.position.clone().sub(this.position).normalize();
-            const force = direction.multiplyScalar(22 * (1 - (range / explosionRange)));
-            enemy.takeDamage(Globals.player, { amount: damage, type: 'explosion' }, { dir: force, dim: 0.3 });
+            const force = direction.multiplyScalar(15 * (1 - (range / explosionRange)));
+            enemy.hit(new HitData({
+                dealer: this.owner,
+                target: enemy,
+                amount: -damage,
+                impulse: force,
+                type: 'fire',
+                hitPosition: this.position,
+            
+            }));
         }
     }
 }

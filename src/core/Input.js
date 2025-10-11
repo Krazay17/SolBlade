@@ -120,6 +120,12 @@ export default class Input {
         if (action) this.actionStates[action] = false;
       });
     });
+
+    MyEventEmitter.on('itemDragStart', () => {
+      for (const state of Object.keys(this.actionStates)) {
+        this.actionStates[state] = false;
+      }
+    })
   };
 
   buttonPressed(action) {

@@ -8,6 +8,7 @@ export default class AIMovement {
     constructor(pawn: Pawn) {
         this.pawn = pawn;
     }
+    update(dt: number, time: number) { }
     setSpeed(speed: number) {
         this.speed = speed;
     }
@@ -17,7 +18,7 @@ export default class AIMovement {
     }
     walkToTarget(dir: Vector3) {
         this.rotateToTarget(dir);
-        const speedToPlayer =this.tempVector.copy(dir).multiplyScalar(this.speed);
+        const speedToPlayer = this.tempVector.copy(dir).multiplyScalar(this.speed);
         if (this.pawn.body) {
             this.pawn.body.body.setLinvel({ x: speedToPlayer.x, y: speedToPlayer.z, z: this.pawn.body.body.linvel().y }, true)
         }

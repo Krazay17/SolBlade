@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
 import * as Weapon from './weapons/index';
-import { tryPlayerDamage, tryUpdatePosition, tryUpdateState, tryApplyCC, netSocket } from '../core/NetManager';
+import { tryUpdatePosition, netSocket } from '../core/NetManager';
 import CameraFX from '../core/CameraFX';
 import PlayerMovement from './PlayerMovement';
 import DevMenu from '../ui/DevMenu';
@@ -13,23 +13,21 @@ import Inventory from './Inventory';
 import GameScene from '../scenes/GameScene';
 import Pawn from '../actors/Pawn';
 import PlayerStateManager from './playerStates/PlayerStateManager';
+import HitData from '../core/HitData';
 
 export default class Player extends Pawn {
     /**
      * @param {GameScene} scene 
      */
-    constructor(scene, pos = { x: 0, y: 1, z: 0 }, isRemote = false, netId = null, netData = null) {
-        super(scene, pos, 'KnightGirl', .5, 1, { isRemote, netId });
+    constructor(scene, data = {}) {
+        if (!data.isRemote) data.health = LocalData.health
+        super(scene, data, 'KnightGirl', .5, 1);
         this.camera = Globals.camera;
 
-        //this.isRemote = isRemote;
-        this.name = isRemote ? netData.name || 'Player' : LocalData.name || 'Player';
-        this.netId = netId || null;
+        //this.health = this.isRemote ? this.health : LocalData.health;
+        this.name = this.isRemote ? this.name : LocalData.name;
 
-        this.isDead = false;
         this.parry = false;
-
-        this.health = netData?.health || LocalData.health || 100;
         this.energy = 100;
         this.dimmed = 0;
         this.crownMesh = null;
@@ -39,11 +37,8 @@ export default class Player extends Pawn {
 
         soundPlayer.loadPosAudio('playerHit', '/assets/PlayerHit.mp3');
 
-        // fix this later
-        this.animator = this.animationManager;
-
         // Local Player setup
-        if (!isRemote) {
+        if (!this.isRemote) {
             this.input = Globals.input;
             Globals.playerInfo.setActor(this);
 
@@ -91,17 +86,11 @@ export default class Player extends Pawn {
 
             this.namePlate = new NamePlate(this, this.height + 0.5);
             // !!!!pre load crown for net player!!!!
-            if (netData && netData.hasCrown) {
+            if (this.data.hasCrown) {
                 this.pickupCrown();
             }
         }
     }
-
-    // FIX THIS. things still reference the animator instead of the animationManager
-    meshAssigned() {
-        this.animator = this.animationManager;
-    }
-
     async pickupCrown() {
         if (!this.crownMesh) {
             this.crownMesh = await this.scene.meshManager.getMesh('crown', 0.4);
@@ -139,9 +128,14 @@ export default class Player extends Pawn {
         }
         this[`spell${slot}`] = spell;
     }
-
+    dropItem(item) {
+        const { pos, dir } = this.getShootData();
+        const dropPos = pos.add(dir.multiplyScalar(2));
+        this.scene.actorManager.spawnActor('item', { item, pos: dropPos }, false, true);
+    }
     getShootData() {
         const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
+        /**@type {THREE.Vector3} */
         const bulletDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
         const camPosition = this.camera.getWorldPosition(new THREE.Vector3());
         return {
@@ -162,21 +156,16 @@ export default class Player extends Pawn {
 
     update(dt, time) {
         super.update(dt, time);
-        if (!this.mesh) return;
+        if (!this.body) return;
 
         // Local Player
         if (!this.isRemote) {
             tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
-            //tryUpdateState(this.getAnimState());
             this.addEnergy(this.energyRegen, dt);
-            if (this.body) {
-                if (this.movement) this.movement.update(dt);
-                this.handleInput(dt, time);
-                this.position.copy(this.body.position);
-                LocalData.position = this.position;
-                LocalData.rotation = this.rotation.y;
-                CameraFX.update(dt);
-            }
+            this.handleInput(dt, time);
+            LocalData.position = this.position;
+            LocalData.rotation = this.rotation.y;
+            CameraFX.update(dt);
         }
     }
 
@@ -317,66 +306,46 @@ export default class Player extends Pawn {
         }
     }
 
-    takeDamage(attacker, dmg = { amount: 0 }, cc = {}) {
-        let netId;
-        this.setHealth(this.health - dmg.amount);
-        if (this.isRemote) {
-            netId = this.netId;
-        } else {
-            netId = netSocket.id;
-        }
-        netSocket.emit('playerDamageSend', { attacker: attacker.netId, targetId: netId, dmg, cc });
-    }
-
-    applyDamage({ attacker, health, dmg, cc }) {
-        this.setHealth(health, attacker);
+    hit(data) {
+        super.hit(data);
         soundPlayer.playPosAudio('playerHit', this.position);
+    }
+    applyHit(data, health) {
+        super.applyHit(data, health);
         if (this.isRemote) return;
-        const { type, amount } = dmg;
-        const { stun, dir, dim, dur } = cc;
-        if (amount > 0) {
+        /**@type {HitData} */
+        const { type, amount, stun, impulse, dim } = data;
+        if (amount !== 0) {
             if (type === 'melee' || type === 'explosion') {
                 CameraFX.shake(0.2, 125);
             }
             if (stun > 0) {
                 this.stateManager.setState('stun', { stun, anim: 'knockback' });
             }
-            if (dir) {
-                if (!stun) {
-                    this.stateManager.setState('knockback', { dur: dur || 300 });
-                }
+            if (impulse) {
                 this.body.wakeUp();
-                this.body.velocity = dir;
+                this.body.velocity = impulse;
             }
             if (dim) {
                 this.setDimmed(dim);
             }
         }
     }
-    takeHealing(dealer, heal = {}) {
-        this.setHealth(Math.min(100, this.health + heal.amount));
-        MyEventEmitter.emit('takeHealing', { dealer, heal });
-    }
-    applyHealing(health, { dealer, heal }) {
-        this.setHealth(health, dealer)
-    }
-    // call twice from local and server
-    setHealth(newHealth, dealer = null) {
-        this.health = Math.min(100, newHealth);
-        if (!this.isRemote) {
-            if (this.health <= 0) {
-                this.die(dealer);
-            }
-            LocalData.health = newHealth;
-            MyEventEmitter.emit('updateHealth', this.health);
-        } else {
-            this.namePlate?.setHealth(newHealth);
+    healthChange(health) {
+        super.healthChange(health);
+        if (this.isRemote) {
+            this.namePlate?.setHealth(health);
+            return;
         }
-        MyEventEmitter.emit('playerHealthChange', { player: this, health: this.health });
+        if (!this.isRemote) {
+            LocalData.health = health;
+            MyEventEmitter.emit('playerHealthChange', { player: this, health });
+        }
     }
     // only local
     die(source = null) {
         if (this.isRemote) return;
+        if (this.isDead) return;
         this.stateManager.setState('dead');
         MyEventEmitter.emit('playerDied', { player: this, source });
     }
@@ -387,27 +356,11 @@ export default class Player extends Pawn {
         this.body.velocity = { x: 0, y: 0, z: 0 };
         this.body.position = { x: spawnPoint.x, y: spawnPoint.y, z: spawnPoint.z };
         this.position.copy(this.body.position);
-        this.setHealth(100);
+        this.health = this.maxHealth;
+        this.isDead = false;
         this.stateManager.setState('idle');
 
-        MyEventEmitter.emit('playerRespawn', { health: this.health });
-        netSocket.emit('playerRespawnUpdate', { id: this.netId, health: this.health, pos: this.position });
-    }
-
-    getState() {
-        return this.stateManager.currentStateName ? this.stateManager.currentStateName : null;
-    }
-    destroy(id) {
-        if (this.body) {
-            Globals.physicsWorld.removeBody(this.body);
-            this.body = null;
-        }
-        if (this) {
-            Globals.graphicsWorld.remove(this);
-        }
-        if (this.mesh) {
-            this.mesh = null;
-        }
+        MyEventEmitter.emit('playerRespawn');
     }
     getAnimState() {
         return this.animationManager ? this.animationManager.currentAnimation : null;

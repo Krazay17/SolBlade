@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import Globals from '../../utils/Globals.js';
 import MyEventEmitter from '../../core/MyEventEmitter.js';
 import { spawnParticles } from '../../actors/ParticleEmitter.js';
+import HitData from '../../core/HitData.js';
 
 export default class WeaponPistol extends Weapon {
     constructor(actor, scene, isSpell = false) {
@@ -56,13 +57,21 @@ export default class WeaponPistol extends Weapon {
             this.useFx(offSetPos, dir);
             MyEventEmitter.emit('fx', { type: 'pistolUse', pos: offSetPos, dir: dir });
 
-            this.meshTracer.multiLineTrace(cameraPos, dir, this.scene.getPawnManager().hostiles, this.range, offSetPos, (hit) => {
+            this.meshTracer.multiLineTrace(cameraPos, dir, this.scene.pawnManager.hostiles, this.range, offSetPos, (hit) => {
                 const actor = hit.object.userData.owner;
                 if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
                     this.hitActors.add(actor);
                     const scaledDir = dir.clone().normalize().multiplyScalar(4);
-                    actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 80, dir: scaledDir, dim: 1000 });
-
+                    //actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 80, dir: scaledDir, dim: 1000 });
+                    actor.hit(new HitData({
+                        dealer: this.actor,
+                        target: actor,
+                        stun: 50,
+                        dim: 500,
+                        impulse: scaledDir,
+                        amount: -this.damage,
+                        hitPosition: hit.point,
+                    }));
                     this.hitFx(hit.point, dir);
                     MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
                 }

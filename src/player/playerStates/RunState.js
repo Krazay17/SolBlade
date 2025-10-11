@@ -1,3 +1,4 @@
+import Input from "../../core/Input";
 import PlayerState from "./_PlayerState";
 
 export default class RunState extends PlayerState {
@@ -5,52 +6,50 @@ export default class RunState extends PlayerState {
         super(actor, manager, options);
     }
     enter() {
-        this.actor.movement.grounded = true;
+        this.grounded = true;
     }
     update(dt) {
+        /**@type {Input} */
+        const input = this.input;
+
         this.actor.movement.groundMove(dt);
         const animScale = 1 + this.movement.momentumBooster.getBoost() / 20;
 
         this.actor.animationManager?.changeTimeScale(animScale, 2);
 
-        if (!this.actor.movement.isGrounded()) {
+        if (!this.grounded) {
             this.manager.setState('fall');
             return;
         }
-        if (this.actor.movement.getInputDirection().length() === 0) {
+        if (this.movement.getInputDirection().length() === 0) {
             this.manager.setState('idle');
             return;
         }
-        if (this.input.keys['Space']
+        if (input.actionStates.jump && this.grounded
             && this.manager.setState('jump')) {
             return;
         }
 
         let strafe = true;
-        if (this.input.keys['KeyW']) {
+        if (input.actionStates.moveForward) {
             strafe = false;
-            this.actor.animator?.setAnimState('run');
+            this.actor.animationManager?.playAnimation('run');
         }
-        if (this.input.keys['KeyS']) {
+        if (input.actionStates.moveBackward) {
             strafe = false;
-            this.actor.animator?.setAnimState('run');
+            this.actor.animationManager?.playAnimation('run');
         }
-        if (this.input.keys['KeyA']) {
+        if (input.actionStates.moveLeft) {
             if (strafe) {
-                this.actor.animator?.setAnimState('strafeLeft');
+                this.actor.animationManager?.playAnimation('strafeLeft');
             }
         }
-        if (this.input.keys['KeyD']) {
+        if (input.actionStates.moveRight) {
             if (strafe) {
-                this.actor.animator?.setAnimState('strafeRight');
+                this.actor.animationManager?.playAnimation('strafeRight');
             }
         }
-        // Jump
-        if (this.input.keys['Space'] && this.grounded
-            && this.manager.setState('jump')) {
-            return;
-        }
-        if (!this.actor.movement.isGrounded(.1)) {
+        if (!this.movement.isGrounded()) {
             if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {
                     this.floorTimer = null;

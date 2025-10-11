@@ -24,14 +24,6 @@ export default class Inventory {
         this.createInventoryUI();
         this.bindEvents();
         this.initItems();
-
-        // this.addItem(new Item({
-        //     name: 'Fireball',
-        //     imgUrl: 'assets/Fireball.png',
-        //     weight: 1,
-        //     min: 1,
-        //     max: 10,
-        // }));
     }
     initItems() {
         LocalData.items.forEach(i => {
@@ -42,6 +34,7 @@ export default class Inventory {
         MyEventEmitter.on('openInventory', () => {
             this.toggleInventory();
         })
+        // Cooldown visual on spell button
         MyEventEmitter.on('spellUsed', ({ slot, cd }) => {
             const cdEl = this[`spellSlot${slot}CD`]; // e.g. this.spellSlot1CD
             if (!cdEl) return;
@@ -109,10 +102,8 @@ export default class Inventory {
         const originalParent = dragged.parentElement;
         dragged.classList.remove("dragging");
         if (!dragged.foundDrop) {
-            const { pos, dir } = this.actor.getShootData();
-            const frontPos = pos.add(dir.multiplyScalar(2));
-            MyEventEmitter.emit('playerDropItem', { item: dragged._item, pos: frontPos });
-            LocalData.removeItem(dragged._item)
+            this.actor.dropItem(dragged._item);
+            LocalData.removeItem(dragged._item);
 
             if (originalParent.classList.contains("spell-slot")) {
                 originalParent.innerHTML = "";
@@ -194,6 +185,7 @@ export default class Inventory {
         //     e.target.classList.add("dragging");
         // });
         container.addEventListener("dragstart", (e) => {
+            MyEventEmitter.emit('itemDragStart');
             const el = e.target.closest(".item");
             if (!el) return;
             e.dataTransfer.effectAllowed = "move";

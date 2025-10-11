@@ -1,5 +1,4 @@
 import Projectile from "../actors/Projectile";
-import ProjectileFireball from "../actors/ProjectileFireball";
 import Player from "../player/Player";
 import GameScene from "../scenes/GameScene";
 
@@ -7,24 +6,31 @@ export default class ProjectileManager {
     scene: GameScene;
     player: Player;
     projectiles: Projectile[] = [];
-
+    lastProjectileUpdate: any = {};
     constructor(scene: GameScene, player: Player) {
         this.scene = scene;
         this.player = player;
     }
     update(dt: number, time: number) {
-        for (const p of this.projectiles) {
-            p.update(dt);
-        }
+        // let projectileUpdate: any = {}
+        // for (const p of this.projectiles) {
+        //     if (!p.netId) continue;
+        //     const { pos } = this.lastProjectileUpdate[p.netId];
+        //     if (p.position.distanceToSquared(pos) > .1) {
+        //         projectileUpdate[p.netId] = p.serialize();
+        //     }
+        // }
+        // this.lastProjectileUpdate = projectileUpdate;
+        // MyEventEmitter.emit('updateProjectiles', this.lastProjectileUpdate);
     }
-    spawnProjectile(type: string, data: any, netData: any) {
+    spawnProjectile(type: string, data: any, isRemote: boolean = false) {
         let projectile;
         switch (type) {
             case 'fireball':
-                projectile = new ProjectileFireball(this.scene, data, netData);
+                projectile = this.scene.actorManager?.spawnActor('fireball', data, isRemote);
                 break;
         }
         if (!projectile) return;
-        this.projectiles.push(projectile);
+        this.projectiles.push(projectile as Projectile);
     }
 }

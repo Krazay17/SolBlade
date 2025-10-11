@@ -62,7 +62,9 @@ export default class IdleState extends PlayerState {
     }
     pivot() {
         const dir = this.actor.getShootData().dir.normalize();
-        const vel = this.body.velocity.normalize();
+        const vel = this.body.velocity;
+        if (vel.length() < .5) return "Neutral";
+        vel.normalize();
 
         let angleDeg = vectorsToLateralDegrees(dir, vel);
 

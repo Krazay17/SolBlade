@@ -2,8 +2,8 @@ import MyEventEmitter from "../core/MyEventEmitter";
 import Pickup from "./Pickup";
 
 export default class CrownPickup extends Pickup {
-    constructor(scene, pos, itemId) {
-        super(scene, pos, itemId);
+    constructor(scene, data) {
+        super(scene, data);
         this.makeMesh('crown', .6);
     }
     applyCollect() {
