@@ -93,7 +93,7 @@ export default class Projectile extends Actor {
                 enemy.hit(new HitData({
                     dealer: this.owner,
                     target: enemy,
-                    amount: -this.damage,
+                    amount: this.damage,
                     type: 'fire',
                 }));
 

@@ -10,18 +10,18 @@ import MeshManager from '../core/MeshManager.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import PartyFrame from '../ui/PartyFrame.js';
 import GameMode from '../core/GameMode.js';
-import { MeshBVH, MeshBVHHelper, acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
+import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import PawnManager from '../core/PawnManager.ts';
 import Actor from '../actors/Actor.ts';
 import ItemManager from '../core/ItemManager.js';
-import PickupManager from '../core/PickupManager.ts';
 import ProjectileManager from '../core/ProjectileManager.ts';
 import Game from './Game.js';
 import { Scene } from "three";
 import Portal from '../actors/Portal.js';
 import RAPIER from '@dimforge/rapier3d-compat';
 import ActorManager from '../core/ActorManager.ts';
+import QuestManager from '../core/QuestManager.js';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
@@ -60,7 +60,6 @@ export default class GameScene {
     this.actorManager = new ActorManager(this);
     this.player = this._pawnManager.spawnPlayer({ pos: LocalData.position || new THREE.Vector3(0, 1, 0) }, false);
     this._pawnManager.setLocalPlayer(this.player);
-    this.pickupManager = new PickupManager(this, this.player);
     this.projectileManager = new ProjectileManager(this, this.player);
     this.debugData = new DebugData(this.player);
     this.gameMode = new GameMode(this, 'crown', this.player);
@@ -68,6 +67,9 @@ export default class GameScene {
 
     Globals.player = this.player;
     this.players.push(this.player);
+
+    this.questManager = new QuestManager(this, this.player);
+    this.questManager.addQuest('quest1');
 
     this.spawnLevel('Level1');
     soundPlayer.init();
@@ -108,15 +110,12 @@ export default class GameScene {
     if (this.skyBox) this.skyBox.update();
     if (!this.levelLoaded) return;
     if (this.actorManager) this.actorManager.update(dt, time);
-    if (this._pawnManager) {
-      this._pawnManager.update(dt, time);
-    }
+    if (this._pawnManager) { this._pawnManager.update(dt, time) }
     if (!this.player) return;
     if (!this.player.isDead) {
       if (this.player.body.position.y < -350) {
         this.player.die('the void');
       }
-      this.pickupManager.update(dt);
     }
     this.debugData.update(dt, time);
   }

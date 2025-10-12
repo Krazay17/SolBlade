@@ -287,7 +287,7 @@ export default class Player extends Pawn {
     setParry(doesParry) {
         if (this.parry !== doesParry) {
             this.parry = doesParry;
-            MyEventEmitter.emit('updateParry', this.parry);
+            MyEventEmitter.emit('parryUpdate', this.parry);
         }
     }
 
@@ -295,14 +295,8 @@ export default class Player extends Pawn {
         const pos = attacker?.position ?? attacker ?? new THREE.Vector3(0, 0, 0);
         soundPlayer.playPosAudio('parry', this.position, 'assets/Parry.mp3');
         this.animationManager?.changeTimeScale(0, 600);
-
         if (!this.isRemote) {
-            this.stateManager.setState('parry', { duration: 600, pos });
-        } else {
-            clearTimeout(this.parryTimeoutId);
-            this.parryTimeoutId = setTimeout(() => {
-                this.animationManager?.changeTimeScale(-.5, 300);
-            }, 300);
+            this.stateManager.setState('parry', { pos });
         }
     }
 

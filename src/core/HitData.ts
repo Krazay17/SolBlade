@@ -44,7 +44,7 @@ export default class HitData implements HitDataArgs {
         this.dealer = dealer;
         this.target = target;
         this.type = type;
-        this.amount = amount;
+        this.amount = -amount;
         this.hitPosition = hitPosition;
         this.impulse = impulse;
         this.stun = stun;

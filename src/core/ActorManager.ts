@@ -5,11 +5,15 @@ import Player from "../player/Player";
 import GameScene from "../scenes/GameScene";
 import MyEventEmitter from "./MyEventEmitter";
 import ItemPickup from "../actors/ItemPickup";
+import PowerPickup from "../actors/PowerPickup";
+import CrownPickup from "../actors/CrownPickup";
 
 const actorRegistry: Record<string, any> = {
     player: Player,
     fireball: ProjectileFireball,
     item: ItemPickup,
+    power: PowerPickup,
+    crown: CrownPickup,
 }
 
 export default class ActorManager {
@@ -29,6 +33,8 @@ export default class ActorManager {
         replicate: boolean = false,
     ): Actor | undefined | void {
         const finalData = { type, ...data, isRemote, replicate };
+        // const existingActor = this.getActorById(data.netId);
+        // if (existingActor) return existingActor.activate(finalData);
         const actorClass = actorRegistry[type];
         if (!actorClass) return console.warn(`Unknown actor: ${type}`);
 

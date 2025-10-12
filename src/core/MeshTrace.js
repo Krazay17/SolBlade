@@ -98,7 +98,8 @@ export default class MeshTrace {
             this.raycaster.set(startPos, dir);
             const hit = this.raycaster.intersectObjects(hostileMeshes, false)[0];
             if (hit) {
-                hostileMeshes.splice(hostileMeshes.indexOf(hit.object), 1); // remove so we don't hit same actor multiple times
+                const indx = hostileMeshes.indexOf(hit.object)
+                hostileMeshes.splice(indx, 1); // remove so we don't hit same actor multiple times
 
                 // LOS check...
                 const losDir = this.tempVector5.copy(hit.point).sub(actorEyes).normalize();

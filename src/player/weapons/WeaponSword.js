@@ -92,7 +92,7 @@ export default class WeaponSword extends Weapon {
                 dealer: this.actor,
                 target,
                 type: 'physical',
-                amount: -this.damage,
+                amount: this.damage,
                 stun: 500,
                 impulse: knockbackDir
             }));

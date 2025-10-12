@@ -21,8 +21,9 @@ export const netSocket = socket;
 
 /**@type {GameScene} */
 let scene = null;
-let netPlayers = {};
+export let netPlayers = {};
 let player = null;
+let playerId = null;
 let socketBound = false;
 let voiceChat;
 
@@ -47,169 +48,181 @@ function bindSocketEvents() {
     if (!scene) return;
     player = scene.player;
 
-    netPlayers[socket.id] = scene.player;
-
     socket.emit('joinGame', player.serialize());
-    socket.on('joinAck', (data) => {
-        player.setNetId(data.netId);
-    })
-    MyEventEmitter.emit('joinGame', player);
 
     socket.on('disconnect', () => {
         MyEventEmitter.emit('disconnect');
         console.log("disconnected from server");
     });
-    socket.on('currentPlayers', (players) => {
-        for (const player of Object.values(players)) {
+
+    const bindGameplay = () => {
+        socket.on('currentPlayers', (players) => {
+            for (const player of Object.values(players)) {
+                const playerData = Actor.deserialize(player);
+                const { netId } = playerData;
+                if (netId === playerId) continue;
+                netPlayers[netId] = scene.pawnManager.spawnPlayer(playerData, true);
+            }
+
+            MyEventEmitter.emit('currentPlayers', netPlayers);
+        });
+        socket.on('newPlayer', (player) => {
             const playerData = Actor.deserialize(player);
             const { netId } = playerData;
-            if (netId === socket.id) continue;
+            if (netId === playerId) return;
             netPlayers[netId] = scene.pawnManager.spawnPlayer(playerData, true);
-        }
 
-        //MyEventEmitter.emit('currentPlayers', players);
-    });
-    socket.on('newPlayer', (player) => {
-        const playerData = Actor.deserialize(player);
-        const { netId } = playerData;
-        if (netId === socket.id) return;
-        netPlayers[netId] = scene.pawnManager.spawnPlayer(playerData, true);
+            MyEventEmitter.emit('newPlayer', { netId, data: playerData });
+        });
+        socket.on('playerDisconnected', (netId) => {
+            if (!netPlayers[netId]) return;
+            const player = scene.pawnManager.getPawnById(netId);
+            scene.pawnManager.removePawn(player);
+            delete netPlayers[netId];
 
-        //MyEventEmitter.emit('newPlayer', { netId, data: playerData });
-    });
-    socket.on('playerDisconnected', (netId) => {
-        if (!netPlayers[netId]) return;
-        const player = scene.pawnManager.getPawnById(netId);
-        scene.pawnManager.removePawn(player);
-        delete netPlayers[netId];
-
-        //MyEventEmitter.emit('dcPlayer', netId);
-    });
-    socket.on('playerPositionUpdate', ({ id, data }) => {
-        if (netPlayers[id]) {
-            netPlayers[id].targetPosition.copy(data.pos);
-            netPlayers[id].targetRotation = data.rot;
-        }
-    });
-    socket.on('playAnimation', ({ id, data }) => {
-        const player = netPlayers[id];
-        if (player) {
-            player.animationManager?.playAnimation(data.name, data.loop);
-        }
-    })
-    socket.on('playerNameUpdate', ({ id, name }) => {
-        if (netPlayers[id]) {
-            netPlayers[id].setName(name);
-            MyEventEmitter.emit('playerNameUpdate', { netId: id, player: netPlayers[id], name });
-        }
-    });
-    socket.on('chatMessageUpdate', ({ id, data }) => {
-        if (netPlayers[id]) {
-            MyEventEmitter.emit('chatMessage', { player: data.player, message: data.message, color: 'white' });
-        }
-    });
-    socket.on('serverMessage', (data) => {
-        MyEventEmitter.emit('chatMessage', { player: 'Server', message: data.message, color: data.color });
-    });
-    socket.on('playerDamageUpdate', ({ targetId, data }) => {
-        if (targetId === socket.id) {
-            scene.player.applyDamage(data);
-        }
-        else if (netPlayers[targetId]) {
-            netPlayers[targetId].applyDamage(data);
-        }
-    });
-    socket.on('playerBlockedUpdate', ({ id, blocking, health }) => {
-        if (id === socket.id) {
-            console.log('blocked');
-        } else if (netPlayers[id]) {
-            netPlayers[id].setHealth(health);
-        }
-    });
-    socket.on('playerParried', ({ id, attacker, health, dmgType }) => {
-        if (netPlayers[id]) {
-            netPlayers[id].parried(netPlayers[attacker]);
-            netPlayers[id].setHealth(health);
-            if (dmgType === 'melee') {
-                netPlayers[attacker].parried(netPlayers[id]);
+            //MyEventEmitter.emit('dcPlayer', netId);
+        });
+        socket.on('playerPositionUpdate', ({ id, data }) => {
+            if (netPlayers[id]) {
+                netPlayers[id].targetPosition.copy(data.pos);
+                netPlayers[id].targetRotation = data.rot;
             }
-        }
-    });
-    socket.on('playerRespawn', ({ id, health }) => {
-        if (netPlayers[id]) {
-            netPlayers[id].health = health;
-        }
-    });
-    socket.on('fx', (data) => {
-        MyEventEmitter.emit('netFx', data);
-    });
-    socket.on('scoreUpdate', (data) => {
-        MyEventEmitter.emit('scoreUpdate', data);
-    });
-    socket.on('pickupCollected', ({ playerId, netId }) => {
-        const pickup = scene.pickupManager.getPickup(netId);
-        if (!pickup) return;
-        if (socket.id === playerId) {
-            pickup.applyCollect(scene.player);
-        }
-        scene.pickupManager.removePickup(pickup);
-    });
-    socket.on('crownGameStarted', (players) => {
-        MyEventEmitter.emit('crownGameStarted', players);
-    });
-    socket.on('crownGameEnded', (winner) => {
-        MyEventEmitter.emit('crownGameEnded', winner);
-    });
-    socket.on('pickupCrown', ({ playerId }) => {
-        if (netPlayers[playerId]) {
-            netPlayers[playerId].pickupCrown();
-        }
-    });
-    socket.on('dropCrown', ({ playerId }) => {
-        if (netPlayers[playerId]) {
-            netPlayers[playerId].dropCrown();
-        }
-    });
-    socket.on('crownScoreIncrease', ({ playerId, score }) => {
-        MyEventEmitter.emit('crownScoreIncrease', { playerId, score });
-    });
-    socket.on('actorHit', ({ data, health }) => {
-        const hit = HitData.deserialize(data, (id) => scene.actorManager.getActorById(id));
-        const target = hit.target;
-        if (target) {
-            target.applyHit(hit, health);
-        }
-    });
-    socket.on('newActor', (data) => {
-        const { type, tempId, netId } = data
-        const existingActor = scene.actorManager.actors.find(a => a.tempId === tempId);
-        if (existingActor) {
-            existingActor.setNetId(netId);
-        } else {
-            const actorData = Actor.deserialize(data, (id) => scene.actorManager.getActorById(id));
-            scene.actorManager.spawnActor(type, actorData, true, false);
-        }
-    });
-    socket.on('destroyActor', (id) => {
-        const actor = scene.actorManager.getActorById(id)
-        if (actor.isRemote) actor.destroy();
-    });
-    socket.on('actorTouch', data => {
-        data = TouchData.deserialize(data, (id) => scene.actorManager.getActorById(id));
-        const { dealer, target, active } = data;
-        if (dealer && target) {
-            target.applyTouch(dealer);
-            target.active = active;
-        }
+        });
+        socket.on('playAnimation', ({ id, data }) => {
+            const player = netPlayers[id];
+            if (player) {
+                player.animationManager?.playAnimation(data.name, data.loop);
+            }
+        })
+        socket.on('playerNameUpdate', ({ id, name }) => {
+            if (netPlayers[id]) {
+                netPlayers[id].setName(name);
+                MyEventEmitter.emit('playerNameUpdate', { netId: id, player: netPlayers[id], name });
+            }
+        });
+        socket.on('chatMessageUpdate', ({ id, data }) => {
+            if (netPlayers[id]) {
+                MyEventEmitter.emit('chatMessage', { player: data.player, message: data.message, color: 'white' });
+            }
+        });
+        socket.on('serverMessage', (data) => {
+            MyEventEmitter.emit('chatMessage', { player: 'Server', message: data.message, color: data.color });
+        });
+        socket.on('playerParried', ({ target, dealer }) => {
+            if (netPlayers[target] && netPlayers[dealer]) {
+                netPlayers[target].parried(netPlayers[dealer]);
+            }
+        });
+        socket.on('playerRespawn', ({ id, health }) => {
+            if (netPlayers[id]) {
+                netPlayers[id].health = health;
+            }
+        });
+        socket.on('fx', (data) => {
+            MyEventEmitter.emit('netFx', data);
+        });
+        socket.on('scoreUpdate', (data) => {
+            MyEventEmitter.emit('scoreUpdate', data);
+        });
+        socket.on('crownGameStarted', (players) => {
+            MyEventEmitter.emit('crownGameStarted', players);
+        });
+        socket.on('crownGameEnded', (winner) => {
+            MyEventEmitter.emit('crownGameEnded', winner);
+        });
+        socket.on('pickupCrown', (playerId) => {
+            if (netPlayers[playerId]) {
+                netPlayers[playerId].pickupCrown();
+            }
+        });
+        socket.on('dropCrown', ({ playerId }) => {
+            if (netPlayers[playerId]) {
+                netPlayers[playerId].dropCrown();
+            }
+        });
+        socket.on('crownScoreIncrease', ({ playerId, score }) => {
+            MyEventEmitter.emit('crownScoreIncrease', { playerId, score });
+        });
+        socket.on('newActor', (data) => {
+            const { type, tempId, netId } = data
+            const existingActor = scene.actorManager.actors.find(a => a.tempId === tempId);
+            if (existingActor) {
+                existingActor.setNetId(netId);
+            } else {
+                const actorData = Actor.deserialize(data, (id) => scene.actorManager.getActorById(id));
+                scene.actorManager.spawnActor(type, actorData, true, false);
+            }
+        });
+        socket.on('currentActors', (data) => {
+            for (const a of data) {
+                scene.actorManager.spawnActor(a.type, a, true);
+            }
+        })
+        socket.on('actorHit', ({ data, health }) => {
+            const hit = HitData.deserialize(data, (id) => scene.actorManager.getActorById(id));
+            const target = hit.target;
+            if (target) {
+                target.applyHit(hit, health);
+            }
+        });
+        socket.on('destroyActor', (id) => {
+            const actor = scene.actorManager.getActorById(id)
+            if (actor.isRemote) actor.destroy();
+        });
+        socket.on('actorTouch', data => {
+            data = TouchData.deserialize(data, (id) => scene.actorManager.getActorById(id));
+            const { dealer, target, active } = data;
+            if (dealer && target) {
+                target.applyTouch(dealer);
+                target.active = active;
+            }
+        });
+        socket.on('activateActor', data => {
+            const actor = scene.actorManager.getActorById(data.netId);
+            if (actor) {
+                actor.activate(data);
+            }
+        })
+        socket.on('changeAnimation', ({ id, data }) => {
+            if (id === socket.id) return;
+            const actor = netPlayers[id];
+            if (actor) {
+                const { scale, duration } = data;
+                actor.animationManager.changeTimeScale(scale, duration);
+            }
+        })
+    }
+    socket.on('joinAck', (data) => {
+        playerId = data.netId;
+        player.setNetId(playerId);
+        netPlayers[playerId] = player;
+        bindGameplay();
+        socket.emit('bindGameplay')
+        MyEventEmitter.emit('joinGame', player);
     })
+
 }
 
-MyEventEmitter.on('actorTouch', data => {
-    socket.emit('actorTouch', data.serialize());
-})
+MyEventEmitter.on('activateActor', ({ actor, data }) => {
+    if (socket.connected) {
+        socket.emit('activateActor', actor.serialize());
+    } else {
+        actor.activate(data)
+    }
+});
+MyEventEmitter.on('actorTouch',
+    /**@param {TouchData} data */
+    (data) => {
+        if (socket.connected) {
+            socket.emit('actorTouch', data.serialize());
+        } else {
+            data.target.applyTouch(data.dealer);
+        }
+    }
+);
 MyEventEmitter.on('destroyActor', (data) => {
     socket.emit('destroyActor', data.netId);
-})
+});
 MyEventEmitter.on('playerRespawn', () => {
     socket.emit('playerRespawn');
 });
@@ -221,12 +234,10 @@ MyEventEmitter.on('newActor', (data) => {
 });
 MyEventEmitter.on('spawnLocations', (data) => {
     socket.emit('spawnLocations', data);
-})
+});
 MyEventEmitter.on('playerDropItem', (data) => {
-    if (socket.connected) {
-        socket.emit('playerDropItem', data);
-    }
-})
+    if (socket.connected) socket.emit('playerDropItem', data);
+});
 MyEventEmitter.on('projectileDestroyed', (data) => {
     socket.emit('projectileDestroyed', data);
 });
@@ -238,16 +249,9 @@ MyEventEmitter.on('projectileCreated', (data) => {
 });
 MyEventEmitter.on('takeHealing', (data) => {
     socket.emit('takeHealing', data);
-})
+});
 MyEventEmitter.on('fx', (data) => {
     socket.emit('fx', data);
-});
-MyEventEmitter.on('pickupCollected', (data) => {
-    socket.emit('pickupCollected', data);
-    if (!socket.connected) {
-        data.item.applyCollect(scene.player);
-        scene.pickupManager.removePickup(data.item);
-    }
 });
 MyEventEmitter.on('pickupCrown', () => {
     socket.emit('pickupCrown');
@@ -265,14 +269,17 @@ MyEventEmitter.on('bootPlayer', (targetPlayer) => {
 
     socket.emit('bootPlayer', targetPlayer.netId);
 });
-MyEventEmitter.on('updateParry', (doesParry) => {
+MyEventEmitter.on('parryUpdate', (doesParry) => {
     if (player) {
-        socket.emit('playerParryUpdate', doesParry);
+        socket.emit('parryUpdate', doesParry);
     }
 });
 MyEventEmitter.on('playAnimation', (data) => {
     socket.emit('playAnimation', data);
 });
+MyEventEmitter.on('changeAnimation', (data) => {
+    socket.emit('changeAnimation', data);
+})
 MyEventEmitter.on('actorHit', (data) => {
     if (socket.connected) {
         socket.emit('actorHit', data.serialize());

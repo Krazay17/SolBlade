@@ -60,6 +60,25 @@
     z-index: 1000;
 }
 
+#questUI {
+    position: fixed;
+    top: 0;
+    right: 0;
+    flex-direction: column;
+    width: 500px;
+    height: fit-content;
+    border: 1px solid blue;
+    padding: 1%;
+    z-index: 1001;
+}
+
+.quest {
+    position: relative;
+    text-wrap: inherit;
+    color: white;
+    padding: 4px;
+}
+
 .party-player {
     display: flex;
     flex-direction: column;
@@ -319,12 +338,18 @@
 
 /* keyframes animate the overlay "shrinking" upward */
 @keyframes cooldownAnim {
-    from { transform: scaleY(1); }
-    to   { transform: scaleY(0); }
+    from {
+        transform: scaleY(1);
+    }
+
+    to {
+        transform: scaleY(0);
+    }
 }
 
 .spell-cd.on-cd {
     animation-name: cooldownAnim;
     animation-timing-function: linear;
-    animation-fill-mode: forwards; /* stay at final state (scaleY(0)) */
+    animation-fill-mode: forwards;
+    /* stay at final state (scaleY(0)) */
 }

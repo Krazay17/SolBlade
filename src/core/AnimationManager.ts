@@ -94,6 +94,8 @@ export default class AnimationManager {
                 this.mixer.timeScale = 1;
             }, duration);
         }
+        if (this.pawn.isRemote) return;
+        MyEventEmitter.emit('changeAnimation', { scale, duration });
     }
 
     update(deltaTime: number) {

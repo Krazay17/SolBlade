@@ -62,14 +62,13 @@ export default class WeaponPistol extends Weapon {
                 if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
                     this.hitActors.add(actor);
                     const scaledDir = dir.clone().normalize().multiplyScalar(4);
-                    //actor.takeDamage(this.actor, { type: 'bullet', amount: this.damage }, { stun: 80, dir: scaledDir, dim: 1000 });
                     actor.hit(new HitData({
                         dealer: this.actor,
                         target: actor,
                         stun: 50,
-                        dim: 500,
+                        dim: 700,
                         impulse: scaledDir,
-                        amount: -this.damage,
+                        amount: this.damage,
                         hitPosition: hit.point,
                     }));
                     this.hitFx(hit.point, dir);

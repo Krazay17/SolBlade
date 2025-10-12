@@ -41,7 +41,7 @@ export default class GameMode {
             if (!player) return;
             player.data.name = name;
             if (!player.element) return;
-            player.element.innerText = `${player.data.name}: ${player.score}`;
+            player.element.innerText = `${player.name}: ${player.score}`;
         });
         MyEventEmitter.on('pickupCrown', () => {
             this.hasCrown = true;
@@ -118,7 +118,7 @@ export default class GameMode {
     addPlayer(player) {
         const element = document.createElement('div');
         element.classList.add('gamemode-player');
-        element.innerText = `${player.data.name}: ${player.score}`;
+        element.innerText = `${player.name}: ${player.score}`;
         this.gamemodeUI.appendChild(element);
         return element;
     }

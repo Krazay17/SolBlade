@@ -13,7 +13,7 @@ export default class ParryState extends PlayerState {
             .sub(pos)
             .normalize()
             .multiplyScalar(6);
-        this.actor.body.velocity.set(0, 0, 0);
+        this.actor.body.velocity = { x: 0, y: 0, z: 0 };
         this.actor.body.sleep();
     }
     update(dt) {
@@ -25,7 +25,7 @@ export default class ParryState extends PlayerState {
     exit() {
         this.actor.animationManager?.changeTimeScale(-.5, 300);
         this.actor.body.wakeUp();
-        this.actor.body.velocity.set(this.direction.x, this.direction.y, this.direction.z);
+        this.actor.body.velocity = { x: this.direction.x, y: this.direction.y, z: this.direction.z };
         this.actor.setParry(false);
         MyEventEmitter.emit('playerParryUpdate', false);
     }

@@ -18,9 +18,6 @@ export default class ProjectileFireball extends Projectile {
         this.createMesh();
         this.setGravity(4);
 
-        console.log(this.isRemote);
-
-
         ProjectileFireball.netFx = ProjectileFireball.netFx || false;
         if (!ProjectileFireball.netFx) {
             MyEventEmitter.on('netFx', (data) => {
@@ -65,7 +62,7 @@ export default class ProjectileFireball extends Projectile {
             enemy.hit(new HitData({
                 dealer: this.owner,
                 target: enemy,
-                amount: -damage,
+                amount: damage,
                 impulse: force,
                 type: 'fire',
                 hitPosition: this.position,

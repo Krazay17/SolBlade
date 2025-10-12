@@ -120,8 +120,16 @@ export default class Actor extends Object3D {
         if (!this.active) return;
         this.active = false
         this.scene.graphics.remove(this);
-        if (this.isRemote) return;
         MyEventEmitter.emit('destroyActor', this);
+    }
+    activate(data: any) {
+        this.active = true;
+        this.data = { ...data };
+        if (data.pos) this.position.copy(data.pos);
+        this.scene.graphics.add(this);
+        if (this.isRemote) return this;
+        MyEventEmitter.emit('activateActor', { actor: this, data: this.data });
+        return this;
     }
     update(dt: number, time: number) { };
     hit(data: HitData) {
@@ -148,5 +156,7 @@ export default class Actor extends Object3D {
     get health() {
         return this._health;
     }
-    die(source: any = null) { }
+    die(source: any = null) { 
+        this.destroy();
+    }
 }
