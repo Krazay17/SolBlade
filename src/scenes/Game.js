@@ -8,15 +8,19 @@ import MyEventEmitter from '../core/MyEventEmitter';
 import Globals from '../utils/Globals';
 import soundPlayer from '../core/SoundPlayer';
 import LoadingManager from '../core/LoadingManager';
-import Level1 from './Level1';
-import Level2 from './Level2';
-import GameScene from './GameScene';
+import World1 from './World1';
+import World2 from './World2';
+import LocalData from '../core/LocalData';
+import World3 from './World3';
+import MeshManager from '../core/MeshManager';
+import Player from '../player/Player';
 
 await RAPIER.init();
 
 const mapMap = new Map([
-  ['Level1', Level1],
-  ['Level2', Level2],
+  ['world1', World1],
+  ['world2', World2],
+  ['world3', World3],
 ]);
 
 export default class Game {
@@ -29,23 +33,22 @@ export default class Game {
       subStep: 6,
     }
 
+    this.initWindow();
     this.running = true;
     this.lastTime = 0;
-
-    /**@type {LoadingManager} */
-    this.loadingManager = new LoadingManager();
-
-    this.renderer = new THREE.WebGLRenderer({ alpha: 0 });
-    document.body.appendChild(this.renderer.domElement);
-
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-
     this.accumulator = 0;
     this.timeStep = 1 / 120;
 
-    this.rapierWorld = new RAPIER.World({ x: 0, y: -6, z: 0 });
 
+    this.renderer = new THREE.WebGLRenderer({ alpha: 0 });
+    document.body.appendChild(this.renderer.domElement);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+    this.rapierWorld = new RAPIER.World({ x: 0, y: -6, z: 0 });
     this.graphicsWorld = new THREE.Scene();
+    /**@type {LoadingManager} */
+    this.loadingManager = new LoadingManager();
+    this.meshManager = new MeshManager(this);
 
     this.camera = new THREE.PerspectiveCamera(
       80,
@@ -59,21 +62,13 @@ export default class Game {
     this.camera.add(this.audioListener);
     soundPlayer.setPosAudio(this.audioListener);
 
-    this.crosshair = new Crosshair(this.graphicsWorld);
-
-    this.spawnLights();
-
     this.input = new Input(canvas);
     this.playerInfo = new PlayerInfo();
     Globals.playerInfo = this.playerInfo;
 
-    this.initWindow();
+    this.crosshair = new Crosshair(this.graphicsWorld);
 
-    MyEventEmitter.on('KeyPressed', (key) => {
-      if (key === 'KeyT') {
-        this.running = !this.running;
-      }
-    })
+    this.worldLight();
 
     Globals.game = this;
     Globals.graphicsWorld = this.graphicsWorld;
@@ -81,10 +76,11 @@ export default class Game {
     Globals.input = this.input;
     Globals.camera = this.camera;
 
-    // const scene = mapMap.get(LocalData.scene || 'Level1')
-    // const newScene = new scene(this);
-    const newScene = new GameScene(this);
+    const scene = mapMap.get(LocalData.solWorld || 'world1')
+    const newScene = new scene(this);
     this.setScene(newScene);
+
+
     this.start();
   }
 
@@ -133,21 +129,10 @@ export default class Game {
     requestAnimationFrame(this.loop.bind(this));
   }
 
-  spawnLights() {
+  worldLight() {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    // this.csm = new CSM({
-    //   camera: this.camera,
-    //   parent: this.graphicsWorld,
-    //   cascades: 4,
-    //   maxFar: this.camera.far,
-    //   shadowMapSize: 2048,
-    //   lightDirection: new THREE.Vector3(1, -1, 1).normalize(),
-    // });
-    // Globals.csm = this.csm;
-
-    // Directional Light (main sun)
-    const dirLight = new THREE.DirectionalLight(0xffffff, .4);
+    const dirLight = new THREE.DirectionalLight(0xffffff, .66);
     dirLight.position.set(50, 100, 50);
     const target = new THREE.Vector3().addVectors(dirLight.position, new THREE.Vector3(1, -1, 1).normalize())
     dirLight.lookAt(target);
@@ -159,24 +144,18 @@ export default class Game {
     dirLight.shadow.camera.near = 1;
     dirLight.shadow.camera.far = 200;
 
-    dirLight.shadow.mapSize.width = 2048 * 2;
-    dirLight.shadow.mapSize.height = 2048 * 2;
+    // dirLight.shadow.mapSize.width = 2048 * 2;
+    // dirLight.shadow.mapSize.height = 2048 * 2;
+    dirLight.shadow.mapSize.width = 512;
+    dirLight.shadow.mapSize.height = 512;
     dirLight.shadow.bias = -0.0001;
     dirLight.shadow.normalBias = 0.02;
 
-
     dirLight.castShadow = true;
     this.graphicsWorld.add(dirLight);
-    // Ambient Light
+
     const ambientLight = new THREE.AmbientLight(0xffffff, .025);
     this.graphicsWorld.add(ambientLight);
-
-    // const helper = new THREE.CameraHelper(dirLight.shadow.camera);
-    // this.graphicsWorld.add(helper);
-
-    // Optional helper to see light direction
-    // const lightHelper = new THREE.DirectionalLightHelper(dirLight, 1);
-    // this.threeScene.add(lightHelper);
   }
 
   makeKeybindWindow() {

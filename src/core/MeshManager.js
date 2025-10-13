@@ -3,6 +3,13 @@ import * as THREE from "three";
 import { SkeletonUtils } from "three/examples/jsm/Addons.js";
 import { MeshBVH, SAH } from 'three-mesh-bvh';
 
+const modelRegister = new Map([
+    ['knightGirl', '/assets/KnightGirl.glb'],
+    ['ninjaDude', '/assets/NinjaDude.glb'],
+    ['julian', '/assets/julian.glb'],
+    ['lavaGolem', '/assets/LavaGolem.glb'],
+])
+
 export default class MeshManager {
     /**@type {MeshManager} */
     static instance = null;
@@ -18,7 +25,6 @@ export default class MeshManager {
         this.skinMap = new Map();
         this.texMap = new Map();
         this.tempVec = new Vector3();
-
 
         this.skinMap.set('KnightGirl', '/assets/KnightGirl.glb');
         this.skinMap.set('NinjaDude', '/assets/NinjaDude.glb');
@@ -54,20 +60,13 @@ export default class MeshManager {
         }
         return { offset, rotation, scale };
     }
-
-    getAddress(name) {
-        return this.skinMap.get(name);
-    }
-
     addMesh(meshName, mesh) {
         this.meshPool[meshName] = this.meshPool[meshName] || [];
         this.meshPool[meshName].push(mesh);
     }
-
     getSkeleMesh(meshName) {
         return this.meshPool[meshName] ? this.meshPool[meshName].pop() : null;
     }
-
     /**
      * Loads a skeletal mesh by its skin name.
      * @param {*} skinName 
@@ -78,7 +77,8 @@ export default class MeshManager {
         if (this.skinCache[skinName]) {
             return this.skinCache[skinName];
         }
-        const url = this.getAddress(skinName);
+        const url = modelRegister.get(skinName);
+        console.log(url);
         return new Promise((resolve, reject) => {
             this.loader.load(url, (gltf) => {
                 const model = gltf.scene;

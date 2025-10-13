@@ -29,9 +29,15 @@ THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
 
 export default class GameScene {
-  constructor(game) {
+  constructor(game, solWorld = 'world1', data = {}) {
+    const {
+      killFloor = -100,
+    } = data;
     /**@type {Game} */
     this.game = game; // Access camera, renderer, input, etc.
+    this.solWorld = solWorld;
+    this.data = data;
+
     this.name = 'Level1';
     /** @type {Scene} */
     this.graphics = game.graphicsWorld;
@@ -62,7 +68,6 @@ export default class GameScene {
     this._pawnManager.setLocalPlayer(this.player);
     this.projectileManager = new ProjectileManager(this, this.player);
     this.debugData = new DebugData(this.player);
-    this.gameMode = new GameMode(this, 'crown', this.player);
     this.partyFrame = new PartyFrame();
 
     Globals.player = this.player;
@@ -71,7 +76,7 @@ export default class GameScene {
     this.questManager = new QuestManager(this, this.player);
     this.questManager.addQuest('quest1');
 
-    this.spawnLevel('Level1');
+    this.spawnLevel(this.solWorld);
     soundPlayer.init();
     this.makeSky();
     setNetScene(this);
@@ -113,7 +118,7 @@ export default class GameScene {
     if (this._pawnManager) { this._pawnManager.update(dt, time) }
     if (!this.player) return;
     if (!this.player.isDead) {
-      if (this.player.body.position.y < -350) {
+      if (this.player.body.position.y < this.data.killFloor ?? -100) {
         this.player.die('the void');
       }
     }
@@ -156,7 +161,7 @@ export default class GameScene {
     portal.position.set(pos.x, pos.y, pos.z);
     portal.init(targetPos, newScene);
   }
-  spawnLevel(name = 'Level3') {
+  spawnLevel(name = 'world2') {
     if (this.mapLoaded[name]) return;
     this.game.loadingManager.gltfLoader.load(`/assets/${name}.glb`, (gltf) => {
       const model = gltf.scene;

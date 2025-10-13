@@ -76,7 +76,7 @@ export default class Pawn extends Actor {
         }
     }
     async assignMesh(meshName: string) {
-        const mesh = await this.scene.meshManager?.createSkeleMesh(meshName);
+        const mesh = await this.scene.game.meshManager?.createSkeleMesh(meshName);
         if (!mesh) return;
         this.add(mesh);
         this.mesh = mesh.meshBody as THREE.SkinnedMesh;

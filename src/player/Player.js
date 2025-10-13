@@ -21,7 +21,7 @@ export default class Player extends Pawn {
      */
     constructor(scene, data = {}) {
         if (!data.isRemote) data.health = LocalData.health
-        super(scene, data, 'KnightGirl', .5, 1);
+        super(scene, data, 'knightGirl', .5, 1);
         this.camera = Globals.camera;
 
         //this.health = this.isRemote ? this.health : LocalData.health;
@@ -214,6 +214,9 @@ export default class Player extends Pawn {
         if (this.input.actionStates.blade) {
             this.tryEnterBlade();
         }
+        if (this.input.actionStates.goHome && this.scene.levelLoaded) {
+            this.scene.game.setScene('world1');
+        }
         if (this.input.keys['KeyF']) {
             const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
             const scaledConvertedDirection = new THREE.Vector3(direction.x, direction.y, direction.z).multiplyScalar(2);
@@ -347,8 +350,9 @@ export default class Player extends Pawn {
     unDie() {
         if (this.isRemote) return;
         const spawnPoint = this.scene.getRespawnPoint();
-        this.body.velocity = { x: 0, y: 0, z: 0 };
+        if (!spawnPoint) spawnPoint = { x: 0, y: 1, z: 0 };
         this.body.position = { x: spawnPoint.x, y: spawnPoint.y, z: spawnPoint.z };
+        this.body.velocity = { x: 0, y: 0, z: 0 };
         this.position.copy(this.body.position);
         this.health = this.maxHealth;
         this.isDead = false;

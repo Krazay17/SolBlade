@@ -12,7 +12,6 @@ const config = {
         { urls: "Stun:stun3.l.google.com:19302" },
     ]
 };
-console.log('vcLoad');
 
 export default class VoiceChat {
     constructor() {
@@ -25,6 +24,11 @@ export default class VoiceChat {
         this.scene = null;
         this.voicesVolume = 1;
         this.tempVector = new THREE.Vector3();
+
+        this.closeDistance = 1;
+        this.maxDistance = 6;
+        this.fallOff = .5;
+
         this.init();
     }
 
@@ -256,9 +260,9 @@ export default class VoiceChat {
             const panner = this.audioContext.createPanner();
             panner.panningModel = 'HRTF';
             panner.distanceModel = 'inverse';
-            panner.refDistance = 1;
-            panner.maxDistance = 6;
-            panner.rolloffFactor = .5;
+            panner.refDistance = this.closeDistance;
+            panner.maxDistance = this.maxDistance;
+            panner.rolloffFactor = this.fallOff;
             panner.orientationX.setValueAtTime(0, this.audioContext.currentTime);
             panner.orientationY.setValueAtTime(0, this.audioContext.currentTime);
             panner.orientationZ.setValueAtTime(-1, this.audioContext.currentTime);

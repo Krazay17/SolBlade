@@ -1,12 +1,13 @@
 import MyEventEmitter from "./MyEventEmitter";
 
-const CURRENT_VERSION = 0.078;
+const CURRENT_VERSION = 0.079;
 export default {
     version: CURRENT_VERSION,
     name: "Player",
     money: 0,
     health: 100,
     scene: 'Level2',
+    solWorld: 'world2',
     position: { x: 0, y: 1, z: 0 },
     rotation: 0,
     masterVolume: 1,
@@ -37,6 +38,7 @@ export default {
             money: this.money,
             health: this.health,
             scene: this.scene,
+            solWorld: this.solWorld,
             position: this.position,
             rotation: this.rotation,
             masterVolume: this.masterVolume,
@@ -78,6 +80,7 @@ export default {
         this.money = parsed.money ?? this.money;
         this.health = parsed.health ?? this.health;
         this.scene = parsed.scene ?? this.scene;
+        this.solWorld = parsed.solWorld ?? this.solWorld;
         this.position = parsed.position ?? this.position;
         this.rotation = parsed.rotation ?? this.rotation;
         this.masterVolume = parsed.masterVolume ?? this.masterVolume;
@@ -97,6 +100,7 @@ export default {
         this.money = keep.money ?? this.money;
         this.health = keep.health ?? this.health;
         this.scene = keep.scene ?? this.scene;
+        this.solWorld = keep.solWorld ?? this.solWorld;
         this.position = keep.position ?? this.position;
         this.rotation = keep.rotation ?? this.rotation;
         this.masterVolume = keep.masterVolume ?? this.masterVolume;
