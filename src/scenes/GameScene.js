@@ -45,6 +45,9 @@ export default class GameScene {
     this.rapier = game.rapierWorld;
     Globals.scene = this;
   }
+  onExit() {
+
+  }
   onEnter() {
     LocalData.scene = this.name;
     this.levelLoaded = false;
@@ -172,7 +175,9 @@ export default class GameScene {
       const enemyLocations = [];
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
-      this.game.graphicsWorld.add(model);
+      
+      this.map = model;
+      this.game.graphicsWorld.add(this.map);
       model.traverse((child) => {
         /**@type {string} */
         const childName = child.name;

@@ -69,35 +69,37 @@ export default class Projectile extends Actor {
     }
     update(deltaTime) {
         if (!this.active) return;
-        
+
         this.tempVector.copy(this.velocity).multiplyScalar(deltaTime);
         if (this.gravity) {
             this.velocity.y -= this.gravity * deltaTime; // Apply gravity
         }
         this.position.add(this.tempVector);
+
         if (this.isRemote) return;
-        
         const activeActors = this.scene.actorManager.getActiveActors(this, this.owner);
+        console.log(activeActors);
         for (const enemy of activeActors) {
             if (enemy.height) {
                 this.headOffset.set(0, enemy.height * 0.5, 0);
                 this.footOffset.set(0, enemy.height * -0.5, 0);
             } else {
-                this.headOffset.set(0,0,0);
-                this.footOffset.set(0,0,0);
+                this.headOffset.set(0, 0, 0);
+                this.footOffset.set(0, 0, 0);
             }
             const enemyHead = this.tempVector2.copy(enemy.position).add(this.headOffset);
             const enemyFoot = this.tempVector3.copy(enemy.position).add(this.footOffset);
-            if (this.position.distanceToSquared(enemyHead) < this.radius
-                || this.position.distanceToSquared(enemyFoot) < this.radius) {
-                enemy.hit(new HitData({
+            if (this.position.distanceToSquared(enemyHead) < this.radius ||
+                this.position.distanceToSquared(enemyFoot) < this.radius) {
+                const hitData = new HitData({
                     dealer: this.owner,
                     target: enemy,
                     amount: this.damage,
                     type: 'fire',
-                }));
+                })
+                enemy.hit(hitData);
 
-                this.destroy();
+                this.die();
                 return;
             }
         }
@@ -105,12 +107,12 @@ export default class Projectile extends Actor {
         if (walls) {
             this.body.center.copy(this.position);
             if (walls.geometry.boundsTree.intersectsSphere(this.body)) {
-                this.destroy();
+                this.die();
             }
         }
         this.duration -= deltaTime * 1000;
         if (this.duration <= 0) {
-            this.destroy();
+            this.die();
         }
     }
     setGravity(amount) {

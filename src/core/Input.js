@@ -31,6 +31,7 @@ export default class Input {
       'Space': 'jump',
       'ShiftLeft': 'blade',
       'KeyC': 'openInventory',
+      'KeyT': 'goHome',
       'Digit1': 'spell1',
       'Digit2': 'spell2',
       'Digit3': 'spell3',

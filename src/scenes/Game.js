@@ -13,15 +13,14 @@ import World2 from './World2';
 import LocalData from '../core/LocalData';
 import World3 from './World3';
 import MeshManager from '../core/MeshManager';
-import Player from '../player/Player';
 
 await RAPIER.init();
 
-const mapMap = new Map([
-  ['world1', World1],
-  ['world2', World2],
-  ['world3', World3],
-]);
+const mapRegistry = {
+  world1: World1,
+  world2: World2,
+  world3: World3,
+}
 
 export default class Game {
   constructor(canvas) {
@@ -76,14 +75,19 @@ export default class Game {
     Globals.input = this.input;
     Globals.camera = this.camera;
 
-    const scene = mapMap.get(LocalData.solWorld || 'world1')
-    const newScene = new scene(this);
+    const newScene = new mapRegistry[LocalData.solWorld || 'world1'](this);
     this.setScene(newScene);
 
+    this.bindings();
 
     this.start();
   }
-
+  bindings() {
+    MyEventEmitter.on('goHome', () => {
+      const scene = new mapRegistry['world1'](this)
+      this.setScene(scene)
+    })
+  }
   initWindow() {
     window.addEventListener('resize', () => {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -93,10 +97,6 @@ export default class Game {
   }
 
   setScene(scene) {
-    if (typeof scene === String) {
-      const newMap = mapMap.get(scene);
-      scene = new newMap(this);
-    }
     if (this.scene?.onExit) this.scene.onExit();
     this.scene = scene;
     if (this.scene?.onEnter) this.scene.onEnter();
@@ -144,10 +144,8 @@ export default class Game {
     dirLight.shadow.camera.near = 1;
     dirLight.shadow.camera.far = 200;
 
-    // dirLight.shadow.mapSize.width = 2048 * 2;
-    // dirLight.shadow.mapSize.height = 2048 * 2;
-    dirLight.shadow.mapSize.width = 512;
-    dirLight.shadow.mapSize.height = 512;
+    dirLight.shadow.mapSize.width = 2048;
+    dirLight.shadow.mapSize.height = 2048;
     dirLight.shadow.bias = -0.0001;
     dirLight.shadow.normalBias = 0.02;
 

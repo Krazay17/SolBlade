@@ -36,6 +36,4 @@ export default class WeaponFireball extends Weapon {
         }, false, true);
         this.projectiles.push(projectile);
     }
-
-    update() { }
 }

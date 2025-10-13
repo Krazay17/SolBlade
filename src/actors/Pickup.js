@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import soundPlayer from '../core/SoundPlayer.js';
 import Actor from './Actor.js';
+import TouchData from '../core/TouchData.js';
 
 export default class Pickup extends Actor {
     constructor(scene, data) {
@@ -31,13 +32,13 @@ export default class Pickup extends Actor {
         this.add(this.mesh);
     }
     touch(dealer) {
+        if (!this.active) return;
+        this.active = false;
         Pickup.pickupFx(this.position);
-
-        this.destroy();
         super.touch(dealer);
     }
-    applyTouch(dealer) {
-        this.destroy();
+    applyTouch(data) {
+        this.die(data);
     }
     checkDistanceToPlayer() {
         const player = this.scene.player;

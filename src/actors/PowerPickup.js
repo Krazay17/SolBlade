@@ -5,7 +5,7 @@ export default class PowerPickup extends Pickup {
     constructor(scene, data) {
         data.health = 10;
         super(scene, data);
-        
+
         let color;
         switch (data.power) {
             case 'health':
@@ -14,6 +14,8 @@ export default class PowerPickup extends Pickup {
             case 'energy':
                 color = 0xffff00;
                 break;
+            default:
+                color = 0xffffff;
         }
         const mesh = new THREE.Mesh(
             new THREE.SphereGeometry(0.5, 16, 16),
@@ -21,8 +23,8 @@ export default class PowerPickup extends Pickup {
         );
         this.add(mesh);
     }
-    applyTouch(dealer) {
-        super.applyTouch(dealer);
+    applyTouch(data) {
+        const { dealer, target } = data;
         switch (this.data.power) {
             case 'health':
                 dealer.health += 25;
@@ -31,5 +33,6 @@ export default class PowerPickup extends Pickup {
                 dealer.energy += 50;
                 break;
         }
+        super.applyTouch(data);
     }
 }

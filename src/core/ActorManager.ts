@@ -23,6 +23,11 @@ export default class ActorManager {
         this.scene = scene;
         this.actors = [];
     }
+    destroy() {
+        for (const a of this.actors) {
+            a.destroy();
+        }
+    }
     update(dt: number, time: number) {
         for (const a of this.actors) { a.update(dt, time) };
     }
@@ -49,6 +54,7 @@ export default class ActorManager {
                 MyEventEmitter.emit('newActor', actor.serialize());
             }
         }
+        console.log(actor);
         return actor;
     }
     removeActor(actor: Actor | string | undefined = undefined) {
@@ -64,14 +70,12 @@ export default class ActorManager {
         return this.actors.find(a => a.netId === id);
     }
     getActiveActors(self: Actor, owner: Actor) {
-        let activeActors: Actor[] = [];
-        for (const a of this.actors) {
-            if (!a.active) continue;
-            if (self && self === a) continue;
-            if (owner && owner === a || owner === a.owner) continue;
-            activeActors.push(a);
-        }
-        return activeActors;
+        console.log(self, owner);
+        return this.actors.filter(a =>
+            a.active &&
+            a !== self &&
+            !(owner && (a === owner || a.owner === owner))
+        );
     }
     getActorsInRange(owner: Actor, actor: Actor, pos: Vector3, range: number) {
         let inrange = new Map();

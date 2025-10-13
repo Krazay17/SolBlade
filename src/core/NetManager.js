@@ -143,6 +143,18 @@ function bindSocketEvents() {
         socket.on('crownScoreIncrease', ({ playerId, score }) => {
             MyEventEmitter.emit('crownScoreIncrease', { playerId, score });
         });
+        socket.on('currentActors', (data) => {
+            for (const a of data) {
+                const { type, tempId, netId } = a
+                const localActor = scene.actorManager.actors.find(a => a.tempId === tempId);
+                if (localActor) {
+                    localActor.setNetId(netId);
+                } else {
+                    const actorData = Actor.deserialize(a, (id) => scene.actorManager.getActorById(id));
+                    scene.actorManager.spawnActor(type, actorData, true, false);
+                }
+            }
+        });
         socket.on('newActor', (data) => {
             const { type, tempId, netId } = data
             const existingActor = scene.actorManager.actors.find(a => a.tempId === tempId);
@@ -153,11 +165,6 @@ function bindSocketEvents() {
                 scene.actorManager.spawnActor(type, actorData, true, false);
             }
         });
-        socket.on('currentActors', (data) => {
-            for (const a of data) {
-                scene.actorManager.spawnActor(a.type, a, true);
-            }
-        })
         socket.on('actorHit', ({ data, health }) => {
             const hit = HitData.deserialize(data, (id) => scene.actorManager.getActorById(id));
             const target = hit.target;
@@ -166,48 +173,54 @@ function bindSocketEvents() {
             }
         });
         socket.on('destroyActor', (id) => {
-            const actor = scene.actorManager.getActorById(id)
-            if (actor.isRemote) actor.destroy();
+            const actor = scene.actorManager.getActorById(id);
+            if (actor && actor.isRemote) actor.destroy();
         });
         socket.on('actorTouch', data => {
             data = TouchData.deserialize(data, (id) => scene.actorManager.getActorById(id));
-            const { dealer, target, active } = data;
-            if (dealer && target) {
-                target.applyTouch(dealer);
-                target.active = active;
-            }
+            const target = data.target;
+            if (target) target.applyTouch(data);
         });
         socket.on('activateActor', data => {
             const actor = scene.actorManager.getActorById(data.netId);
             if (actor) {
                 actor.activate(data);
             }
-        })
+        });
+        socket.on('actorDie', (data) => {
+            data = HitData.deserialize(data, (id) => scene.actorManager.getActorById(id));
+            const { dealer, target } = data;
+            console.log(data);
+            if (target) target.applyDie(data);
+        });
         socket.on('changeAnimation', ({ id, data }) => {
             if (id === socket.id) return;
             const actor = netPlayers[id];
             if (actor) {
                 const { scale, duration } = data;
-                actor.animationManager.changeTimeScale(scale, duration);
+                actor.animationManager?.changeTimeScale(scale, duration);
             }
-        })
+        });
     }
     socket.on('joinAck', (data) => {
         playerId = data.netId;
         player.setNetId(playerId);
         netPlayers[playerId] = player;
         bindGameplay();
-        socket.emit('bindGameplay')
+        socket.emit('bindGameplay');
         MyEventEmitter.emit('joinGame', player);
     })
 
 }
 
+MyEventEmitter.on('actorDie', (data) => {
+    socket.emit('actorDie', data.serialize?.() || data);
+})
 MyEventEmitter.on('activateActor', ({ actor, data }) => {
     if (socket.connected) {
         socket.emit('activateActor', actor.serialize());
     } else {
-        actor.activate(data)
+        actor.activate(data);
     }
 });
 MyEventEmitter.on('actorTouch',

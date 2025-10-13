@@ -117,9 +117,10 @@ export default class Actor extends Object3D {
         this.netId = id;
     }
     destroy() {
-        if (!this.active) return;
         this.active = false
         this.scene.graphics.remove(this);
+        this.scene.actorManager?.removeActor(this);
+        if (this.isRemote) return;
         MyEventEmitter.emit('destroyActor', this);
     }
     activate(data: any) {
@@ -138,13 +139,13 @@ export default class Actor extends Object3D {
     }
     applyHit(data: HitData, health: number) {
         this.health = health;
-        this.lastHitData = data;
-        if (this.health <= 0) this.die(data.dealer);
+        if (data) this.lastHitData = data;
+        if (this.health <= 0) this.die(this.lastHitData || { dealer: 'The Void', target: this.netId || this });
     }
     touch(dealer: any) {
         MyEventEmitter.emit('actorTouch', new TouchData(dealer, this, this.active));
     }
-    applyTouch(dealer: any) {
+    applyTouch(data: any) {
     }
     set health(amnt: number) {
         const clamped = Math.max(0, Math.min(this.maxHealth, amnt));
@@ -156,7 +157,14 @@ export default class Actor extends Object3D {
     get health() {
         return this._health;
     }
-    die(source: any = null) { 
-        this.destroy();
+    die(data: any = null) {
+        this.active = false
+        this.scene.graphics.remove(this);
+        if (this.isRemote) return;
+        MyEventEmitter.emit('actorDie', data || { dealer: 'The Void', target: this.netId || this });
+    }
+    applyDie(data: any) {
+        this.active = false;
+        this.scene.graphics.remove(this);
     }
 }

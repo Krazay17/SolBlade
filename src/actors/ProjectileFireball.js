@@ -33,25 +33,26 @@ export default class ProjectileFireball extends Projectile {
     }
 
     update(dt) {
-        const scaledDt = dt * 10;
         if (this.texture) this.texture.rotation += dt;
-        if (this.exploding) {
-            if (this.shrink) this.shrink = this.explodeSize <= 0 ? false : true;
-            this.explodeSize = this.shrink ? this.explodeSize -= scaledDt : this.explodeSize += scaledDt;
-            this.scale.set(this.explodeSize, this.explodeSize, this.explodeSize);
-            this.flashPower += dt * 80;
-            if (this.material) this.material.emissiveIntensity = (Math.sin(this.flashPower) + 1) / 1.5;
-            if (this.explodeSize >= 2) super.destroy();
-        } else super.update(dt);
+        super.update(dt);
+        // const scaledDt = dt * 10;
+        // if (this.exploding) {
+        //     if (this.shrink) this.shrink = this.explodeSize <= 0 ? false : true;
+        //     this.explodeSize = this.shrink ? this.explodeSize -= scaledDt : this.explodeSize += scaledDt;
+        //     this.scale.set(this.explodeSize, this.explodeSize, this.explodeSize);
+        //     this.flashPower += dt * 80;
+        //     if (this.material) this.material.emissiveIntensity = (Math.sin(this.flashPower) + 1) / 1.5;
+        //     if (this.explodeSize >= 2) this.die();
+        // } else super.update(dt);
     }
 
-    destroy() {
-        super.destroy();
-        this.exploding = true;
+    die(data) {
+        super.die(data);
         ProjectileFireball.hitFx(this.position);
-        if (this.isRemote) return;
 
+        if (this.isRemote) return;
         MyEventEmitter.emit('fx', { type: 'fireballHit', pos: this.position });
+
         const explosionRange = 6;
         const enemiesInRange = this.scene.actorManager.getActorsInRange(this.owner, this, this.position, explosionRange);
         for (const [enemy, range] of enemiesInRange) {
@@ -66,7 +67,6 @@ export default class ProjectileFireball extends Projectile {
                 impulse: force,
                 type: 'fire',
                 hitPosition: this.position,
-            
             }));
         }
     }
