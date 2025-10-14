@@ -1,3 +1,6 @@
+import MyEventEmitter from "../../core/MyEventEmitter";
+import { netSocket } from "../../core/NetManager";
+import soundPlayer from "../../core/SoundPlayer";
 import PlayerState from "./_PlayerState";
 
 export default class DashState extends PlayerState {
@@ -9,6 +12,9 @@ export default class DashState extends PlayerState {
     enter() {
         super.enter()
         this.actor.animationManager?.playAnimation('dash', false);
+        soundPlayer.playPosAudio('dash', this.actor.position, 'assets/Dash.mp3');
+        const pos = { x: this.actor.position.x, y: this.actor.position.y, z: this.actor.position.z };
+        netSocket.emit('playerAudio', { name: 'dash', pos, url: 'assets/Dash.mp3' });
         this.actor.movement.dashStart();
         this.actor.energyRegen = 0;
         this.movement.momentumBooster.increaseBoost(2);

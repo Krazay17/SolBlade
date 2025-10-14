@@ -39,6 +39,7 @@ export default class Pickup extends Actor {
     }
     checkDistanceToPlayer() {
         const player = this.scene.player;
+        if(player.isDead) return;
         const adjustPos = this.tempVector.copy(this.position);
         adjustPos.y += this.height;
         const dist = player.position.distanceToSquared(adjustPos)

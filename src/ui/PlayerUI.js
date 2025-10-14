@@ -1,6 +1,7 @@
 import MyEventEmitter from "../core/MyEventEmitter.js";
 import LocalData from "../core/LocalData.js";
 import { netSocket } from "../core/NetManager.js";
+import Globals from "../utils/Globals.js";
 
 export default class PlayerInfo {
     constructor() {
@@ -49,6 +50,7 @@ export default class PlayerInfo {
         healthBar.id = 'health-bar';
         healthBar.style.width = `${this.health}%`;
         MyEventEmitter.on('playerHealthChange', ({ player, health }) => {
+            if(player !== Globals.player) return;
             this.health = health;
             healthBar.style.width = `${this.health}%`;
         });

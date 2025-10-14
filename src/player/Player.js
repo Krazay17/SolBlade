@@ -20,12 +20,12 @@ export default class Player extends Pawn {
      * @param {GameScene} scene 
      */
     constructor(scene, data = {}) {
-        if (!data.isRemote) data.health = LocalData.health
+        if (!data.isRemote) {
+            data.health = LocalData.health
+            data.name = LocalData.name
+        }
         super(scene, data, 'knightGirl', .5, 1);
         this.camera = Globals.camera;
-
-        //this.health = this.isRemote ? this.health : LocalData.health;
-        this.name = this.isRemote ? this.name : LocalData.name;
 
         this.parry = false;
         this.energy = 100;
@@ -84,7 +84,7 @@ export default class Player extends Pawn {
         } else {
             // Remote Player
 
-            this.namePlate = new NamePlate(this, this.height + 0.5);
+            this.namePlate = new NamePlate(this, this.height);
             // !!!!pre load crown for net player!!!!
             if (this.data.hasCrown) {
                 this.pickupCrown();
@@ -94,7 +94,7 @@ export default class Player extends Pawn {
     async pickupCrown() {
         if (!this.crownMesh) {
             this.crownMesh = await this.scene.meshManager.getMesh('crown', 0.4);
-            this.crownMesh.position.set(0, 2, 0);
+            this.crownMesh.position.set(0, 1.5, 0);
             this.crownMesh.scale.set(.4, .4, .4);
         }
         this.add(this.crownMesh);
@@ -305,10 +305,10 @@ export default class Player extends Pawn {
 
     hit(data) {
         super.hit(data);
-        soundPlayer.playPosAudio('playerHit', this.position);
     }
     applyHit(data, health) {
         super.applyHit(data, health);
+        soundPlayer.playPosAudio('playerHit', this.position);
         if (this.isRemote) return;
         /**@type {HitData} */
         const { type, amount, stun, impulse, dim } = data;
@@ -330,22 +330,21 @@ export default class Player extends Pawn {
     }
     healthChange(health) {
         super.healthChange(health);
+        MyEventEmitter.emit('playerHealthChange', { player: this, health });
         if (this.isRemote) {
             this.namePlate?.setHealth(health);
             return;
         }
         if (!this.isRemote) {
             LocalData.health = health;
-            MyEventEmitter.emit('playerHealthChange', { player: this, health });
         }
     }
     // only local
-    die(data) {
-        console.log(data);
+    die() {
         if (this.isRemote) return;
         if (this.isDead) return;
         this.stateManager.setState('dead');
-        MyEventEmitter.emit('playerDied', data);
+        MyEventEmitter.emit('iDied', this.lastHitData);
     }
     // only local
     unDie() {
@@ -355,6 +354,7 @@ export default class Player extends Pawn {
         this.body.position = { x: spawnPoint.x, y: spawnPoint.y, z: spawnPoint.z };
         this.body.velocity = { x: 0, y: 0, z: 0 };
         this.position.copy(this.body.position);
+        this.lastHitData = null;
         this.health = this.maxHealth;
         this.isDead = false;
         this.stateManager.setState('idle');

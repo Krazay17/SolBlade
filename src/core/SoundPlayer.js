@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import LocalData from "./LocalData";
 import MyEventEmitter from "./MyEventEmitter";
 import Globals from '../utils/Globals';
+import { netSocket } from './NetManager';
 
 class SoundPlayer {
     constructor() {
@@ -17,6 +18,8 @@ class SoundPlayer {
         this.musicPlaying = null;
         this.posSoundPools = new Map();
         this.threeAudioLoader = new THREE.AudioLoader();
+
+        console.log(this);
     }
 
     init() {
@@ -154,12 +157,16 @@ class SoundPlayer {
     setPosAudio(listener) {
         this.audioListener = listener;
     }
-    loadPosAudio(name, url, poolSize = 5, play = false, position) {
+    loadPosAudio(name, url, poolSize = 5) {
         if (!this.posSoundPools.has(name)) {
             this.posSoundPools.set(name, []);
         }
+
+        const pool = this.posSoundPools.get(name);
+
         for (let i = 0; i < poolSize; i++) {
             const posAudio = new THREE.PositionalAudio(this.audioListener);
+
             this.threeAudioLoader.load(url, (buffer) => {
                 posAudio.setBuffer(buffer);
                 posAudio.setRefDistance(10);
@@ -167,29 +174,43 @@ class SoundPlayer {
                 posAudio.setRolloffFactor(2);
                 posAudio.setVolume(this.sfxVolume * this.masterVolume);
                 Globals.graphicsWorld.add(posAudio);
-                if (play) this.playPosAudio(name, position);
             });
-            this.posSoundPools.get(name).push(posAudio);
+
+            pool.push(posAudio);
         }
     }
+
     playPosAudio(name, position, url) {
-        const pool = this.posSoundPools.get(name);
+        // ensure pool exists
+        let pool = this.posSoundPools.get(name);
         if (!pool) {
             if (url) {
-                this.loadPosAudio(name, url, 1, true, position);
+                // initialize pool and retry once loaded
+                this.loadPosAudio(name, url, 1);
+                pool = this.posSoundPools.get(name);
+            } else {
+                console.warn(`No positional audio pool for "${name}" and no URL provided.`);
                 return;
             }
-            return;
         }
-        const audio = pool.find(a => !a.isPlaying);
-        if (audio && audio.buffer) {
+
+        // find an available audio instance
+        const audio = pool.find(a => !a.isPlaying && a.buffer);
+        if (audio) {
             if (position) audio.position.copy(position);
             audio.setVolume(this.sfxVolume * this.masterVolume);
             audio.play();
-        } else if (url) {
-            this.loadPosAudio(name, url, 1, true, position);
+            return;
+        }
+
+        // fallback: create one extra if pool exhausted
+        if (url) {
+            this.loadPosAudio(name, url, 1);
+        } else {
+            console.warn(`No free audio instance available for "${name}" and no URL to load more.`);
         }
     }
+
     stopPosAudio(name) {
         const pool = this.posSoundPools.get(name);
         if (!pool) return;
@@ -199,5 +220,6 @@ class SoundPlayer {
         }
     }
 }
+/**@type {SoundPlayer} */
 const soundPlayer = SoundPlayer.getSoundInstance();
 export default soundPlayer;

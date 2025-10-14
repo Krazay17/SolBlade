@@ -1,4 +1,4 @@
-import MyEventEmitter from "../core/MyEventEmitter";
+import { netSocket } from "../core/NetManager";
 import Pickup from "./Pickup";
 
 export default class CrownPickup extends Pickup {
@@ -6,9 +6,9 @@ export default class CrownPickup extends Pickup {
         super(scene, data);
         this.makeMesh('crown', .6);
     }
-    die(){}
     hit(){}
-    applyTouch() {
-        MyEventEmitter.emit('pickupCrown')
+    applyTouch(data) {
+        super.applyTouch(data);
+        netSocket.emit('crownPickup', data.dealer.netId);
     }
 }

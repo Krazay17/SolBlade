@@ -61,22 +61,72 @@
 }
 
 #questUI {
+    pointer-events: none;
     position: fixed;
     top: 0;
     right: 0;
     flex-direction: column;
-    width: 500px;
+    width: fit-content;
     height: fit-content;
     border: 1px solid blue;
     padding: 1%;
     z-index: 1001;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+#quest-notificationUI {
+    pointer-events: none;
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column;
+    height: fit-content;
+    width: fit-content;
 }
 
 .quest {
+    pointer-events: none;
     position: relative;
     text-wrap: inherit;
+    pointer-events: none;
     color: white;
     padding: 4px;
+    white-space: pre-line;
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.quest-notification {
+    pointer-events: none;
+    font-size: x-large;
+    color: white;
+    z-index: 1002;
+    text-wrap: inherit;
+    opacity: 1;
+    animation: fadeOut 6s ease-in-out forwards;
+}
+
+.quest-blue {
+    text-shadow:
+        1px 1px 2px black,
+        0 0 1em blue,
+        0 0 0.2em blue;
+}
+
+.quest-red {
+    text-shadow:
+        1px 1px 2px black,
+        0 0 1em red,
+        0 0 0.2em red;
 }
 
 .party-player {
@@ -200,7 +250,6 @@
 
 }
 
-/* Inventory UI Styles */
 #inventory-ui {
     display: none;
     position: fixed;
@@ -217,7 +266,7 @@
     padding: 10px;
     display: none;
     flex-direction: column;
-    z-index: 1001;
+    z-index: 1005;
 }
 
 #inventory-equipped {

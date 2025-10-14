@@ -67,7 +67,7 @@ export default class PartyFrame {
     }
 
     selectPlayer(player) {
-        Globals.player.body.position.copy(player.position);
+        Globals.player.body.position = player.position;
     }
 
     render() {

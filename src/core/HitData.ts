@@ -15,8 +15,8 @@ export interface HitDataArgs {
 }
 
 export default class HitData implements HitDataArgs {
-    dealer: Actor;
-    target: Actor;
+    dealer: Actor | undefined;
+    target: Actor | undefined;
     type: string = "physical";
     amount: number = 0;
     dur: number = 0;
@@ -38,9 +38,6 @@ export default class HitData implements HitDataArgs {
         dur = 0,
         critMult = 1,
     }: HitDataArgs = {}) {
-        if (!dealer || !target)
-            throw new Error("HitData requires both dealer and target Actors");
-
         this.dealer = dealer;
         this.target = target;
         this.type = type;

@@ -140,18 +140,18 @@ export default class Actor extends Object3D {
     applyHit(data: HitData, health: number) {
         this.health = health;
         if (data) this.lastHitData = data;
-        if (this.health <= 0) this.die(this.lastHitData || { dealer: 'The Void', target: this.netId || this });
+        if (this.health <= 0) this.die(this.lastHitData);
     }
     touch(dealer: any) {
         MyEventEmitter.emit('actorTouch', new TouchData(dealer, this, this.data.respawn));
     }
     applyTouch(data: any) {
     }
-    die(data: any = null) {
+    die(data: HitData | null) {
         this.active = false;
         this.scene.graphics.remove(this);
         if (this.isRemote) return;
-        MyEventEmitter.emit('actorDie', data || { dealer: 'The Void', target: this.netId || this });
+        MyEventEmitter.emit('actorDie', data || new HitData({ target: this }));
     }
     set health(amnt: number) {
         const clamped = Math.max(0, Math.min(this.maxHealth, amnt));

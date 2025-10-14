@@ -6,10 +6,8 @@ import Globals from '../utils/Globals.js';
 import SkyBox from '../actors/SkyBox.js';
 import soundPlayer from '../core/SoundPlayer.js';
 import DebugData from '../ui/DebugData.js';
-import MeshManager from '../core/MeshManager.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import PartyFrame from '../ui/PartyFrame.js';
-import GameMode from '../core/GameMode.js';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import PawnManager from '../core/PawnManager.ts';
@@ -63,7 +61,6 @@ export default class GameScene {
     /**@type {Player[]} */
     this.players = [];
 
-    this.meshManager = new MeshManager(this.game);
     this.itemManager = new ItemManager(this);
     this._pawnManager = new PawnManager(this);
     this.actorManager = new ActorManager(this);
@@ -77,17 +74,19 @@ export default class GameScene {
     this.players.push(this.player);
 
     this.questManager = new QuestManager(this, this.player);
-    this.questManager.addQuest('quest1');
+    const newQuest = this.questManager.addQuest('playerKill');
 
     this.spawnLevel(this.solWorld);
     soundPlayer.init();
     this.makeSky();
+
     setNetScene(this);
   }
   add(obj) {
     this.graphics.add(obj);
   }
   get pawnManager() { return this._pawnManager };
+  get meshManager() { return this.game.meshManager };
   getIsConnected() {
     return netSocket.connected;
   }
@@ -175,7 +174,7 @@ export default class GameScene {
       const enemyLocations = [];
       model.position.set(0, 0, 0);
       model.scale.set(1, 1, 1); // Adjust size if needed
-      
+
       this.map = model;
       this.game.graphicsWorld.add(this.map);
       model.traverse((child) => {

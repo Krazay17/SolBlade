@@ -41,7 +41,7 @@ export default class WeaponPistol extends Weapon {
             Globals.graphicsWorld.remove(line);
         }, 500);
 
-        soundPlayer.playPosAudio('pistolUse', pos.clone());
+        soundPlayer.playPosAudio('pistolUse', pos, 'assets/PistolUse.wav');
     }
     use(currentTime, pos, dir) {
         if (this.canUse(currentTime) &&
@@ -53,7 +53,6 @@ export default class WeaponPistol extends Weapon {
             let cameraPos = this.tempVector2;
             this.actor.cameraArm.getWorldPosition(cameraPos);
             this.hitActors.clear();
-
             this.useFx(offSetPos, dir);
             MyEventEmitter.emit('fx', { type: 'pistolUse', pos: offSetPos, dir: dir });
 

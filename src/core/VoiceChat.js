@@ -61,7 +61,7 @@ export default class VoiceChat {
         });
 
         // Peer disconnect
-        netSocket.on("peer-disconnect", peerId => {
+        netSocket.on("playerDisconnected", peerId => {
             if (this.peers[peerId]) {
                 this.peers[peerId].close();
                 delete this.peers[peerId];
