@@ -9,7 +9,7 @@ type Team = 'A' | 'B' | 'C';
 export default class PawnManager {
     scene: GameScene;
     player: Pawn | null = null;
-    players: Pawn[] = [];
+    _players: Pawn[] = [];
     allPawns: Pawn[] = [];
     teamMap: Map<Pawn, Team> = new Map();
     constructor(scene: GameScene) {
@@ -67,11 +67,14 @@ export default class PawnManager {
             || this.teamMap.get(pawn) !== playerTeam)
         return hostiles;
     }
+    get players(): Pawn[] {
+        return this._players;
+    }
     spawnPlayer(data: any, isRemote: boolean = false) {
         const player = this.scene.actorManager?.spawnActor('player', data, isRemote, true);
         if (!player) return;
         this.addPawn(player as Pawn, 'A');
-        this.players?.push(player as Pawn);
+        this._players?.push(player as Pawn);
         return player;
     }
     getPawnById(id: string) {

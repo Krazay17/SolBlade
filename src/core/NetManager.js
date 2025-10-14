@@ -78,6 +78,7 @@ function bindSocketEvents() {
             if (!netPlayers[netId]) return;
             const player = scene.pawnManager.getPawnById(netId);
             scene.pawnManager.removePawn(player);
+            console.log(netId);
             delete netPlayers[netId];
 
             //MyEventEmitter.emit('dcPlayer', netId);
@@ -172,26 +173,21 @@ function bindSocketEvents() {
                 target.applyHit(hit, health);
             }
         });
-        socket.on('destroyActor', (id) => {
-            const actor = scene.actorManager.getActorById(id);
-            if (actor && actor.isRemote) actor.destroy();
-        });
         socket.on('actorTouch', data => {
             data = TouchData.deserialize(data, (id) => scene.actorManager.getActorById(id));
             const target = data.target;
-            if (target) target.applyTouch(data);
-        });
-        socket.on('activateActor', data => {
-            const actor = scene.actorManager.getActorById(data.netId);
-            if (actor) {
-                actor.activate(data);
+            if (target) {
+                target.applyTouch(data);
             }
         });
         socket.on('actorDie', (data) => {
             data = HitData.deserialize(data, (id) => scene.actorManager.getActorById(id));
             const { dealer, target } = data;
-            console.log(data);
-            if (target) target.applyDie(data);
+            if (target) target.die(data);
+        });
+        socket.on('destroyActor', (id) => {
+            const actor = scene.actorManager.getActorById(id);
+            if (actor && actor.isRemote) actor.destroy();
         });
         socket.on('changeAnimation', ({ id, data }) => {
             if (id === socket.id) return;
@@ -216,13 +212,6 @@ function bindSocketEvents() {
 MyEventEmitter.on('actorDie', (data) => {
     socket.emit('actorDie', data.serialize?.() || data);
 })
-MyEventEmitter.on('activateActor', ({ actor, data }) => {
-    if (socket.connected) {
-        socket.emit('activateActor', actor.serialize());
-    } else {
-        actor.activate(data);
-    }
-});
 MyEventEmitter.on('actorTouch',
     /**@param {TouchData} data */
     (data) => {
@@ -272,9 +261,8 @@ MyEventEmitter.on('pickupCrown', () => {
 MyEventEmitter.on('crownGameStart', () => {
     socket.emit('crownGameStart');
 });
-MyEventEmitter.on('playerDied', ({ player, source }) => {
-    source = typeof source === 'string' ? source : source.name || source.netId;
-    netSocket.emit('playerDied', { id: player.netId, source });
+MyEventEmitter.on('playerDied', (data) => {
+    netSocket.emit('playerDied', data.serialize?.() || { target: player.netId });
 });
 MyEventEmitter.on('bootPlayer', (targetPlayer) => {
     if (LocalData.name !== 'Krazzay') return;

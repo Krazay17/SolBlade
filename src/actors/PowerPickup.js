@@ -25,6 +25,7 @@ export default class PowerPickup extends Pickup {
     }
     applyTouch(data) {
         const { dealer, target } = data;
+        if(!dealer) return;
         switch (this.data.power) {
             case 'health':
                 dealer.health += 25;
@@ -33,6 +34,5 @@ export default class PowerPickup extends Pickup {
                 dealer.energy += 50;
                 break;
         }
-        super.applyTouch(data);
     }
 }

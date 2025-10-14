@@ -54,7 +54,6 @@ export default class ActorManager {
                 MyEventEmitter.emit('newActor', actor.serialize());
             }
         }
-        console.log(actor);
         return actor;
     }
     removeActor(actor: Actor | string | undefined = undefined) {
@@ -70,7 +69,6 @@ export default class ActorManager {
         return this.actors.find(a => a.netId === id);
     }
     getActiveActors(self: Actor, owner: Actor) {
-        console.log(self, owner);
         return this.actors.filter(a =>
             a.active &&
             a !== self &&

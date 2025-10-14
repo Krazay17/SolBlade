@@ -37,9 +37,6 @@ export default class Pickup extends Actor {
         Pickup.pickupFx(this.position);
         super.touch(dealer);
     }
-    applyTouch(data) {
-        this.die(data);
-    }
     checkDistanceToPlayer() {
         const player = this.scene.player;
         const adjustPos = this.tempVector.copy(this.position);

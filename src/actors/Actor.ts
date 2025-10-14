@@ -143,9 +143,15 @@ export default class Actor extends Object3D {
         if (this.health <= 0) this.die(this.lastHitData || { dealer: 'The Void', target: this.netId || this });
     }
     touch(dealer: any) {
-        MyEventEmitter.emit('actorTouch', new TouchData(dealer, this, this.active));
+        MyEventEmitter.emit('actorTouch', new TouchData(dealer, this, this.data.respawn));
     }
     applyTouch(data: any) {
+    }
+    die(data: any = null) {
+        this.active = false;
+        this.scene.graphics.remove(this);
+        if (this.isRemote) return;
+        MyEventEmitter.emit('actorDie', data || { dealer: 'The Void', target: this.netId || this });
     }
     set health(amnt: number) {
         const clamped = Math.max(0, Math.min(this.maxHealth, amnt));
@@ -156,15 +162,5 @@ export default class Actor extends Object3D {
     healthChange(health: number) { }
     get health() {
         return this._health;
-    }
-    die(data: any = null) {
-        this.active = false
-        this.scene.graphics.remove(this);
-        if (this.isRemote) return;
-        MyEventEmitter.emit('actorDie', data || { dealer: 'The Void', target: this.netId || this });
-    }
-    applyDie(data: any) {
-        this.active = false;
-        this.scene.graphics.remove(this);
     }
 }

@@ -22,7 +22,7 @@ export default class Projectile extends Actor {
             dir.y * speed,
             dir.z * speed
         );
-        this.duration = dur
+        this.duration = dur;
         this.scale.set(scale.x, scale.y, scale.z);
         this.radius = radius;
         this.damage = damage;
@@ -78,7 +78,6 @@ export default class Projectile extends Actor {
 
         if (this.isRemote) return;
         const activeActors = this.scene.actorManager.getActiveActors(this, this.owner);
-        console.log(activeActors);
         for (const enemy of activeActors) {
             if (enemy.height) {
                 this.headOffset.set(0, enemy.height * 0.5, 0);

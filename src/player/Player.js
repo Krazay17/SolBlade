@@ -340,11 +340,12 @@ export default class Player extends Pawn {
         }
     }
     // only local
-    die(source = null) {
+    die(data) {
+        console.log(data);
         if (this.isRemote) return;
         if (this.isDead) return;
         this.stateManager.setState('dead');
-        MyEventEmitter.emit('playerDied', { player: this, source });
+        MyEventEmitter.emit('playerDied', data);
     }
     // only local
     unDie() {
