@@ -69,26 +69,4 @@ export default class PartyFrame {
     selectPlayer(player) {
         Globals.player.body.position = player.position;
     }
-
-    render() {
-        this.players.forEach(player => {
-            const playerElement = document.createElement('div');
-            playerElement.className = 'party-player';
-            playerElement.innerText = player.name;
-
-            const healthBar = document.createElement('div');
-            healthBar.className = 'party-healthbar';
-            const healthFill = document.createElement('div');
-            healthFill.className = 'party-healthbar-fill';
-            healthFill.style.width = `${player.health}%`;
-            healthBar.appendChild(healthFill);
-
-            playerElement.appendChild(healthBar);
-            this.container.appendChild(playerElement);
-            playerElement.addEventListener('click', () => {
-                this.selectPlayer(player);
-            });
-            this.players.set(player, playerElement);
-        });
-    }
 }

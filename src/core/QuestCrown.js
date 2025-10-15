@@ -72,7 +72,7 @@ export default class QuestCrown extends Quest {
         const player = this.scene.actorManager.getActorById(id)
         if (!player) return;
         player.dropCrown();
-        if(!this.gameOn) return;
+        if (!this.gameOn) return;
         this.setNotification(`${player.name} dropped the crown`)
     }
     onExit() {
@@ -86,7 +86,7 @@ export default class QuestCrown extends Quest {
         for (const [id, p] of Object.entries(this.players)) {
             const actor = this.scene.actorManager.getActorById(id).name;
             if (!actor) break;
-            questText += `\n     ${actor}: ${p.score}`;
+            questText += `\n  ${actor}: ${p.score}`;
         }
         this.text = questText;
     }

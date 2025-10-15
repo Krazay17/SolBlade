@@ -68,10 +68,11 @@
     flex-direction: column;
     width: fit-content;
     height: fit-content;
-    border: 1px solid blue;
-    padding: 1%;
+    border: 2mm ridge rgb(255, 230, 0) ;
+    padding: 2px;
     z-index: 1001;
     background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(6px);
 }
 
 #quest-notificationUI {
@@ -86,13 +87,15 @@
 }
 
 .quest {
+    background-color: rgba(0, 0, 0, 0.219);
     pointer-events: none;
     position: relative;
     text-wrap: inherit;
     pointer-events: none;
     color: white;
     padding: 4px;
-    white-space: pre-line;
+    white-space: pre-wrap;
+    border: 1px solid rgb(110, 110, 110);
 }
 
 @keyframes fadeOut {
@@ -109,7 +112,7 @@
     pointer-events: none;
     font-size: x-large;
     color: white;
-    z-index: 1002;
+    z-index: 1005;
     text-wrap: inherit;
     opacity: 1;
     animation: fadeOut 6s ease-in-out forwards;

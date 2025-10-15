@@ -44,9 +44,9 @@ export default class PawnManager {
     }
     removePawn(pawn: Pawn) {
         if (!pawn) return;
+        pawn.destroy();
         const indx = this.allPawns.indexOf(pawn);
         this.allPawns?.splice(indx, 1);
-        pawn.destroy();
     }
     update(dt: number, time: number) {
     }

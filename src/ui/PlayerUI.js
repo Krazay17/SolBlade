@@ -31,8 +31,7 @@ export default class PlayerInfo {
             if (newName) {
                 this.name = newName;
                 nameElem.textContent = this.name;
-                netSocket.emit('playerNameSend', this.name);
-                MyEventEmitter.emit('playerNameUpdate', { netId: netSocket.id, name: this.name })
+                MyEventEmitter.emit('playerNameChange', this.name);
                 LocalData.name = this.name;
                 LocalData.save();
             }

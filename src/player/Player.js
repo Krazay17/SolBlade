@@ -272,6 +272,7 @@ export default class Player extends Pawn {
     setName(newName) {
         this.name = newName;
         this.namePlate?.setName(newName);
+        console.log(this.name);
     }
 
 

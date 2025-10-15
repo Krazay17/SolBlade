@@ -59,6 +59,8 @@ export default class ActorManager {
     removeActor(actor: Actor | string | undefined = undefined) {
         actor = typeof actor === 'string' ? this.getActorById(actor) : actor;
         if (!actor) return;
+        const index = this.actors.indexOf(actor);
+        this.actors.splice(index, 1);
     }
     destroyActor(actor: Actor | string | undefined = undefined) {
         actor = typeof actor === 'string' ? this.getActorById(actor) : actor;

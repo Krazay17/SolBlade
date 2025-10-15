@@ -76,11 +76,13 @@ function bindSocketEvents() {
             MyEventEmitter.emit('playerJoined', newPlayer)
         });
         socket.on('playerDisconnected', (netId) => {
-            if (!netPlayers[netId] || netPlayers[playerId]) return;
-            const player = scene.pawnManager.getPawnById(netId);
-            scene.pawnManager.removePawn(player);
-            MyEventEmitter.emit('playerLeft', player);
-            delete netPlayers[netId];
+            if (netId === playerId) return;
+            if (netPlayers[netId]) {
+                const player = scene.pawnManager.getPawnById(netId);
+                scene.pawnManager.removePawn(player);
+                MyEventEmitter.emit('playerLeft', player);
+                delete netPlayers[netId];
+            }
         });
         socket.on('playerPositionUpdate', ({ id, data }) => {
             if (netPlayers[id]) {
@@ -94,12 +96,6 @@ function bindSocketEvents() {
                 player.animationManager?.playAnimation(data.name, data.loop);
             }
         })
-        socket.on('playerNameUpdate', ({ id, name }) => {
-            if (netPlayers[id]) {
-                netPlayers[id].setName(name);
-                MyEventEmitter.emit('playerNameUpdate', { netId: id, player: netPlayers[id], name });
-            }
-        });
         socket.on('chatMessageUpdate', ({ id, data }) => {
             if (netPlayers[id]) {
                 MyEventEmitter.emit('chatMessage', { player: data.player, message: data.message, color: 'white' });
@@ -126,7 +122,7 @@ function bindSocketEvents() {
             const { name, pos, url } = data;
             soundPlayer.playPosAudio(name, pos, url);
         });
-        socket.on('crownGamePlayers', data=>{
+        socket.on('crownGamePlayers', data => {
             MyEventEmitter.emit('crownGamePlayers', data);
         });
         socket.on('currentActors', (data) => {
@@ -187,6 +183,14 @@ function bindSocketEvents() {
                 actor.animationManager?.changeTimeScale(scale, duration);
             }
         });
+        socket.on('playerNameChange', ({ id, name }) => {
+            const player = scene.actorManager.getActorById(id);
+            if (player) {
+                player.setName?.(name);
+                MyEventEmitter.emit('playerNameUpdate', ({ player, name }));
+            }
+        })
+
     }
     socket.on('joinAck', (data) => {
         playerId = data.netId;
@@ -199,6 +203,9 @@ function bindSocketEvents() {
 
 }
 
+MyEventEmitter.on('playerNameChange', (data) => {
+    socket.emit('playerNameChange', data);
+})
 MyEventEmitter.on('actorStateUpdate', data => {
     socket.emit('actorStateUpdate', data?.serialize?.());
 });
