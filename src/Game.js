@@ -194,7 +194,6 @@ export default class Game {
   }
   add(obj) {
     this.graphicsWorld.add(obj);
-    console.log(obj);
   }
   remove(obj) {
     this.graphicsWorld.remove(obj);
@@ -211,6 +210,9 @@ export default class Game {
   /**@type {Player[]} */
   get players() {
     return this.actorManager.players;
+  }
+  get hostiles() {
+    return this.actorManager.hostiles;
   }
   get levelLOS() {
     return this.world.mergedLevel;

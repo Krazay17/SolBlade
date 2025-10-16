@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import Globals from '../utils/Globals';
 import Actor from './Actor';
 import MeshManager from '../core/MeshManager';
 import HitData from '../core/HitData';
@@ -102,7 +101,7 @@ export default class Projectile extends Actor {
                 return;
             }
         }
-        const walls = Globals.scene.getMergedLevel();
+        const walls = this.game.levelLOS;
         if (walls) {
             this.body.center.copy(this.position);
             if (walls.geometry.boundsTree.intersectsSphere(this.body)) {

@@ -46,7 +46,7 @@ export default class WeaponSword extends Weapon {
                 doesParry: true
             })) {
             this.lastUsed = currentTime;
-            this.enemyActors = this.game.pawnManager.hostiles;
+            this.enemyActors = this.game.hostiles;
             this.hitActors.clear();
             this.useFx(this.actor.position);
             MyEventEmitter.emit('fx', { type: 'swordUse', pos: this.actor.position });

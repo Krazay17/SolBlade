@@ -243,8 +243,6 @@ MyEventEmitter.on('actorStateUpdate', data => {
 MyEventEmitter.on('actorDie', (data) => {
     if (socket.connected) {
         socket.emit('actorDie', data?.serialize?.() || data);
-    } else {
-        data.target.die(data);
     }
 });
 MyEventEmitter.on('actorTouch', (/**@type {TouchData}*/data) => {

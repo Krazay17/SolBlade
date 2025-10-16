@@ -119,7 +119,7 @@ export default class ActorManager {
         return this.actors.filter(a => a.actorType === 'player');
     }
     get hostiles() {
-        return this.actors.filter(a => a.team === 'A' || (a.team !== this.player.team));
+        return this.actors.filter(a => a !== this.player && a.active && (a.team === 'A' || (a.team !== this.player.team)));
     }
     get allButPlayer() {
         return this.actors.filter(a => a !== this.player);
