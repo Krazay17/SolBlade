@@ -1,43 +1,38 @@
-import Player from "../player/Player";
-import GameScene from "../scenes/GameScene";
+import QuestManager from "./QuestManager";
 
 export default class Quest {
-    constructor(scene, player, box, notificationUI, questId) {
-        /**@type {GameScene} */
-        this.scene = scene;
-        /**@type {Player} */
-        this.player = player;
-        this.box = box;
-        this.notificationUI = notificationUI;
-        this.questId = questId;
-
-        this.data;
-
-        this.questTitle = '';
+    constructor(manager, data = {
+        title: 'default',
+        name: 'default',
+    }) {
+        /**@type {QuestManager} */
+        this.manager = manager;
+        this.title = data.title;
+        this.name = data.name;
+        this.data = data;
 
         this.ui = document.createElement('div');
         this.ui.classList.add('quest');
-        this.box.appendChild(this.ui);
-
+        this.manager.ui.appendChild(this.ui);
     }
     onEnter() { }
     set text(value) {
-        this.ui.textContent = `${this.questTitle}: ${value}`;
+        this.ui.textContent = `${this.data.title}: ${value}`;
     }
-    onExit() { }
+    onExit() { this.ui.remove() }
     updateQuest(data) {
         const { text } = data;
-        this.ui.textContent = `${this.questTitle}: ${text}`;
+        this.ui.textContent = `${this.data.title}: ${text}`;
     }
     setNotification(text, color = 'quest-blue') {
         const bigText = document.createElement('div');
         bigText.textContent = text;
         bigText.classList.add('quest-notification', color);
-        this.notificationUI.appendChild(bigText);
+        this.manager.notificationUI.appendChild(bigText);
         bigText.addEventListener('animationend', () => bigText.remove());
     }
-    destroy() {
-        this.ui.remove();
-    }
     update(dt, time) { }
+    get player() {
+        return this.manager.player;
+    }
 } 

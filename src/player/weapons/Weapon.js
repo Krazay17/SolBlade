@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import MyEventEmitter from '../../core/MyEventEmitter';
 import MeshTrace from '../../core/MeshTrace';
-import GameScene from '../../scenes/GameScene';
 import Player from '../Player';
 
 export default class Weapon {
@@ -18,8 +17,7 @@ export default class Weapon {
         this.tempVector2 = new THREE.Vector3();
         this.hitActors = new Set();
 
-        /**@type {GameScene} */
-        this.scene = null; // To be set by subclasses if needed
+        this.game = null;
         this.isSpell = isSpell;
 
         if (isSpell) {
@@ -59,7 +57,7 @@ export default class Weapon {
     }
     update() { }
     meleeTrace(start, direction, length = 5, dot = 0.5, callback) {
-        const actors = this.scene.pawnManager.hostiles;
+        const actors = this.game.actorManager.hostiles;
         for (const actor of actors) {
             const meshPos = this.tempVector.copy(actor.position);
             meshPos.y += actor.height / 2;
@@ -82,7 +80,7 @@ export default class Weapon {
             frameCount++;
             if (frameCount % 5 !== 0) return;
 
-            const meshTracer = new MeshTrace(this.scene);
+            const meshTracer = new MeshTrace(this.game);
             meshTracer.lineTrace(start, dir, length, (hits) => {
                 for (const hit of hits) {
                     const actor = hit.object.userData.owner;

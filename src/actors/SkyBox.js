@@ -2,15 +2,28 @@ import * as THREE from 'three';
 import Globals from '../utils/Globals';
 
 export default class SkyBox extends THREE.Object3D {
-    constructor() {
+    constructor(scene) {
         super();
-        this.textureLoader = Globals.game.loadingManager.textureLoader;
-        this.createSkyBox();
+        this.scene = scene;
+        this.active = true;
+        this.textureLoader = scene.loadingManager.textureLoader;
+        this.sky = this.createSky();
         this.rotatingFilter1 = this.createRotatingFilter('assets/SkyFilter.webp', 2400);
         this.rotatingFilter2 = this.createRotatingFilter('assets/SkyFilter2.webp', 2300);
+
+        this.scene.add(this);
+    }
+    destroy() {
+        this.active = false;
+        this.scene.remove(this);
+        this.textureLoader = null;
+        this.sky = null;
+        this.rotatingFilter1 = null;
+        this.rotatingFilter2 = null;
+        this.scene = null;
     }
 
-    createSkyBox() {
+    createSky() {
         const geometry = new THREE.SphereGeometry(2500);
         const myTexture = this.textureLoader.load('assets/RedSky0.webp');
         const myMaterial = new THREE.MeshBasicMaterial({
@@ -19,6 +32,8 @@ export default class SkyBox extends THREE.Object3D {
         });
         const skyBox = new THREE.Mesh(geometry, myMaterial);
         this.add(skyBox);
+
+        return skyBox;
     }
 
     createRotatingFilter(texturePath = 'assets/SkyFilter.webp', size = 1100) {
@@ -32,10 +47,12 @@ export default class SkyBox extends THREE.Object3D {
         });
         const rotatingFilter = new THREE.Mesh(geometry, material);
         this.add(rotatingFilter);
+
         return rotatingFilter;
     }
 
     update() {
+        if(!this.active)return;
         if (this.rotatingFilter1) {
             this.rotatingFilter1.rotation.y += 0.0001;
         }

@@ -2,13 +2,12 @@ import * as THREE from 'three';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import soundPlayer from '../core/SoundPlayer.js';
 import Actor from './Actor.js';
-import TouchData from '../core/TouchData.js';
 
 export default class Pickup extends Actor {
     constructor(scene, data) {
         super(scene, data);
         this.active = true;
-        /**@type {THREE.Mesh} */
+        /**@type {THREE.Object3D} */
         this.mesh = null;
 
         this.height = 0;
@@ -28,6 +27,9 @@ export default class Pickup extends Actor {
     }
     async makeMesh(name, scale = 1) {
         this.mesh = await this.scene.meshManager.getMesh(name);
+        const edges = new THREE.EdgesGeometry(this.mesh.children[0].children[0].geometry, 35);
+        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }));
+        this.mesh.add(line);
         this.mesh.scale.set(scale, scale, scale);
         this.add(this.mesh);
     }
@@ -39,7 +41,7 @@ export default class Pickup extends Actor {
     }
     checkDistanceToPlayer() {
         const player = this.scene.player;
-        if(player.isDead) return;
+        if (player.isDead) return;
         const adjustPos = this.tempVector.copy(this.position);
         adjustPos.y += this.height;
         const dist = player.position.distanceToSquared(adjustPos)

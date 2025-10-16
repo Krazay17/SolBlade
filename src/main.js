@@ -1,6 +1,5 @@
 import LocalData from "./core/LocalData";
-import Game from "./scenes/Game";
-import "./core/NetManager";
+import Game from "./Game";
 import Menu from "./ui/Menu";
 import soundPlayer from "./core/SoundPlayer";
 import './ui/StyleUI.css';

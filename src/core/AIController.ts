@@ -1,13 +1,13 @@
-import GameScene from "../scenes/GameScene";
 import Player from "../player/Player";
 import { MovementStates } from './states/StateManager'
 import Enemy from "../actors/Enemy";
 import AIMovement from "./AIMovement";
 import { Vector2, Vector3 } from "three";
 import PawnBody from "./PawnBody";
+import Game from "../Game";
 
 export default class AIController {
-    scene: GameScene;
+    game: Game;
     pawn: Enemy;
     body: PawnBody | null;
     target: any | null = null;
@@ -18,8 +18,8 @@ export default class AIController {
     temp2Vector2: Vector2 = new Vector2();
     homeDist: Vector2 = new Vector2();
     private _meleeDistance: number = 1;
-    constructor(scene: GameScene, pawn: Enemy) {
-        this.scene = scene;
+    constructor(game: Game, pawn: Enemy) {
+        this.game = game;
         this.pawn = pawn;
         this.body = pawn.body;
         this.movement = pawn.movement as AIMovement;
@@ -31,10 +31,10 @@ export default class AIController {
         this.handleStates(this.target);
     }
     findClosestPlayer() {
-        if (!this.scene.players) return;
+        if (!this.game.players) return;
         let closestPlayer: Player | null = null;
         let closestDistSq = Infinity;
-        for (const p of this.scene.players) {
+        for (const p of this.game.players) {
             const distSq = this.pawn.position.distanceToSquared(p.position);
             if (distSq < 225 && distSq < closestDistSq) {
                 closestPlayer = p;

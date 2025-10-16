@@ -3,9 +3,9 @@ import Weapon from './Weapon';
 import MyEventEmitter from '../../core/MyEventEmitter';
 
 export default class WeaponFireball extends Weapon {
-    constructor(actor, scene, isSpell = false) {
+    constructor(actor, game, isSpell = false) {
         super(actor, 'Fireball', 30, 100, 1500, isSpell); // name, damage, range, cooldown
-        this.scene = scene;
+        this.game = game;
         this.projectiles = [];
         this.tempVector = new THREE.Vector3();
         this.tempVector2 = new THREE.Vector3();
@@ -27,7 +27,7 @@ export default class WeaponFireball extends Weapon {
         const dir = this.actor.getShootData().dir;
         pos = pos.add(dir.clone().multiplyScalar(2)); // Start a bit in front of the actor
 
-        const projectile = this.scene.actorManager.spawnActor('fireball', {
+        const projectile = this.game.actorManager.spawnActor('fireball', {
             pos,
             dir,
             speed: 35,

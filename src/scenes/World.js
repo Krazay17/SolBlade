@@ -1,32 +1,19 @@
 import * as THREE from 'three';
-import Player from '../player/Player.js';
 import { netSocket, setNetScene } from '../core/NetManager.js';
 import LocalData from '../core/LocalData.js';
-import Globals from '../utils/Globals.js';
 import SkyBox from '../actors/SkyBox.js';
-import soundPlayer from '../core/SoundPlayer.js';
-import DebugData from '../ui/DebugData.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
-import PartyFrame from '../ui/PartyFrame.js';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import PawnManager from '../core/PawnManager.ts';
-import Actor from '../actors/Actor.ts';
-import ItemManager from '../core/ItemManager.js';
-import ProjectileManager from '../core/ProjectileManager.ts';
-import Game from './Game.js';
-import { Scene } from "three";
+import Game from '../Game.js';
 import Portal from '../actors/Portal.js';
 import RAPIER from '@dimforge/rapier3d-compat';
-import ActorManager from '../core/ActorManager.ts';
-import QuestManager from '../core/QuestManager.js';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-
-export default class GameScene {
+export default class World {
   constructor(game, solWorld = 'world1', data = {}) {
     const {
       killFloor = -100,
@@ -35,66 +22,65 @@ export default class GameScene {
     this.game = game; // Access camera, renderer, input, etc.
     this.solWorld = solWorld;
     this.data = data;
-
-    this.name = 'Level1';
-    /** @type {Scene} */
-    this.graphics = game.graphicsWorld;
-    /**@type {RAPIER.World} */
-    this.rapier = game.rapierWorld;
-    Globals.scene = this;
   }
+  get actorManager() { return this.game.actorManager };
+  get player() { return this.game.player };
+  get loadingManager() { return this.game.loadingManager };
+  get graphics() { return this.game.graphicsWorld };
+  get physics() { return this.game.physicsWorld };
+  get pawnManager() { return this.game.pawnManager };
+  get meshManager() { return this.game.meshManager };
+  get questManager() { return this.game.questManager };
+  get spawnPos() { return { x: 0, y: 1, z: 0 } };
   onExit() {
-
+    MyEventEmitter.emit('leaveWorld', this.solWorld);
+    this.destroy();
   }
-  onEnter() {
-    LocalData.scene = this.name;
+  onEnter(callback) {
     this.levelLoaded = false;
     this.allGeoms = [];
     this.mergedLevel = null;
     this.mapLoaded = {};
     this.spawnPoints = [];
-    this.scenePlayers = {};
-    this.projectiles = [];
 
-    /**@type {Actor[]} */
-    this.actors = [];
-    /**@type {Player[]} */
-    this.players = [];
+    this.createSky();
 
-    this.itemManager = new ItemManager(this);
-    this._pawnManager = new PawnManager(this);
-    this.actorManager = new ActorManager(this);
-    this.player = this._pawnManager.spawnPlayer({ pos: LocalData.position || new THREE.Vector3(0, 1, 0) }, false);
-    this._pawnManager.setLocalPlayer(this.player);
-    this.projectileManager = new ProjectileManager(this, this.player);
-    this.debugData = new DebugData(this.player);
-    this.partyFrame = new PartyFrame();
+    this.map = null;
+    this.worldColliders = [];
+    this.spawnLevel(this.solWorld, callback);
 
-    Globals.player = this.player;
-    this.players.push(this.player);
-
-    this.questManager = new QuestManager(this, this.player);
-    const newQuest = this.questManager.addQuest('playerKill');
-
-    this.spawnLevel(this.solWorld);
-    soundPlayer.init();
-    this.makeSky();
-
-    setNetScene(this);
+    MyEventEmitter.emit('enterWorld', this.solWorld);
+  }
+  destroy() {
+    if (this.map) {
+      this.graphics.remove(this.map)
+      this.map = null;
+    }
+    if (this.worldColliders) {
+      for (const c of this.worldColliders) {
+        this.physics.removeCollider(c);
+      }
+      this.worldColliders = null;
+    }
+    if (this.skyBox) {
+      this.skyBox.destroy();
+      this.skyBox = null;
+    }
   }
   add(obj) {
     this.graphics.add(obj);
   }
-  get pawnManager() { return this._pawnManager };
-  get meshManager() { return this.game.meshManager };
+  remove(obj) {
+    this.graphics.remove(obj);
+  }
+  getActorById(id) {
+    return this.actorManager.getActorById(id)
+  }
   getIsConnected() {
     return netSocket.connected;
   }
   getOtherActorMeshes() {
     return this.actorMeshes.filter(a => a !== this.player.meshBody);
-  }
-  getOtherActors() {
-    return Object.values(this.scenePlayers).filter(p => p !== this.player);
   }
   addEnemy(actor) {
     this.enemyActors.push(actor);
@@ -106,7 +92,7 @@ export default class GameScene {
     return this.mergedLevel || null;
   }
   getScenePlayersPos() {
-    const pawns = [...this.pawnManager.players];
+    const pawns = [...this.actorManager.players];
     const posMap = new Map();
     for (const p of pawns) {
       posMap.set(p.netId, p.position);
@@ -114,17 +100,14 @@ export default class GameScene {
     return posMap;
   }
   update(dt, time) {
-    if (this.skyBox) this.skyBox.update();
     if (!this.levelLoaded) return;
-    if (this.actorManager) this.actorManager.update(dt, time);
-    if (this._pawnManager) { this._pawnManager.update(dt, time) }
+    if (this.skyBox) this.skyBox.update();
     if (!this.player) return;
     if (!this.player.isDead) {
-      if (this.player.body.position.y < this.data.killFloor ?? -100) {
-        this.player.die('the void');
+      if (this.player.body.position.y < (this.data.killFloor || -100)) {
+        this.player.die('The Void');
       }
     }
-    this.debugData.update(dt, time);
   }
 
   getRespawnPoint() {
@@ -133,14 +116,9 @@ export default class GameScene {
       return this.spawnPoints[index];
     }
   }
-
-  makeSky() {
-    this.skyBox = new SkyBox();
-    this.game.graphicsWorld.add(this.skyBox);
-
-    //this.game.graphicsWorld.fog = new THREE.FogExp2(0x000000, .002);
+  createSky() {
+    this.skyBox = new SkyBox(this);
   }
-
   createSpotLight(pos, rot) {
     const targetDir = new THREE.Vector3().setFromEuler(rot);
     const light = new THREE.SpotLight(0xffffff, 100, 40);
@@ -163,7 +141,7 @@ export default class GameScene {
     portal.position.set(pos.x, pos.y, pos.z);
     portal.init(targetPos, newScene);
   }
-  spawnLevel(name = 'world2') {
+  spawnLevel(name = 'world2', callback) {
     if (this.mapLoaded[name]) return;
     this.game.loadingManager.gltfLoader.load(`/assets/${name}.glb`, (gltf) => {
       const model = gltf.scene;
@@ -216,7 +194,8 @@ export default class GameScene {
           return;
         }
         if (childName.startsWith('PointLight')) {
-          this.createPointLight(child.position, child.scale, userData.color);
+          //this.createPointLight(child.position, child.scale, userData.color);
+          this.game.lightManager.spawnLight({ type: 'pointLight', pos: child.position, color: userData.color, intensity: child.scale.x * 10 });
           return;
         }
         if (childName.startsWith('Portal')) {
@@ -259,7 +238,14 @@ export default class GameScene {
           child.castShadow = true;
           child.receiveShadow = true;
 
-          const rBody = this.rapier.createCollider(triMeshFromVerts(child.geometry));
+          const rBody = this.physics.createCollider(triMeshFromVerts(child.geometry));
+          this.worldColliders.push(rBody);
+
+          const edges = new THREE.EdgesGeometry(child.geometry, 35);
+          const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x888888 }));
+          child.add(line);
+          child.material.dithering = true;
+
         }
       });
       for (const geom of this.allGeoms) {
@@ -282,7 +268,9 @@ export default class GameScene {
 
       this.levelLoaded = true;
       this.mapLoaded[name] = true;
+      callback();
       MyEventEmitter.emit('levelLoaded');
+      return gltf;
     });
   }
 }

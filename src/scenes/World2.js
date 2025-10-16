@@ -1,9 +1,10 @@
-import GameScene from "./GameScene";
+import World from "./World";
 
-export default class World2 extends GameScene {
+export default class World2 extends World {
     constructor(game) {
         super(game, 'world2', { killFloor: -30 });
     }
+    get spawnPos() { return this.getRespawnPoint() }
     update(dt, time) {
         super.update(dt, time);
         if (this.player.isDead) return;

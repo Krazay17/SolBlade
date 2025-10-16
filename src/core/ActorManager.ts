@@ -2,11 +2,12 @@ import { Vector3 } from "three";
 import Actor, { ActorData } from "../actors/Actor";
 import ProjectileFireball from "../actors/ProjectileFireball";
 import Player from "../player/Player";
-import GameScene from "../scenes/GameScene";
 import MyEventEmitter from "./MyEventEmitter";
 import ItemPickup from "../actors/ItemPickup";
 import PowerPickup from "../actors/PowerPickup";
 import CrownPickup from "../actors/CrownPickup";
+import Game from "../Game";
+import LocalData from "./LocalData";
 
 const actorRegistry: Record<string, any> = {
     player: Player,
@@ -17,19 +18,31 @@ const actorRegistry: Record<string, any> = {
 }
 
 export default class ActorManager {
-    scene: GameScene;
+    game: Game | null;
+    player: Player;
     actors: Actor[];
-    constructor(scene: GameScene) {
-        this.scene = scene;
+    constructor(game: Game) {
+        this.game = game;
         this.actors = [];
+        this.player = this.spawnLocalPlayer();
     }
     destroy() {
         for (const a of this.actors) {
             a.destroy();
         }
+        this.actors = [];
     }
     update(dt: number, time: number) {
         for (const a of this.actors) { a.update(dt, time) };
+    }
+    spawnLocalPlayer() {
+        //const solWorld = this.game?.solWorld;
+        const actorClass = actorRegistry['player'];
+        if (!actorClass) throw console.error('NO PLAYER');
+
+        const player = new actorClass(this.game, { pos: LocalData.position || { x: 0, y: 1, z: 0 }, solWorld: LocalData.solWorld })
+        this.actors.push(player as Actor);
+        return player;
     }
     spawnActor(
         type: string,
@@ -37,13 +50,15 @@ export default class ActorManager {
         isRemote: boolean = false,
         replicate: boolean = false,
     ): Actor | undefined | void {
-        const finalData = { type, ...data, isRemote, replicate };
+        const solWorld = this.game?.solWorld;
+        // if (isRemote && (data.solWorld !== solWorld)) return;
+        const finalData = { type, ...data, isRemote, replicate, solWorld, active: true };
         // const existingActor = this.getActorById(data.netId);
         // if (existingActor) return existingActor.activate(finalData);
         const actorClass = actorRegistry[type];
-        if (!actorClass) return console.warn(`Unknown actor: ${type}`);
+        if (!actorClass) return console.warn(`Unknown actor: ${type}`, data);
 
-        const actor = new actorClass(this.scene, finalData);
+        const actor = new actorClass(this.game, finalData);
         if (!actor) return;
 
         this.actors.push(actor);
@@ -55,6 +70,13 @@ export default class ActorManager {
             }
         }
         return actor;
+    }
+    clearActors() {
+        const actors = this.allButPlayer;
+        for (const a of actors) {
+            a.destroy();
+        }
+        this.actors = [this.player as Actor];
     }
     removeActor(actor: Actor | string | undefined = undefined) {
         actor = typeof actor === 'string' ? this.getActorById(actor) : actor;
@@ -89,5 +111,17 @@ export default class ActorManager {
             }
         }
         return inrange;
+    }
+    get world() {
+        return this.game?.world;
+    }
+    get players() {
+        return this.actors.filter(a => a.actorType === 'player');
+    }
+    get hostiles() {
+        return this.actors.filter(a => a.team === 'A' || (a.team !== this.player.team));
+    }
+    get allButPlayer() {
+        return this.actors.filter(a => a !== this.player);
     }
 }

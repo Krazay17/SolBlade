@@ -4,8 +4,13 @@ export default class DebugData {
         this.fps = 0;
         this.dt = 0;
         this.createUI();
+        this.active = true;
     }
-
+    destroy() {
+        this.active = false;
+        this.player = null;
+        this.debugSection.remove();
+    }
     createUI() {
         this.debugSection = document.createElement('div');
         this.debugSection.id = 'debug-section';
@@ -13,6 +18,7 @@ export default class DebugData {
     }
 
     update(dt, time) {
+        if(!this.active)return;
         this.dt = dt;
         this.fps = 1 / dt;
         const playerPos = this.player.position.clone();
@@ -26,6 +32,7 @@ export default class DebugData {
             <p>Player State: ${this.player.stateManager.currentStateName}</p>
             <p>Run Boost: ${this.player.movement.momentumBooster?.getBoost().toFixed(2) || 0}</p>
             <p>Player Speed: ${Math.round(Math.hypot(this.player.body.velocity.x, this.player.body.velocity.z) * 10)}</p>
+            <p>NetId: ${this.player.netId}<p>
         `;
     }
 }

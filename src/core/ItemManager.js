@@ -1,9 +1,9 @@
-import GameScene from "../scenes/GameScene";
+import World from "../scenes/World";
 import Item from "./Item";
 
 export default class ItemManager {
     constructor(scene) {
-        /**@type {GameScene} */
+        /**@type {World} */
         this.scene = scene;
         this.items = {
             fireball: {

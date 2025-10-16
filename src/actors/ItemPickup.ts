@@ -3,12 +3,13 @@ import LocalData from "../core/LocalData";
 import TouchData from "../core/TouchData";
 import Inventory from "../player/Inventory";
 import Player from "../player/Player";
-import GameScene from "../scenes/GameScene";
+import World from "../scenes/World";
 import Pickup from "./Pickup";
+import * as THREE from 'three';
 
 export default class ItemPickup extends Pickup {
     itemData: any;
-    constructor(scene: GameScene, data: any) {
+    constructor(scene: World, data: any) {
         super(scene, data);
         const {
             item = null,
@@ -25,6 +26,11 @@ export default class ItemPickup extends Pickup {
     async init() {
         await this.scene.meshManager?.getMesh('item').then((mesh) => {
             this.mesh = mesh;
+            if (this.mesh.children[0].geometry) {
+                const edges = new THREE.EdgesGeometry(this.mesh.children[0].geometry, 35);
+                const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }));
+                this.mesh.add(line);
+            }
             mesh.scale.set(.6, .6, .6);
             this.add(mesh);
             this.makeTexture(mesh);

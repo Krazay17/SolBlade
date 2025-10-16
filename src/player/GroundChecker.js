@@ -43,7 +43,7 @@ export default class GroundChecker {
             this.raycaster.near = 0;
             this.raycaster.far = this.rayLength;
 
-            const hit = this.raycaster.intersectObject(Globals.scene.getMergedLevel(), false)[0];
+            const hit = this.raycaster.intersectObject(this.pawn.world.getMergedLevel(), false)[0];
 
             if (hit) {
                 if (hit) {

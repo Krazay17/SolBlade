@@ -1,6 +1,5 @@
 import * as THREE from "three";
-import GameScene from "../scenes/GameScene";
-import Globals from "../utils/Globals";
+import World from "../scenes/World";
 import AnimationManager from "../core/AnimationManager";
 import MyEventEmitter from "../core/MyEventEmitter";
 import StateManager from '../core/states/StateManager';
@@ -12,6 +11,7 @@ import AIController from "../core/AIController";
 import Actor from "./Actor";
 import RAPIER from "@dimforge/rapier3d-compat";
 import PawnBody from "../core/PawnBody";
+import Game from "../Game";
 
 export default class Pawn extends Actor {
     body: PawnBody | null = null;
@@ -28,13 +28,13 @@ export default class Pawn extends Actor {
     namePlate: NamePlate | null = null;
 
     constructor(
-        scene: GameScene,
+        game: Game,
         data: any,
         meshName: string,
         radius: number = .5,
         height: number = 1
     ) {
-        super(scene, data);
+        super(game, data);
         this.radius = radius;
         this.height = height;
         this.meshName = meshName;
@@ -42,7 +42,7 @@ export default class Pawn extends Actor {
         this.assignMesh(meshName);
 
         if (!this.isRemote) {
-            this.body = new PawnBody(scene.rapier, data.pos, height, radius);
+            if (this.game.physics) this.body = new PawnBody(this.game.physics, data.pos, height, radius);
         } else {
             this.targetPosition = data.pos;
         }
@@ -76,7 +76,7 @@ export default class Pawn extends Actor {
         }
     }
     async assignMesh(meshName: string) {
-        const mesh = await this.scene.game.meshManager?.createSkeleMesh(meshName);
+        const mesh = await this.scene.meshManager?.createSkeleMesh(meshName);
         if (!mesh) return;
         this.add(mesh);
         this.mesh = mesh.meshBody as THREE.SkinnedMesh;

@@ -1,13 +1,13 @@
 import Projectile from "../actors/Projectile";
 import Player from "../player/Player";
-import GameScene from "../scenes/GameScene";
+import World from "../scenes/World";
 
 export default class ProjectileManager {
-    scene: GameScene;
+    scene: World;
     player: Player;
     projectiles: Projectile[] = [];
     lastProjectileUpdate: any = {};
-    constructor(scene: GameScene, player: Player) {
+    constructor(scene: World, player: Player) {
         this.scene = scene;
         this.player = player;
     }

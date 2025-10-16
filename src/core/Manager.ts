@@ -1,8 +1,8 @@
-import GameScene from "../scenes/GameScene";
+import World from "../scenes/World";
 
 export default class Manager {
-    scene: GameScene;
-    constructor(scene: GameScene) {
+    scene: World;
+    constructor(scene: World) {
         this.scene = scene;
     }
 }

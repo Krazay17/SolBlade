@@ -85,7 +85,14 @@
     height: fit-content;
     width: fit-content;
 }
-
+@keyframes sweepIn {
+    0% {
+        translate: -50mm;
+    }
+    100% {
+        translate: none;
+    }
+}
 .quest {
     background-color: rgba(0, 0, 0, 0.219);
     pointer-events: none;
@@ -96,6 +103,7 @@
     padding: 4px;
     white-space: pre-wrap;
     border: 1px solid rgb(110, 110, 110);
+    animation: sweepIn .25s linear forwards;
 }
 
 @keyframes fadeOut {
@@ -388,7 +396,6 @@
     z-index: 2000;
 }
 
-/* keyframes animate the overlay "shrinking" upward */
 @keyframes cooldownAnim {
     from {
         transform: scaleY(1);
@@ -403,5 +410,4 @@
     animation-name: cooldownAnim;
     animation-timing-function: linear;
     animation-fill-mode: forwards;
-    /* stay at final state (scaleY(0)) */
 }

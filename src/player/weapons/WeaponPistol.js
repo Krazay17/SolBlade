@@ -8,11 +8,11 @@ import { spawnParticles } from '../../actors/ParticleEmitter.js';
 import HitData from '../../core/HitData.js';
 
 export default class WeaponPistol extends Weapon {
-    constructor(actor, scene, isSpell = false) {
+    constructor(actor, game, isSpell = false) {
         super(actor, 'Pistol', 20, 50, 800, isSpell); // name, damage, range, cooldown
-        this.scene = scene;
+        this.game = game;
         soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');
-        this.meshTracer = new MeshTrace(this.scene);
+        this.meshTracer = new MeshTrace(this.game);
 
         MyEventEmitter.on('netFx', (data) => {
             if (data.type === 'pistolUse') {
@@ -56,7 +56,7 @@ export default class WeaponPistol extends Weapon {
             this.useFx(offSetPos, dir);
             MyEventEmitter.emit('fx', { type: 'pistolUse', pos: offSetPos, dir: dir });
 
-            this.meshTracer.multiLineTrace(cameraPos, dir, this.scene.pawnManager.hostiles, this.range, offSetPos, (hit) => {
+            this.meshTracer.multiLineTrace(cameraPos, dir, this.game.actorManager.hostiles, this.range, offSetPos, (hit) => {
                 const actor = hit.object.userData.owner;
                 if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
                     this.hitActors.add(actor);

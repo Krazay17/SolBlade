@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
 import * as Weapon from './weapons/index';
-import { tryUpdatePosition, netSocket } from '../core/NetManager';
+import { netSocket, tryUpdatePosition } from '../core/NetManager';
 import CameraFX from '../core/CameraFX';
 import PlayerMovement from './PlayerMovement';
 import DevMenu from '../ui/DevMenu';
@@ -10,23 +10,23 @@ import NamePlate from '../core/Nameplate';
 import Globals from '../utils/Globals';
 import soundPlayer from '../core/SoundPlayer';
 import Inventory from './Inventory';
-import GameScene from '../scenes/GameScene';
 import Pawn from '../actors/Pawn';
 import PlayerStateManager from './playerStates/PlayerStateManager';
 import HitData from '../core/HitData';
 
 export default class Player extends Pawn {
-    /**
-     * @param {GameScene} scene 
-     */
-    constructor(scene, data = {}) {
+    constructor(game, data = {}) {
         if (!data.isRemote) {
-            data.health = LocalData.health
-            data.name = LocalData.name
+            data.type = 'player';
+            data.health = LocalData.health;
+            data.name = LocalData.name;
         }
-        super(scene, data, 'knightGirl', .5, 1);
-        this.camera = Globals.camera;
+        super(game, data, 'knightGirl', .5, 1);
+        this.game = game;
+        this.tick = true;
 
+        this.world = game.world;
+        this.camera = Globals.camera;
         this.parry = false;
         this.energy = 100;
         this.dimmed = 0;
@@ -39,16 +39,16 @@ export default class Player extends Pawn {
 
         // Local Player setup
         if (!this.isRemote) {
+            this.tick = false
             this.input = Globals.input;
-            Globals.playerInfo.setActor(this);
 
             this.direction = new THREE.Vector3();
             this.tempVector = new THREE.Vector3();
 
             /**@type {Weapon.Weapon} */
-            this.weaponL = new Weapon.WeaponPistol(this, scene);
+            this.weaponL = new Weapon.WeaponPistol(this, game);
             /**@type {Weapon.Weapon} */
-            this.weaponR = new Weapon.WeaponSword(this, scene);
+            this.weaponR = new Weapon.WeaponSword(this, game);
             /**@type {Weapon.Weapon} */
             this.spell1 = null;
             /**@type {Weapon.Weapon} */
@@ -93,11 +93,23 @@ export default class Player extends Pawn {
     }
     async pickupCrown() {
         if (!this.crownMesh) {
-            this.crownMesh = await this.scene.meshManager.getMesh('crown', 0.4);
+            this.crownMesh = await this.game.meshManager.getMesh('crown', 0.4);
             this.crownMesh.position.set(0, 1.5, 0);
             this.crownMesh.scale.set(.4, .4, .4);
         }
         this.add(this.crownMesh);
+    }
+    setWorld(newWorld) {
+        this.world = newWorld;
+        this.solWorld = this.world.solWorld;
+        if (LocalData.solWorld !== this.solWorld) {
+            this.body.position = this.world.spawnPos;
+            this.body.velocity = { x: 0, y: 0, z: 0 };
+        }
+        LocalData.solWorld = this.solWorld
+        LocalData.save();
+        this.tick = true;
+        this.body.wakeUp();
     }
 
     dropCrown() {
@@ -110,13 +122,13 @@ export default class Player extends Pawn {
         const spellName = spell?.name || null;
         switch (spellName) {
             case 'Fireball':
-                spell = new Weapon.WeaponFireball(this, this.scene, true);
+                spell = new Weapon.WeaponFireball(this, this.game, true);
                 break;
             case 'Pistol':
-                spell = new Weapon.WeaponPistol(this, this.scene, true);
+                spell = new Weapon.WeaponPistol(this, this.game, true);
                 break;
             case 'Sword':
-                spell = new Weapon.WeaponSword(this, this.scene, true);
+                spell = new Weapon.WeaponSword(this, this.game, true);
                 break;
             default:
                 spell = null;
@@ -131,7 +143,7 @@ export default class Player extends Pawn {
     dropItem(item) {
         const { pos, dir } = this.getShootData();
         const dropPos = pos.add(dir.multiplyScalar(2));
-        this.scene.actorManager.spawnActor('item', { item, pos: dropPos }, false, true);
+        this.game.actorManager.spawnActor('item', { item, pos: dropPos }, false, true);
     }
     getShootData() {
         const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
@@ -155,6 +167,7 @@ export default class Player extends Pawn {
     }
 
     update(dt, time) {
+        if (!this.tick) return;
         super.update(dt, time);
         if (!this.body) return;
 
@@ -177,8 +190,8 @@ export default class Player extends Pawn {
 
         if (this.input.mice[0] && this.input.pointerLocked) {
             const direction = this.camera.getWorldDirection(new THREE.Vector3());
-            if (this.stateManager.activeState.canExit() && this.weaponL.canUse(time)) {
-                this.weaponL.use(performance.now(), this.position, direction);
+            if (this.stateManager.activeState.canExit() && this.weaponL?.canUse(time)) {
+                this.weaponL?.use(performance.now(), this.position, direction);
             }
         }
         if (this.input.mice[2] && this.input.pointerLocked) {
@@ -214,8 +227,8 @@ export default class Player extends Pawn {
         if (this.input.actionStates.blade) {
             this.tryEnterBlade();
         }
-        if (this.input.actionStates.goHome && this.scene.levelLoaded) {
-            this.scene.game.setScene('world1');
+        if (this.input.actionStates.goHome) {
+            this.game?.setWorld('world1');
         }
         if (this.input.keys['KeyF']) {
             const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
@@ -350,7 +363,7 @@ export default class Player extends Pawn {
     // only local
     unDie() {
         if (this.isRemote) return;
-        const spawnPoint = this.scene.getRespawnPoint();
+        let spawnPoint = this.world.getRespawnPoint();
         if (!spawnPoint) spawnPoint = { x: 0, y: 1, z: 0 };
         this.body.position = { x: spawnPoint.x, y: spawnPoint.y, z: spawnPoint.z };
         this.body.velocity = { x: 0, y: 0, z: 0 };

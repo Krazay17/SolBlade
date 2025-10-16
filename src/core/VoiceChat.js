@@ -18,6 +18,7 @@ export default class VoiceChat {
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
         this.localStream = null;
         this.peers = {}; // peerId -> RTCPeerConnection
+        this.voiceMap = {}
         this.voiceActive = false;
         this.gainNode = null;
         this.compressNode = null;
@@ -131,6 +132,10 @@ export default class VoiceChat {
 
     setScene(scene) {
         this.scene = scene;
+        if (!this.voiceMap) return;
+        for (const [id, v] of Object.entries(this.voiceMap)) {
+            v.gain.gain.value = 0;
+        }
     }
 
     createButton() {
@@ -254,7 +259,7 @@ export default class VoiceChat {
 
             // Gain node (per-voice volume)
             const gain = this.audioContext.createGain();
-            gain.gain.value = this.voicesVolume;
+            gain.gain.value = 0;
 
             // Optional panner for spatial audio
             const panner = this.audioContext.createPanner();

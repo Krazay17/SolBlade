@@ -1,5 +1,5 @@
 import Player from "../player/Player";
-import GameScene from "../scenes/GameScene";
+import Game from "../Game";
 import MyEventEmitter from "./MyEventEmitter";
 import QuestCrown from "./QuestCrown";
 import QuestPlayerKill from "./QuestPlayerKill";
@@ -10,9 +10,9 @@ const questRegister = {
 }
 
 export default class QuestManager {
-    constructor(scene, player) {
-        /**@type {GameScene} */
-        this.scene = scene
+    constructor(game, player) {
+        /**@type {Game} */
+        this.game = game;
         /**@type {Player} */
         this.player = player;
 
@@ -35,16 +35,16 @@ export default class QuestManager {
             }
         })
     }
-    removeQuest(questId) {
-        const quest = this.hasQuest(questId);
+    removeQuest(quest) {
+        quest = typeof quest === 'string' ? this.hasQuest(quest) : quest;
         if (quest) {
             quest.onExit();
             const index = this.quests.indexOf(quest);
             this.quests.splice(index, 1);
         }
     }
-    hasQuest(questId) {
-        return this.quests.find(q => q.questId === questId);
+    hasQuest(name) {
+        return this.quests.find(q => q.name === name);
     }
     update(dt, time) {
         for (const quest of this.quests) {
@@ -52,7 +52,7 @@ export default class QuestManager {
         }
     }
     addQuest(quest) {
-        const newQuest = new questRegister[quest](this.scene, this.player, this.ui, this.notificationUI, quest);
+        const newQuest = new questRegister[quest](this);
         if (!newQuest) return;
         newQuest.onEnter?.();
         this.quests.push(newQuest);

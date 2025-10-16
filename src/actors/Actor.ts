@@ -1,9 +1,10 @@
 import { Object3D, Quaternion, Vector3 } from "three";
-import GameScene from "../scenes/GameScene";
 import HitData from "../core/HitData";
 import MyEventEmitter from "../core/MyEventEmitter";
 import { generateUUID } from "three/src/math/MathUtils.js";
 import TouchData from "../core/TouchData";
+import Game from "../Game.js";
+import World from "../scenes/World.js";
 
 export interface ActorData {
     type?: string;
@@ -17,7 +18,10 @@ export interface ActorData {
 }
 
 export default class Actor extends Object3D {
-    scene: GameScene;
+    game: Game;
+    world: World;
+    solWorld: string;
+    team: string;
     data: any;
     actorType: string = '';
     replicate: boolean = false;
@@ -31,11 +35,13 @@ export default class Actor extends Object3D {
     lastHitData: HitData | null = null;
     _health: number = 100;
     targetPosition: Vector3 = new Vector3();
-    constructor(scene: GameScene, data: ActorData = {}) {
+    constructor(game: Game, data: ActorData = {}) {
         super();
         const {
             type = '',
             name = '',
+            solWorld = '',
+            team = 'A',
             pos = new Vector3(),
             rot = new Quaternion(),
             maxHealth = 100,
@@ -48,11 +54,14 @@ export default class Actor extends Object3D {
             active = true,
         } = data;
 
-        this.scene = scene;
+        this.game = game;
+        this.world = game.world;
         this.data = data;
 
         this.actorType = type
         this.name = name;
+        this.solWorld = solWorld;
+        this.team = team;
         this.position.copy(pos);
         this.setRotationFromQuaternion(rot);
         this.maxHealth = maxHealth;
@@ -66,7 +75,7 @@ export default class Actor extends Object3D {
 
         this.tempId = generateUUID();
 
-        this.scene.graphics.add(this);
+        this.game.graphics?.add(this);
 
         if (this.isRemote) {
             this.targetPosition = this.position.clone();
@@ -75,6 +84,8 @@ export default class Actor extends Object3D {
     serialize() {
         return {
             ...this.data,
+            solWorld: this.solWorld,
+            team: this.team,
             owner: this.owner?.netId,
             tempId: this.tempId,
             type: this.actorType,
@@ -118,8 +129,8 @@ export default class Actor extends Object3D {
     }
     destroy() {
         this.active = false
-        this.scene.graphics.remove(this);
-        this.scene.actorManager?.removeActor(this);
+        this.game.graphics?.remove(this);
+        this.game.actorManager?.removeActor(this);
         if (this.isRemote) return;
         MyEventEmitter.emit('destroyActor', this);
     }
@@ -127,7 +138,7 @@ export default class Actor extends Object3D {
         this.active = true;
         this.data = { ...data };
         if (data.pos) this.position.copy(data.pos);
-        this.scene.graphics.add(this);
+        this.game.graphics?.add(this);
         if (this.isRemote) return this;
         MyEventEmitter.emit('activateActor', { actor: this, data: this.data });
         return this;
@@ -138,7 +149,7 @@ export default class Actor extends Object3D {
         console.log(data);
     }
     applyHit(data: HitData, health: number) {
-        this.health = health;
+        this.health = health ?? this.health + data.amount;
         if (data) this.lastHitData = data;
         if (this.health <= 0) this.die(this.lastHitData);
     }
@@ -149,7 +160,7 @@ export default class Actor extends Object3D {
     }
     die(data: HitData | null) {
         this.active = false;
-        this.scene.graphics.remove(this);
+        this.game.graphics?.remove(this);
         if (this.isRemote) return;
         MyEventEmitter.emit('actorDie', data || new HitData({ target: this }));
     }
@@ -162,5 +173,8 @@ export default class Actor extends Object3D {
     healthChange(health: number) { }
     get health() {
         return this._health;
+    }
+    get scene() {
+        return this.game;
     }
 }

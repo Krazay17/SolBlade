@@ -1,4 +1,4 @@
-import { netSocket } from "../core/NetManager";
+import MyEventEmitter from "../core/MyEventEmitter";
 import Pickup from "./Pickup";
 
 export default class CrownPickup extends Pickup {
@@ -9,6 +9,6 @@ export default class CrownPickup extends Pickup {
     hit(){}
     applyTouch(data) {
         super.applyTouch(data);
-        netSocket.emit('crownPickup', data.dealer.netId);
+        MyEventEmitter.emit('crownPickup');
     }
 }

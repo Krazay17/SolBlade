@@ -2,12 +2,12 @@ import { io } from "socket.io-client";
 import MyEventEmitter from "./MyEventEmitter";
 import { Vector3 } from "three";
 import LocalData from "./LocalData";
-import GameScene from "../scenes/GameScene";
 import HitData from "./HitData";
 import Actor from "../actors/Actor";
 import VoiceChat from './VoiceChat';
 import TouchData from "./TouchData";
 import soundPlayer from "./SoundPlayer";
+import Globals from "../utils/Globals";
 
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
@@ -20,7 +20,6 @@ const socket = io(serverURL, {
 });
 export const netSocket = socket;
 
-/**@type {GameScene} */
 let scene = null;
 export let netPlayers = {};
 let player = null;
@@ -30,6 +29,9 @@ let voiceChat;
 
 socket.on("connect", () => {
     console.log(`I connected with id: ${socket.id}`);
+    playerId = socket.id;
+    player = Globals.player;
+    Globals.player.setNetId(socket.id);
     if (scene) {
         bindSocketEvents();
     }
@@ -38,18 +40,13 @@ socket.on("connect", () => {
 export function setNetScene(newScene) {
     scene = newScene;
     bindSocketEvents();
-    voiceChat = new VoiceChat();
-    voiceChat.setScene(newScene);
-    voiceChat.createButton();
+    voiceChat.setScene(scene);
+    socket.emit('newWorld', scene.solWorld);
 }
 
 function bindSocketEvents() {
     if (socketBound) return;
     socketBound = true;
-    if (!scene) return;
-    player = scene.player;
-
-    socket.emit('joinGame', player.serialize());
 
     socket.on('disconnect', () => {
         MyEventEmitter.emit('disconnect');
@@ -57,33 +54,38 @@ function bindSocketEvents() {
     });
 
     const bindGameplay = () => {
-        socket.on('currentPlayers', (players) => {
-            for (const player of Object.values(players)) {
-                const playerData = Actor.deserialize(player);
-                const { netId } = playerData;
-                if (netId === playerId) continue;
-                const newPlayer = scene.pawnManager.spawnPlayer(playerData, true);
-                netPlayers[netId] = newPlayer
-                MyEventEmitter.emit('playerJoined', newPlayer)
-            }
-        });
-        socket.on('newPlayer', (player) => {
-            const playerData = Actor.deserialize(player);
-            const { netId } = playerData;
-            if (netId === playerId) return;
-            const newPlayer = scene.pawnManager.spawnPlayer(playerData, true);
-            netPlayers[netId] = newPlayer
-            MyEventEmitter.emit('playerJoined', newPlayer)
-        });
+        // socket.on('currentPlayers', (players) => {
+        //     for (const player of Object.values(players)) {
+        //         const playerData = Actor.deserialize(player);
+        //         const { netId } = playerData;
+        //         if (netId === playerId) continue;
+        //         const newPlayer = scene.pawnManager.spawnPlayer(playerData, true);
+        //         netPlayers[netId] = newPlayer
+        //         MyEventEmitter.emit('playerJoined', newPlayer)
+        //     }
+        // });
+        // socket.on('newPlayer', (player) => {
+        //     const playerData = Actor.deserialize(player);
+        //     const { netId } = playerData;
+        //     if (netId === playerId) return;
+        //     const newPlayer = scene.pawnManager.spawnPlayer(playerData, true);
+        //     netPlayers[netId] = newPlayer
+        //     MyEventEmitter.emit('playerJoined', newPlayer)
+        // });
+        // socket.on('playerDisconnected', (netId) => {
+        //     if (netId === playerId) return;
+        //     if (netPlayers[netId]) {
+        //         const player = scene.pawnManager.getPawnById(netId);
+        //         scene.pawnManager.removePawn(player);
+        //         MyEventEmitter.emit('playerLeft', player);
+        //         delete netPlayers[netId];
+        //     }
+        // });
         socket.on('playerDisconnected', (netId) => {
-            if (netId === playerId) return;
-            if (netPlayers[netId]) {
-                const player = scene.pawnManager.getPawnById(netId);
-                scene.pawnManager.removePawn(player);
-                MyEventEmitter.emit('playerLeft', player);
-                delete netPlayers[netId];
-            }
-        });
+            const player = netPlayers[netId];
+            if (!player) return;
+            player.destroy();
+        })
         socket.on('playerPositionUpdate', ({ id, data }) => {
             if (netPlayers[id]) {
                 netPlayers[id].targetPosition.copy(data.pos);
@@ -128,23 +130,28 @@ function bindSocketEvents() {
         socket.on('currentActors', (data) => {
             for (const a of data) {
                 const { type, tempId, netId } = a
+                if (netId === playerId) continue;
                 const localActor = scene.actorManager.actors.find(a => a.tempId === tempId);
                 if (localActor) {
                     localActor.setNetId(netId);
                 } else {
                     const actorData = Actor.deserialize(a, (id) => scene.actorManager.getActorById(id));
-                    scene.actorManager.spawnActor(type, actorData, true, false);
+                    const newActor = scene.actorManager.spawnActor(type, actorData, true, false);
+                    if (type === 'player') netPlayers[netId] = newActor;
                 }
             }
         });
         socket.on('newActor', (data) => {
-            const { type, tempId, netId } = data
-            const existingActor = scene.actorManager.actors.find(a => a.tempId === tempId);
+            const { type, tempId, netId, solWorld } = data
+            if (netId === playerId) return;
+            const existingActor = scene.actorManager.actors.find(a => a.tempId === tempId) || scene.actorManager.actors.find(a => (a.netId === netId) && a.active);
             if (existingActor) {
                 existingActor.setNetId(netId);
             } else {
+                if (solWorld !== scene.solWorld) return;
                 const actorData = Actor.deserialize(data, (id) => scene.actorManager.getActorById(id));
-                scene.actorManager.spawnActor(type, actorData, true, false);
+                const newActor = scene.actorManager.spawnActor(type, actorData, true, false);
+                if (type === 'player') netPlayers[netId] = newActor;
             }
         });
         socket.on('actorHit', ({ data, health }) => {
@@ -162,14 +169,13 @@ function bindSocketEvents() {
             }
         });
         socket.on('actorDie', (data) => {
-            data = HitData.deserialize(data, (id) => scene.actorManager.getActorById(id));
+            data = HitData.deserialize(data, (id) => scene.getActorById(id));
             const { dealer, target } = data;
-            if (target) target.die(data);
+            if (target) target.die?.(data);
         });
         socket.on('playerDied', data => {
-            data = HitData.deserialize(data, (id) => scene.actorManager.getActorById(id));
-            data.questId = 'playerKill';
-            MyEventEmitter.emit('questEvent', data);
+            data = HitData.deserialize(data, (id) => scene.getActorById(id));
+            MyEventEmitter.emit('playerDied', data);
         })
         socket.on('destroyActor', (id) => {
             const actor = scene.actorManager.getActorById(id);
@@ -189,20 +195,45 @@ function bindSocketEvents() {
                 player.setName?.(name);
                 MyEventEmitter.emit('playerNameUpdate', ({ player, name }));
             }
+        });
+        socket.on('newWorld', player => {
+            const data = Actor.deserialize(player, (id) => scene.getActorById(id));
+            const { type, netId, solWorld } = data;
+            const actor = scene.getActorById(netId);
+            if (actor && (scene.solWorld !== solWorld)) {
+                voiceChat.voiceMap[netId].gain.gain.value = 0;
+                actor.destroy();
+            }
+            if (!actor && (scene.solWorld === solWorld)) {
+                netPlayers[netId] = scene.actorManager.spawnActor(type, data, true, false);
+            }
         })
 
     }
-    socket.on('joinAck', (data) => {
-        playerId = data.netId;
-        player.setNetId(playerId);
-        netPlayers[playerId] = player;
-        bindGameplay();
-        socket.emit('bindGameplay');
-        MyEventEmitter.emit('joinGame', player);
-    });
+    bindGameplay();
 
+    voiceChat = new VoiceChat();
+    voiceChat.createButton();
+
+    socket.emit('joinGame', Globals.player.serialize());
+
+    // socket.on('joinAck', (data) => {
+    //     // playerId = data.netId;
+    //     // player.setNetId(playerId);
+    //     // netPlayers[playerId] = player;
+    //     bindGameplay();
+    //     socket.emit('bindGameplay');
+    //     //socket.emit('requestActors', game.solWorld);
+    //     MyEventEmitter.emit('joinGame', player);
+    // });
 }
 
+MyEventEmitter.on('enterWorld', world => {
+    socket.emit('enterWorld', world);
+})
+MyEventEmitter.on('leaveWorld', (world) => {
+    socket.emit('leaveWorld', world);
+})
 MyEventEmitter.on('playerNameChange', (data) => {
     socket.emit('playerNameChange', data);
 })
@@ -210,17 +241,19 @@ MyEventEmitter.on('actorStateUpdate', data => {
     socket.emit('actorStateUpdate', data?.serialize?.());
 });
 MyEventEmitter.on('actorDie', (data) => {
-    socket.emit('actorDie', data?.serialize?.() || data);
-});
-MyEventEmitter.on('actorTouch',
-    /**@param {TouchData} data */
-    (data) => {
-        if (socket.connected) {
-            socket.emit('actorTouch', data.serialize());
-        } else {
-            data.target.applyTouch(data.dealer);
-        }
+    if (socket.connected) {
+        socket.emit('actorDie', data?.serialize?.() || data);
+    } else {
+        data.target.die(data);
     }
+});
+MyEventEmitter.on('actorTouch', (/**@type {TouchData}*/data) => {
+    if (socket.connected) {
+        socket.emit('actorTouch', data.serialize());
+    } else {
+        data.target.applyTouch(data.dealer);
+    }
+}
 );
 MyEventEmitter.on('destroyActor', (data) => {
     socket.emit('destroyActor', data.netId);
@@ -255,14 +288,16 @@ MyEventEmitter.on('takeHealing', (data) => {
 MyEventEmitter.on('fx', (data) => {
     socket.emit('fx', data);
 });
-MyEventEmitter.on('pickupCrown', () => {
-    socket.emit('pickupCrown');
+MyEventEmitter.on('crownPickup', () => {
+    socket.emit('crownPickup');
 });
 MyEventEmitter.on('crownGameStart', () => {
     socket.emit('crownGameStart');
 });
 MyEventEmitter.on('iDied', (data) => {
-    netSocket.emit('iDied', data?.serialize?.() || { dealer: { name: 'The Void' }, target: player.netId });
+    if (socket.connected) {
+        netSocket.emit('iDied', data?.serialize?.() || { dealer: { name: 'The Void' }, target: Globals.player.netId });
+    }
 });
 MyEventEmitter.on('bootPlayer', (targetPlayer) => {
     if (LocalData.name !== 'Krazzay') return;
@@ -300,6 +335,6 @@ export function tryUpdatePosition({ pos, rot }) {
         || lastSentRotation !== rot) {
         lastSentPosition.copy(pos);
         lastSentRotation = rot;
-        socket.emit("playerPositionSend", { pos: lastSentPosition, rot: lastSentRotation });
+        socket.emit('playerPositionSend', { pos: lastSentPosition, rot: lastSentRotation });
     }
 }

@@ -1,19 +1,22 @@
 import { SkinnedMesh, Vector3 } from "three";
 import Enemy from "../actors/Enemy";
 import Pawn from "../actors/Pawn";
-import GameScene from "../scenes/GameScene";
+import World from "../scenes/World";
 import AIMovement from "./AIMovement";
 
 type Team = 'A' | 'B' | 'C';
 
 export default class PawnManager {
-    scene: GameScene;
+    scene: World;
     player: Pawn | null = null;
     _players: Pawn[] = [];
     allPawns: Pawn[] = [];
     teamMap: Map<Pawn, Team> = new Map();
-    constructor(scene: GameScene) {
+    constructor(scene: World) {
         this.scene = scene;
+    }
+    destroy() {
+        
     }
     spawnEnemy(type: string, pos: Vector3) {
         let enemy: Enemy | null = null;

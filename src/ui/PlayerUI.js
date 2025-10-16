@@ -4,13 +4,13 @@ import { netSocket } from "../core/NetManager.js";
 import Globals from "../utils/Globals.js";
 
 export default class PlayerInfo {
-    constructor() {
+    constructor(player) {
         this.name = LocalData.name || "Player";
         this.money = LocalData.money || 0;
         this.health = LocalData.health || 100;
         this.energy = 100;
         this.partyFrame = null;
-        this.actor = null;
+        this.player = player;
 
         this.createUI();
     }
@@ -49,7 +49,7 @@ export default class PlayerInfo {
         healthBar.id = 'health-bar';
         healthBar.style.width = `${this.health}%`;
         MyEventEmitter.on('playerHealthChange', ({ player, health }) => {
-            if(player !== Globals.player) return;
+            if (player !== Globals.player) return;
             this.health = health;
             healthBar.style.width = `${this.health}%`;
         });
@@ -64,9 +64,9 @@ export default class PlayerInfo {
         MyEventEmitter.on('updateEnergy', (newEnergy) => {
             this.energy = newEnergy;
             energyBar.style.width = `${this.energy}%`;
-            if (this.energy < this.actor.dashCost || this.energy < 35 || this.actor.getDimmed()) {
+            if (this.energy < this.player.dashCost || this.energy < 35 || this.player.getDimmed()) {
                 energyBar.style.backgroundColor = 'rgba(255, 81, 0, 1)';
-            } else if (this.energy < this.actor.doubleJumpCost || this.energy < 50) {
+            } else if (this.energy < this.player.doubleJumpCost || this.energy < 50) {
                 energyBar.style.backgroundColor = 'rgba(255, 145, 0, 1)';
             } else {
                 energyBar.style.backgroundColor = 'rgba(255, 255, 0, 1)';
@@ -74,9 +74,5 @@ export default class PlayerInfo {
         });
         energyBarContainer.appendChild(energyBar);
         container.appendChild(energyBarContainer);
-    }
-
-    setActor(actor) {
-        this.actor = actor;
     }
 }

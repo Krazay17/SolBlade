@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import LocalData from "./LocalData";
 import MyEventEmitter from "./MyEventEmitter";
 import Globals from '../utils/Globals';
-import { netSocket } from './NetManager';
 
 class SoundPlayer {
     constructor() {
@@ -18,8 +17,6 @@ class SoundPlayer {
         this.musicPlaying = null;
         this.posSoundPools = new Map();
         this.threeAudioLoader = new THREE.AudioLoader();
-
-        console.log(this);
     }
 
     init() {

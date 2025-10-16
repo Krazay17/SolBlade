@@ -1,16 +1,9 @@
-import { Box3, BufferGeometry, Line, LineBasicMaterial, Mesh, Object3D, Raycaster, Sphere, Vector3 } from "three";
-import Globals from "../utils/Globals";
-import { Capsule } from "three/examples/jsm/Addons.js";
-import { MeshBVH } from "three-mesh-bvh";
-import { MeshBVHHelper } from "three-mesh-bvh";
-import * as THREE from 'three';
-import GameScene from "../scenes/GameScene";
+import { Box3, Object3D, Raycaster, Sphere, Vector3 } from "three";
 import Pawn from "../actors/Pawn";
 
 export default class MeshTrace {
-    constructor(scene) {
-        /**@type {GameScene} */
-        this.scene = scene;
+    constructor(game) {
+        this.game = game;
         this.mapWalls = null;
         this.raycaster = new Raycaster();
         this.raycaster2 = new Raycaster();
@@ -30,13 +23,13 @@ export default class MeshTrace {
         let savedDir = direction instanceof Object3D ? direction.position.clone().sub(savedStart).normalize() : direction.clone().normalize();
         let hits = [];
 
-        // const actors = this.scene.getOtherActors().filter(a => {
+        // const actors = this.game.getOtherActors().filter(a => {
         //     const direction = a.position.clone().sub(start);
         //     direction.normalize();
         //     return savedDir.dot(direction) > .33 && a.position.distanceTo(start) < length && !a.isDead;
         // });
         // if (actors.length === 0) return;
-        // this.actorMeshes = this.scene.getOtherActorMeshes();
+        // this.actorMeshes = this.game.getOtherActorMeshes();
         // if (this.actorMeshes.length === 0) return;
 
         this.raycaster.set(savedStart, savedDir);
@@ -72,7 +65,7 @@ export default class MeshTrace {
             const dot = targetPos.sub(actorEyes).normalize().dot(dir);
             return dot > 0.5;
         });
-        let hostileMeshes = hostiles.map(pawn => pawn.getMeshBody()).filter(Boolean);
+        let hostileMeshes = hostiles.map(pawn => pawn?.getMeshBody?.()).filter(Boolean);
 
         const right = this.tempVector.crossVectors(this.worldUp, savedDir).normalize();
         if (right.length() === 0) right.set(1, 0, 0);
@@ -106,7 +99,7 @@ export default class MeshTrace {
                 this.raycaster2.set(actorEyes, losDir);
                 this.raycaster2.far = actorEyes.distanceTo(hit.point);
 
-                const losHit = this.raycaster2.intersectObject(this.scene.getMergedLevel());
+                const losHit = this.raycaster2.intersectObject(this.game.levelLOS);
                 if (losHit[0] && losHit[0].distance < hit.distance) return;
                 callback(hit);
             }
