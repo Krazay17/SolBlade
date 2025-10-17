@@ -20,6 +20,7 @@ const socket = io(serverURL, {
 });
 export const netSocket = socket;
 
+let game;
 let scene = null;
 export let netPlayers = {};
 let player = null;
@@ -27,10 +28,12 @@ let playerId = null;
 let socketBound = false;
 let voiceChat;
 
+
 socket.on("connect", () => {
     console.log(`I connected with id: ${socket.id}`);
     playerId = socket.id;
     player = Globals.player;
+    netPlayers[socket.id] = player;
     Globals.player.setNetId(socket.id);
     if (scene) {
         bindSocketEvents();

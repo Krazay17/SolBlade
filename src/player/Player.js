@@ -306,6 +306,7 @@ export default class Player extends Pawn {
     }
 
     parried(attacker) {
+        console.log(attacker);
         const pos = attacker?.position ?? attacker ?? new THREE.Vector3(0, 0, 0);
         soundPlayer.playPosAudio('parry', this.position, 'assets/Parry.mp3');
         this.animationManager?.changeTimeScale(0, 600);
