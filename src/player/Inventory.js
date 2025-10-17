@@ -1,4 +1,4 @@
-import Item from "../core/Item";
+import Item, { makeRandomItem } from "../core/Item";
 import LocalData from "../core/LocalData";
 import MyEventEmitter from "../core/MyEventEmitter";
 
@@ -68,6 +68,12 @@ export default class Inventory {
         slot.className = 'inventory-slot';
         return slot;
     }
+    aquireItem(item) {
+        LocalData.addItem(item);
+        LocalData.save();
+        this.addItem(item);
+        this.pickupAnim(item);
+    }
     addItem(item) {
         this.items.push(item);
 
@@ -107,7 +113,7 @@ export default class Inventory {
 
             if (originalParent.classList.contains("spell-slot")) {
                 originalParent.innerHTML = "";
-                actor.setSpell(originalParent.id, null);
+                this.actor.setSpell(originalParent.id, null);
             } else {
                 originalParent.innerHTML = "";
             }
@@ -133,6 +139,21 @@ export default class Inventory {
         el.appendChild(label);
 
         return el;
+    }
+    pickupAnim(item) {
+        const el = document.createElement('div');
+        el.className = 'item-glowbox';
+
+        const icon = document.createElement('div');
+        icon.className = 'item-icon';
+        icon.style.backgroundImage = `url(${item.imgUrl})`;
+
+        el.appendChild(icon);
+
+        document.body.appendChild(el);
+        setTimeout(() => {
+            el.remove();
+        }, 2000);
     }
     createInventoryUI() {
         this.inventoryUI = document.createElement('div');
@@ -275,5 +296,13 @@ export default class Inventory {
                 return;
             }
         });
+    }
+    addCards(amount) {
+        let i = 0;
+        const cardLoop = setInterval(() => {
+            this.aquireItem(makeRandomItem());
+            i++;
+            if (i >= amount) clearInterval(cardLoop);
+        }, 500)
     }
 }

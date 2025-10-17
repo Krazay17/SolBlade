@@ -25,17 +25,8 @@ export default class QuestManager {
         document.body.appendChild(this.notificationUI);
 
         this.quests = [];
-
-        MyEventEmitter.on('questEvent', data => {
-            const quest = this.quests.filter(q => q.questId === data.questId);
-            if (quest) {
-                for (const q of quest) {
-                    q.updateQuest(data);
-                }
-            }
-        })
     }
-    removeQuest(quest) {
+    remove(quest) {
         quest = typeof quest === 'string' ? this.hasQuest(quest) : quest;
         if (quest) {
             quest.onExit();
@@ -52,7 +43,7 @@ export default class QuestManager {
         }
     }
     addQuest(quest) {
-        const newQuest = new questRegister[quest](this);
+        const newQuest = typeof quest === 'string' ? new questRegister[quest](this.game, this) : quest;
         if (!newQuest) return;
         newQuest.onEnter?.();
         this.quests.push(newQuest);

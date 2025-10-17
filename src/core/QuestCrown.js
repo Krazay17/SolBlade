@@ -3,8 +3,8 @@ import { netSocket } from "./NetManager";
 import Quest from "./Quest";
 
 export default class QuestCrown extends Quest {
-    constructor(manager) {
-        super(manager, {
+    constructor(game, manager) {
+        super(game, manager, {
             title: 'Hold the Crown',
             name: 'crown',
         });
@@ -102,7 +102,6 @@ export default class QuestCrown extends Quest {
         this.text = questText;
     }
     update() {
-        if (this.manager.game.solWorld !== 'world2') this.manager.removeQuest(this)
-        //if (this.manager.player.position.distanceToSquared({ x: 0, y: 10, z: 0 }) > 60 ** 2) this.manager.removeQuest(this)
+        if (this.manager.game.solWorld !== 'world2') this.manager.remove(this)
     }
 }

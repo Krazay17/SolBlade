@@ -242,7 +242,7 @@ export default class World {
           this.worldColliders.push(rBody);
 
           const edges = new THREE.EdgesGeometry(child.geometry, 35);
-          const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x888888 }));
+          const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
           child.add(line);
           child.material.dithering = true;
 

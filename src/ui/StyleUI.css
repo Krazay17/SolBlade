@@ -68,7 +68,7 @@
     flex-direction: column;
     width: fit-content;
     height: fit-content;
-    border: 2mm ridge rgb(255, 230, 0) ;
+    border: 2mm ridge rgb(255, 230, 0);
     padding: 2px;
     z-index: 1001;
     background-color: rgba(0, 0, 0, 0.5);
@@ -85,14 +85,17 @@
     height: fit-content;
     width: fit-content;
 }
+
 @keyframes sweepIn {
     0% {
         translate: -50mm;
     }
+
     100% {
         translate: none;
     }
 }
+
 .quest {
     background-color: rgba(0, 0, 0, 0.219);
     pointer-events: none;
@@ -124,6 +127,47 @@
     text-wrap: inherit;
     opacity: 1;
     animation: fadeOut 6s ease-in-out forwards;
+}
+
+@keyframes flash {
+    0% {
+        background-color: rgba(255, 255, 255, 0);
+    }
+
+    100% {
+        background-color: rgb(0, 255, 55);
+    }
+}
+
+@keyframes flyoff {
+    0% {
+        translate: none;
+    }
+    80% {
+        translate: 30mm;
+    }
+
+    100% {
+        translate: 200mm 150mm;
+    }
+
+}
+
+.item-glowbox {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 44mm;
+    width: 30mm;
+    padding: 2mm;
+    mask-image: url('assets/cardGlow.png');
+    mask-size: cover;
+    mask-repeat: no-repeat;
+    background-blend-mode: screen;
+    background-size: contain;
+    animation:
+        flash 0.2s alternate 11,
+        flyoff 2.1s ease-out;
 }
 
 .quest-blue {

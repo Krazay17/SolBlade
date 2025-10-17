@@ -21,6 +21,7 @@ import QuestManager from './core/QuestManager';
 import { setNetScene } from './core/NetManager';
 import Player from './player/Player';
 import LightManager from './core/LightManager';
+import Inventory from './player/Inventory';
 
 await RAPIER.init();
 
@@ -83,6 +84,7 @@ export default class Game {
     Globals.player = this.player;
     this.crosshair = new Crosshair(this.graphicsWorld);
     this.playerInfo = new PlayerInfo(this.player);
+    this.inventory = new Inventory(this.player);
     Globals.playerInfo = this.playerInfo;
     this.partyFrame = new PartyFrame();
     this.questManager = new QuestManager(this, this.player);

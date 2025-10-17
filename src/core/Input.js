@@ -144,7 +144,7 @@ export default class Input {
     addButton('KeyUnpressed', 'Space', 'Jump', 2, 6, '140px');
     addButton('KeyUnpressed', 'KeyC', 'Inventory', 1, 7);
     addButton('KeyUnpressed', 'KeyB', 'Menu', 1, 6);
-    addButton('KeyUnpressed', 'KeyT', 'Pause', 1, 5);
+    addButton('KeyUnpressed', 'KeyT', 'Home', 1, 5);
     addButton('KeyUnpressed', 'KeyR', 'Respawn', 1, 4);
   };
 }

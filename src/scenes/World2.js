@@ -12,7 +12,7 @@ export default class World2 extends World {
         if (dist < 60 ** 2) {
             if (!this.questManager.hasQuest('crown')) this.questManager.addQuest('crown')
         } else {
-            if (this.questManager.hasQuest('crown')) this.questManager.removeQuest('crown');
+            if (this.questManager.hasQuest('crown')) this.questManager.remove('crown');
         }
     }
 }

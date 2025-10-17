@@ -1,8 +1,5 @@
 import { makeItem, makeRandomItem } from "../core/Item";
-import LocalData from "../core/LocalData";
 import TouchData from "../core/TouchData";
-import Inventory from "../player/Inventory";
-import Player from "../player/Player";
 import World from "../scenes/World";
 import Pickup from "./Pickup";
 import * as THREE from 'three';
@@ -62,15 +59,7 @@ export default class ItemPickup extends Pickup {
         })
     }
     applyTouch(data: TouchData): void {
-        const dealer = data.dealer as Player;
-        if (dealer) {
-            const inv: Inventory | undefined = dealer.inventory;
-            if (inv) {
-                inv.addItem(this.itemData);
-                LocalData.addItem(this.itemData);
-                LocalData.save();
-            }
-        }
+        this.game.inventory.aquireItem(this.itemData);
         super.applyTouch(data);
     }
     update(dt: number, time: number) {

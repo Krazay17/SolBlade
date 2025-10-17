@@ -9,7 +9,6 @@ import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
 import Globals from '../utils/Globals';
 import soundPlayer from '../core/SoundPlayer';
-import Inventory from './Inventory';
 import Pawn from '../actors/Pawn';
 import PlayerStateManager from './playerStates/PlayerStateManager';
 import HitData from '../core/HitData';
@@ -57,8 +56,6 @@ export default class Player extends Pawn {
             this.spell3 = null;
             /**@type {Weapon.Weapon} */
             this.spell4 = null;
-
-            this.inventory = new Inventory(this);
 
             this.cameraArm = new THREE.Object3D();
             this.cameraArm.position.set(.333, .666, -.333);

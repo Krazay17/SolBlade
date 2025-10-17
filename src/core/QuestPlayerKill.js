@@ -2,26 +2,37 @@ import MyEventEmitter from "./MyEventEmitter";
 import Quest from "./Quest";
 
 export default class QuestPlayerKill extends Quest {
-    constructor(manager) {
-        super(manager, {
+    constructor(game, manager) {
+        super(game, manager, {
             title: 'Kill players',
             name: 'playerKill',
         })
     }
     onEnter() {
         this.killCount = 0;
+        this.requirement = 10;
         this.questTitle = 'Kill players'
-        this.text = '0/10';
-        MyEventEmitter.on('playerDied', this.updateQuest.bind(this));
+        this.text = `0/${this.requirement}`;
+        this.bindEvent('playerDied', this.updateQuest);
     }
     onExit() {
-        MyEventEmitter.off('playerDied', this.updateQuest.bind(this));
+        this.unbindEvent('playerDied');
+        super.onExit();
+    }
+    completeQuest() {
+        this.manager.remove(this);
+        this.setNotification('Kill players complete!');
+        this.game.inventory.addCards(5);
+        this.manager.addQuest('playerKill');
     }
     updateQuest(data) {
         if (data.dealer === this.player) {
             this.killCount++;
-            this.text = `${this.killCount}/10`;
-            this.setNotification(`${data.target.name} slain! ${this.killCount}/10`);
+            this.text = `${this.killCount}/${this.requirement}`;
+            this.setNotification(`${data.target.name} slain! ${this.killCount}/${this.requirement}`);
+        }
+        if(this.killCount >= this.requirement) {
+            this.completeQuest();
         }
     }
 }

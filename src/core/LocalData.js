@@ -1,6 +1,6 @@
 import MyEventEmitter from "./MyEventEmitter";
 
-const CURRENT_VERSION = 0.079;
+const CURRENT_VERSION = 0.080;
 export default {
     version: CURRENT_VERSION,
     name: "Player",
@@ -72,7 +72,7 @@ export default {
                     micVolume: parsed.micVolume,
                     voicesVolume: parsed.voicesVolume,
                     flags: parsed.flags,
-                    items: parsed.items,
+                    //items: parsed.items,
                 });
             return;
         }
