@@ -148,7 +148,7 @@
     }
 
     100% {
-        translate: 200mm 150mm;
+        translate: 60vw 100vh;
     }
 
 }
@@ -156,7 +156,7 @@
 .item-glowbox {
     position: absolute;
     top: 0;
-    left: 50%;
+    left: 50vw;
     height: 44mm;
     width: 30mm;
     padding: 2mm;
