@@ -55,7 +55,6 @@ export default class MeshManager {
                 rotation = 0;
                 break;
             default:
-                console.log('Initializing default properties');
                 break;
         }
         return { offset, rotation, scale };
@@ -78,7 +77,6 @@ export default class MeshManager {
             return this.skinCache[skinName];
         }
         const url = modelRegister.get(skinName);
-        console.log(url);
         return new Promise((resolve, reject) => {
             this.loader.load(url, (gltf) => {
                 const model = gltf.scene;

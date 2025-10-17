@@ -94,7 +94,6 @@ export default class Game {
 
     this.worldReady = () => {
       this.player.setWorld(this.world);
-      console.log(this.world.map);
       this.solRender.outlineObject = this.world.map;
     }
     this.setWorld(LocalData.solWorld || 'world2');

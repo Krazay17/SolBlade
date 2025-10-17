@@ -62,7 +62,10 @@ export default class PartyFrame {
     }
 
     removePlayer(player) {
-        this.container.removeChild(this.players.get(player));
+        if (!player) return;
+        const el = this.players.get(player)
+        if(!el) return;
+        this.container.removeChild(el);
         this.players.delete(player);
     }
 

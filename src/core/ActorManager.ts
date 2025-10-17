@@ -68,6 +68,8 @@ export default class ActorManager {
             } else {
                 MyEventEmitter.emit('newActor', actor.serialize());
             }
+        } else if (type === 'player') {
+            MyEventEmitter.emit('playerJoined', actor);
         }
         return actor;
     }

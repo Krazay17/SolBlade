@@ -160,7 +160,7 @@
     height: 44mm;
     width: 30mm;
     padding: 2mm;
-    mask-image: url('public/assets/cardGlow.png');
+    mask-image: url('/assets/cardGlow.png');
     mask-size: cover;
     mask-repeat: no-repeat;
     background-blend-mode: screen;

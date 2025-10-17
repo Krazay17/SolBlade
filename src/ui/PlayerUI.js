@@ -9,7 +9,6 @@ export default class PlayerInfo {
         this.money = LocalData.money || 0;
         this.health = LocalData.health || 100;
         this.energy = 100;
-        this.partyFrame = null;
         this.player = player;
 
         this.createUI();
