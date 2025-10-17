@@ -66,7 +66,7 @@ export default class Pawn extends Actor {
             if (this.position.distanceToSquared(this.targetPosition) > 2) {
                 this.position.copy(this.targetPosition);
             } else {
-                this.position.lerp(this.targetPosition, 120 * dt);
+                this.position.lerp(this.targetPosition, 80 * dt);
             }
             if (Math.abs(this.rotation.y - this.targetRotation) > 5) {
                 this.rotation.y = this.targetRotation;
