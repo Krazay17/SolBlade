@@ -166,7 +166,7 @@ export default class Game {
   worldLight() {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    const dirLight = new THREE.DirectionalLight(0xffeeee, .77);
+    const dirLight = new THREE.DirectionalLight(0xffeeee, .9);
 
     dirLight.position.set(50, 100, 50);
     const target = new THREE.Vector3().addVectors(dirLight.position, new THREE.Vector3(1, -1, 1).normalize())
@@ -187,7 +187,7 @@ export default class Game {
     dirLight.castShadow = true;
     this.graphicsWorld.add(dirLight);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, .2);
+    const ambientLight = new THREE.AmbientLight(0xffffff, .5);
     this.graphicsWorld.add(ambientLight);
 
     // const rimLight = new THREE.DirectionalLight(0xffffff, 1);
