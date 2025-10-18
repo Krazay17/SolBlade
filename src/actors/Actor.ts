@@ -169,6 +169,7 @@ export default class Actor extends Object3D {
         this.onDie(data);
     }
     onDie(data: any) {
+        this.applyDestroy();
     }
     destroy() {
         this.applyDestroy();

@@ -22,8 +22,8 @@ export default class ProjectileFireball extends Projectile {
             const sizeDelta = 50 * dt;
             this.scale.add({ x: sizeDelta, y: sizeDelta, z: sizeDelta })
             if (this.scale.x > 8) {
-                this.applyDestroy();
                 this.explode = false;
+                this.destroy();
             }
         }
     }

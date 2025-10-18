@@ -118,7 +118,13 @@ export default class Game {
     });
     MyEventEmitter.on('world3', () => {
       this.setWorld('world3');
-    })
+    });
+    window.addEventListener('focus', () => {
+      this.running = true;
+    });
+    window.addEventListener('mousedown', () => {
+      this.running = true;
+    });
   }
   setWorld(world) {
     const newWorld = new worldRegistry[world](this);
@@ -136,9 +142,16 @@ export default class Game {
   start() {
     requestAnimationFrame(this.loop.bind(this));
   }
+  handleSleep() {
+    this.running = false;
+  }
   loop(time) {
     const dt = (time - this.lastTime) / 1000;
     this.lastTime = time;
+
+    if (dt > 1) {
+      this.handleSleep();
+    }
 
     if (this.running && this.world) {
       MyEventEmitter.emit('preUpdate', dt, time);

@@ -3,19 +3,16 @@ import Actor from "../actors/Actor";
 export default class TouchData {
     dealer: Actor;
     target: Actor;
-    die: boolean;
     respawn: number;
     destroy: boolean;
     constructor(
         dealer: Actor,
         target: Actor,
-        die: boolean = true,
         respawn: number = 0,
         destroy: boolean = false,
     ) {
         this.dealer = dealer;
         this.target = target;
-        this.die = die;
         this.respawn = respawn;
         this.destroy = destroy;
     }
@@ -23,7 +20,6 @@ export default class TouchData {
         return {
             dealer: this.dealer.netId,
             target: this.target.netId,
-            die: this.die,
             respawn: this.respawn,
             destroy: this.destroy,
         }
@@ -31,9 +27,8 @@ export default class TouchData {
     static deserialize(data: any, getActor: (id: string) => Actor | null) {
         const dealer = data.dealer instanceof Actor ? data.dealer : getActor(data.dealer);
         const target = data.target instanceof Actor ? data.target : getActor(data.target);
-        const die = data.die ?? true;
         const respawn = data.respawn ?? 0;
         const destroy = data.destroy ?? false;
-        return new TouchData(dealer, target, die, respawn, destroy);
+        return new TouchData(dealer, target, respawn, destroy);
     }
 }

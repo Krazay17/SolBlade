@@ -30,6 +30,7 @@ export default class WeaponFireball extends Weapon {
                 damageDelay: 100,
                 callback: () => this.shootFireball(.3, 50, 10),
             })) {
+            this.game.soundPlayer.playPosSound('fireballUse', this.actor.position);
             return true;
         }
     }

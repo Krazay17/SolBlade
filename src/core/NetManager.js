@@ -179,10 +179,11 @@ function bindSocketEvents() {
         socket.on('actorDie', (data) => {
             data = HitData.deserialize(data, (id) => scene.getActorById(id));
             const { dealer, target } = data;
+            console.log(target);
             if (target) target.applyDie?.(data);
         });
         socket.on('actorDestroy', (data) => {
-            data = HitData.deserialize(data, (id) => scene.getActorById(id));
+            data = Actor.deserialize(data, (id) => scene.getActorById(id));
             const { dealer, target } = data;
             if (target) target.applyDestroy?.(data);
         });
