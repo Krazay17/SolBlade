@@ -1,6 +1,5 @@
 import { Vector3 } from "three";
 import MyEventEmitter from "../../core/MyEventEmitter";
-import soundPlayer from "../../core/SoundPlayer";
 import PlayerState from "./_PlayerState";
 
 export default class BladeState extends PlayerState {
@@ -14,13 +13,6 @@ export default class BladeState extends PlayerState {
         this.lastExit = null;
         this.timer = 0;
         this.tempVector = new Vector3();
-
-        soundPlayer.loadPosAudio('dash', '/assets/Dash.mp3');
-        MyEventEmitter.on('netFx', (data) => {
-            if (data.type === 'dash') {
-                this.dashFx(this.tempVector.set(data.pos.x, data.pos.y, data.pos.z));
-            }
-        });
     }
     enter(state, neutral) {
         this.lastEnter = performance.now();
@@ -29,11 +21,6 @@ export default class BladeState extends PlayerState {
         this.actor.energyRegen = this.actor.bladeDrain;
     }
     update(dt) {
-        // if (this.dashTimer > performance.now()) {
-        //     this.actor.movement.dashMove(dt, 6, 6);
-        //     return;
-        // }
-        // Jump
         if (this.input.keys['Space'] && this.grounded && !this.jumping) {
             clearTimeout(this.floorTimer);
             this.grounded = false;
@@ -82,8 +69,5 @@ export default class BladeState extends PlayerState {
     }
     canEnter() {
         return !this.actor.getDimmed()
-    }
-    dashFx(pos) {
-        soundPlayer.playPosAudio('dash', pos);
     }
 }

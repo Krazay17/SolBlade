@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import MyEventEmitter from '../core/MyEventEmitter.js';
-import soundPlayer from '../core/SoundPlayer.js';
 import Actor from './Actor.js';
+import MyEventEmitter from '../core/MyEventEmitter.js';
+import TouchData from '../core/TouchData.js';
 
 export default class Pickup extends Actor {
     constructor(scene, data) {
@@ -12,18 +12,6 @@ export default class Pickup extends Actor {
 
         this.height = 0;
         this.tempVector = new THREE.Vector3();
-
-        if (!Pickup.netFx) {
-            MyEventEmitter.on('netFx', (data) => {
-                if (data.type === 'pickup') {
-                    Pickup.pickupFx(new THREE.Vector3(data.pos.x, data.pos.y, data.pos.z));
-                }
-            });
-            Pickup.netFx = true;
-        }
-    }
-    static pickupFx(pos) {
-        soundPlayer.playPosAudio('pickup', pos, '/assets/Pickup.mp3');
     }
     async makeMesh(name, scale = 1) {
         this.mesh = await this.scene.meshManager.getMesh(name);
@@ -35,9 +23,12 @@ export default class Pickup extends Actor {
     }
     touch(dealer) {
         if (!this.active) return;
-        this.active = false;
-        Pickup.pickupFx(this.position);
+        MyEventEmitter.emit('actorTouch', new TouchData(dealer, this, true, true));
         super.touch(dealer);
+    }
+    onTouch(dealer) {
+        this.game.soundPlayer.applyPosSound('pickup', this.position);
+        this.applyDestroy();
     }
     checkDistanceToPlayer() {
         const player = this.scene.player;

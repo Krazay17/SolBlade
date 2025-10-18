@@ -11,26 +11,40 @@ export default class WeaponFireball extends Weapon {
         this.tempVector2 = new THREE.Vector3();
     }
 
-    spellUse(currentTime, pos, dir) {
+    spellUse(currentTime) {
         if (this.canSpellUse(currentTime)
-            && this.actor.stateManager.setState('attack', { damageDelay: 850, duration: 1300, anim: 'fireball', callback: () => this.shootFireball() })) {
+            && this.actor.stateManager.setState('attack', { damageDelay: 850, duration: 1300, anim: 'fireball', callback: () => this.shootFireball(1, 35, 25) })) {
             this.lastUsed = currentTime;
-            MyEventEmitter.emit('fx', { type: 'fireballUse', pos: this.actor.position });
+            this.game.soundPlayer.playPosSound('fireWhoosh', this.actor.position);
             return true;
         } else {
             return false;
         }
     }
+    use(time) {
+        if (this.canUse(time) &&
+            this.stateManager.setState('attack', {
+                weapon: this,
+                anim: 'gunShoot',
+                duration: 550,
+                damageDelay: 100,
+                callback: () => this.shootFireball(.3, 50, 10),
+            })) {
+            return true;
+        }
+    }
 
-    shootFireball() {
+    shootFireball(radius = 1, speed = 35, damage = 10) {
         let pos = this.actor.getShootData().camPos;
         const dir = this.actor.getShootData().dir;
-        pos = pos.add(dir.clone().multiplyScalar(2)); // Start a bit in front of the actor
+        pos = pos.add(dir.clone().multiplyScalar(1.5)); // Start a bit in front of the actor
 
         const projectile = this.game.actorManager.spawnActor('fireball', {
             pos,
             dir,
-            speed: 35,
+            radius,
+            damage,
+            speed,
             dur: 30000,
             owner: this.actor,
         }, false, true);

@@ -59,8 +59,11 @@ export default class ItemPickup extends Pickup {
         })
     }
     applyTouch(data: TouchData): void {
-        this.game.inventory.aquireItem(this.itemData);
         super.applyTouch(data);
+        const { dealer } = data;
+        if (dealer === this.game.player) {
+            this.game.inventory.aquireItem(this.itemData);
+        }
     }
     update(dt: number, time: number) {
         super.update(dt, time)

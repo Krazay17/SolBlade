@@ -1,3 +1,4 @@
+import Game from "../Game";
 import MyEventEmitter from "./MyEventEmitter";
 import QuestManager from "./QuestManager";
 
@@ -6,8 +7,9 @@ export default class Quest {
         title: 'default',
         name: 'default',
     }) {
-        /**@type {QuestManager} */
+        /**@type {Game} */
         this.game = game;
+        /**@type {QuestManager} */
         this.manager = manager;
         this.title = data.title;
         this.name = data.name;

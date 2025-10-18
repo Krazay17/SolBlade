@@ -6,9 +6,11 @@ export default class CrownPickup extends Pickup {
         super(scene, data);
         this.makeMesh('crown', .6);
     }
-    hit(){}
+    hit() { }
     applyTouch(data) {
         super.applyTouch(data);
-        MyEventEmitter.emit('crownPickup');
+        if (data.dealer === this.game.player) {
+            MyEventEmitter.emit('crownPickup');
+        }
     }
 }

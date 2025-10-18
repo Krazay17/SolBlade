@@ -12,6 +12,7 @@ export interface HitDataArgs {
     dim?: number;
     dur?: number;
     critMult?: number;
+    sound?: string | null;
 }
 
 export default class HitData implements HitDataArgs {
@@ -25,6 +26,7 @@ export default class HitData implements HitDataArgs {
     critMult: number = 1;
     stun: number = 0;
     dim: number = 0;
+    sound: string | null;
 
     constructor({
         dealer,
@@ -37,6 +39,7 @@ export default class HitData implements HitDataArgs {
         dim = 0,
         dur = 0,
         critMult = 1,
+        sound = null,
     }: HitDataArgs = {}) {
         this.dealer = dealer;
         this.target = target;
@@ -48,6 +51,7 @@ export default class HitData implements HitDataArgs {
         this.dim = dim;
         this.dur = dur;
         this.critMult = critMult;
+        this.sound = sound;
     }
 
     serialize() {
@@ -76,6 +80,7 @@ export default class HitData implements HitDataArgs {
             dim: data.dim ?? 0,
             dur: data.dur ?? 0,
             critMult: data.critMult ?? 1,
+            sound: data.sound ?? null,
         });
     }
 }

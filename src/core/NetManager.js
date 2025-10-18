@@ -6,7 +6,6 @@ import HitData from "./HitData";
 import Actor from "../actors/Actor";
 import VoiceChat from './VoiceChat';
 import TouchData from "./TouchData";
-import soundPlayer from "./SoundPlayer";
 import Globals from "../utils/Globals";
 
 const serverURL = location.hostname === "localhost" ?
@@ -20,7 +19,6 @@ const socket = io(serverURL, {
 });
 export const netSocket = socket;
 
-let game;
 let scene = null;
 export let netPlayers = {};
 let player = null;
@@ -29,61 +27,39 @@ let socketBound = false;
 let voiceChat;
 
 
+export function setNetScene(newScene) {
+    scene = newScene;
+    if (socket.connected && scene) {
+        bindSocketEvents();
+        if (voiceChat) voiceChat.setScene(scene);
+        socket.emit('newWorld', scene.solWorld);
+    }
+}
 socket.on("connect", () => {
     console.log(`I connected with id: ${socket.id}`);
     playerId = socket.id;
-    player = Globals.player;
-    netPlayers[socket.id] = player;
-    Globals.player.setNetId(socket.id);
-    if (scene) {
-        bindSocketEvents();
-    }
-});
-
-export function setNetScene(newScene) {
-    scene = newScene;
-    bindSocketEvents();
-    voiceChat.setScene(scene);
-    socket.emit('newWorld', scene.solWorld);
-}
-
-function bindSocketEvents() {
-    if (socketBound) return;
-    socketBound = true;
-
     socket.on('disconnect', () => {
         MyEventEmitter.emit('disconnect');
         console.log("disconnected from server");
     });
+    if (scene) {
+        bindSocketEvents();
+    }
+});
+function bindSocketEvents() {
+    if (socketBound || !scene) return;
+    socketBound = true;
+
+    player = Globals.player;
+    Globals.player.setNetId(socket.id);
+    netPlayers[socket.id] = player;
+    socket.emit('joinGame', Globals.player.serialize());
+
+    voiceChat = new VoiceChat();
+    voiceChat.createButton();
+    voiceChat.setScene(scene);
 
     const bindGameplay = () => {
-        // socket.on('currentPlayers', (players) => {
-        //     for (const player of Object.values(players)) {
-        //         const playerData = Actor.deserialize(player);
-        //         const { netId } = playerData;
-        //         if (netId === playerId) continue;
-        //         const newPlayer = scene.pawnManager.spawnPlayer(playerData, true);
-        //         netPlayers[netId] = newPlayer
-        //         MyEventEmitter.emit('playerJoined', newPlayer)
-        //     }
-        // });
-        // socket.on('newPlayer', (player) => {
-        //     const playerData = Actor.deserialize(player);
-        //     const { netId } = playerData;
-        //     if (netId === playerId) return;
-        //     const newPlayer = scene.pawnManager.spawnPlayer(playerData, true);
-        //     netPlayers[netId] = newPlayer
-        //     MyEventEmitter.emit('playerJoined', newPlayer)
-        // });
-        // socket.on('playerDisconnected', (netId) => {
-        //     if (netId === playerId) return;
-        //     if (netPlayers[netId]) {
-        //         const player = scene.pawnManager.getPawnById(netId);
-        //         scene.pawnManager.removePawn(player);
-        //         MyEventEmitter.emit('playerLeft', player);
-        //         delete netPlayers[netId];
-        //     }
-        // });
         socket.on('playerDisconnected', (netId) => {
             const player = netPlayers[netId];
             if (!player) return;
@@ -123,11 +99,6 @@ function bindSocketEvents() {
         socket.on('fx', (data) => {
             MyEventEmitter.emit('netFx', data);
         });
-        socket.on('playerAudio', ({ id, data }) => {
-            if (id === socket.id) return;
-            const { name, pos, url } = data;
-            soundPlayer.playPosAudio(name, pos, url);
-        });
         socket.on('crownGamePlayers', data => {
             MyEventEmitter.emit('crownGamePlayers', data);
         });
@@ -135,12 +106,12 @@ function bindSocketEvents() {
             for (const a of data) {
                 const { type, tempId, netId } = a
                 if (netId === playerId) continue;
-                const localActor = scene.actorManager.actors.find(a => a.tempId === tempId);
+                const localActor = scene.actorManager.actors.find(a => (a.tempId === tempId) || a.netId === netId && a.active);
                 if (localActor) {
                     localActor.setNetId(netId);
                 } else {
                     const actorData = Actor.deserialize(a, (id) => scene.actorManager.getActorById(id));
-                    const newActor = scene.actorManager.spawnActor(type, actorData, true, false);
+                    const newActor = scene.actorManager.spawnActor(type, actorData, true, true);
                     if (type === 'player') {
                         netPlayers[netId] = newActor;
                     }
@@ -148,47 +119,23 @@ function bindSocketEvents() {
             }
         });
         socket.on('newActor', (data) => {
-            console.log(data);
             const { type, tempId, netId, solWorld } = data
             if (netId === playerId) return;
-            const existingActor = scene.actorManager.actors.find(a => a.tempId === tempId) //|| scene.actorManager.actors.find(a => (a.netId === netId) && a.active);
+            const existingActor = scene.actorManager.actors.find(a => a.tempId === tempId) || scene.actorManager.actors.find(a => (a.netId === netId) && a.active);
             if (existingActor) {
                 existingActor.setNetId(netId);
             } else {
                 if (solWorld !== scene.solWorld) return;
                 const actorData = Actor.deserialize(data, (id) => scene.actorManager.getActorById(id));
-                const newActor = scene.actorManager.spawnActor(type, actorData, true, false);
+                const newActor = scene.actorManager.spawnActor(type, actorData, true, true);
                 if (type === 'player') {
                     netPlayers[netId] = newActor;
                 }
             }
         });
-        socket.on('actorHit', ({ data, health }) => {
-            const hit = HitData.deserialize(data, (id) => scene.actorManager.getActorById(id));
-            const target = hit.target;
-            if (target) {
-                target.applyHit(hit, health);
-            }
-        });
-        socket.on('actorTouch', data => {
-            data = TouchData.deserialize(data, (id) => scene.actorManager.getActorById(id));
-            const target = data.target;
-            if (target) {
-                target.applyTouch(data);
-            }
-        });
-        socket.on('actorDie', (data) => {
-            data = HitData.deserialize(data, (id) => scene.getActorById(id));
-            const { dealer, target } = data;
-            if (target) target.die?.(data);
-        });
         socket.on('playerDied', data => {
             data = HitData.deserialize(data, (id) => scene.getActorById(id));
             MyEventEmitter.emit('playerDied', data);
-        });
-        socket.on('destroyActor', (id) => {
-            const actor = scene.actorManager.getActorById(id);
-            if (actor && actor.isRemote) actor.destroy();
         });
         socket.on('changeAnimation', ({ id, data }) => {
             if (id === socket.id) return;
@@ -215,57 +162,83 @@ function bindSocketEvents() {
                 MyEventEmitter.emit('playerLeft', actor);
             }
             if (!actor && (scene.solWorld === solWorld)) {
-                const newPlayer = scene.actorManager.spawnActor(type, data, true, false);
+                const newPlayer = scene.actorManager.spawnActor(type, data, true, true);
                 netPlayers[netId] = newPlayer;
             }
+        });
+        socket.on('actorHit', ({ data, health }) => {
+            data = HitData.deserialize(data, (id) => scene.getActorById(id));
+            const { dealer, target } = data;
+            if (target) target.applyHit?.(data, health);
+        });
+        socket.on('actorTouch', (data) => {
+            data = TouchData.deserialize(data, (id) => scene.getActorById(id));
+            const { dealer, target } = data;
+            if (target) target.applyTouch?.(data);
+        });
+        socket.on('actorDie', (data) => {
+            data = HitData.deserialize(data, (id) => scene.getActorById(id));
+            const { dealer, target } = data;
+            if (target) target.applyDie?.(data);
+        });
+        socket.on('actorDestroy', (data) => {
+            data = HitData.deserialize(data, (id) => scene.getActorById(id));
+            const { dealer, target } = data;
+            if (target) target.applyDestroy?.(data);
+        });
+        socket.on('playPosSound', ({ map, data }) => {
+            if (map !== scene.solWorld) return;
+            scene.soundPlayer.applyPosSound(data.name, data.pos);
         })
-
     }
     bindGameplay();
-
-    voiceChat = new VoiceChat();
-    voiceChat.createButton();
-
-    socket.emit('joinGame', Globals.player.serialize());
-
-    // socket.on('joinAck', (data) => {
-    //     // playerId = data.netId;
-    //     // player.setNetId(playerId);
-    //     // netPlayers[playerId] = player;
-    //     bindGameplay();
-    //     socket.emit('bindGameplay');
-    //     //socket.emit('requestActors', game.solWorld);
-    //     MyEventEmitter.emit('joinGame', player);
-    // });
 }
 
-MyEventEmitter.on('enterWorld', world => {
-    socket.emit('enterWorld', world);
+MyEventEmitter.on('playPosSound', ({ name, pos }) => {
+    socket.emit('playPosSound', { name, pos: { x: pos.x, y: pos.y, z: pos.z } });
 })
-MyEventEmitter.on('leaveWorld', (world) => {
-    socket.emit('leaveWorld', world);
-})
-MyEventEmitter.on('playerNameChange', (data) => {
-    socket.emit('playerNameChange', data);
-})
-MyEventEmitter.on('actorStateUpdate', data => {
-    socket.emit('actorStateUpdate', data?.serialize?.());
-});
-MyEventEmitter.on('actorDie', (data) => {
-    if (socket.connected) {
-        socket.emit('actorDie', data?.serialize?.() || data);
+MyEventEmitter.on('actorHit', (/**@type {HitData}*/data) => {
+    if (socket.connected && data.target.replicate) {
+        socket.emit('actorHit', data.serialize());
+    } else {
+        data.target.applyHit(data);
     }
 });
 MyEventEmitter.on('actorTouch', (/**@type {TouchData}*/data) => {
-    if (socket.connected) {
+    if (socket.connected && data.target.replicate) {
         socket.emit('actorTouch', data.serialize());
     } else {
-        data.target.applyTouch(data.dealer);
+        data.target.applyTouch(data);
     }
-}
-);
-MyEventEmitter.on('destroyActor', (data) => {
-    socket.emit('destroyActor', data.netId);
+});
+MyEventEmitter.on('actorDie', (/**@type {HitData}*/data) => {
+    if (socket.connected && data.target.replicate) {
+        socket.emit('actorDie', data.serialize());
+    } else {
+        data.target.applyDie(data);
+    }
+});
+MyEventEmitter.on('actorDestroy', (/**@type {Actor}*/data) => {
+    if (socket.connected && data.replicate) {
+        socket.emit('actorDestroy', data.serialize());
+    }
+});
+MyEventEmitter.on('actorFX', ({ actor, fx }) => {
+    if (socket.connected && actor.replicate) {
+        socket.emit('actorFX', { id: actor.netId, fx });
+    }
+});
+MyEventEmitter.on('enterWorld', world => {
+    socket.emit('enterWorld', world);
+});
+MyEventEmitter.on('leaveWorld', (world) => {
+    socket.emit('leaveWorld', world);
+});
+MyEventEmitter.on('playerNameChange', (data) => {
+    socket.emit('playerNameChange', data);
+});
+MyEventEmitter.on('actorStateUpdate', data => {
+    socket.emit('actorStateUpdate', data?.serialize?.());
 });
 MyEventEmitter.on('playerRespawn', () => {
     socket.emit('playerRespawn');
@@ -287,7 +260,7 @@ MyEventEmitter.on('projectileDestroyed', (data) => {
 });
 MyEventEmitter.on('projectileMoved', (data) => {
     socket.emit('projectileMoved', data);
-})
+});
 MyEventEmitter.on('projectileCreated', (data) => {
     socket.emit('projectileCreated', data);
 });
@@ -324,13 +297,6 @@ MyEventEmitter.on('playAnimation', (data) => {
 });
 MyEventEmitter.on('changeAnimation', (data) => {
     socket.emit('changeAnimation', data);
-})
-MyEventEmitter.on('actorHit', (data) => {
-    if (socket.connected) {
-        socket.emit('actorHit', data.serialize());
-    } else {
-        data.target.applyHit(data);
-    }
 });
 
 setInterval(() => {

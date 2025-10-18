@@ -127,13 +127,6 @@ export default class Actor extends Object3D {
     setNetId(id: string) {
         this.netId = id;
     }
-    destroy() {
-        this.active = false
-        this.game.graphics?.remove(this);
-        this.game.actorManager?.removeActor(this);
-        if (this.isRemote) return;
-        MyEventEmitter.emit('destroyActor', this);
-    }
     activate(data: any) {
         this.active = true;
         this.data = { ...data };
@@ -146,23 +139,47 @@ export default class Actor extends Object3D {
     update(dt: number, time: number) { };
     hit(data: HitData) {
         MyEventEmitter.emit('actorHit', data);
+        this.game.soundPlayer.playSound('hit');
         console.log(data);
     }
     applyHit(data: HitData, health: number) {
-        this.health = health ?? this.health + data.amount;
+        const { dealer, type, impulse, stun, dim, dur, sound, hitPosition, amount } = data;
+        this.health = health ?? this.health + amount;
+        if (sound) {
+            this.game.soundPlayer.applyPosSound(sound, hitPosition);
+        }
+
         if (data) this.lastHitData = data;
         if (this.health <= 0) this.die(this.lastHitData);
     }
     touch(dealer: any) {
-        MyEventEmitter.emit('actorTouch', new TouchData(dealer, this, this.data.respawn));
+        MyEventEmitter.emit('actorTouch', new TouchData(dealer, this));
+        this.onTouch(dealer);
     }
     applyTouch(data: any) {
+        this.onTouch(data.dealer || null);
+    }
+    onTouch(dealer: any) {
+        this.applyDestroy();
     }
     die(data: HitData | null) {
-        this.active = false;
-        this.game.graphics?.remove(this);
-        if (this.isRemote) return;
         MyEventEmitter.emit('actorDie', data || new HitData({ target: this }));
+        this.onDie(data);
+    }
+    applyDie(data: HitData | null) {
+        this.onDie(data);
+    }
+    onDie(data: any) {
+        this.applyDestroy();
+    }
+    destroy() {
+        this.applyDestroy();
+        MyEventEmitter.emit('actorDestroy', this);
+    }
+    applyDestroy() {
+        this.active = false
+        this.game.graphics?.remove(this);
+        this.game.actorManager?.removeActor(this);
     }
     set health(amnt: number) {
         const clamped = Math.max(0, Math.min(this.maxHealth, amnt));

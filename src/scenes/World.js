@@ -32,6 +32,7 @@ export default class World {
   get meshManager() { return this.game.meshManager };
   get questManager() { return this.game.questManager };
   get spawnPos() { return { x: 0, y: 1, z: 0 } };
+  get soundPlayer() { return this.game.soundPlayer };
   onExit() {
     MyEventEmitter.emit('leaveWorld', this.solWorld);
     this.destroy();

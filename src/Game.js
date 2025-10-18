@@ -5,7 +5,6 @@ import Input from './core/Input';
 import PlayerInfo from './ui/PlayerUI';
 import MyEventEmitter from './core/MyEventEmitter';
 import Globals from './utils/Globals';
-import soundPlayer from './core/SoundPlayer';
 import LoadingManager from './core/LoadingManager';
 import World1 from './scenes/World1';
 import World2 from './scenes/World2';
@@ -22,6 +21,7 @@ import { setNetScene } from './core/NetManager';
 import Player from './player/Player';
 import LightManager from './core/LightManager';
 import Inventory from './player/Inventory';
+import SoundPlayer from './core/SoundPlayer';
 
 await RAPIER.init();
 
@@ -43,14 +43,13 @@ export default class Game {
       subStep: 6,
     }
 
-    this.initWindow();
     this.running = true;
     this.lastTime = 0;
     this.accumulator = 0;
     this.timeStep = 1 / 120;
 
     this.renderer = new THREE.WebGLRenderer({ alpha: 0, antialias: true });
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    //this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     document.body.appendChild(this.renderer.domElement);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -66,10 +65,9 @@ export default class Game {
     this.solRender = new SolRenderPass(this.renderer, this.graphicsWorld, this.camera);
     this.worldLight();
 
-    soundPlayer.init();
     this.audioListener = new THREE.AudioListener();
+    this.soundPlayer = new SoundPlayer(this, this.audioListener);
     this.camera.add(this.audioListener);
-    soundPlayer.setPosAudio(this.audioListener);
 
     this.input = new Input(canvas);
 
@@ -95,6 +93,7 @@ export default class Game {
     this.worldReady = () => {
       this.player.setWorld(this.world);
       this.solRender.outlineObject = this.world.map;
+      setNetScene(this.world);
     }
     this.setWorld(LocalData.solWorld || 'world2');
 
@@ -102,13 +101,15 @@ export default class Game {
     this.start();
   }
   initWindow() {
-    window.addEventListener('resize', () => {
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.camera.aspect = window.innerWidth / window.innerHeight;
-      this.camera.updateProjectionMatrix();
-    });
   }
   bindings() {
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      this.renderer.setSize(w, h);
+      this.camera.aspect = w / h;
+      this.camera.updateProjectionMatrix();
+    });
     MyEventEmitter.on('goHome', () => {
       this.setWorld('world1');
     });
@@ -131,7 +132,6 @@ export default class Game {
     if (this.world?.onExit) this.world.onExit();
     this.world = newWorld;
     if (this.world?.onEnter) this.world.onEnter(this.worldReady);
-    setNetScene(this.world);
   }
   start() {
     requestAnimationFrame(this.loop.bind(this));
@@ -165,7 +165,7 @@ export default class Game {
   worldLight() {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    const dirLight = new THREE.DirectionalLight(0xffeeee, .9);
+    const dirLight = new THREE.DirectionalLight(0xffeeee, .5);
 
     dirLight.position.set(50, 100, 50);
     const target = new THREE.Vector3().addVectors(dirLight.position, new THREE.Vector3(1, -1, 1).normalize())
@@ -186,7 +186,7 @@ export default class Game {
     dirLight.castShadow = true;
     this.graphicsWorld.add(dirLight);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, .5);
+    const ambientLight = new THREE.AmbientLight(0xffffff, .03);
     this.graphicsWorld.add(ambientLight);
 
     // const rimLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -194,10 +194,10 @@ export default class Game {
     // this.graphicsWorld.add(rimLight);
   }
   add(obj) {
-    this.graphicsWorld.add(obj);
+    if (obj) this.graphicsWorld.add(obj);
   }
   remove(obj) {
-    this.graphicsWorld.remove(obj);
+    if (obj) this.graphicsWorld.remove(obj);
   }
   get solWorld() {
     return this.world.solWorld || LocalData.solWorld;

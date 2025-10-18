@@ -1,6 +1,5 @@
 import Projectile from "./Projectile";
 import { spawnParticles } from "./ParticleEmitter";
-import MyEventEmitter from "../core/MyEventEmitter";
 import { clamp } from "three/src/math/MathUtils.js";
 import HitData from "../core/HitData";
 
@@ -10,56 +9,36 @@ export default class ProjectileFireball extends Projectile {
         data.name ??= 'fireball';
         super(scene, data);
 
-        this.exploding = false;
-        this.explodeSize = 1;
-        this.shrink = true;
-        this.flashPower = 0;
+        this.explode = false;
 
         this.createMesh();
         this.setGravity(4);
-
-        ProjectileFireball.netFx = ProjectileFireball.netFx || false;
-        if (!ProjectileFireball.netFx) {
-            MyEventEmitter.on('netFx', (data) => {
-                if (data.type === 'fireballHit') {
-                    ProjectileFireball.hitFx(this.tempVector.set(data.pos.x, data.pos.y, data.pos.z));
-                }
-            });
-            ProjectileFireball.netFx = true;
-        }
-    }
-    static hitFx(pos) {
-        spawnParticles(pos, 55);
     }
 
     update(dt) {
-        if (this.texture) this.texture.rotation += dt;
         super.update(dt);
-        // const scaledDt = dt * 10;
-        // if (this.exploding) {
-        //     if (this.shrink) this.shrink = this.explodeSize <= 0 ? false : true;
-        //     this.explodeSize = this.shrink ? this.explodeSize -= scaledDt : this.explodeSize += scaledDt;
-        //     this.scale.set(this.explodeSize, this.explodeSize, this.explodeSize);
-        //     this.flashPower += dt * 80;
-        //     if (this.material) this.material.emissiveIntensity = (Math.sin(this.flashPower) + 1) / 1.5;
-        //     if (this.explodeSize >= 2) this.die();
-        // } else super.update(dt);
+        if (this.texture) this.texture.rotation += dt;
+        if (this.explode) {
+            const sizeDelta = 50 * dt;
+            this.scale.add({ x: sizeDelta, y: sizeDelta, z: sizeDelta })
+            if (this.scale.x > 8) {
+                this.applyDestroy();
+                this.explode = false;
+            }
+        }
     }
 
     die(data) {
         super.die(data);
-        ProjectileFireball.hitFx(this.position);
 
         if (this.isRemote) return;
-        MyEventEmitter.emit('fx', { type: 'fireballHit', pos: this.position });
-
         const explosionRange = 6;
         const enemiesInRange = this.scene.actorManager.getActorsInRange(this.owner, this, this.position, explosionRange);
         for (const [enemy, range] of enemiesInRange) {
             const distance = clamp((1 - ((range - this.radius) / explosionRange)), .5, 1);
             const damage = this.damage * distance;
             const direction = enemy.position.clone().sub(this.position).normalize();
-            const force = direction.multiplyScalar(15 * (1 - (range / explosionRange)));
+            const force = direction.multiplyScalar(this.damage * (1 - (range / explosionRange)));
             enemy.hit(new HitData({
                 dealer: this.owner,
                 target: enemy,
@@ -69,5 +48,11 @@ export default class ProjectileFireball extends Projectile {
                 hitPosition: this.position,
             }));
         }
+    }
+    onDie() {
+        this.game.soundPlayer.applyPosSound('fireballImpact', this.position);
+        spawnParticles(this.position, 55);
+        this.active = false;
+        this.explode = true;
     }
 }

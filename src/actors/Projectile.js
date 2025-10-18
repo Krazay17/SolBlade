@@ -92,6 +92,7 @@ export default class Projectile extends Actor {
                 const hitData = new HitData({
                     dealer: this.owner,
                     target: enemy,
+                    hitPosition: this.position,
                     amount: this.damage,
                     type: 'fire',
                 })

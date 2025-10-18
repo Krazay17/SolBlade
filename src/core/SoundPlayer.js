@@ -1,22 +1,30 @@
 import * as THREE from 'three';
 import LocalData from "./LocalData";
 import MyEventEmitter from "./MyEventEmitter";
-import Globals from '../utils/Globals';
 
-class SoundPlayer {
-    constructor() {
+/**@type {SoundPlayer} */
+let currentInstance = null;
+export default class SoundPlayer {
+    constructor(game, listener) {
+        this.game = game;
+        this.audioListener = listener;
+
         this.sounds = new Map();
         this.masterVolume = LocalData.masterVolume;
         this.musicVolume = LocalData.musicVolume;
         this.sfxVolume = LocalData.sfxVolume;
         this.micVolume = LocalData.micVolume;
         this.voicesVolume = LocalData.voicesVolume;
-        this.audioListener = null;
         this.musics = [];
         this.sfx = [];
         this.musicPlaying = null;
         this.posSoundPools = new Map();
         this.threeAudioLoader = new THREE.AudioLoader();
+
+        this.loadSfx('hit', '/assets/hit.mp3');
+
+        this.init();
+        currentInstance = this;
     }
 
     init() {
@@ -144,17 +152,10 @@ class SoundPlayer {
         this.loadMusic('music4', 'assets/Music4.mp3');
     }
 
-    static getSoundInstance() {
-        if (!SoundPlayer.instance) {
-            SoundPlayer.instance = new SoundPlayer();
-        }
-        return SoundPlayer.instance;
-    }
-
     setPosAudio(listener) {
         this.audioListener = listener;
     }
-    loadPosAudio(name, url, poolSize = 5) {
+    loadPosAudio(name, url, poolSize = 5, onLoad = null) {
         if (!this.posSoundPools.has(name)) {
             this.posSoundPools.set(name, []);
         }
@@ -170,20 +171,31 @@ class SoundPlayer {
                 posAudio.setMaxDistance(100);
                 posAudio.setRolloffFactor(2);
                 posAudio.setVolume(this.sfxVolume * this.masterVolume);
-                Globals.graphicsWorld.add(posAudio);
+                this.game.add(posAudio);
+                if (onLoad) onLoad(posAudio);
             });
 
             pool.push(posAudio);
         }
     }
+    playPosSound(name, pos) {
+        this.applyPosSound(name, pos);
+        MyEventEmitter.emit('playPosSound', { name, pos })
+    }
 
-    playPosAudio(name, position, url) {
+    applyPosSound(name, position) {
+        const url = `/assets/${name}.mp3`;
         // ensure pool exists
         let pool = this.posSoundPools.get(name);
         if (!pool) {
-            if (url) {
-                // initialize pool and retry once loaded
-                this.loadPosAudio(name, url, 1);
+            if (url !== `/assets/.mp3`) {
+                this.loadPosAudio(name, url, 1, (audio) => {
+                    // play immediately after load
+                    if (position) audio.position.copy(position);
+                    audio.setVolume(this.sfxVolume * this.masterVolume);
+                    audio.play();
+                    console.log(url);
+                });
                 pool = this.posSoundPools.get(name);
             } else {
                 console.warn(`No positional audio pool for "${name}" and no URL provided.`);
@@ -217,6 +229,7 @@ class SoundPlayer {
         }
     }
 }
-/**@type {SoundPlayer} */
-const soundPlayer = SoundPlayer.getSoundInstance();
-export default soundPlayer;
+
+export function playPosSound(name, pos) {
+    if (currentInstance) currentInstance.playPosSound(name, pos);
+}

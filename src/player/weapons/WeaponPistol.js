@@ -1,5 +1,4 @@
 import Weapon from './Weapon.js';
-import soundPlayer from '../../core/SoundPlayer.js';
 import MeshTrace from '../../core/MeshTrace.js';
 import * as THREE from 'three';
 import Globals from '../../utils/Globals.js';
@@ -11,7 +10,7 @@ export default class WeaponPistol extends Weapon {
     constructor(actor, game, isSpell = false) {
         super(actor, 'Pistol', 20, 50, 800, isSpell); // name, damage, range, cooldown
         this.game = game;
-        soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');
+        this.game.soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');
         this.meshTracer = new MeshTrace(this.game);
 
         MyEventEmitter.on('netFx', (data) => {
@@ -41,7 +40,6 @@ export default class WeaponPistol extends Weapon {
             Globals.graphicsWorld.remove(line);
         }, 500);
 
-        soundPlayer.playPosAudio('pistolUse', pos, 'assets/PistolUse.wav');
     }
     use(currentTime, pos, dir) {
         if (this.canUse(currentTime) &&
@@ -53,8 +51,10 @@ export default class WeaponPistol extends Weapon {
             let cameraPos = this.tempVector2;
             this.actor.cameraArm.getWorldPosition(cameraPos);
             this.hitActors.clear();
-            this.useFx(offSetPos, dir);
-            MyEventEmitter.emit('fx', { type: 'pistolUse', pos: offSetPos, dir: dir });
+            this.game.soundPlayer.playPosSound('pistolShoot', pos);
+
+            // this.useFx(offSetPos, dir);
+            // MyEventEmitter.emit('fx', { type: 'pistolUse', pos: offSetPos, dir: dir });
 
             this.meshTracer.multiLineTrace(cameraPos, dir, this.game.actorManager.hostiles, this.range, offSetPos, (hit) => {
                 const actor = hit.object.userData.owner;
@@ -64,14 +64,18 @@ export default class WeaponPistol extends Weapon {
                     actor.hit(new HitData({
                         dealer: this.actor,
                         target: actor,
+                        type: 'bullet',
                         stun: 50,
                         dim: 700,
                         impulse: scaledDir,
                         amount: this.damage,
                         hitPosition: hit.point,
                     }));
-                    this.hitFx(hit.point, dir);
-                    MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
+                    
+            this.game.soundPlayer.playPosSound('pistolShoot', pos);
+
+                    // this.hitFx(hit.point, dir);
+                    // MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
                 }
             }, 3, .15);
 

@@ -32,6 +32,9 @@ export default class QuestCrown extends Quest {
         this.onGameEnd = id => {
             this.gameOn = false;
             const player = this.manager.game.actorManager.getActorById(id)?.name ?? 'Unknown';
+            if(id === this.player.netId) {
+                this.completeQuest();
+            }
             this.setNotification(`${player} Wins!!!`);
         };
         this.onDied = () => {
@@ -90,6 +93,9 @@ export default class QuestCrown extends Quest {
         netSocket.off('crownGameEnd', this.onGameEnd);
 
         super.onExit();
+    }
+    completeQuest() {
+        this.game.inventory.addCards(10);
     }
     updateQuest(data) {
         if (data) this.players[data.id].score = data.score;

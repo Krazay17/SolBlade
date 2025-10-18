@@ -1,7 +1,7 @@
 import { menuButton } from "../ui/Menu";
+import LocalData from "./LocalData";
 import MyEventEmitter from "./MyEventEmitter";
 import { netSocket } from "./NetManager";
-import soundPlayer from "./SoundPlayer";
 import * as THREE from "three";
 
 const config = {
@@ -206,7 +206,7 @@ export default class VoiceChat {
             // noiseFloor.start();
 
             this.gainNode = this.audioContext.createGain();
-            this.gainNode.gain.value = soundPlayer.micVolume;
+            this.gainNode.gain.value = LocalData.micVolume;
 
             // Destination stream (for WebRTC)
             const destination = this.audioContext.createMediaStreamDestination();

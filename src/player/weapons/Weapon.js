@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import MyEventEmitter from '../../core/MyEventEmitter';
 import MeshTrace from '../../core/MeshTrace';
 import Player from '../Player';
+import Game from '../../Game';
 
 export default class Weapon {
     constructor(actor, name = 'Weapon', damage = 1, range = 10, cooldown = 1000, isSpell = false) {
@@ -17,6 +18,7 @@ export default class Weapon {
         this.tempVector2 = new THREE.Vector3();
         this.hitActors = new Set();
 
+        /**@type {Game} */
         this.game = null;
         this.isSpell = isSpell;
 
@@ -25,15 +27,13 @@ export default class Weapon {
         }
         this.lastUsed = -this.cooldown; // timestamp of last use
     }
+    get stateManager() {
+        return this.actor.stateManager;
+    }
     canSpellUse(currentTime) {
         return (currentTime - this.lastUsed) >= this.cooldown;
     }
-    /**
-     * @param {number} currentTime
-     * @param {THREE.Vector3} pos
-     * @param {THREE.Vector3} dir
-     */
-    spellUse(currentTime, pos, dir) {
+    spellUse(currentTime) {
         if (this.canSpellUse(currentTime)) {
             this.lastUsed = currentTime;
             return true; // Spell used successfully
@@ -43,12 +43,7 @@ export default class Weapon {
     canUse(currentTime) {
         return (currentTime - this.lastUsed) >= this.cooldown;
     }
-    /**
-     * @param {number} currentTime
-     * @param {THREE.Vector3} pos
-     * @param {THREE.Vector3} dir
-     */
-    use(currentTime, pos, dir) {
+    use(currentTime) {
         if (this.canUse(currentTime)) {
             this.lastUsed = currentTime;
             return true; // Weapon used successfully

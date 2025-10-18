@@ -8,7 +8,6 @@ import PlayerMovement from './PlayerMovement';
 import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
 import Globals from '../utils/Globals';
-import soundPlayer from '../core/SoundPlayer';
 import Pawn from '../actors/Pawn';
 import PlayerStateManager from './playerStates/PlayerStateManager';
 import HitData from '../core/HitData';
@@ -21,7 +20,6 @@ export default class Player extends Pawn {
             data.name = LocalData.name;
         }
         super(game, data, 'knightGirl', .5, 1);
-        this.game = game;
         this.tick = true;
 
         this.world = game.world;
@@ -34,8 +32,6 @@ export default class Player extends Pawn {
         this.dashCost = 30;
         this.bladeDrain = -5; // per second
 
-        soundPlayer.loadPosAudio('playerHit', '/assets/PlayerHit.mp3');
-
         // Local Player setup
         if (!this.isRemote) {
             this.tick = false
@@ -45,7 +41,7 @@ export default class Player extends Pawn {
             this.tempVector = new THREE.Vector3();
 
             /**@type {Weapon.Weapon} */
-            this.weaponL = new Weapon.WeaponPistol(this, game);
+            this.weaponL = new Weapon.WeaponFireball(this, game);
             /**@type {Weapon.Weapon} */
             this.weaponR = new Weapon.WeaponSword(this, game);
             /**@type {Weapon.Weapon} */
@@ -166,8 +162,6 @@ export default class Player extends Pawn {
     update(dt, time) {
         if (!this.tick) return;
         super.update(dt, time);
-        if (!this.body) return;
-
         // Local Player
         if (!this.isRemote) {
             tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
@@ -306,9 +300,8 @@ export default class Player extends Pawn {
     }
 
     parried(attacker) {
-        console.log(attacker);
         const pos = attacker?.position ?? attacker ?? new THREE.Vector3(0, 0, 0);
-        soundPlayer.playPosAudio('parry', this.position, 'assets/Parry.mp3');
+        this.game.soundPlayer.playPosSound('parry', this.position);
         this.animationManager?.changeTimeScale(0, 600);
         if (!this.isRemote) {
             this.stateManager.setState('parry', { pos });
@@ -320,12 +313,12 @@ export default class Player extends Pawn {
     }
     applyHit(data, health) {
         super.applyHit(data, health);
-        soundPlayer.playPosAudio('playerHit', this.position);
-        if (this.isRemote) return;
         /**@type {HitData} */
         const { type, amount, stun, impulse, dim } = data;
+        //this.game.soundPlayer.applyPosSound('playerHit', this.position);
+        if (this.isRemote) return;
         if (amount !== 0) {
-            if (type === 'melee' || type === 'explosion') {
+            if (type === 'physical' || type === 'explosion') {
                 CameraFX.shake(0.2, 125);
             }
             if (stun > 0) {
@@ -358,6 +351,7 @@ export default class Player extends Pawn {
         this.stateManager.setState('dead');
         MyEventEmitter.emit('iDied', this.lastHitData);
     }
+    applyDie() { }
     // only local
     unDie() {
         if (this.isRemote) return;

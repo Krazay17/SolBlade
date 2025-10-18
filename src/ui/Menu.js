@@ -1,6 +1,5 @@
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
-import soundPlayer from '../core/SoundPlayer';
 import Globals from '../utils/Globals';
 import './StyleMenu.css';
 
@@ -19,10 +18,8 @@ menuSection.appendChild(menuElement2);
 
 export default class Menu {
     static instance;
-    constructor() {
-        if (Menu.instance) {
-            return Menu.instance;
-        }
+    constructor(game) {
+        this.game = game
         this.isOpen = false;
 
 
@@ -83,7 +80,7 @@ export default class Menu {
         this.masterVolumeSlider = this.createSlider(LocalData.masterVolume * 100);
         this.masterVolumeSlider.addEventListener('input', (event) => {
             const scaledValue = event.target.value / 100;
-            soundPlayer.setMasterVolume(scaledValue);
+            this.game.soundPlayer.setMasterVolume(scaledValue);
             LocalData.masterVolume = scaledValue;
             this.masterVolumeLabel.innerText = 'Master Volume: ' + LocalData.masterVolume;
         });
@@ -94,7 +91,7 @@ export default class Menu {
         this.musicVolumeSlider = this.createSlider(LocalData.musicVolume * 100);
         this.musicVolumeSlider.addEventListener('input', (event) => {
             const scaledValue = event.target.value / 100;
-            soundPlayer.setMusicVolume(scaledValue);
+            this.game.soundPlayer.setMusicVolume(scaledValue);
             LocalData.musicVolume = scaledValue;
             this.musicVolumeLabel.innerText = 'Music Volume: ' + LocalData.musicVolume;
         });
@@ -105,7 +102,7 @@ export default class Menu {
         this.sfxVolumeSlider = this.createSlider(LocalData.sfxVolume * 100);
         this.sfxVolumeSlider.addEventListener('input', (event) => {
             const scaledValue = event.target.value / 100;
-            soundPlayer.setSfxVolume(scaledValue);
+            this.game.soundPlayer.setSfxVolume(scaledValue);
             LocalData.sfxVolume = scaledValue;
             this.sfxVolumeLabel.innerText = 'SFX Volume: ' + LocalData.sfxVolume;
         });
@@ -116,7 +113,7 @@ export default class Menu {
         this.micVolumeSlider = this.createSlider(LocalData.micVolume * 100);
         this.micVolumeSlider.addEventListener('input', (event) => {
             const scaledValue = event.target.value / 100;
-            soundPlayer.setMicVolume(scaledValue);
+            this.game.soundPlayer.setMicVolume(scaledValue);
             LocalData.micVolume = scaledValue;
             this.micVolumeLabel.innerText = 'Microphone: ' + LocalData.micVolume;
         });
@@ -127,7 +124,7 @@ export default class Menu {
         this.voiceVolumeSlider = this.createSlider(LocalData.voicesVolume * 100);
         this.voiceVolumeSlider.addEventListener('input', (event) => {
             const scaledValue = event.target.value / 100;
-            soundPlayer.setVoicesVolume(scaledValue);
+            this.game.soundPlayer.setVoicesVolume(scaledValue);
             LocalData.voicesVolume = scaledValue;
             this.voiceVolumeLabel.innerText = 'Voices: ' + LocalData.voicesVolume;
         });
@@ -138,16 +135,16 @@ export default class Menu {
         let seekValue = 0;
         this.seekSlider = this.createSlider(0);
         this.seekSlider.addEventListener('input', (event) => {
-            soundPlayer.setSeek(event.target.value);
+            this.game.soundPlayer.setSeek(event.target.value);
         });
 
         this.seekLabel = document.createElement('p');
         this.seekLabel.innerText = 'Music Seek: 0';
         menuElement.appendChild(this.seekLabel);
         setInterval(() => {
-            if (soundPlayer.musicPlaying) {
-                this.seekSlider.value = (soundPlayer.musicPlaying.currentTime / soundPlayer.musicPlaying.duration) * 100;
-                this.seekLabel.innerText = 'Music Seek: ' + soundPlayer.musicPlaying.currentTime.toFixed(2) + ' / ' + soundPlayer.musicPlaying.duration.toFixed(2);
+            if (this.game.soundPlayer.musicPlaying) {
+                this.seekSlider.value = (this.game.soundPlayer.musicPlaying.currentTime / this.game.soundPlayer.musicPlaying.duration) * 100;
+                this.seekLabel.innerText = 'Music Seek: ' + this.game.soundPlayer.musicPlaying.currentTime.toFixed(2) + ' / ' + this.game.soundPlayer.musicPlaying.duration.toFixed(2);
             }
         }, 10);
 
@@ -165,22 +162,22 @@ export default class Menu {
         buttonGrid.appendChild(skipButton);
 
         playButton.addEventListener('click', () => {
-            if (soundPlayer.musicPlaying.paused) {
-                soundPlayer.musicPlaying.play();
+            if (this.game.soundPlayer.musicPlaying.paused) {
+                this.game.soundPlayer.musicPlaying.play();
             } else {
-                soundPlayer.musicPlaying.pause();
+                this.game.soundPlayer.musicPlaying.pause();
             }
             playButton.blur();
         });
 
         skipButton.addEventListener('click', () => {
-            soundPlayer.skipTrack();
-            this.trackName.innerText = 'Current Track: ' + soundPlayer.getCurrentTrackName();
+            this.game.soundPlayer.skipTrack();
+            this.trackName.innerText = 'Current Track: ' + this.game.soundPlayer.getCurrentTrackName();
             skipButton.blur();
         });
 
         this.trackName = document.createElement('p');
-        this.trackName.innerText = 'Current Track: ' + soundPlayer.getCurrentTrackName();
+        this.trackName.innerText = 'Current Track: ' + this.game.soundPlayer.getCurrentTrackName();
         menuElement.appendChild(this.trackName);
         MyEventEmitter.on('musicChanged', (trackName) => {
             this.trackName.innerText = 'Current Track: ' + trackName;
