@@ -61,7 +61,7 @@ export default class Player extends Pawn {
             CameraFX.init(this.camera);
 
             this.movement = new PlayerMovement(this);
-            this.stateManager = new PlayerStateManager(this);
+            this.stateManager = new PlayerStateManager(this.game, this);
             this.devMenu = new DevMenu(this, this.movement);
 
             MyEventEmitter.on('KeyPressed', (key) => {
@@ -110,28 +110,28 @@ export default class Player extends Pawn {
             this.remove(this.crownMesh);
         }
     }
-    setSpell(slot, spell) {
-        if (slot < 1 || slot > 4) return;
-        const spellName = spell?.name || null;
-        switch (spellName) {
+    setSpell(slot, weapon) {
+        const weaponName = weapon?.name || null;
+        const isSpell = slot > 1;
+        switch (weaponName) {
             case 'Fireball':
-                spell = new Weapon.WeaponFireball(this, this.game, true);
+                weapon = new Weapon.WeaponFireball(this, this.game, isSpell);
                 break;
             case 'Pistol':
-                spell = new Weapon.WeaponPistol(this, this.game, true);
+                weapon = new Weapon.WeaponPistol(this, this.game, isSpell);
                 break;
             case 'Sword':
-                spell = new Weapon.WeaponSword(this, this.game, true);
+                weapon = new Weapon.WeaponSword(this, this.game, isSpell);
                 break;
             default:
-                spell = null;
+                weapon = null;
                 break;
         }
-        if (!spell) {
-            this[`spell${slot}`] = null;
+        if (!weapon) {
+            this[`weapon${slot}`] = null;
             return;
         }
-        this[`spell${slot}`] = spell;
+        this[`weapon${slot}`] = weapon;
     }
     dropItem(item) {
         const { pos, dir } = this.getShootData();
@@ -178,41 +178,40 @@ export default class Player extends Pawn {
         // Rotate player
         this.rotation.y = this.input.yaw;        // Yaw
         this.cameraArm.rotation.x = this.input.pitch; // Pitch
+        const canExitState = this.stateManager.activeState.canExit();
 
         if (this.input.mice[0] && this.input.pointerLocked) {
-            const direction = this.camera.getWorldDirection(new THREE.Vector3());
-            if (this.stateManager.activeState.canExit() && this.weaponL?.canUse(time)) {
-                this.weaponL?.use(performance.now(), this.position, direction);
+            if (canExitState && this.weapon0?.canUse()) {
+                this.weapon0?.use();
             }
         }
         if (this.input.mice[2] && this.input.pointerLocked) {
-            const direction = this.camera.getWorldDirection(new THREE.Vector3());
-            if (this.stateManager.activeState.canExit() && this.weaponR.canUse(time)) {
-                this.weaponR.use(performance.now(), this.position, direction);
+            if (canExitState && this.weapon1?.canUse()) {
+                this.weapon1?.use();
             }
         }
-        if (this.input.actionStates.spell1 && this.spell1) {
-            if (this.stateManager.activeState.canExit() && this.spell1.canSpellUse(performance.now())) {
-                this.spell1.spellUse(performance.now());
-                MyEventEmitter.emit('spellUsed', { slot: '1', cd: this.spell1.cooldown });
+        if (this.input.actionStates.spell1) {
+            if (canExitState && this.weapon2?.canSpellUse()) {
+                this.weapon2.spellUse();
+                MyEventEmitter.emit('spellUsed', { slot: '1', cd: this.weapon2.cooldown });
             }
         }
-        if (this.input.actionStates.spell2 && this.spell2) {
-            if (this.stateManager.activeState.canExit() && this.spell2.canSpellUse(performance.now())) {
-                this.spell2.spellUse(performance.now());
-                MyEventEmitter.emit('spellUsed', { slot: '2', cd: this.spell2.cooldown });
+        if (this.input.actionStates.spell2) {
+            if (canExitState && this.weapon3?.canSpellUse()) {
+                this.weapon3.spellUse();
+                MyEventEmitter.emit('spellUsed', { slot: '2', cd: this.weapon3.cooldown });
             }
         }
-        if (this.input.actionStates.spell3 && this.spell3) {
-            if (this.stateManager.activeState.canExit() && this.stateManager.activeState.canExit() && this.spell3.canSpellUse(performance.now())) {
-                this.spell3.spellUse(performance.now());
-                MyEventEmitter.emit('spellUsed', { slot: '3', cd: this.spell3.cooldown });
+        if (this.input.actionStates.spell3) {
+            if (canExitState && this.weapon4?.canSpellUse()) {
+                this.weapon4.spellUse();
+                MyEventEmitter.emit('spellUsed', { slot: '3', cd: this.weapon4.cooldown });
             }
         }
-        if (this.input.actionStates.spell4 && this.spell4) {
-            if (this.stateManager.activeState.canExit() && this.spell4.canSpellUse(performance.now())) {
-                this.spell4.spellUse(performance.now());
-                MyEventEmitter.emit('spellUsed', { slot: '4', cd: this.spell4.cooldown });
+        if (this.input.actionStates.spell4) {
+            if (canExitState && this.weapon5?.canSpellUse()) {
+                this.weapon5.spellUse();
+                MyEventEmitter.emit('spellUsed', { slot: '4', cd: this.weapon5.cooldown });
             }
         }
         if (this.input.actionStates.blade) {

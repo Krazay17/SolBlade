@@ -174,18 +174,18 @@ function bindSocketEvents() {
         socket.on('actorTouch', (data) => {
             data = TouchData.deserialize(data, (id) => scene.getActorById(id));
             const { dealer, target } = data;
-            if (target) target.applyTouch?.(data);
+            if (target && target.isRemote) target.applyTouch?.(data);
         });
         socket.on('actorDie', (data) => {
             data = HitData.deserialize(data, (id) => scene.getActorById(id));
             const { dealer, target } = data;
-            console.log(target);
-            if (target) target.applyDie?.(data);
+            if (target && target.isRemote) target.applyDie?.(data);
         });
         socket.on('actorDestroy', (data) => {
             data = Actor.deserialize(data, (id) => scene.getActorById(id));
-            const { dealer, target } = data;
-            if (target) target.applyDestroy?.(data);
+            const { netId } = data;
+            const actor = scene.getActorById(netId);
+            if (actor) actor.applyDestroy?.(data);
         });
         socket.on('playPosSound', ({ map, data }) => {
             if (map !== scene.solWorld) return;
@@ -215,9 +215,10 @@ MyEventEmitter.on('actorTouch', (/**@type {TouchData}*/data) => {
 MyEventEmitter.on('actorDie', (/**@type {HitData}*/data) => {
     if (socket.connected && data.target.replicate) {
         socket.emit('actorDie', data.serialize());
-    } else {
-        data.target.applyDie(data);
     }
+    // else {
+    //     data.target.applyDie(data);
+    // }
 });
 MyEventEmitter.on('actorDestroy', (/**@type {Actor}*/data) => {
     if (socket.connected && data.replicate) {

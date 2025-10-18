@@ -2,9 +2,6 @@ import Input from "../../core/Input";
 import PlayerState from "./_PlayerState";
 
 export default class RunState extends PlayerState {
-    constructor(actor, manager, options = {}) {
-        super(actor, manager, options);
-    }
     enter() {
         this.grounded = true;
     }

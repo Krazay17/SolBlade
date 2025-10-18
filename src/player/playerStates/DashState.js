@@ -1,20 +1,19 @@
-import { netSocket } from "../../core/NetManager";
 import PlayerState from "./_PlayerState";
 
 export default class DashState extends PlayerState {
-    constructor(actor, manager, options = {}) {
-        super(actor, manager, options);
+    constructor(game, manager, actor, options = {}) {
+        super(game, manager, actor,options);
         this.cd = 400;
         this.duration = 300
     }
     enter() {
         super.enter()
-        this.actor.animationManager?.playAnimation('dash', false);
-        const pos = { x: this.actor.position.x, y: this.actor.position.y, z: this.actor.position.z };
-        netSocket.emit('playerAudio', { name: 'dash', pos, url: 'assets/Dash.mp3' });
         this.actor.movement.dashStart();
         this.actor.energyRegen = 0;
         this.movement.momentumBooster.increaseBoost(2);
+
+        this.actor.animationManager?.playAnimation('dash', false);
+        this.game.soundPlayer.playPosSound('dash', this.actor.position);
     }
     update(dt) {
         this.actor.movement.dashMove(dt, 10, 7);

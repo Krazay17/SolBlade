@@ -30,22 +30,24 @@ export default class Weapon {
     get stateManager() {
         return this.actor.stateManager;
     }
-    canSpellUse(currentTime) {
-        return (currentTime - this.lastUsed) >= this.cooldown;
+    canSpellUse() {
+        return (performance.now() - this.lastUsed) >= this.cooldown;
     }
-    spellUse(currentTime) {
-        if (this.canSpellUse(currentTime)) {
-            this.lastUsed = currentTime;
+    spellUse() {
+        const now = performance.now()
+        if (this.canSpellUse(now)) {
+            this.lastUsed = now;
             return true; // Spell used successfully
         }
         return false; // Spell is on cooldown
     }
-    canUse(currentTime) {
-        return (currentTime - this.lastUsed) >= this.cooldown;
+    canUse() {
+        return (performance.now() - this.lastUsed) >= this.cooldown;
     }
-    use(currentTime) {
-        if (this.canUse(currentTime)) {
-            this.lastUsed = currentTime;
+    use() {
+        const now = performance.now()
+        if (this.canUse(now)) {
+            this.lastUsed = now;
             return true; // Weapon used successfully
         }
         return false; // Weapon is on cooldown
@@ -54,15 +56,14 @@ export default class Weapon {
     meleeTrace(start, direction, length = 5, dot = 0.5, callback) {
         const actors = this.game.actorManager.hostiles;
         for (const actor of actors) {
-            const meshPos = this.tempVector.copy(actor.position);
-            meshPos.y += actor.height / 2;
-            const meshDist = meshPos.distanceTo(start);
-            const meshDir = this.tempVector2.copy(meshPos).sub(start).normalize();
+            const pos = this.tempVector.copy(actor.position);
+            const dist = pos.distanceTo(start);
+            const dir = this.tempVector2.copy(pos).sub(start).normalize();
 
             if (actor === this.actor) continue;
             if (this.hitActors.has(actor)) continue;
-            if (meshDist > length) continue;
-            if (meshDir.dot(direction) < dot) continue;
+            if (dist > length) continue;
+            if (dir.dot(direction) < dot) continue;
 
             this.hitActors.add(actor);
             callback?.(actor, direction);

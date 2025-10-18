@@ -160,22 +160,27 @@ export default class Inventory {
         this.inventoryUI.id = 'inventory-ui';
         document.body.appendChild(this.inventoryUI);
 
-        this.equippedUI = document.createElement('div');
-        this.equippedUI.id = 'inventory-equipped';
-        this.inventoryUI.appendChild(this.equippedUI);
-
         this.itemsUI = document.createElement('div');
         this.itemsUI.id = 'inventory-items';
         this.inventoryUI.appendChild(this.itemsUI);
-        this.setupDragAndDrop(this.itemsUI, this.actor);
+        this.setupDragAndDrop(this.itemsUI);
 
         this.spellUI = document.createElement('div');
         this.spellUI.id = 'spell-ui';
         document.body.appendChild(this.spellUI);
-        this.setupDragAndDrop(this.spellUI, this.actor);
+        this.setupDragAndDrop(this.spellUI);
 
-        // create 4 slots + CD overlays and keep references like this.spellSlot1CD
-        for (let i = 1; i <= 4; i++) {
+        this.weaponsUI = document.createElement('div')
+        this.weaponsUI.id = 'weapons-ui';
+        this.inventoryUI.appendChild(this.weaponsUI);
+        this.setupDragAndDrop(this.weaponsUI);
+
+        this.createEquipSlots(this.spellUI, 2, 5)
+        this.createEquipSlots(this.weaponsUI, 0, 1);
+
+    }
+    createEquipSlots(ui, from, to) {
+        for (let i = from; i <= to; i++) {
             const container = document.createElement('div');
             container.className = 'spell-slot-container';
 
@@ -185,16 +190,16 @@ export default class Inventory {
             container.appendChild(slot);
 
             const cd = document.createElement('div');
-            cd.className = 'spell-cd';        // overlay element
+            cd.className = 'spell-cd';
             container.appendChild(cd);
 
-            this.spellUI.appendChild(container);
+            ui.appendChild(container);
 
             // store reference to each CD overlay for later
             this[`spellSlot${i}CD`] = cd;
         }
     }
-    setupDragAndDrop(container, actor) {
+    setupDragAndDrop(container) {
         // container.addEventListener("dragstart", (e) => {
         //     const spell = e.target.closest(".item");
         //     if (!spell) return;
@@ -254,7 +259,8 @@ export default class Inventory {
 
             if (originalParent.classList.contains("spell-slot")) {
                 originalParent.innerHTML = "";
-                actor.setSpell(originalParent.id, null);
+                this.actor.setSpell(originalParent.id, null);
+                console.log(originalParent.id);
             }
 
             // If dropped on a specific slot
@@ -268,7 +274,7 @@ export default class Inventory {
                     if (originalParent.classList.contains("spell-slot")) {
                         slotFull.classList.add("spell");
                         originalParent.appendChild(slotFull);
-                        actor.setSpell(originalParent.id, slotFullData);
+                        this.actor.setSpell(originalParent.id, slotFullData);
                     } else if (originalParent.classList.contains("inventory-slot")) {
                         slotFull.classList.remove("spell");
                         originalParent.appendChild(slotFull);
@@ -279,7 +285,7 @@ export default class Inventory {
                     dragged.classList.remove("dragging");
                     dragged.classList.add("spell");
                     slot.appendChild(dragged);
-                    actor.setSpell(slot.id, data);
+                    this.actor.setSpell(slot.id, data);
                 } else if (slot.classList.contains("inventory-slot")) {
                     dragged.classList.remove("spell");
                     slot.appendChild(dragged);

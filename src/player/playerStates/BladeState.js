@@ -3,8 +3,8 @@ import MyEventEmitter from "../../core/MyEventEmitter";
 import PlayerState from "./_PlayerState";
 
 export default class BladeState extends PlayerState {
-    constructor(actor, manager, options = {}) {
-        super(actor, manager, options);
+    constructor(game, manager,actor, options = {}) {
+        super(game, manager,actor, options);
         this.reEnter = false;
         this.jumpCD = 0;
         this.cdSpeed = 1000;

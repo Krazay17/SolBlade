@@ -1,8 +1,8 @@
 import PlayerState from "./_PlayerState";
 
 export default class AttackState extends PlayerState {
-    constructor(actor, manager, options = {}) {
-        super(actor, manager, options);
+    constructor(game, manager, actor,options = {}) {
+        super(game, manager, actor,options);
         this.weapon = null;
     }
     enter(state, {

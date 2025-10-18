@@ -1,25 +1,26 @@
 import * as States from './index.js';
 
 export default class PlayerStateManager {
-    constructor(actor) {
+    constructor(game, actor) {
+        this.game = game;
         this.actor = actor;
         this.states = {
-            idle: new States.IdleState(actor, this),
-            run: new States.RunState(actor, this),
-            jump: new States.JumpState(actor, this),
-            fall: new States.FallState(actor, this),
-            attack: new States.AttackState(actor, this),
-            stun: new States.StunState(actor, this),
-            knockback: new States.KnockbackState(actor, this),
-            dash: new States.DashState(actor, this),
-            emote: new States.EmoteState(actor, this),
-            blade: new States.BladeState(actor, this),
-            dead: new States.DeadState(actor, this),
-            parry: new States.ParryState(actor, this),
-            bladeJump: new States.BladeJumpState(actor, this),
-            // wallCling: new States.WallClingState(actor, this),
-            // wallSlide: new States.WallSlideState(actor, this),
-            // wallJump: new States.WallJumpState(actor, this),
+            idle: new States.IdleState(game, this, actor),
+            run: new States.RunState(game, this, actor),
+            jump: new States.JumpState(game, this, actor),
+            fall: new States.FallState(game, this, actor),
+            attack: new States.AttackState(game, this, actor),
+            stun: new States.StunState(game, this, actor),
+            knockback: new States.KnockbackState(game, this, actor),
+            dash: new States.DashState(game, this, actor),
+            emote: new States.EmoteState(game, this, actor),
+            blade: new States.BladeState(game, this, actor),
+            dead: new States.DeadState(game, this, actor),
+            parry: new States.ParryState(game, this, actor),
+            bladeJump: new States.BladeJumpState(game, this, actor),
+            // wallCling: new States.WallClingState(game, this),
+            // wallSlide: new States.WallSlideState(game, this),
+            // wallJump: new States.WallJumpState(game, this),
         };
         this.activeState = this.states.idle;
         this.actionState = null;

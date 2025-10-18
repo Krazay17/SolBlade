@@ -126,4 +126,7 @@ export default class ActorManager {
     get allButPlayer() {
         return this.actors.filter(a => a !== this.player);
     }
+    get localActors(){
+        return this.actors.filter(a=> !a.isRemote && a.replicate);
+    }
 }

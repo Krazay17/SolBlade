@@ -3,19 +3,23 @@ import PlayerMovement from '../PlayerMovement';
 import Player from '../Player';
 import PlayerStateManager from './PlayerStateManager';
 import PawnBody from '../../core/PawnBody';
+import Game from '../../Game';
 export default class PlayerState {
-    constructor(actor, manager, options = {}) {
+    constructor(game, manager, actor, options = {}) {
+        /**@type {Game} */
+        this.game = game;
+        /**@type {PlayerStateManager} */
+        this.stateManager = manager;
         /**@type {Player} */
         this.actor = actor;
         /**@type {PlayerMovement} */
         this.movement = actor.movement;
         /**@type {PlayerStateManager} */
         this.manager = manager;
-        /**@type {PlayerStateManager} */
-        this.stateManager = manager;
         /**@type {PawnBody} */
         this.body = actor.body;
         this.input = actor.input;
+        
         this.tempVector = new Vector3();
 
         this.cd = 0;

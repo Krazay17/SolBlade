@@ -1,9 +1,6 @@
 import PlayerState from "./_PlayerState";
 
 export default class DeadState extends PlayerState {
-    constructor(actor, manager, options = {}) {
-        super(actor, manager, options);
-    }
     enter() {
         this.actor.animationManager?.playAnimation('knockback', false);
         this.actor.isDead = true;

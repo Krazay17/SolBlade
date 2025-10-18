@@ -58,7 +58,7 @@ export default class Projectile extends Actor {
         this.applyTexture();
     }
     async applyTexture() {
-        const texture = await this.meshManager.getTex('SkyFilter2.webp');
+        const texture = await this.meshManager.getTex('dirtMask.webp');
         this.material.map = texture;
         this.material.needsUpdate = true;
         this.texture = texture;

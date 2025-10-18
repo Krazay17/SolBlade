@@ -60,6 +60,17 @@
     z-index: 1000;
 }
 
+#weapons-ui {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    top: 10%;
+    left: 50%;
+    translate: -50%;
+    background-color: blue;
+    padding: 2mm;
+}
+
 #questUI {
     pointer-events: none;
     position: fixed;
@@ -309,8 +320,7 @@
     display: none;
     position: fixed;
     top: 0;
-    left: 100%;
-    transform: translate(-100%, 0);
+    right: 0;
     width: 40%;
     height: 80%;
     background-color: rgba(0, 0, 0, 0.8);
@@ -329,6 +339,8 @@
 }
 
 #inventory-items {
+    position: relative;
+    top: 50%;
     display: flex;
     flex-wrap: wrap;
     border: 1px solid white;

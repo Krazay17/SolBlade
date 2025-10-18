@@ -41,12 +41,11 @@ export default class WeaponPistol extends Weapon {
         }, 500);
 
     }
-    use(currentTime, pos, dir) {
-        if (this.canUse(currentTime) &&
+    use() {
+        if (super.use() &&
             this.actor.stateManager.setState('attack', {
                 weapon: this, anim: 'gunShoot', duration: 250
             })) {
-            this.lastUsed = currentTime;
             const offSetPos = pos.clone().add(this.tempVector.set(0, .8, 0));
             let cameraPos = this.tempVector2;
             this.actor.cameraArm.getWorldPosition(cameraPos);
@@ -71,9 +70,6 @@ export default class WeaponPistol extends Weapon {
                         amount: this.damage,
                         hitPosition: hit.point,
                     }));
-                    
-            this.game.soundPlayer.playPosSound('pistolShoot', pos);
-
                     // this.hitFx(hit.point, dir);
                     // MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
                 }
@@ -82,8 +78,5 @@ export default class WeaponPistol extends Weapon {
             return true;
         }
         return false;
-    }
-    spellUse(currentTime, pos, dir) {
-        console.log('spellUse');
     }
 }

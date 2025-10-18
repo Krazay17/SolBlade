@@ -11,22 +11,21 @@ export default class WeaponFireball extends Weapon {
         this.tempVector2 = new THREE.Vector3();
     }
 
-    spellUse(currentTime) {
-        if (this.canSpellUse(currentTime)
-            && this.actor.stateManager.setState('attack', { damageDelay: 850, duration: 1300, anim: 'fireball', callback: () => this.shootFireball(1, 35, 25) })) {
-            this.lastUsed = currentTime;
+    spellUse() {
+        if (super.spellUse() &&
+            this.actor.stateManager.setState('attack', { damageDelay: 850, duration: 1300, anim: 'fireball', callback: () => this.shootFireball(1, 35, 25) })) {
             this.game.soundPlayer.playPosSound('fireWhoosh', this.actor.position);
             return true;
         } else {
             return false;
         }
     }
-    use(time) {
-        if (this.canUse(time) &&
+    use() {
+        if (super.use() &&
             this.stateManager.setState('attack', {
                 weapon: this,
                 anim: 'gunShoot',
-                duration: 550,
+                duration: 450,
                 damageDelay: 100,
                 callback: () => this.shootFireball(.3, 50, 10),
             })) {
