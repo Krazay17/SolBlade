@@ -184,6 +184,7 @@ function bindSocketEvents() {
         socket.on('actorDestroy', (data) => {
             data = Actor.deserialize(data, (id) => scene.getActorById(id));
             const { netId } = data;
+            if(netId === playerId) return;
             const actor = scene.getActorById(netId);
             if (actor) actor.applyDestroy?.(data);
         });

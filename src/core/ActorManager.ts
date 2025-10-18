@@ -76,7 +76,7 @@ export default class ActorManager {
     clearActors() {
         const actors = this.allButPlayer;
         for (const a of actors) {
-            a.destroy();
+            a.applyDestroy();
         }
         this.actors = [this.player as Actor];
     }
@@ -85,11 +85,6 @@ export default class ActorManager {
         if (!actor) return;
         const index = this.actors.indexOf(actor);
         this.actors.splice(index, 1);
-    }
-    destroyActor(actor: Actor | string | undefined = undefined) {
-        actor = typeof actor === 'string' ? this.getActorById(actor) : actor;
-        if (!actor) return;
-        actor.destroy();
     }
     getActorById(id: string) {
         return this.actors.find(a => a.netId === id);
