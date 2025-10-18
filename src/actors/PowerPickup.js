@@ -24,7 +24,6 @@ export default class PowerPickup extends Pickup {
         this.add(mesh);
     }
     applyTouch(data) {
-        super.applyTouch(data);
         const { dealer, target } = data;
         if (dealer === this.game.player) {
             switch (this.data.power) {
@@ -36,5 +35,6 @@ export default class PowerPickup extends Pickup {
                     break;
             }
         }
+        this.applyDestroy();
     }
 }

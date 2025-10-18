@@ -160,7 +160,6 @@ export default class Actor extends Object3D {
         this.onTouch(data.dealer || null);
     }
     onTouch(dealer: any) {
-        this.applyDestroy();
     }
     die(data: HitData | null) {
         MyEventEmitter.emit('actorDie', data || new HitData({ target: this }));
@@ -170,7 +169,6 @@ export default class Actor extends Object3D {
         this.onDie(data);
     }
     onDie(data: any) {
-        this.applyDestroy();
     }
     destroy() {
         this.applyDestroy();
