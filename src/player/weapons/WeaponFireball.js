@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 import Weapon from './Weapon';
-import MyEventEmitter from '../../core/MyEventEmitter';
 
 export default class WeaponFireball extends Weapon {
     constructor(actor, game, isSpell = false) {
-        super(actor, 'Fireball', 30, 100, 1500, isSpell); // name, damage, range, cooldown
+        super(actor, 'Fireball', 30, 100, 1100, isSpell); // name, damage, range, cooldown
         this.game = game;
         this.projectiles = [];
         this.tempVector = new THREE.Vector3();

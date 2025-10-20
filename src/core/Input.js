@@ -34,6 +34,7 @@ export default class Input {
       'KeyT': 'goHome',
       'KeyY': 'goCrown',
       'KeyU': 'world3',
+      'KeyI': 'world4',
       'Digit1': 'spell1',
       'Digit2': 'spell2',
       'Digit3': 'spell3',

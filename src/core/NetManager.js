@@ -7,6 +7,7 @@ import Actor from "../actors/Actor";
 import VoiceChat from './VoiceChat';
 import TouchData from "./TouchData";
 import Globals from "../utils/Globals";
+import { menuButton } from "../ui/Menu";
 
 const serverURL = location.hostname === "localhost" ?
     "http://localhost:3000"
@@ -31,8 +32,6 @@ export function setNetScene(newScene) {
     scene = newScene;
     if (socket.connected && scene) {
         bindSocketEvents();
-        if (voiceChat) voiceChat.setScene(scene);
-        socket.emit('newWorld', scene.solWorld);
     }
 }
 socket.on("connect", () => {
@@ -41,23 +40,29 @@ socket.on("connect", () => {
     socket.on('disconnect', () => {
         MyEventEmitter.emit('disconnect');
         console.log("disconnected from server");
+
     });
     if (scene) {
         bindSocketEvents();
     }
 });
 function bindSocketEvents() {
+    if (voiceChat) voiceChat.setScene(scene);
+    socket.emit('joinGame', Globals.player.serialize());
+    socket.emit('newWorld', scene.solWorld);
     if (socketBound || !scene) return;
     socketBound = true;
 
     player = Globals.player;
     Globals.player.setNetId(socket.id);
-    netPlayers[socket.id] = player;
-    socket.emit('joinGame', Globals.player.serialize());
-
     voiceChat = new VoiceChat();
     voiceChat.createButton();
-    voiceChat.setScene(scene);
+
+    netPlayers[socket.id] = player;
+
+    menuButton('disconnect', () => {
+        socket.disconnect();
+    });
 
     const bindGameplay = () => {
         socket.on('playerDisconnected', (netId) => {
@@ -103,6 +108,7 @@ function bindSocketEvents() {
             MyEventEmitter.emit('crownGamePlayers', data);
         });
         socket.on('currentActors', (data) => {
+            console.log(data);
             for (const a of data) {
                 const { type, tempId, netId } = a
                 if (netId === playerId) continue;
@@ -174,24 +180,24 @@ function bindSocketEvents() {
         socket.on('actorTouch', (data) => {
             data = TouchData.deserialize(data, (id) => scene.getActorById(id));
             const { dealer, target } = data;
-            if (target && target.isRemote) target.applyTouch?.(data);
+            if (target) target.applyTouch?.(data);
         });
         socket.on('actorDie', (data) => {
             data = HitData.deserialize(data, (id) => scene.getActorById(id));
             const { dealer, target } = data;
-            if (target && target.isRemote) target.applyDie?.(data);
+            if (target) target.applyDie?.(data);
         });
         socket.on('actorDestroy', (data) => {
             data = Actor.deserialize(data, (id) => scene.getActorById(id));
             const { netId } = data;
-            if(netId === playerId) return;
+            if (netId === playerId) return;
             const actor = scene.getActorById(netId);
             if (actor) actor.applyDestroy?.(data);
         });
         socket.on('playPosSound', ({ map, data }) => {
             if (map !== scene.solWorld) return;
             scene.soundPlayer.applyPosSound(data.name, data.pos);
-        })
+        });
     }
     bindGameplay();
 }
@@ -254,9 +260,6 @@ MyEventEmitter.on('newActor', (data) => {
 });
 MyEventEmitter.on('spawnLocations', (data) => {
     socket.emit('spawnLocations', data);
-});
-MyEventEmitter.on('playerDropItem', (data) => {
-    if (socket.connected) socket.emit('playerDropItem', data);
 });
 MyEventEmitter.on('projectileDestroyed', (data) => {
     socket.emit('projectileDestroyed', data);

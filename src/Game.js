@@ -22,6 +22,8 @@ import Player from './player/Player';
 import LightManager from './core/LightManager';
 import Inventory from './player/Inventory';
 import SoundPlayer from './core/SoundPlayer';
+import World4 from './scenes/World4';
+import { menuSlider } from './ui/Menu';
 
 await RAPIER.init();
 
@@ -29,6 +31,7 @@ const worldRegistry = {
   world1: World1,
   world2: World2,
   world3: World3,
+  world4: World4,
 }
 
 export default class Game {
@@ -119,12 +122,23 @@ export default class Game {
     MyEventEmitter.on('world3', () => {
       this.setWorld('world3');
     });
+    MyEventEmitter.on('world4', () => {
+      this.setWorld('world4');
+    })
     window.addEventListener('focus', () => {
       this.running = true;
+      this.isFocused = true;
+    });
+    window.addEventListener('blur', () => {
+      this.running = true;
+      this.isFocused = false;
     });
     window.addEventListener('mousedown', () => {
       this.running = true;
     });
+    MyEventEmitter.on('disconnect', ()=>{
+      this.actorManager.clearRemoteActors();
+    })
   }
   setWorld(world) {
     const newWorld = new worldRegistry[world](this);
@@ -143,6 +157,7 @@ export default class Game {
     requestAnimationFrame(this.loop.bind(this));
   }
   handleSleep() {
+    if (this.isFocused) return;
     this.running = false;
   }
   loop(time) {
@@ -180,19 +195,31 @@ export default class Game {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     const dirLight = new THREE.DirectionalLight(0xffeeee, .5);
 
-    dirLight.position.set(50, 100, 50);
+    dirLight.position.set(0, 100, 0);
     const target = new THREE.Vector3().addVectors(dirLight.position, new THREE.Vector3(1, -1, 1).normalize())
     dirLight.lookAt(target);
 
-    dirLight.shadow.camera.left = -150;
-    dirLight.shadow.camera.right = 150;
-    dirLight.shadow.camera.top = 150;
-    dirLight.shadow.camera.bottom = -150;
+    dirLight.shadow.camera.left = -100;
+    dirLight.shadow.camera.right = 100;
+    dirLight.shadow.camera.top = 100;
+    dirLight.shadow.camera.bottom = -100;
     dirLight.shadow.camera.near = 1;
     dirLight.shadow.camera.far = 200;
 
-    dirLight.shadow.mapSize.width = 2048;
-    dirLight.shadow.mapSize.height = 2048;
+    const { label } = menuSlider('Shadow Quality', 1, 10, 1, (e) => {
+      const value = e.target.value;
+      label.innerText = `Shadow Quality: ${value}`;
+      dirLight.shadow.mapSize.width = 1024 * value;
+      dirLight.shadow.mapSize.height = 1024 * value;
+      if(dirLight.shadow.map) {
+        dirLight.shadow.map.dispose();
+        dirLight.shadow.map = null;
+      }
+      dirLight.shadow.needsUpdate = true;
+      console.log(value);
+    })
+    dirLight.shadow.mapSize.width = 1024 * 4;
+    dirLight.shadow.mapSize.height = 1024 * 4;
     dirLight.shadow.bias = -0.0001;
     dirLight.shadow.normalBias = 0.02;
 

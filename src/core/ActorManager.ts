@@ -78,7 +78,12 @@ export default class ActorManager {
         for (const a of actors) {
             a.applyDestroy();
         }
-        this.actors = [this.player as Actor];
+        this.actors = [this.player];
+    }
+    clearRemoteActors() {
+        for (const a of this.remoteActors) {
+            a.applyDestroy();
+        }
     }
     removeActor(actor: Actor | string | undefined = undefined) {
         actor = typeof actor === 'string' ? this.getActorById(actor) : actor;
@@ -121,7 +126,8 @@ export default class ActorManager {
     get allButPlayer() {
         return this.actors.filter(a => a !== this.player);
     }
-    get localActors(){
-        return this.actors.filter(a=> !a.isRemote && a.replicate);
+    get localActors() {
+        return this.actors.filter(a => !a.isRemote && a.replicate);
     }
+    get remoteActors() { return this.actors.filter(a => a.isRemote) };
 }

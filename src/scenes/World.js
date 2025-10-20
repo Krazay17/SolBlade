@@ -210,9 +210,20 @@ export default class World {
         if (childName.startsWith('Landscape')) {
           child.material.map.repeat.set(40, 40);
         }
+        if (userData.texRepeat) {
+          //child.material = child.material.clone()
+          child.material.map = child.material.map.clone();
+          child.material.map.repeat.set(userData.texRepeat, userData.texRepeat);
+          child.material.map.needsUpdate = true;
+        }
         if (childName.includes('Translucent')) {
           child.material.transparent = true;
           child.material.opacity = .2;
+        }
+        if (childName.includes('Alpha')) {
+          child.material.transparent = true;
+          child.material.depthWrite = false;
+          child.renderOrder = 1;
         }
         if (childName.startsWith('Visual')) return;
         // Collision and bvh

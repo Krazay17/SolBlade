@@ -41,17 +41,17 @@ export default class Player extends Pawn {
             this.tempVector = new THREE.Vector3();
 
             /**@type {Weapon.Weapon} */
-            this.weaponL = new Weapon.WeaponFireball(this, game);
+            this.weapon0 = new Weapon.WeaponFireball(this, game);
             /**@type {Weapon.Weapon} */
-            this.weaponR = new Weapon.WeaponSword(this, game);
+            this.weapon1 = new Weapon.WeaponSword(this, game);
             /**@type {Weapon.Weapon} */
-            this.spell1 = null;
+            this.weapon2 = null;
             /**@type {Weapon.Weapon} */
-            this.spell2 = null;
+            this.weapon3 = null;
             /**@type {Weapon.Weapon} */
-            this.spell3 = null;
+            this.weapon4 = null;
             /**@type {Weapon.Weapon} */
-            this.spell4 = null;
+            this.weapon5 = null;
 
             this.cameraArm = new THREE.Object3D();
             this.cameraArm.position.set(.333, .666, -.333);
@@ -193,25 +193,25 @@ export default class Player extends Pawn {
         if (this.input.actionStates.spell1) {
             if (canExitState && this.weapon2?.canSpellUse()) {
                 this.weapon2.spellUse();
-                MyEventEmitter.emit('spellUsed', { slot: '1', cd: this.weapon2.cooldown });
+                MyEventEmitter.emit('spellUsed', { slot: '2', cd: this.weapon2.cooldown });
             }
         }
         if (this.input.actionStates.spell2) {
             if (canExitState && this.weapon3?.canSpellUse()) {
                 this.weapon3.spellUse();
-                MyEventEmitter.emit('spellUsed', { slot: '2', cd: this.weapon3.cooldown });
+                MyEventEmitter.emit('spellUsed', { slot: '3', cd: this.weapon3.cooldown });
             }
         }
         if (this.input.actionStates.spell3) {
             if (canExitState && this.weapon4?.canSpellUse()) {
                 this.weapon4.spellUse();
-                MyEventEmitter.emit('spellUsed', { slot: '3', cd: this.weapon4.cooldown });
+                MyEventEmitter.emit('spellUsed', { slot: '4', cd: this.weapon4.cooldown });
             }
         }
         if (this.input.actionStates.spell4) {
             if (canExitState && this.weapon5?.canSpellUse()) {
                 this.weapon5.spellUse();
-                MyEventEmitter.emit('spellUsed', { slot: '4', cd: this.weapon5.cooldown });
+                MyEventEmitter.emit('spellUsed', { slot: '5', cd: this.weapon5.cooldown });
             }
         }
         if (this.input.actionStates.blade) {

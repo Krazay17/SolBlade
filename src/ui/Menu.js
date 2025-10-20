@@ -225,3 +225,21 @@ export function menuButton(text = 'Button', callback = () => { }) {
     menuElement2.appendChild(button);
     return button;
 }
+export function menuSlider(text = 'Slider', min = 0, max = 1, step = 0.1, callback = () => { }) {
+    const slider = document.createElement('input');
+    slider.classList.add('menu-slider');
+    slider.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+    })
+    slider.type = 'range';
+    slider.min = min;
+    slider.max = max;
+    slider.step = step;
+    slider.value = min;
+    slider.addEventListener('input', callback);
+    menuElement2.appendChild(slider);
+    const label = document.createElement('p');
+    label.innerText = text;
+    menuElement2.appendChild(label);
+    return { slider, label };
+}

@@ -179,6 +179,8 @@ export default class Actor extends Object3D {
         this.active = false
         this.game.graphics?.remove(this);
         this.game.actorManager?.removeActor(this);
+        this.tempId = '';
+        this.netId = null;
     }
     set health(amnt: number) {
         const clamped = Math.max(0, Math.min(this.maxHealth, amnt));

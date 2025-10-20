@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 import Actor from './Actor.js';
-import MyEventEmitter from '../core/MyEventEmitter.js';
-import TouchData from '../core/TouchData.js';
 
 export default class Pickup extends Actor {
     constructor(scene, data) {
+        data.health = 1;
         super(scene, data);
         this.active = true;
         /**@type {THREE.Object3D} */
