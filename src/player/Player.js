@@ -334,13 +334,14 @@ export default class Player extends Pawn {
     }
     healthChange(health) {
         super.healthChange(health);
-        MyEventEmitter.emit('playerHealthChange', { player: this, health });
+        MyEventEmitter.emit('playerHealthChange', { id: this.netId, health });
         if (this.isRemote) {
             this.namePlate?.setHealth(health);
             return;
         }
         if (!this.isRemote) {
             LocalData.health = health;
+            netSocket.emit('playerHealthChangeLocal', { id: this.netId, health });
         }
     }
     // only local

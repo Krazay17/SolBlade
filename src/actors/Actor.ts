@@ -81,6 +81,7 @@ export default class Actor extends Object3D {
             this.targetPosition = this.position.clone();
         }
     }
+    update(dt: number, time: number) { };
     serialize() {
         return {
             ...this.data,
@@ -129,18 +130,31 @@ export default class Actor extends Object3D {
     }
     activate(data: any) {
         this.active = true;
-        this.data = { ...data };
+        this.data = { ...this.data, ...data };
         if (data.pos) this.position.copy(data.pos);
+        if (data.rot) this.setRotationFromQuaternion(data.rot);
+        if (data.health !== undefined) this.health = data.health;
+        if (data.isDead !== undefined) this.isDead = data.isDead;
+        if (data.isRemote !== undefined) this.isRemote = data.isRemote;
+
         this.game.graphics?.add(this);
-        if (this.isRemote) return this;
-        MyEventEmitter.emit('activateActor', { actor: this, data: this.data });
-        return this;
+
+        if (!this.isRemote) MyEventEmitter.emit('newActor', this);
     }
-    update(dt: number, time: number) { };
+    deActivate() {
+        this.active = false;
+        this.game.graphics?.remove(this);
+    }
+    destroy() {
+        this.active = false
+        this.game.graphics?.remove(this);
+        this.game.actorManager?.removeActor(this);
+    }
     hit(data: HitData) {
+        console.log(data);
         MyEventEmitter.emit('actorHit', data);
         this.game.soundPlayer.playSound('hit');
-        console.log(data);
+        this.onHit(data);
     }
     applyHit(data: HitData, health: number) {
         const { dealer, type, impulse, stun, dim, dur, sound, hitPosition, amount } = data;
@@ -151,6 +165,10 @@ export default class Actor extends Object3D {
 
         if (data) this.lastHitData = data;
         if (this.health <= 0) this.die(this.lastHitData);
+        this.onHit(data);
+    }
+    onHit(data: any) {
+
     }
     touch(dealer: any) {
         MyEventEmitter.emit('actorTouch', new TouchData(dealer, this));
@@ -160,6 +178,7 @@ export default class Actor extends Object3D {
         this.onTouch(data.dealer || null);
     }
     onTouch(dealer: any) {
+        this.deActivate();
     }
     die(data: HitData | null) {
         MyEventEmitter.emit('actorDie', data || new HitData({ target: this }));
@@ -169,18 +188,7 @@ export default class Actor extends Object3D {
         this.onDie(data);
     }
     onDie(data: any) {
-        this.applyDestroy();
-    }
-    destroy() {
-        this.applyDestroy();
-        MyEventEmitter.emit('actorDestroy', this);
-    }
-    applyDestroy() {
-        this.active = false
-        this.game.graphics?.remove(this);
-        this.game.actorManager?.removeActor(this);
-        this.tempId = '';
-        this.netId = null;
+        this.deActivate();
     }
     set health(amnt: number) {
         const clamped = Math.max(0, Math.min(this.maxHealth, amnt));

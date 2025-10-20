@@ -47,8 +47,8 @@ export default class PlayerInfo {
         const healthBar = document.createElement('div');
         healthBar.id = 'health-bar';
         healthBar.style.width = `${this.health}%`;
-        MyEventEmitter.on('playerHealthChange', ({ player, health }) => {
-            if (player !== Globals.player) return;
+        MyEventEmitter.on('playerHealthChange', ({ id, health }) => {
+            if (id !== Globals.player.netId) return;
             this.health = health;
             healthBar.style.width = `${this.health}%`;
         });

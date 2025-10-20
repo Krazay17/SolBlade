@@ -9,20 +9,11 @@ export default class PartyFrame {
         this.container.id = 'party-frame';
         document.getElementById('game-data').appendChild(this.container);
 
-        MyEventEmitter.on('playerJoined', (player) => {
+        MyEventEmitter.on('playerConnected', (player) => {
             this.addPlayer(player);
         });
-        MyEventEmitter.on('playerLeft', (player) => {
+        MyEventEmitter.on('playerDisconnected', (player) => {
             this.removePlayer(player);
-        });
-        MyEventEmitter.on('playerHealthChange', ({ player, health }) => {
-            const playerElement = this.players.get(player);
-            if (playerElement) {
-                const healthFill = playerElement.querySelector('.party-healthbar-fill');
-                if (healthFill) {
-                    healthFill.style.width = `${health}%`;
-                }
-            }
         });
         MyEventEmitter.on('playerNameUpdate', ({ player, name }) => {
             const playerElement = this.players.get(player);
@@ -42,6 +33,11 @@ export default class PartyFrame {
         const healthFill = document.createElement('div');
         healthFill.className = 'party-healthbar-fill';
         healthFill.style.width = `${player.health}%`;
+        MyEventEmitter.on('playerHealthChange', ({ id, health }) => {
+            if (player.netId === id) {
+                healthFill.style.width = `${health}%`;
+            }
+        })
 
         healthBar.appendChild(healthFill);
 
@@ -64,12 +60,12 @@ export default class PartyFrame {
     removePlayer(player) {
         if (!player) return;
         const el = this.players.get(player)
-        if(!el) return;
+        if (!el) return;
         this.container.removeChild(el);
         this.players.delete(player);
     }
 
     selectPlayer(player) {
-        Globals.player.body.position = player.position;
+        Globals.player.body.position = player.pos;
     }
 }

@@ -136,7 +136,7 @@ export default class Game {
     window.addEventListener('mousedown', () => {
       this.running = true;
     });
-    MyEventEmitter.on('disconnect', ()=>{
+    MyEventEmitter.on('disconnect', () => {
       this.actorManager.clearRemoteActors();
     })
   }
@@ -206,17 +206,14 @@ export default class Game {
     dirLight.shadow.camera.near = 1;
     dirLight.shadow.camera.far = 200;
 
-    const { label } = menuSlider('Shadow Quality', 1, 10, 1, (e) => {
-      const value = e.target.value;
-      label.innerText = `Shadow Quality: ${value}`;
+    menuSlider('Shadow Quality', 1, 10, 1, (value) => {
       dirLight.shadow.mapSize.width = 1024 * value;
       dirLight.shadow.mapSize.height = 1024 * value;
-      if(dirLight.shadow.map) {
+      if (dirLight.shadow.map) {
         dirLight.shadow.map.dispose();
         dirLight.shadow.map = null;
       }
       dirLight.shadow.needsUpdate = true;
-      console.log(value);
     })
     dirLight.shadow.mapSize.width = 1024 * 4;
     dirLight.shadow.mapSize.height = 1024 * 4;

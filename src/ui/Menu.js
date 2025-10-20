@@ -236,10 +236,15 @@ export function menuSlider(text = 'Slider', min = 0, max = 1, step = 0.1, callba
     slider.max = max;
     slider.step = step;
     slider.value = min;
-    slider.addEventListener('input', callback);
-    menuElement2.appendChild(slider);
     const label = document.createElement('p');
     label.innerText = text;
+    slider.addEventListener('input', (e) => {
+        const value = e.target.value;
+        label.innerText = `${text}: ${value}`;
+        callback(value);
+    });
+
+    menuElement2.appendChild(slider);
     menuElement2.appendChild(label);
     return { slider, label };
 }

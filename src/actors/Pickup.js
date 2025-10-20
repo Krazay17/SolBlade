@@ -21,11 +21,12 @@ export default class Pickup extends Actor {
         this.add(this.mesh);
     }
     onTouch(dealer) {
+        if (!this.active) return;
         this.game.soundPlayer.applyPosSound('pickup', this.position);
     }
     applyTouch(data) {
         super.applyTouch(data);
-        this.applyDestroy();
+        this.destroy();
     }
     checkDistanceToPlayer() {
         const player = this.scene.player;

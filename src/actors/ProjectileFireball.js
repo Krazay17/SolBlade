@@ -23,7 +23,7 @@ export default class ProjectileFireball extends Projectile {
             this.scale.add({ x: sizeDelta, y: sizeDelta, z: sizeDelta })
             if (this.scale.x > 8) {
                 this.explode = false;
-                this.applyDestroy();
+                this.destroy();
             }
         }
     }
@@ -32,13 +32,13 @@ export default class ProjectileFireball extends Projectile {
         super.die(data);
 
         if (this.isRemote) return;
-        const explosionRange = 6;
+        const explosionRange = this.radius * 20;
         const enemiesInRange = this.scene.actorManager.getActorsInRange(this.owner, this, this.position, explosionRange);
         for (const [enemy, range] of enemiesInRange) {
-            const distance = clamp((1 - ((range - this.radius) / explosionRange)), .5, 1);
+            const distance = Math.min((1 - ((range - this.radius) / explosionRange)), 1);
             const damage = this.damage * distance;
             const direction = enemy.position.clone().sub(this.position).normalize();
-            const force = direction.multiplyScalar(this.damage * (1 - (range / explosionRange)));
+            const force = direction.multiplyScalar(damage * (1 - (range / explosionRange)));
             enemy.hit(new HitData({
                 dealer: this.owner,
                 target: enemy,
@@ -46,6 +46,7 @@ export default class ProjectileFireball extends Projectile {
                 impulse: force,
                 type: 'fire',
                 hitPosition: this.position,
+                dim: 500,
             }));
         }
     }

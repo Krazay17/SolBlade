@@ -8,6 +8,7 @@ import PowerPickup from "../actors/PowerPickup";
 import CrownPickup from "../actors/CrownPickup";
 import Game from "../Game";
 import LocalData from "./LocalData";
+import EnemyJulian from "../actors/EnemyJulian";
 
 const actorRegistry: Record<string, any> = {
     player: Player,
@@ -15,6 +16,7 @@ const actorRegistry: Record<string, any> = {
     item: ItemPickup,
     power: PowerPickup,
     crown: CrownPickup,
+    julian: EnemyJulian,
 }
 
 export default class ActorManager {
@@ -36,12 +38,8 @@ export default class ActorManager {
         for (const a of this.actors) { a.update(dt, time) };
     }
     spawnLocalPlayer() {
-        //const solWorld = this.game?.solWorld;
-        const actorClass = actorRegistry['player'];
-        if (!actorClass) throw console.error('NO PLAYER');
-
-        const player = new actorClass(this.game, { pos: LocalData.position || { x: 0, y: 1, z: 0 }, solWorld: LocalData.solWorld })
-        this.actors.push(player as Actor);
+        const player = new actorRegistry['player'](this.game, { pos: LocalData.position || { x: 0, y: 1, z: 0 }, solWorld: LocalData.solWorld })
+        this.actors.push(player);
         return player;
     }
     spawnActor(
@@ -64,25 +62,23 @@ export default class ActorManager {
         this.actors.push(actor);
         if (!isRemote && replicate) {
             if (type === 'player') {
-                MyEventEmitter.emit('newPlayer', actor.serialize());
+                MyEventEmitter.emit('newPlayer', actor);
             } else {
-                MyEventEmitter.emit('newActor', actor.serialize());
+                MyEventEmitter.emit('newActor', actor);
             }
-        } else if (type === 'player') {
-            MyEventEmitter.emit('playerJoined', actor);
         }
         return actor;
     }
     clearActors() {
         const actors = this.allButPlayer;
         for (const a of actors) {
-            a.applyDestroy();
+            a.destroy();
         }
         this.actors = [this.player];
     }
     clearRemoteActors() {
         for (const a of this.remoteActors) {
-            a.applyDestroy();
+            a.destroy();
         }
     }
     removeActor(actor: Actor | string | undefined = undefined) {

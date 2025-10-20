@@ -23,6 +23,10 @@ export default class PowerPickup extends Pickup {
         );
         this.add(mesh);
     }
+    touch(dealer) {
+        super.touch(dealer);
+        this.active = false;
+    }
     applyTouch(data) {
         const { dealer, target } = data;
         if (dealer === this.game.player) {
@@ -35,6 +39,6 @@ export default class PowerPickup extends Pickup {
                     break;
             }
         }
-        this.applyDestroy();
+        super.applyTouch(data);
     }
 }
