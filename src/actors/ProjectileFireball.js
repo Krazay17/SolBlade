@@ -38,7 +38,7 @@ export default class ProjectileFireball extends Projectile {
             const distance = Math.min((1 - ((range - this.radius) / explosionRange)), 1);
             const damage = this.damage * distance;
             const direction = enemy.position.clone().sub(this.position).normalize();
-            const force = direction.multiplyScalar(damage * (1 - (range / explosionRange)));
+            const force = direction.multiplyScalar(Math.min(16, ((damage * .7) * (1 - (range / explosionRange)))));
             enemy.hit(new HitData({
                 dealer: this.owner,
                 target: enemy,

@@ -9,6 +9,14 @@ export default class PartyFrame {
         this.container.id = 'party-frame';
         document.getElementById('game-data').appendChild(this.container);
 
+        MyEventEmitter.on('disconnect', () => {
+            for (const [p, el] of this.players) {
+                console.log(p)
+                this.removePlayer(p)
+            }
+            this.players.clear();
+        })
+
         MyEventEmitter.on('playerConnected', (player) => {
             this.addPlayer(player);
         });
@@ -43,7 +51,7 @@ export default class PartyFrame {
 
         playerElement.appendChild(healthBar);
         playerElement.addEventListener('click', () => {
-            this.selectPlayer(player);
+            //this.selectPlayer(player);
         });
 
         playerElement.addEventListener('mousedown', (e) => {

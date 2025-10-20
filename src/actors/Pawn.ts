@@ -12,6 +12,7 @@ import Actor from "./Actor";
 import RAPIER from "@dimforge/rapier3d-compat";
 import PawnBody from "../core/PawnBody";
 import Game from "../Game";
+import { lerp } from "three/src/math/MathUtils.js";
 
 export default class Pawn extends Actor {
     body: PawnBody | null = null;
@@ -63,16 +64,13 @@ export default class Pawn extends Actor {
             if (this.body) {
                 this.body.position = this.position;
             }
-            if (this.position.distanceToSquared(this.targetPosition) > 2) {
+            if (this.position.distanceToSquared(this.targetPosition) > 25) {
                 this.position.copy(this.targetPosition);
             } else {
                 this.position.lerp(this.targetPosition, 60 * dt);
             }
-            if (Math.abs(this.rotation.y - this.targetRotation) > 5) {
-                this.rotation.y = this.targetRotation;
-            } else {
-                this.rotation.y += (this.targetRotation - this.rotation.y) * 60 * dt;
-            }
+
+            this.rotation.y = lerp(this.rotation.y, this.targetRotation, 60 * dt);
         }
     }
     async assignMesh(meshName: string) {

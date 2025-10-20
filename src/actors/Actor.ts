@@ -149,6 +149,8 @@ export default class Actor extends Object3D {
         this.active = false
         this.game.graphics?.remove(this);
         this.game.actorManager?.removeActor(this);
+        this.tempId = '';
+        this.netId = '';
     }
     hit(data: HitData) {
         console.log(data);
