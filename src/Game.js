@@ -144,7 +144,9 @@ export default class Game {
     const newWorld = new worldRegistry[world](this);
     if (!newWorld) return;
     if (this.world && !this.world.levelLoaded) return;
+    this.player.solWorld = world;
     this.player.tick = false;
+    MyEventEmitter.emit('playerStateUpdate', this.player);
 
     this.actorManager.clearActors();
     this.lightManager.destroy();
@@ -229,6 +231,9 @@ export default class Game {
     // const rimLight = new THREE.DirectionalLight(0xffffff, 1);
     // rimLight.position.set(-1, 1, 1);
     // this.graphicsWorld.add(rimLight);
+  }
+  getActorById(id) {
+    return this.actorManager.getActorById(id);
   }
   add(obj) {
     if (obj) this.graphicsWorld.add(obj);

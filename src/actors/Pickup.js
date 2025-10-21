@@ -20,6 +20,10 @@ export default class Pickup extends Actor {
         this.mesh.scale.set(scale, scale, scale);
         this.add(this.mesh);
     }
+    touch(dealer) {
+        super.touch(dealer)
+        this.active = false;
+    }
     onTouch(dealer) {
         if (!this.active) return;
         this.game.soundPlayer.applyPosSound('pickup', this.position);

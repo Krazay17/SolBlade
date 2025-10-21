@@ -1,4 +1,3 @@
-import MyEventEmitter from "./MyEventEmitter";
 import Quest from "./Quest";
 
 export default class QuestPlayerKill extends Quest {

@@ -16,7 +16,7 @@ export default class QuestCrown extends Quest {
         this.setNotification('Enter Crown Game', 'quest-blue');
 
         const joinCrownGame = () => {
-            if (netSocket.connected && this.manager.player.netId) {
+            if (netSocket.connected && this.player.netId) {
                 this.gameOn = true;
                 netSocket.emit('crownGameEnter');
             } else {
@@ -31,15 +31,15 @@ export default class QuestCrown extends Quest {
         this.onPickupCrown = id => this.pickupCrown(id);
         this.onGameEnd = id => {
             this.gameOn = false;
-            const player = this.manager.game.actorManager.getActorById(id)?.name ?? 'Unknown';
-            if(id === this.player.netId) {
+            const player = this.game.getActorById(id)?.name ?? 'Unknown';
+            if (id === this.player.netId) {
                 this.completeQuest();
             }
             this.setNotification(`${player} Wins!!!`);
         };
         this.onDied = () => {
-            const diePos = this.manager.player.serialize().pos;
-            const finalPos = this.manager.player.position.y > this.manager.game.world.data.killFloor ? diePos : null;
+            const diePos = this.player.position;
+            const finalPos = diePos.y > (this.game.world.data.killFloor + 2) ? diePos : null;
             netSocket.emit('dropCrown', finalPos);
         };
         this.onGamePlayers = data => {
@@ -62,19 +62,25 @@ export default class QuestCrown extends Quest {
         netSocket.on('crownGameEnd', this.onGameEnd);
     }
 
+    died() {
+        const diePos = this.player.position;
+        const finalPos = diePos.y > (this.game.world.data.killFloor + 2) ? diePos : null;
+        netSocket.emit('dropCrown', finalPos);
+    }
     destroy() {
         // ✅ Unbind with same references
         super.destroy();
     }
     pickupCrown(id) {
-        if (!this.gameOn) return;
-        const player = this.manager.game.actorManager.getActorById(id);
+        console.log(this);
+        const player = this.game.getActorById(id);
         if (!player) return;
         player.pickupCrown();
         this.setNotification(`${player.name} picked up the crown`)
     }
     dropCrown(id) {
-        const player = this.manager.game.actorManager.getActorById(id)
+        console.log('dropCrown')
+        const player = this.game.getActorById(id)
         if (!player) return;
         player.dropCrown();
         if (!this.gameOn) return;
@@ -84,7 +90,7 @@ export default class QuestCrown extends Quest {
         this.gameOn = false;
         this.setNotification('Exit Crown Game', 'quest-red');
         netSocket.emit('crownGameLeave');
-        this.manager.player.dropCrown();
+        this.player.dropCrown();
         MyEventEmitter.off('iDied', this.onDied);
         MyEventEmitter.off('crownGamePlayers', this.onGamePlayers);
         netSocket.off('crownScoreIncrease', this.onScoreIncrease);

@@ -53,7 +53,6 @@ function joinGame() {
     netPlayers[playerId] = player;
     initBindings();
     socket.emit('joinGame', player.serialize());
-    console.log(player.serialize());
     socket.emit('newWorld', scene.solWorld);
     if (voiceChat) voiceChat.setScene(scene);
 }
