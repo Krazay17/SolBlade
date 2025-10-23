@@ -70,6 +70,7 @@ export default class AnimationManager {
             return clip;
         } else {
             console.warn(`Animation ${name} not found.`);
+            return false;
         }
     }
     queAnimation(name: string, loop: boolean = true) {

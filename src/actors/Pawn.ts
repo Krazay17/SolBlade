@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import World from "../scenes/World";
 import AnimationManager from "../core/AnimationManager";
 import MyEventEmitter from "../core/MyEventEmitter";
 import StateManager from '../core/states/StateManager';
@@ -23,7 +22,9 @@ export default class Pawn extends Actor {
     targetRotation: number = 0;
     controller: AIController | null = null;
     movement: PlayerMovement | AIMovement | null = null;
-    mesh: THREE.SkinnedMesh | null = null;
+    skin: string;
+    mesh: THREE.Group | null = null;
+    meshBody: THREE.SkinnedMesh | null = null;
     stateManager: StateManager | PlayerStateManager | null = null;
     animationManager: AnimationManager | null = null;
     namePlate: NamePlate | null = null;
@@ -39,6 +40,7 @@ export default class Pawn extends Actor {
         this.radius = radius;
         this.height = height;
         this.meshName = meshName;
+        this.skin = meshName;
 
         this.assignMesh(meshName);
 
@@ -75,16 +77,23 @@ export default class Pawn extends Actor {
     }
     async assignMesh(meshName: string) {
         const mesh = await this.scene.meshManager?.createSkeleMesh(meshName);
-        if (!mesh) return;
+        if (!mesh) return false;
+        if (this.mesh) {
+            this.remove(this.mesh);
+        }
         this.add(mesh);
-        this.mesh = mesh.meshBody as THREE.SkinnedMesh;
-        this.mesh.userData.owner = this;
-        this.animationManager = new AnimationManager(this, this.mesh, mesh.animations);
-        this.meshAssigned();
-        MyEventEmitter.emit('newPawnMesh', this.mesh);
+        this.mesh = mesh;
+        this.meshBody = mesh.meshBody as THREE.SkinnedMesh;
+        if (this.meshBody) this.meshBody.userData.owner = this;
+        this.animationManager = new AnimationManager(this, this.meshBody ?? this.mesh, mesh.animations);
+        this.skin = meshName;
+        this.data.skin = meshName;
+
+        return true;
     }
-    meshAssigned() { }
     getMeshBody() {
-        return this.mesh;
+        return this.meshBody;
     }
+
+
 }

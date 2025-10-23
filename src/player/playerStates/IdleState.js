@@ -8,20 +8,23 @@ export default class IdleState extends PlayerState {
 
         switch (this.pivot()) {
             case 'Front':
-                this.animationManager?.playAnimation('runStopFwd', false, () => this.animationManager?.playAnimation('idle', true));
+                this.animationManager?.playAnimation('runStopFwd', false, () => this.animationManager?.playAnimation('idle', true)) || this.idle();
                 break;
             case 'Left':
-                this.animationManager?.playAnimation('runStopLeft', false, () => this.animationManager?.playAnimation('idle', true));
+                this.animationManager?.playAnimation('runStopLeft', false, () => this.animationManager?.playAnimation('idle', true)) || this.idle();
                 break;
             case 'Right':
-                this.animationManager?.playAnimation('runStopRight', false, () => this.animationManager?.playAnimation('idle', true));
+                this.animationManager?.playAnimation('runStopRight', false, () => this.animationManager?.playAnimation('idle', true)) || this.idle();
                 break;
             case 'Back':
-                this.animationManager?.playAnimation('runStopBack', false, () => this.animationManager?.playAnimation('idle', true));
+                this.animationManager?.playAnimation('runStopBack', false, () => this.animationManager?.playAnimation('idle', true)) || this.idle();
                 break;
             default:
                 this.animationManager?.playAnimation('idle', true);
         }
+    }
+    idle() {
+        this.animationManager?.playAnimation('idle', true);
     }
     update(dt) {
         if (!this.actor.movement.idleMove(dt)) {

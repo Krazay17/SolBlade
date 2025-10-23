@@ -205,6 +205,14 @@ function initBindings() {
         if (map !== scene.solWorld) return;
         scene.soundPlayer.applyPosSound(data.name, data.pos);
     });
+    socket.on('playerStateUpdate', (data) => {
+        const { netId } = data;
+        if (netId === playerId) return
+        const actor = scene.getActorById(netId);
+        if (actor) {
+            actor.stateUpdate(data);
+        }
+    })
 }
 
 MyEventEmitter.on('playPosSound', ({ name, pos }) => {
@@ -246,6 +254,9 @@ MyEventEmitter.on('leaveWorld', (world) => {
 MyEventEmitter.on('playerNameChange', (data) => {
     socket.emit('playerNameChange', data);
 });
+MyEventEmitter.on('playerStateUpdate', (data) => {
+    socket.emit('playerStateUpdate', data?.serialize?.());
+})
 MyEventEmitter.on('actorStateUpdate', data => {
     socket.emit('actorStateUpdate', data?.serialize?.());
 });

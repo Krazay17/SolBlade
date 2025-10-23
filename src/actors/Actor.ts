@@ -141,6 +141,9 @@ export default class Actor extends Object3D {
 
         if (!this.isRemote) MyEventEmitter.emit('newActor', this);
     }
+    stateUpdate(data: any) {
+        console.log(data);
+    }
     deActivate() {
         this.active = false;
         this.game.graphics?.remove(this);

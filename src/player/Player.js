@@ -11,6 +11,7 @@ import Globals from '../utils/Globals';
 import Pawn from '../actors/Pawn';
 import PlayerStateManager from './playerStates/PlayerStateManager';
 import HitData from '../core/HitData';
+import { menuButton } from '../ui/Menu';
 
 export default class Player extends Pawn {
     constructor(game, data = {}) {
@@ -19,7 +20,7 @@ export default class Player extends Pawn {
             data.health = LocalData.health;
             data.name = LocalData.name;
         }
-        super(game, data, 'knightGirl', .5, 1);
+        super(game, data, data.skin || 'knightGirl', .5, 1);
         this.tick = true;
 
         this.world = game.world;
@@ -52,6 +53,13 @@ export default class Player extends Pawn {
             this.weapon4 = null;
             /**@type {Weapon.Weapon} */
             this.weapon5 = null;
+
+            menuButton('spikeMan', () => {
+                this.assignMesh('spikeMan');
+            });
+            menuButton('knightGirl', () => {
+                this.assignMesh('knightGirl');
+            });
 
             this.cameraArm = new THREE.Object3D();
             this.cameraArm.position.set(.333, .666, -.333);
@@ -104,7 +112,20 @@ export default class Player extends Pawn {
         this.tick = true;
         this.body.wakeUp();
     }
-
+    async assignMesh(skin) {
+        if (await super.assignMesh(skin)) {
+            if (this.isRemote) return;
+            MyEventEmitter.emit('playerStateUpdate', this);
+        }
+    }
+    stateUpdate(data) {
+        const { skin } = data;
+        console.log(data);
+        if (skin && (this.skin !== skin)) {
+            this.assignMesh(skin);
+            console.log('tryChangeSkin');
+        }
+    }
     dropCrown() {
         if (this.crownMesh) {
             this.remove(this.crownMesh);

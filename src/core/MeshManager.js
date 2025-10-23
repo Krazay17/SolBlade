@@ -8,6 +8,7 @@ const modelRegister = new Map([
     ['ninjaDude', '/assets/NinjaDude.glb'],
     ['julian', '/assets/julian.glb'],
     ['lavaGolem', '/assets/LavaGolem.glb'],
+    ['spikeMan', '/assets/spikeMan.glb'],
 ])
 
 export default class MeshManager {

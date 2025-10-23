@@ -26,10 +26,10 @@ export default class QuestCrown extends Quest {
         joinCrownGame();
 
         // ✅ Bind and store references
-        this.onScoreIncrease = data => this.updateQuest(data);
-        this.onDropCrown = id => this.dropCrown(id);
-        this.onPickupCrown = id => this.pickupCrown(id);
-        this.onGameEnd = id => {
+        this.onScoreIncrease = (data) => this.updateQuest(data);
+        this.onDropCrown = (id) => this.dropCrown(id);
+        this.onPickupCrown = (id) => this.pickupCrown(id);
+        this.onGameEnd = (id) => {
             this.gameOn = false;
             const player = this.game.getActorById(id)?.name ?? 'Unknown';
             if (id === this.player.netId) {
@@ -42,7 +42,7 @@ export default class QuestCrown extends Quest {
             const finalPos = diePos.y > (this.game.world.data.killFloor + 2) ? diePos : null;
             netSocket.emit('dropCrown', finalPos);
         };
-        this.onGamePlayers = data => {
+        this.onGamePlayers = (data) => {
             this.players = data;
             this.updateQuest();
             for (const [id, p] of Object.entries(this.players)) {

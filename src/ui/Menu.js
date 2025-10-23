@@ -56,24 +56,6 @@ export default class Menu {
         this.sensitivityText = document.createElement('p');
         this.sensitivityText.innerText = 'Mouse Sensitivity: ' + Globals.input.sensitivity;
         menuElement.appendChild(this.sensitivityText);
-
-        const skinGrid = document.createElement('div');
-        skinGrid.classList.add('menu-button-grid');
-        menuElement.appendChild(skinGrid);
-        this.skinButton = document.createElement('button');
-        this.skinButton.innerText = 'Ninja';
-        this.skinButton.classList.add('menu-button');
-        skinGrid.appendChild(this.skinButton);
-        this.skinButton.addEventListener('click', () => {
-            Globals.player.setMesh('NinjaDude');
-        });
-        this.skinButton2 = document.createElement('button');
-        this.skinButton2.innerText = 'Girl';
-        this.skinButton2.classList.add('menu-button');
-        skinGrid.appendChild(this.skinButton2);
-        this.skinButton2.addEventListener('click', () => {
-            Globals.player.setMesh('KnightGirl');
-        });
     }
 
     createAudioSection() {
