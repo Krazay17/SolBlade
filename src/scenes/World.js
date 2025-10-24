@@ -44,6 +44,9 @@ export default class World {
     this.mapLoaded = {};
     this.spawnPoints = [];
 
+    /**@type {THREE.Texture[]} */
+    this.panningTextures = [];
+
     this.createSky();
 
     this.map = null;
@@ -109,6 +112,12 @@ export default class World {
         this.player.die('The Void');
       }
     }
+    if (this.panningTextures) {
+      for (const tex of this.panningTextures) {
+        tex.rotation += 2 * dt;
+        tex.offset.add({ x: dt * .1, y: 0 });
+      }
+    }
   }
 
   getRespawnPoint() {
@@ -137,10 +146,10 @@ export default class World {
     light.position.copy(pos);
     this.graphics.add(light);
   }
-  createPortal(pos, targetPos, newScene) {
-    const portal = new Portal(this);
+  createPortal(pos, targetPos, newWorld) {
+    const portal = new Portal(this.game);
     portal.position.set(pos.x, pos.y, pos.z);
-    portal.init(targetPos, newScene);
+    portal.init(targetPos, newWorld);
   }
   spawnLevel(name = 'world2', callback) {
     if (this.mapLoaded[name]) return;
@@ -199,13 +208,8 @@ export default class World {
           this.game.lightManager.spawnLight({ type: 'pointLight', pos: child.position, color: userData.color, intensity: child.scale.x * 10 });
           return;
         }
-        if (childName.startsWith('Portal')) {
-          this.createPortal(
-            child.position,
-            { x: userData.pos[0], y: userData.pos[1], z: userData.pos[2] },
-            userData.scene
-          );
-          return;
+        if (childName.includes('PanningTex')) {
+          this.panningTextures.push(child.material.map);
         }
         if (childName.startsWith('Landscape')) {
           child.material.map.repeat.set(40, 40);
@@ -222,10 +226,20 @@ export default class World {
         }
         if (childName.includes('Alpha')) {
           child.material.transparent = true;
-          child.material.depthWrite = false;
+          child.material.opacity = 6;
+          //child.material.depthWrite = false;
           child.renderOrder = 1;
         }
         if (childName.startsWith('Visual')) return;
+        if (childName.startsWith('Portal')) {
+          const pos = userData.pos ? { x: userData.pos[0], y: userData.pos[1], z: userData.pos[2] } : undefined
+          this.createPortal(
+            child.position,
+            pos,
+            userData.world
+          );
+          return;
+        }
         // Collision and bvh
         if (child.isMesh) {
           // if(!child.geometry) return;

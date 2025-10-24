@@ -82,6 +82,10 @@ export default class ActorManager {
             a.destroy();
         }
     }
+    addActor(actor: Actor) {
+        if (!actor) return;
+        this.actors.push(actor);
+    }
     removeActor(actor: Actor | string | undefined = undefined) {
         actor = typeof actor === 'string' ? this.getActorById(actor) : actor;
         if (!actor) return;

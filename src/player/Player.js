@@ -104,7 +104,12 @@ export default class Player extends Pawn {
         this.world = newWorld;
         this.solWorld = this.world.solWorld;
         if (LocalData.solWorld !== this.solWorld) {
-            this.body.position = this.world.spawnPos;
+            if (this.portalPos) {
+                this.body.position = this.portalPos
+                this.portalPos = null;
+            } else {
+                this.body.position = this.world.spawnPos;
+            }
             this.body.velocity = { x: 0, y: 0, z: 0 };
         }
         LocalData.solWorld = this.solWorld

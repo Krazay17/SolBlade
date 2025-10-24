@@ -140,10 +140,12 @@ export default class Game {
       this.actorManager.clearRemoteActors();
     })
   }
-  setWorld(world) {
+  setWorld(world, pos) {
     const newWorld = new worldRegistry[world](this);
     if (!newWorld) return;
     if (this.world && !this.world.levelLoaded) return;
+
+    this.player.portalPos = pos;
     this.player.solWorld = world;
     this.player.tick = false;
     MyEventEmitter.emit('playerStateUpdate', this.player);
@@ -154,6 +156,7 @@ export default class Game {
     if (this.world?.onExit) this.world.onExit();
     this.world = newWorld;
     if (this.world?.onEnter) this.world.onEnter(this.worldReady);
+
   }
   start() {
     requestAnimationFrame(this.loop.bind(this));

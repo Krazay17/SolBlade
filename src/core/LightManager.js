@@ -15,6 +15,7 @@ export default class LightManager {
                 break;
         }
         light.position.set(pos.x, pos.y, pos.z);
+        light.distance = intensity * 2;
         this.lights.push(light);
         this.game.add(light);
         return light;
