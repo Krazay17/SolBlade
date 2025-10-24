@@ -151,6 +151,7 @@ function initBindings() {
     socket.on('newWorld', player => {
         const data = Actor.deserialize(player, (id) => scene.getActorById(id));
         const { type, netId, solWorld } = data;
+        if(netId === playerId) return;
         const actor = scene.getActorById(netId);
         if (actor && (scene.solWorld !== solWorld)) {
             //voiceChat.voiceMap[netId].gain.gain.value = 0;
@@ -161,7 +162,6 @@ function initBindings() {
         }
     });
     socket.on('currentActors', (data) => {
-        console.log(data);
         for (const a of data) {
             const { type, tempId, netId } = a
             if (netId === playerId) continue;
@@ -271,9 +271,6 @@ MyEventEmitter.on('newActor', (data) => {
 });
 MyEventEmitter.on('spawnLocations', (data) => {
     socket.emit('spawnLocations', data);
-});
-MyEventEmitter.on('projectileDestroyed', (data) => {
-    socket.emit('projectileDestroyed', data);
 });
 MyEventEmitter.on('projectileMoved', (data) => {
     socket.emit('projectileMoved', data);

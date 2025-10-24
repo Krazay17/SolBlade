@@ -65,10 +65,10 @@ export default class PlayerState {
         let moveDir;
         if (useVel) {
             moveDir = this.body.velocity;
-            if (moveDir.length() < .5) return "Neutral";
+            if (moveDir.length() < .8) return "Neutral";
             moveDir.normalize();
         } else {
-            moveDir = this.movement.getInputDirection(1);
+            moveDir = this.movement.getInputDirection(-1);
         }
 
         let angleDeg = vectorsToLateralDegrees(lookDir, moveDir);
