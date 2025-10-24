@@ -287,7 +287,6 @@ export default class PlayerMovement {
 
         if (this.direction.length() === 0) {
             this.direction.z = z;
-            return this.direction
         }
         const { rotatedX, rotatedZ } = this.rotateInputVector(this.direction);
 

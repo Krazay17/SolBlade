@@ -4,6 +4,8 @@ import Player from '../Player';
 import PlayerStateManager from './PlayerStateManager';
 import PawnBody from '../../core/PawnBody';
 import Game from '../../Game';
+import { vectorsToLateralDegrees } from '../../utils/Utils';
+import Input from '../../core/Input';
 export default class PlayerState {
     constructor(game, manager, actor, options = {}) {
         /**@type {Game} */
@@ -18,8 +20,9 @@ export default class PlayerState {
         this.manager = manager;
         /**@type {PawnBody} */
         this.body = actor.body;
+        /**@type {Input} */
         this.input = actor.input;
-        
+
         this.tempVector = new Vector3();
 
         this.cd = 0;
@@ -56,5 +59,27 @@ export default class PlayerState {
             return true;
         }
         return false;
+    }
+    pivot(useVel = false) {
+        const lookDir = this.actor.getShootData().dir.normalize();
+        let moveDir;
+        if (useVel) {
+            moveDir = this.body.velocity;
+            if (moveDir.length() < .5) return "Neutral";
+            moveDir.normalize();
+        } else {
+            moveDir = this.movement.getInputDirection(1);
+        }
+
+        let angleDeg = vectorsToLateralDegrees(lookDir, moveDir);
+
+        // Determine sector (0=Front, 1=Left, 2=Back, 3=Right)
+        const sector = Math.floor((angleDeg + 45) / 90) % 4;
+        switch (sector) {
+            case 0: return "Front";
+            case 1: return "Right";
+            case 2: return "Back";
+            case 3: return "Left";
+        }
     }
 }

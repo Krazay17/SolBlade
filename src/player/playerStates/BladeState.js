@@ -26,7 +26,7 @@ export default class BladeState extends PlayerState {
             this.grounded = false;
             this.movement.jumpStart(.333);
             this.jumping = performance.now() + 400;
-            this.actor.animationManager.playAnimation('jump')
+            this.actor.animationManager.playAnimation('jump', false);
             return;
         }
         if (this.jumping > performance.now()) return this.movement.jumpMove(dt, 6);

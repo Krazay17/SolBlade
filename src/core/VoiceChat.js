@@ -129,12 +129,61 @@ export default class VoiceChat {
             });
         }, 50);
     }
+    update() {
+        if (!this.scene) return;
+        const player = this.scene.player;
+        if (!player) return;
+        const playerPos = player.position;
+        if (!playerPos.y) return;
+        const time = this.audioContext.currentTime;
+        const playerRot = player.rotation.y;
+        const forward = this.tempVector.set(0, 0, -1);
+        forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerRot);
+        if (this.audioContext.listener.forwardX) {
+            this.audioContext.listener.forwardX.linearRampToValueAtTime(forward.x, time + 0.06);
+            this.audioContext.listener.forwardY.linearRampToValueAtTime(forward.y, time + 0.06);
+            this.audioContext.listener.forwardZ.linearRampToValueAtTime(forward.z, time + 0.06);
+        } else {
+            this.audioContext.listener.setOrientation(forward.x, forward.y, forward.z, 0, 1, 0);
+        }
+        if (this.audioContext.listener.positionX) {
+            this.audioContext.listener.positionX.linearRampToValueAtTime(playerPos.x, time + 0.06);
+            this.audioContext.listener.positionY.linearRampToValueAtTime(playerPos.y, time + 0.06);
+            this.audioContext.listener.positionZ.linearRampToValueAtTime(playerPos.z, time + 0.06);
+        } else {
+            this.audioContext.listener.setPosition(playerPos.x, playerPos.y, playerPos.z);
+        }
+        /**@type {Map} */
+        const players = this.scene.getScenePlayersPos();
+        if (!players) return;
+
+        players.forEach((pos, id) => {
+            if (id === netSocket.id) return; // don't update our own
+            if (!this.voiceMap) return;
+            const audio = this.voiceMap[id];
+            if (!audio) return;
+            if (audio.gain) {
+                //audio.gain.gain.linearRampToValueAtTime(this.voicesVolume, time + 0.06);
+            }
+            /**@type {PannerNode} */
+            const panner = audio.panner;
+            if (panner) {
+                if (panner.positionX) {
+                    panner.positionX.linearRampToValueAtTime(pos.x, time + 0.06);
+                    panner.positionY.linearRampToValueAtTime(pos.y, time + 0.06);
+                    panner.positionZ.linearRampToValueAtTime(pos.z, time + 0.06);
+                } else {
+                    panner.setPosition(pos.x, pos.y, pos.z);
+                }
+            }
+        });
+    }
 
     setScene(scene) {
         this.scene = scene;
         if (!this.voiceMap) return;
         for (const [id, v] of Object.entries(this.voiceMap)) {
-            v.gain.gain.value = 0;
+            //v.gain.gain.value = 0;
         }
     }
 
@@ -169,6 +218,7 @@ export default class VoiceChat {
                     noiseSuppression: true,
                     echoCancellation: false,
                     autoGainControl: false,
+                    sampleRate: 48000,
                 }
             });
 
@@ -273,7 +323,10 @@ export default class VoiceChat {
             panner.orientationZ.setValueAtTime(-1, this.audioContext.currentTime);
 
             // Connect graph: source -> panner -> gain -> destination
-            source.connect(panner).connect(gain).connect(this.audioContext.destination);
+            source
+                .connect(panner)
+                //.connect(gain)
+                .connect(this.audioContext.destination);
 
             // Save references if you want to update volume / position later
             if (!this.voiceMap) this.voiceMap = {};

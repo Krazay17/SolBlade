@@ -1,12 +1,11 @@
 import { netSocket } from "../../core/NetManager";
-import { vectorsToLateralDegrees } from "../../utils/Utils";
 import PlayerState from "./_PlayerState";
 
 export default class IdleState extends PlayerState {
     enter() {
         this.actor.movement.grounded = true;
 
-        switch (this.pivot()) {
+        switch (this.pivot(true)) {
             case 'Front':
                 this.animationManager?.playAnimation('runStopFwd', false, () => this.animationManager?.playAnimation('idle', true)) || this.idle();
                 break;
@@ -62,22 +61,5 @@ export default class IdleState extends PlayerState {
             return false;
         }
         return true;
-    }
-    pivot() {
-        const dir = this.actor.getShootData().dir.normalize();
-        const vel = this.body.velocity;
-        if (vel.length() < .5) return "Neutral";
-        vel.normalize();
-
-        let angleDeg = vectorsToLateralDegrees(dir, vel);
-
-        // Determine sector (0=Front, 1=Left, 2=Back, 3=Right)
-        const sector = Math.floor((angleDeg + 45) / 90) % 4;
-        switch (sector) {
-            case 0: return "Front";
-            case 1: return "Right";
-            case 2: return "Back";
-            case 3: return "Left";
-        }
     }
 }
