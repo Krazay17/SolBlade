@@ -73,13 +73,17 @@ export default class PlayerState {
 
         let angleDeg = vectorsToLateralDegrees(lookDir, moveDir);
 
-        // Determine sector (0=Front, 1=Left, 2=Back, 3=Right)
-        const sector = Math.floor((angleDeg + 45) / 90) % 4;
+        const sector = Math.floor((angleDeg + 22.5) / 45) % 8;
+        console.log(sector);
         switch (sector) {
             case 0: return "Front";
-            case 1: return "Right";
-            case 2: return "Back";
-            case 3: return "Left";
+            case 1: return "Front";
+            case 2: return "Right";
+            case 3: return "Right";
+            case 4: return "Back";
+            case 5: return "Left";
+            case 6: return "Left";
+            case 7: return "Front";
         }
     }
 }

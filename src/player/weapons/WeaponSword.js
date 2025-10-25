@@ -35,7 +35,7 @@ export default class WeaponSword extends Weapon {
         if (super.use() &&
             this.actor.stateManager.setState('attack', {
                 weapon: this,
-                anim: 'attack',
+                anim: 'attackRight',
                 damageDelay: 240,
                 damageDuration: 220,
                 duration: 600,

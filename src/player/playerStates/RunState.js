@@ -26,25 +26,22 @@ export default class RunState extends PlayerState {
             && this.manager.setState('jump')) {
             return;
         }
+        switch (this.pivot(false)) {
+            case 'Front':
+                this.animationManager.playAnimation('run');
+                break;
+            case 'Back':
+                this.animationManager.playAnimation('runBwd');
+                break;
+            case 'Left':
+                this.animationManager.playAnimation('strafeLeft');
+                break;
+            case 'Right':
+                this.animationManager.playAnimation('strafeRight');
+                break;
+            default:
+                this.animationManager.playAnimation('run');
 
-        let strafe = true;
-        if (input.actionStates.moveForward) {
-            strafe = false;
-            this.actor.animationManager?.playAnimation('run');
-        }
-        if (input.actionStates.moveBackward) {
-            strafe = false;
-            this.actor.animationManager?.playAnimation('run');
-        }
-        if (input.actionStates.moveLeft) {
-            if (strafe) {
-                this.actor.animationManager?.playAnimation('strafeLeft');
-            }
-        }
-        if (input.actionStates.moveRight) {
-            if (strafe) {
-                this.actor.animationManager?.playAnimation('strafeRight');
-            }
         }
         if (!this.movement.isGrounded()) {
             if (!this.floorTimer) {

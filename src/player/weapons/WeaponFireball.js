@@ -12,7 +12,7 @@ export default class WeaponFireball extends Weapon {
 
     spellUse() {
         if (super.spellUse() &&
-            this.actor.stateManager.setState('attack', { damageDelay: 850, duration: 1300, anim: 'fireball', callback: () => this.shootFireball(1, 35, 25) })) {
+            this.actor.stateManager.setState('attack', { damageDelay: 850, duration: 1300, anim: 'attackSpell', callback: () => this.shootFireball(1, 35, 25) })) {
             this.game.soundPlayer.playPosSound('fireWhoosh', this.actor.position);
             return true;
         } else {
@@ -23,7 +23,7 @@ export default class WeaponFireball extends Weapon {
         if (super.use() &&
             this.stateManager.setState('attack', {
                 weapon: this,
-                anim: 'gunShoot',
+                anim: 'attackLeft',
                 duration: 450,
                 damageDelay: 100,
                 callback: () => this.shootFireball(.3, 50, 10),
