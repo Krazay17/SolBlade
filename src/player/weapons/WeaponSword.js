@@ -5,7 +5,7 @@ import HitData from "../../core/HitData";
 
 export default class WeaponSword extends Weapon {
     constructor(actor, game, slot = 0) {
-        super(actor, 'Sword', 35, 2.9, 1200, slot); // name, damage, range, cooldown
+        super(actor, 'Sword', 35, 2.9, 1250, slot); // name, damage, range, cooldown
         this.game = game;
         this.damageDuration = 0; // duration of the sword trace in milliseconds
         this.dashSpeed = 0;
@@ -70,7 +70,7 @@ export default class WeaponSword extends Weapon {
                     target,
                     type: 'physical',
                     amount: this.damage,
-                    stun: 500,
+                    stun: 400,
                     hitPosition: target.position,
                     impulse: knockbackDir,
                     sound: 'swordHit',

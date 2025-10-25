@@ -42,9 +42,9 @@ export default class Player extends Pawn {
             this.tempVector = new THREE.Vector3();
 
             /**@type {Weapon.Weapon} */
-            this.weapon0 = new Weapon.WeaponFireball(this, game, 0);
+            this.weapon0 = new Weapon.WeaponFireball(this, game, '0');
             /**@type {Weapon.Weapon} */
-            this.weapon1 = new Weapon.WeaponSword(this, game, 1);
+            this.weapon1 = new Weapon.WeaponSword(this, game, '1');
             /**@type {Weapon.Weapon} */
             this.weapon2 = null;
             /**@type {Weapon.Weapon} */

@@ -3,7 +3,7 @@ import Weapon from './Weapon';
 
 export default class WeaponFireball extends Weapon {
     constructor(actor, game, slot = 0) {
-        super(actor, 'Fireball', 30, 100, 1100, slot); // name, damage, range, cooldown
+        super(actor, 'Fireball', 30, 100, 1250, slot); // name, damage, range, cooldown
         this.game = game;
     }
 
@@ -32,7 +32,7 @@ export default class WeaponFireball extends Weapon {
         if (super.use() &&
             this.stateManager.setState('attack', {
                 weapon: this,
-                duration: 700,
+                duration: 550,
                 onExit: () => { if (this.onAttack) clearTimeout(this.onAttack) }
             })) {
 
