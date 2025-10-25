@@ -113,10 +113,26 @@ export default class PlayerMovement {
         }
         return true;
     }
+    smartMove(dt) {
+        if(this.isGrounded()) {
+            this.groundMove(dt);
+        } else {
+            this.airMove(dt);
+        }
+    }
 
-    dashForward() {
+    dashForward(speed = 7, restrictY = true) {
         const forward = this.actor.getShootData().dir;
-        this.body.velocity = forward.multiplyScalar(7);
+        if (restrictY) forward.y = Math.min(0, forward.y);
+        forward.normalize();
+        this.body.velocity = forward.multiplyScalar(speed);
+    }
+
+    hoverFreeze() {
+        const x = this.body.velocity.x *= .98;
+        const z = this.body.velocity.z *= .98;
+        const y = this.body.velocity.y < 0 ? this.body.velocity.y *= .9 : this.body.velocity.y *= .999;
+        this.body.velocity = { x, y, z };
     }
 
     attackMove(dt, friction = null, speed = null) {

@@ -34,6 +34,21 @@ export default class PawnBody {
     set velocity(vel: { x: number, y: number, z: number }) {
         this.body.setLinvel(vel, true);
     }
+    set velocityX(x: number) {
+        const y = this.body.linvel().y;
+        const z = this.body.linvel().z;
+        this.body.setLinvel({ x, y, z }, true);
+    }
+    set velocityY(y: number) {
+        const x = this.body.linvel().x;
+        const z = this.body.linvel().z;
+        this.body.setLinvel({ x, y, z }, true);
+    }
+    set velocityZ(z: number) {
+        const x = this.body.linvel().x;
+        const y = this.body.linvel().y;
+        this.body.setLinvel({ x, y, z }, true);
+    }
     sleep() {
         this.body.sleep();
     }

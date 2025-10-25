@@ -30,3 +30,10 @@ export function vectorsToLateralDegrees(vec1, vec2) {
 
     return angleDeg;
 }
+
+export function lerpAngle(a, b, t) {
+    let diff = b - a;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    return a + diff * t;
+}

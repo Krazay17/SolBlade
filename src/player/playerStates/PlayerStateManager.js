@@ -44,7 +44,7 @@ export default class PlayerStateManager {
             this.activeState?.exit(newState);
             this.lastState = this.currentStateName;
             this.activeState = this.states[newState];
-            console.log(`State change: ${this.lastState} -> ${newState}`);
+            //console.log(`State change: ${this.lastState} -> ${newState}`);
             this.activeState?.enter(this.lastState, enterParams);
             this.currentStateName = newState;
             return true;

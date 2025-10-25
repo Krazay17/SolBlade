@@ -21,6 +21,7 @@ export default class Weapon {
         /**@type {Game} */
         this.game = null;
         this.isSpell = isSpell;
+        this.damageDelay = 0;
 
         if (isSpell) {
             this.cooldown *= 8;
@@ -30,6 +31,7 @@ export default class Weapon {
     get stateManager() {
         return this.actor.stateManager;
     }
+    get movement() { return this.actor.movement }
     canSpellUse() {
         return (performance.now() - this.lastUsed) >= this.cooldown;
     }

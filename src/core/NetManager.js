@@ -82,7 +82,6 @@ function initBindings() {
         for (const [netId, player] of Object.entries(players)) {
             if (netId === playerId) return;
             netPlayers[netId] = player
-            console.log(netId, player);
             MyEventEmitter.emit('playerConnected', player);
         }
     });

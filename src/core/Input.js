@@ -109,6 +109,8 @@ export default class Input {
 
       if (Math.abs(e.movementX) < 200 && Math.abs(e.movementY) < 200) {
         this.yaw -= e.movementX * this.sensitivity;
+        this.yaw = ((this.yaw + Math.PI) % (Math.PI * 2)) - Math.PI;
+
         this.pitch = Math.max(
           -Math.PI / 2,
           Math.min(Math.PI / 2, this.pitch - e.movementY * this.sensitivity)

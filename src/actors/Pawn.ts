@@ -12,6 +12,7 @@ import RAPIER from "@dimforge/rapier3d-compat";
 import PawnBody from "../core/PawnBody";
 import Game from "../Game";
 import { lerp } from "three/src/math/MathUtils.js";
+import { lerpAngle } from "../utils/Utils";
 
 export default class Pawn extends Actor {
     body: PawnBody | null = null;
@@ -71,8 +72,8 @@ export default class Pawn extends Actor {
             } else {
                 this.position.lerp(this.targetPosition, 60 * dt);
             }
-
-            this.rotation.y = lerp(this.rotation.y, this.targetRotation, 60 * dt);
+            this.rotation.y = lerpAngle(this.rotation.y, this.targetRotation, 60 * dt)
+            //this.rotation.y = lerp(this.rotation.y, this.targetRotation, 60 * dt);
         }
     }
     async assignMesh(meshName: string) {

@@ -51,7 +51,8 @@ export default class Game {
     this.accumulator = 0;
     this.timeStep = 1 / 120;
 
-    this.renderer = new THREE.WebGLRenderer({ alpha: 0, antialias: true });
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.renderer.clearColor(0x000000);
     //this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     document.body.appendChild(this.renderer.domElement);
     this.renderer.setSize(window.innerWidth, window.innerHeight);

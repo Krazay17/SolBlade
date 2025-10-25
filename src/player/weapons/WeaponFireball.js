@@ -5,29 +5,37 @@ export default class WeaponFireball extends Weapon {
     constructor(actor, game, isSpell = false) {
         super(actor, 'Fireball', 30, 100, 1100, isSpell); // name, damage, range, cooldown
         this.game = game;
-        this.projectiles = [];
-        this.tempVector = new THREE.Vector3();
-        this.tempVector2 = new THREE.Vector3();
     }
 
     spellUse() {
         if (super.spellUse() &&
-            this.actor.stateManager.setState('attack', { damageDelay: 850, duration: 1300, anim: 'attackSpell', callback: () => this.shootFireball(1, 35, 25) })) {
+            this.actor.stateManager.setState('attack', {
+                weapon: this,
+                duration: 1300,
+                anim: 'attackSpell',
+                onExit: () => { if (this.onAttack) clearTimeout(this.onAttack) }
+            })) {
+            this.onAttack = setTimeout(() => this.shootFireball(1, 35, 30), 800);
+            this.actor.animationManager.playAnimation('attackSpell', false);
             this.game.soundPlayer.playPosSound('fireWhoosh', this.actor.position);
             return true;
-        } else {
-            return false;
+        }
+    }
+    update(dt) {
+        if (this.isSpell) {
+            this.movement.hoverFreeze();
         }
     }
     use() {
         if (super.use() &&
             this.stateManager.setState('attack', {
                 weapon: this,
-                anim: 'attackLeft',
                 duration: 700,
-                damageDelay: 100,
-                callback: () => this.shootFireball(.3, 50, 10),
+                onExit: () => { if (this.onAttack) clearTimeout(this.onAttack) }
             })) {
+
+            this.onAttack = setTimeout(() => this.shootFireball(.4, 80, 15), 200);
+            this.actor.animationManager.playAnimation('attackLeft', false);
             this.game.soundPlayer.playPosSound('fireballUse', this.actor.position);
             return true;
         }
@@ -47,6 +55,5 @@ export default class WeaponFireball extends Weapon {
             dur: 30000,
             owner: this.actor,
         }, false, true);
-        this.projectiles.push(projectile);
     }
 }
