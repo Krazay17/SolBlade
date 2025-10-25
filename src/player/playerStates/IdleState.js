@@ -4,8 +4,6 @@ import PlayerState from "./_PlayerState";
 export default class IdleState extends PlayerState {
     enter() {
         this.actor.movement.grounded = true;
-        console.log(this.pivot(true));
-
         switch (this.pivot(true)) {
             case 'Front':
                 this.animationManager?.playAnimation('runStopFwd', false, () => this.idle()) || this.idle();

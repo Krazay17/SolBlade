@@ -42,9 +42,9 @@ export default class Player extends Pawn {
             this.tempVector = new THREE.Vector3();
 
             /**@type {Weapon.Weapon} */
-            this.weapon0 = new Weapon.WeaponFireball(this, game);
+            this.weapon0 = new Weapon.WeaponFireball(this, game, 0);
             /**@type {Weapon.Weapon} */
-            this.weapon1 = new Weapon.WeaponSword(this, game);
+            this.weapon1 = new Weapon.WeaponSword(this, game, 1);
             /**@type {Weapon.Weapon} */
             this.weapon2 = null;
             /**@type {Weapon.Weapon} */
@@ -138,16 +138,15 @@ export default class Player extends Pawn {
     }
     setSpell(slot, weapon) {
         const weaponName = weapon?.name || null;
-        const isSpell = slot > 1;
         switch (weaponName) {
             case 'Fireball':
-                weapon = new Weapon.WeaponFireball(this, this.game, isSpell);
+                weapon = new Weapon.WeaponFireball(this, this.game, slot);
                 break;
             case 'Pistol':
-                weapon = new Weapon.WeaponPistol(this, this.game, isSpell);
+                weapon = new Weapon.WeaponPistol(this, this.game, slot);
                 break;
             case 'Sword':
-                weapon = new Weapon.WeaponSword(this, this.game, isSpell);
+                weapon = new Weapon.WeaponSword(this, this.game, slot);
                 break;
             default:
                 weapon = null;

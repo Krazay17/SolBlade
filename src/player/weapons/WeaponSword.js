@@ -4,11 +4,12 @@ import { spawnParticles } from "../../actors/ParticleEmitter";
 import HitData from "../../core/HitData";
 
 export default class WeaponSword extends Weapon {
-    constructor(actor, game, isSpell = false) {
-        super(actor, 'Sword', 35, 2.9, 1200, isSpell); // name, damage, range, cooldown
+    constructor(actor, game, slot = 0) {
+        super(actor, 'Sword', 35, 2.9, 1200, slot); // name, damage, range, cooldown
         this.game = game;
         this.damageDuration = 0; // duration of the sword trace in milliseconds
         this.dashSpeed = 0;
+        console.log(slot);
     }
     hitFx(pos) {
         spawnParticles(pos, 25);
@@ -18,7 +19,7 @@ export default class WeaponSword extends Weapon {
             this.actor.stateManager.setState('attack', {
                 // pass attack state this, so it can tick this for damage
                 weapon: this,
-                duration: 1500,
+                duration: 1300,
                 onExit: () => {
                     this.actor.setParry(false);
                 }
@@ -39,7 +40,7 @@ export default class WeaponSword extends Weapon {
         if (super.use() &&
             this.actor.stateManager.setState('attack', {
                 weapon: this,
-                duration: 700,
+                duration: 550,
                 onExit: () => {
                     this.actor.setParry(false);
                 }
@@ -50,7 +51,9 @@ export default class WeaponSword extends Weapon {
             this.damageDuration = 300;
             this.dashSpeed = Math.max(8, this.actor.body.velocity.length());
 
-            this.actor.animationManager.playAnimation('attackRight', false);
+            const anim = this.slot === '0' ? 'attackLeft' : 'attackRight';
+            console.log(anim);
+            this.actor.animationManager.playAnimation(anim, false);
             this.game.soundPlayer.playPosSound('heavySword', this.actor.position);
 
             return true;
@@ -81,19 +84,20 @@ export default class WeaponSword extends Weapon {
                 this.actor.setParry(true);
             }
         }
-        if (!this.isSpell) {
+        if (this.slot > 1) {
+            if (delay < performance.now() && duration > performance.now()) {
+                this.dashSpeed = Math.max(0, this.dashSpeed - 6 * dt);
+                this.actor.movement.dashForward(this.dashSpeed);
+            }
+            this.movement.hoverFreeze(dt, .95);
+        } else {
             if (duration > performance.now()) {
                 this.dashSpeed = Math.max(0, this.dashSpeed - 6 * dt);
                 if (this.movement.isGrounded()) {
                     this.actor.movement.dashForward(this.dashSpeed);
                 }
             }
-        } else {
-            if (delay < performance.now() && duration > performance.now()) {
-                this.dashSpeed = Math.max(0, this.dashSpeed - 6 * dt);
-                    this.actor.movement.dashForward(this.dashSpeed);
-            }
+            this.movement.smartMove(dt);
         }
-        this.movement.smartMove(dt);
     }
 }

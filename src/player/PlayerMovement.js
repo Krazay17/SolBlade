@@ -114,7 +114,7 @@ export default class PlayerMovement {
         return true;
     }
     smartMove(dt) {
-        if(this.isGrounded()) {
+        if (this.isGrounded()) {
             this.groundMove(dt);
         } else {
             this.airMove(dt);
@@ -128,10 +128,10 @@ export default class PlayerMovement {
         this.body.velocity = forward.multiplyScalar(speed);
     }
 
-    hoverFreeze() {
-        const x = this.body.velocity.x *= .98;
-        const z = this.body.velocity.z *= .98;
-        const y = this.body.velocity.y < 0 ? this.body.velocity.y *= .9 : this.body.velocity.y *= .999;
+    hoverFreeze(dt, lateralDampening = .98) {
+        const x = this.body.velocity.x *= lateralDampening - dt;
+        const z = this.body.velocity.z *= lateralDampening - dt;
+        const y = this.body.velocity.y < 0 ? this.body.velocity.y *= .9 - dt : this.body.velocity.y *= .999 - dt;
         this.body.velocity = { x, y, z };
     }
 

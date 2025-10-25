@@ -5,7 +5,7 @@ import Player from '../Player';
 import Game from '../../Game';
 
 export default class Weapon {
-    constructor(actor, name = 'Weapon', damage = 1, range = 10, cooldown = 1000, isSpell = false) {
+    constructor(actor, name = 'Weapon', damage = 1, range = 10, cooldown = 1000, slot = 0) {
         /**@type {Player} */
         this.actor = actor;
         this.name = name;
@@ -20,10 +20,10 @@ export default class Weapon {
 
         /**@type {Game} */
         this.game = null;
-        this.isSpell = isSpell;
+        this.slot = slot
         this.damageDelay = 0;
 
-        if (isSpell) {
+        if (this.slot > 1) {
             this.cooldown *= 8;
         }
         this.lastUsed = -this.cooldown; // timestamp of last use

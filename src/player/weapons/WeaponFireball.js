@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import Weapon from './Weapon';
 
 export default class WeaponFireball extends Weapon {
-    constructor(actor, game, isSpell = false) {
-        super(actor, 'Fireball', 30, 100, 1100, isSpell); // name, damage, range, cooldown
+    constructor(actor, game, slot = 0) {
+        super(actor, 'Fireball', 30, 100, 1100, slot); // name, damage, range, cooldown
         this.game = game;
     }
 
@@ -22,8 +22,10 @@ export default class WeaponFireball extends Weapon {
         }
     }
     update(dt) {
-        if (this.isSpell) {
-            this.movement.hoverFreeze();
+        if (this.slot > 1) {
+            this.movement.hoverFreeze(dt);
+        } else {
+            this.movement.smartMove(dt);
         }
     }
     use() {
@@ -34,8 +36,9 @@ export default class WeaponFireball extends Weapon {
                 onExit: () => { if (this.onAttack) clearTimeout(this.onAttack) }
             })) {
 
-            this.onAttack = setTimeout(() => this.shootFireball(.4, 80, 15), 200);
-            this.actor.animationManager.playAnimation('attackLeft', false);
+            this.onAttack = setTimeout(() => this.shootFireball(.4, 100, 15), 200);
+            const anim = this.slot === '0' ? 'attackLeft' : 'attackRight';
+            this.actor.animationManager.playAnimation(anim, false);
             this.game.soundPlayer.playPosSound('fireballUse', this.actor.position);
             return true;
         }
