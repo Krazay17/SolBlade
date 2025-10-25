@@ -24,7 +24,7 @@ export default class WeaponFireball extends Weapon {
             this.stateManager.setState('attack', {
                 weapon: this,
                 anim: 'attackLeft',
-                duration: 450,
+                duration: 700,
                 damageDelay: 100,
                 callback: () => this.shootFireball(.3, 50, 10),
             })) {

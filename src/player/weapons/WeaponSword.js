@@ -38,7 +38,7 @@ export default class WeaponSword extends Weapon {
                 anim: 'attackRight',
                 damageDelay: 240,
                 damageDuration: 220,
-                duration: 600,
+                duration: 700,
                 doesParry: true,
                 friction: 2,
                 speed: 2,
