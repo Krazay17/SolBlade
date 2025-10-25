@@ -3,8 +3,8 @@ import MyEventEmitter from "../../core/MyEventEmitter";
 import PlayerState from "./_PlayerState";
 
 export default class BladeState extends PlayerState {
-    constructor(game, manager,actor, options = {}) {
-        super(game, manager,actor, options);
+    constructor(game, manager, actor, options = {}) {
+        super(game, manager, actor, options);
         this.reEnter = false;
         this.jumpCD = 0;
         this.cdSpeed = 1000;
@@ -17,7 +17,7 @@ export default class BladeState extends PlayerState {
     enter(state, neutral) {
         this.lastEnter = performance.now();
         this.floorTimer = null;
-        this.actor.animationManager?.setAnimState('crouch', false);
+        this.animationManager.playAnimation('blade', true);
         this.actor.energyRegen = this.actor.bladeDrain;
     }
     update(dt) {
@@ -33,13 +33,10 @@ export default class BladeState extends PlayerState {
         else this.jumping = 0;
         this.actor.movement.bladeMove(dt);
 
-        this.actor.animationManager?.playAnimation('crouch', false);
-
         if (!this.input.actionStates.blade || this.actor.energy <= 0) {
             this.manager.setState('idle');
             return;
         }
-
         if (!this.actor.movement.isGrounded(.1)) {
             if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {
@@ -54,6 +51,12 @@ export default class BladeState extends PlayerState {
                 //this.actor.movement.bladeStart();
             }
             this.grounded = true;
+        }
+
+        if (this.grounded) {
+            this.animationManager.playAnimation('blade', true);
+        } else {
+            this.animationManager.playAnimation('bladeAir', true);
         }
     }
     exit(state) {

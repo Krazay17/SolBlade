@@ -74,7 +74,6 @@ export default class PlayerState {
         let angleDeg = vectorsToLateralDegrees(lookDir, moveDir);
 
         const sector = Math.floor((angleDeg + 22.5) / 45) % 8;
-        console.log(sector);
         switch (sector) {
             case 0: return "Front";
             case 1: return "Front";
