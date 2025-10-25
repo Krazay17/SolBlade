@@ -177,6 +177,7 @@ export default class Game {
       MyEventEmitter.emit('preUpdate', dt, time);
 
       this.accumulator += dt;
+      this.accumulator = Math.min(this.accumulator, 0.25);
       while (this.accumulator >= this.timeStep) {
         this.physicsWorld.step();
         this.world?.fixedUpdate?.(this.timeStep, time);
