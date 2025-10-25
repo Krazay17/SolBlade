@@ -23,7 +23,7 @@ export default class FallState extends PlayerState {
     }
     anim() {
 
-        switch (this.pivot()) {
+        switch (this.pivot(true)) {
             case 'Front':
                 this.animationManager?.playAnimation('fall', true);
                 break;
