@@ -4,19 +4,20 @@ import PlayerState from "./_PlayerState";
 export default class IdleState extends PlayerState {
     enter() {
         this.actor.movement.grounded = true;
+        console.log(this.pivot(true));
 
         switch (this.pivot(true)) {
             case 'Front':
-                this.animationManager?.playAnimation('runStopFwd', false, () => this.animationManager?.playAnimation('idle', true)) || this.idle();
+                this.animationManager?.playAnimation('runStopFwd', false, () => this.idle()) || this.idle();
                 break;
             case 'Left':
-                this.animationManager?.playAnimation('runStopLeft', false, () => this.animationManager?.playAnimation('idle', true)) || this.idle();
+                this.animationManager?.playAnimation('runStopLeft', false, () => this.idle()) || this.idle();
                 break;
             case 'Right':
-                this.animationManager?.playAnimation('runStopRight', false, () => this.animationManager?.playAnimation('idle', true)) || this.idle();
+                this.animationManager?.playAnimation('runStopRight', false, () => this.idle()) || this.idle();
                 break;
             case 'Back':
-                this.animationManager?.playAnimation('runStopBack', false, () => this.animationManager?.playAnimation('idle', true)) || this.idle();
+                this.animationManager?.playAnimation('runStopBack', false, () => this.idle()) || this.idle();
                 break;
             default:
                 this.animationManager?.playAnimation('idle', true);

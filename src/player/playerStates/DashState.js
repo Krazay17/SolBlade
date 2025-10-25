@@ -18,16 +18,16 @@ export default class DashState extends PlayerState {
                 this.animationManager?.playAnimation('dash', false);
                 break;
             case 'Left':
-                this.animationManager?.playAnimation('dashLeft', false) || this.animationManager?.playAnimation('dash', true);
+                this.animationManager?.playAnimation('dashLeft', false) || this.animationManager?.playAnimation('dash', false);
                 break;
             case 'Right':
-                this.animationManager?.playAnimation('dashRight', false) ||this.animationManager?.playAnimation('dash', true);
+                this.animationManager?.playAnimation('dashRight', false) || this.animationManager?.playAnimation('dash', false);
                 break;
             case 'Back':
-                this.animationManager?.playAnimation('dashBwd', false) || this.animationManager?.playAnimation('dash', true);
+                this.animationManager?.playAnimation('dashBwd', false) || this.animationManager?.playAnimation('dash', false);
                 break;
             default:
-                this.animationManager?.playAnimation('dash', true) ||this.animationManager?.playAnimation('dash', true);
+                this.animationManager?.playAnimation('dash', false) || this.animationManager?.playAnimation('dash', false);
         }
     }
     update(dt) {

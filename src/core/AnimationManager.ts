@@ -10,6 +10,7 @@ export default class AnimationManager {
     timeScaleTimer: NodeJS.Timeout | null = null;
     currentAnimation: string | null = null;
     _onFinishedListener: any;
+    quedAnim: NodeJS.Timeout | null = null;
     setAnimState = this.playAnimation;
     hitFreeze = this.changeTimeScale;
 
@@ -43,12 +44,14 @@ export default class AnimationManager {
                 this.currentAction.timeScale = 1;
                 this.currentAction.crossFadeTo(action, 0.175); // .125
             }
+
             action.reset().fadeIn(0.1).play();
             this.currentAction = action;
             this.currentAnimation = name;
 
             if (this._onFinishedListener) {
-                this.mixer.removeEventListener('finished', this._onFinishedListener);
+                if (this.quedAnim) clearTimeout(this.quedAnim)
+                //this.mixer.removeEventListener('finished', this._onFinishedListener);
                 this._onFinishedListener = null;
             }
             if (!loop && onFinished && !this.pawn.isRemote) {
@@ -58,11 +61,14 @@ export default class AnimationManager {
                     } catch (e) {
                         console.log('onFinished callback failed', e);
                     }
-                    this.mixer.removeEventListener('finished', listener);
+                    //this.mixer.removeEventListener('finished', listener);
                     this._onFinishedListener = null;
                 }
                 this._onFinishedListener = listener;
-                this.mixer.addEventListener('finished', listener);
+                //this.mixer.addEventListener('finished', listener);
+                const clipDuration = action.getClip().duration / action.timeScale * 1000;
+                console.log(clipDuration);
+                this.quedAnim = setTimeout(listener, clipDuration);
             }
 
             if (!this.pawn.isRemote) MyEventEmitter.emit('playAnimation', { name, loop });
@@ -97,6 +103,13 @@ export default class AnimationManager {
         }
         if (this.pawn.isRemote) return;
         MyEventEmitter.emit('changeAnimation', { scale, duration });
+    }
+    clearTimeScale() {
+        if (this.timeScaleTimer) {
+            clearTimeout(this.timeScaleTimer);
+            this.timeScaleTimer = null;
+            this.mixer.timeScale = 1;
+        }
     }
 
     update(deltaTime: number) {

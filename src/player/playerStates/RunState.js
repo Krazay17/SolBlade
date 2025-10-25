@@ -61,5 +61,4 @@ export default class RunState extends PlayerState {
         }
 
     }
-
 }
