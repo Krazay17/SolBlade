@@ -50,10 +50,6 @@ export default class PlayerState {
         return this.exitTimer < performance.now();
     }
 
-    setAnimState(state) {
-        this.actor?.setAnimState?.(state);
-    };
-
     isTryingToMove() {
         if (this.input.keys['KeyW'] || this.input.keys['KeyA'] || this.input.keys['KeyS'] || this.input.keys['KeyD']) {
             return true;
@@ -65,10 +61,11 @@ export default class PlayerState {
         let moveDir;
         if (useVel) {
             moveDir = this.body.velocity;
-            if (moveDir.length() < .8) return "Neutral";
+            const lateral = Math.atan2(moveDir.x, moveDir.z);
+            if (lateral === 0) return "Front";
             moveDir.normalize();
         } else {
-            moveDir = this.movement.getInputDirection(-1);
+            moveDir = this.movement.getInputDirection();
         }
 
         let angleDeg = vectorsToLateralDegrees(lookDir, moveDir);

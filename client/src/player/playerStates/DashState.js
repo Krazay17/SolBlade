@@ -31,7 +31,7 @@ export default class DashState extends PlayerState {
         }
     }
     update(dt) {
-        this.actor.movement.dashMove(dt, 10, 7);
+        this.actor.movement.dashMove(dt, 8, 5.5);
         if (this.exitTimer < performance.now()) {
             if (this.input.actionStates.blade) {
                 this.manager.setState('blade');

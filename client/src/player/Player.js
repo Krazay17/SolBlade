@@ -386,28 +386,6 @@ export default class Player extends Pawn {
 
         MyEventEmitter.emit('playerRespawn');
     }
-    getAnimState() {
-        return this.animationManager ? this.animationManager.currentAnimation : null;
-    }
-    setAnimState(anim) {
-        if (this.animationManager) {
-            this.animationManager.playAnimation(anim, true);
-        }
-    }
-    setupCapsule(height, radius) {
-        const capsuleGeo = new THREE.CapsuleGeometry(radius, height, 4, 8);
-        const capsuleMat = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true });
-        const capsule = new THREE.Mesh(capsuleGeo, capsuleMat);
-
-        return capsule;
-    }
-    playerNetData() {
-        return {
-            pos: { x: this.position.x, y: this.position.y, z: this.position.z },
-            rot: this.rotation.y,
-            state: this.getAnimState(),
-        };
-    }
     tryEnterBlade() {
         if (this.stateManager.currentStateName === 'blade') return;
         if (this.stateManager.currentStateName === 'dash') return;
@@ -416,7 +394,6 @@ export default class Player extends Pawn {
         const energyCost = neutral ? 0 : this.dashCost;
         if (!neutral && this.stateManager.setState('dash') && this.energy.tryUse(energyCost)) return;
         if (this.stateManager.setState('blade') && this.energy.tryUse(energyCost)) {
-            this.energy.drainRate = this.bladeDrain;
             return true;
         }
         return false;

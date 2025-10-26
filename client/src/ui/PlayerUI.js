@@ -63,9 +63,9 @@ export default class PlayerInfo {
         MyEventEmitter.on('updateEnergy', (newEnergy) => {
             this.energy = newEnergy;
             energyBar.style.width = `${this.energy}%`;
-            if (this.energy < this.player.dashCost || this.energy < 35 || this.player.getDimmed()) {
+            if (this.energy < this.player.dashCost || this.player.getDimmed()) {
                 energyBar.style.backgroundColor = 'rgba(255, 81, 0, 1)';
-            } else if (this.energy < this.player.doubleJumpCost || this.energy < 50) {
+            } else if (this.energy < this.player.doubleJumpCost) {
                 energyBar.style.backgroundColor = 'rgba(255, 145, 0, 1)';
             } else {
                 energyBar.style.backgroundColor = 'rgba(255, 255, 0, 1)';

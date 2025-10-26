@@ -210,7 +210,7 @@ export default class PlayerMovement {
         this.getInputDirection(-1);
         this.dashValue = Math.max(this.values.dash.speed, this.body.velocity.length());
     }
-    dashMove(dt, decay = 5, min = 7) {
+    dashMove(dt, decay = 10, min = 6) {
         const d = this.tempVector.copy(this.direction)
         this.dashValue = Math.max(min, this.dashValue - decay * dt);
         this.body.velocity = d.multiplyScalar(this.dashValue);
