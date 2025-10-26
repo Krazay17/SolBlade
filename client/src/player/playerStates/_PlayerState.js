@@ -62,7 +62,7 @@ export default class PlayerState {
         if (useVel) {
             moveDir = this.body.velocity;
             const lateral = Math.atan2(moveDir.x, moveDir.z);
-            if (lateral === 0) return "Front";
+            if (lateral === 0) return "Neutral";
             moveDir.normalize();
         } else {
             moveDir = this.movement.getInputDirection();
