@@ -1,27 +1,18 @@
+# Node modules
+client/node_modules/
+server/node_modules/
+
+# Vite build output
+client/dist/
+
 # Logs
-logs
 *.log
 npm-debug.log*
-dist
 
-# Compiled binary addons (https://nodejs.org/api/addons.html)
-build/Release
+# Environment files
+.env
 
-# Dependency directories
-node_modules/
-./client/node_modules/
-./server/node_modules/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
-.npm
-
-# Vite logs files
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
-
-# Vite Local dist
-./client/dist
-.dist
+# Git metadata
+.git/
+.github/
+.gitignore
