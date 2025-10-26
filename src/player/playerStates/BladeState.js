@@ -1,5 +1,4 @@
 import { Vector3 } from "three";
-import MyEventEmitter from "../../core/MyEventEmitter";
 import PlayerState from "./_PlayerState";
 
 export default class BladeState extends PlayerState {
@@ -18,13 +17,13 @@ export default class BladeState extends PlayerState {
         this.lastEnter = performance.now();
         this.floorTimer = null;
         this.animationManager.playAnimation('blade', true);
-        this.actor.energyRegen = this.actor.bladeDrain;
+        this.actor.energy.drainRate = 5;
     }
     update(dt) {
         if (this.input.keys['Space'] && this.grounded && !this.jumping) {
             clearTimeout(this.floorTimer);
             this.grounded = false;
-            this.movement.jumpStart(.333);
+            this.movement.jumpStart(.5);
             this.jumping = performance.now() + 400;
             this.actor.animationManager.playAnimation('jump', false);
             return;
@@ -64,11 +63,7 @@ export default class BladeState extends PlayerState {
         this.floorTimer = null;
         this.grounded = false;
         this.lastExit = performance.now();
-
-        if (state === 'bladeJump') return;
-        this.actor.energyRegen = 25;
-
-        //netSocket.emit('playerBlockUpdate', false);
+        this.actor.energy.drainRate = 0;
     }
     canEnter() {
         return !this.actor.getDimmed()

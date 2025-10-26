@@ -8,8 +8,8 @@ export default class SkyBox extends THREE.Object3D {
         this.active = true;
         this.textureLoader = scene.loadingManager.textureLoader;
         this.sky = this.createSky();
-        this.rotatingFilter1 = this.createRotatingFilter('assets/SkyFilter.webp', 2400);
-        this.rotatingFilter2 = this.createRotatingFilter('assets/SkyFilter2.webp', 2300);
+        this.rotatingFilter1 = this.createRotatingFilter('assets/SkyFilter.webp', 1950);
+        this.rotatingFilter2 = this.createRotatingFilter('assets/SkyFilter2.webp', 1900);
 
         this.scene.add(this);
     }
@@ -24,7 +24,7 @@ export default class SkyBox extends THREE.Object3D {
     }
 
     createSky() {
-        const geometry = new THREE.SphereGeometry(2500);
+        const geometry = new THREE.SphereGeometry(2000);
         const myTexture = this.textureLoader.load('assets/RedSky0.webp');
         const myMaterial = new THREE.MeshBasicMaterial({
             map: myTexture,

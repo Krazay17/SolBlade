@@ -52,7 +52,6 @@ export default class Game {
     this.timeStep = 1 / 120;
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.clearColor(0x000000);
     //this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     document.body.appendChild(this.renderer.domElement);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -64,7 +63,7 @@ export default class Game {
     this.loadingManager = new LoadingManager();
     this.meshManager = new MeshManager(this);
 
-    this.camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, 0.1, 5000);
+    this.camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, .8, 3000);
 
     this.solRender = new SolRenderPass(this.renderer, this.graphicsWorld, this.camera);
     this.worldLight();

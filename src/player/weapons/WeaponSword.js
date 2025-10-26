@@ -78,7 +78,8 @@ export default class WeaponSword extends Weapon {
 
                 this.actor.animationManager.changeTimeScale(0, 150);
                 CameraFX.shake(0.14, 150);
-                this.actor.body.velocityY = 4;
+                const prevY = this.actor.body.velocity.y;
+                this.actor.body.velocityY = Math.max(prevY, 4);
             });
             if (!this.actor.parry) {
                 this.actor.setParry(true);

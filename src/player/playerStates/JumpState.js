@@ -21,6 +21,6 @@ export default class JumpState extends PlayerState {
     canEnter() {
         this.grounded = this.actor.movement.isGrounded(.7);
         return (!this.jumpCD || this.jumpCD < performance.now())
-            && ((this.grounded || this.actor.tryUseEnergy(50)));
+            && ((this.grounded || this.actor.energy.tryUse(35)));
     }
 }

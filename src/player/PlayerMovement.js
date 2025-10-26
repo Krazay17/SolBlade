@@ -129,9 +129,10 @@ export default class PlayerMovement {
     }
 
     hoverFreeze(dt, lateralDampening = .98) {
-        const x = this.body.velocity.x *= lateralDampening - dt;
-        const z = this.body.velocity.z *= lateralDampening - dt;
-        const y = this.body.velocity.y < 0 ? this.body.velocity.y *= .9 - dt : this.body.velocity.y *= .999 - dt;
+        const scaledDelta = dt * 120;
+        const x = this.body.velocity.x *= lateralDampening ** scaledDelta;
+        const z = this.body.velocity.z *= lateralDampening ** scaledDelta;
+        const y = this.body.velocity.y < 0 ? this.body.velocity.y *= .9 ** scaledDelta : this.body.velocity.y *= .999 ** scaledDelta;
         this.body.velocity = { x, y, z };
     }
 

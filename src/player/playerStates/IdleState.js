@@ -4,6 +4,7 @@ import PlayerState from "./_PlayerState";
 export default class IdleState extends PlayerState {
     enter() {
         this.actor.movement.grounded = true;
+        this.actor.energy.regenRate = this.actor.energy.baseRegenRate;
         switch (this.pivot(true)) {
             case 'Front':
                 this.animationManager?.playAnimation('runStopFwd', false, () => this.idle()) || this.idle();
@@ -18,7 +19,7 @@ export default class IdleState extends PlayerState {
                 this.animationManager?.playAnimation('runStopBack', false, () => this.idle()) || this.idle();
                 break;
             default:
-                this.animationManager?.playAnimation('idle', true);
+                this.idle();
         }
     }
     idle() {

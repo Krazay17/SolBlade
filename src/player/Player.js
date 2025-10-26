@@ -12,6 +12,7 @@ import Pawn from '../actors/Pawn';
 import PlayerStateManager from './playerStates/PlayerStateManager';
 import HitData from '../core/HitData';
 import { menuButton } from '../ui/Menu';
+import EnergyManager from '../core/EnergyManager';
 
 export default class Player extends Pawn {
     constructor(game, data = {}) {
@@ -26,12 +27,11 @@ export default class Player extends Pawn {
         this.world = game.world;
         this.camera = Globals.camera;
         this.parry = false;
-        this.energy = 100;
         this.dimmed = 0;
         this.crownMesh = null;
-        this.energyRegen = 25;
-        this.dashCost = 30;
-        this.bladeDrain = -5; // per second
+
+        this.dashCost = 25;
+        this.doubleJumpCost = 35;
 
         // Local Player setup
         if (!this.isRemote) {
@@ -40,6 +40,7 @@ export default class Player extends Pawn {
 
             this.direction = new THREE.Vector3();
             this.tempVector = new THREE.Vector3();
+            this.energy = new EnergyManager(this, 100);
 
             /**@type {Weapon.Weapon} */
             this.weapon0 = new Weapon.WeaponFireball(this, game, '0');
@@ -62,7 +63,7 @@ export default class Player extends Pawn {
             });
 
             this.cameraArm = new THREE.Object3D();
-            this.cameraArm.position.set(.333, .666, -.333);
+            this.cameraArm.position.set(.666, .666, -.333);
             this.add(this.cameraArm);
             this.camera.position.z = 1.666;
             this.cameraArm.add(this.camera);
@@ -189,15 +190,14 @@ export default class Player extends Pawn {
         super.update(dt, time);
         // Local Player
         if (!this.isRemote) {
+            if (this.energy) this.energy.update(dt);
             tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
-            this.addEnergy(this.energyRegen, dt);
             this.handleInput(dt, time);
             LocalData.position = this.position;
             LocalData.rotation = this.rotation.y;
             CameraFX.update(dt);
         }
     }
-
     handleInput(dt, time) {
         if (!this.input) return;
         // Rotate player
@@ -301,12 +301,6 @@ export default class Player extends Pawn {
         this.name = newName;
         this.namePlate?.setName(newName);
         console.log(this.name);
-    }
-
-
-    setEnergy(newEnergy) {
-        this.energy = newEnergy;
-        this.namePlate?.setEnergy(newEnergy);
     }
 
     infoUpdate() {
@@ -414,39 +408,15 @@ export default class Player extends Pawn {
             state: this.getAnimState(),
         };
     }
-    tryUseEnergy(amount) {
-        if (this.getDimmed()) return false;
-        if (amount === 0) return true;
-        if (this.energy < amount) return false;
-        this.energy -= amount;
-        MyEventEmitter.emit('updateEnergy', this.energy);
-        return true;
-    }
-    addEnergy(amount, dt) {
-        this.energy += dt ? amount * dt : amount;
-        if (this.energy > 100) this.energy = 100;
-        if (this.energy < 0) this.energy = 0;
-        MyEventEmitter.emit('updateEnergy', this.energy);
-    }
     tryEnterBlade() {
         if (this.stateManager.currentStateName === 'blade') return;
         if (this.stateManager.currentStateName === 'dash') return;
         const neutral = this.movement.getInputDirection().length() === 0;
-        if (this.energy < this.dashCost) return false;
+        if (this.energy.current < this.dashCost) return false;
         const energyCost = neutral ? 0 : this.dashCost;
-        if (!neutral && this.stateManager.setState('dash') && this.tryUseEnergy(energyCost)) return;
-        if (this.stateManager.setState('blade')
-            && this.tryUseEnergy(energyCost)) {
-
-            this.energyRegen = this.bladeDrain;
-            MyEventEmitter.emit('updateEnergy', this.energy);
-            return true;
-        }
-        return false;
-    }
-    tryExitBlade() {
-        if (this.stateManager.setState('idle')) {
-            this.energyRegen = 25;
+        if (!neutral && this.stateManager.setState('dash') && this.energy.tryUse(energyCost)) return;
+        if (this.stateManager.setState('blade') && this.energy.tryUse(energyCost)) {
+            this.energy.drainRate = this.bladeDrain;
             return true;
         }
         return false;

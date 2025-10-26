@@ -35,7 +35,7 @@ export default class PowerPickup extends Pickup {
                     dealer.health += 25;
                     break;
                 case 'energy':
-                    dealer.energy += 50;
+                    dealer.energy.add(50);
                     break;
             }
         }
