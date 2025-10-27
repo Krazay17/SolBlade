@@ -20,16 +20,15 @@ export default class ServerPhysics {
 
         setInterval(() => {
             const now = Date.now();
-            let dt = (now - lastTime) / 1000;
+            let dt = (now - this.lastTime) / 1000;
             this.lastTime = now;
 
             // You can step multiple times if dt > timestep
             while (dt > 0) {
                 this.world3.step(timestep);
                 dt -= timestep;
+                this.loop();
             }
-
-            this.updateWorld3();
         }, 1000 / 60);
 
     }
@@ -40,7 +39,7 @@ export default class ServerPhysics {
         const world = new RAPIER.World(GRAVITY_DEF);
         for (const obj of worldData) {
             const verts = new Float32Array(obj.vertices)
-            const indic = new Float32Array(obj.indices)
+            const indic = new Uint32Array(obj.indices)
             //const desc = RAPIER.ColliderDesc.convexMesh(verts, indic)
             const desc = RAPIER.ColliderDesc.trimesh(verts, indic);
             world.createCollider(desc);
