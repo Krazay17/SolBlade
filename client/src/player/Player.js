@@ -21,7 +21,7 @@ export default class Player extends Pawn {
             data.health = LocalData.health;
             data.name = LocalData.name;
         }
-        super(game, data, data.skin || 'spikeMan', .5, 1);
+        super(game, data);
         this.tick = true;
 
         this.world = game.world;

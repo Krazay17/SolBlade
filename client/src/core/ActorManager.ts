@@ -53,11 +53,13 @@ export default class ActorManager {
         const finalData = { type, ...data, isRemote, replicate, solWorld, active: true };
         // const existingActor = this.getActorById(data.netId);
         // if (existingActor) return existingActor.activate(finalData);
-        const actorClass = actorRegistry[type];
+        const finalType = data?.enemy || type;
+        const actorClass = actorRegistry[finalType];
         if (!actorClass) return console.warn(`Unknown actor: ${type}`, data);
 
         const actor = new actorClass(this.game, finalData);
         if (!actor) return;
+        console.log(actor);
 
         this.actors.push(actor);
         if (!isRemote && replicate) {

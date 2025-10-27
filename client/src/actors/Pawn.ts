@@ -18,7 +18,6 @@ export default class Pawn extends Actor {
     collider: RAPIER.Collider | null = null;
     radius: number;
     height: number;
-    meshName: string;
     targetRotation: number = 0;
     controller: AIController | null = null;
     movement: PlayerMovement | AIMovement | null = null;
@@ -31,20 +30,16 @@ export default class Pawn extends Actor {
 
     constructor(
         game: Game,
-        data: any,
-        meshName: string,
-        radius: number = .5,
-        height: number = 1
+        data: any
     ) {
         super(game, data);
-        this.radius = radius;
-        this.height = height;
-        this.meshName = meshName;
-        this.skin = meshName;
+        this.radius = data.radius ?? .5;
+        this.height = data.height ?? 1;
+        this.skin = data.skin ?? 'spikeMan';
 
-        this.assignMesh(meshName);
+        this.assignMesh(this.skin);
 
-            if (this.game.physics) this.body = new PawnBody(this.game.physics, data.pos, height, radius);
+        if (this.game.physics) this.body = new PawnBody(this.game.physics, data.pos, this.height, this.radius);
         if (!this.isRemote) {
         } else {
             this.targetPosition = data.pos;

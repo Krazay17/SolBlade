@@ -7,7 +7,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@dimforge/rapier3d": "^0.19.2",
+    "@dimforge/rapier3d-compat": "^0.19.2",
     "socket.io": "^4.8.1"
   },
   "imports": {

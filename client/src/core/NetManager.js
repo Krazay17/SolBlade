@@ -211,6 +211,13 @@ function initBindings() {
         if (actor) {
             actor.stateUpdate(data);
         }
+    });
+    socket.on('updateEnemies', (data)=>{
+        for (const a of data) {
+            const actor = scene.getActorById(a.id);
+            console.log(a);
+            actor.targetPosition = a.pos;
+        }
     })
 }
 

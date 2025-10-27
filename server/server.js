@@ -149,6 +149,7 @@ io.on('connection', (socket) => {
                 const actor = actorManager.getActorById(data.target);
                 if (actor) {
                     if (actor.type === 'player' && !playerHit(actor, data)) return;
+                    if (actor.type === 'enemy' && !enemyHit(actor, data)) return;
                     actor.health = Math.max(0, Math.min(actor.maxHealth, actor.health + data.amount));
                     actor.lastHit = data;
                     io.emit('actorHit', { data, health: actor.health });
@@ -208,14 +209,21 @@ io.on('connection', (socket) => {
     // player connected
 });
 
-function playerHit(targetActor, data) {
-    const { amount, dealer, target } = data;
+function playerHit(actor, data) {
+    const { amount, dealer } = data;
     const dealerActor = actorManager.getActorById(dealer);
-    if (amount < 0 && targetActor.parry) {
-        io.emit('playerParried', { target, dealer });
-        if (dealerActor.parry) io.emit('playerParried', { target: dealer, dealer: target })
+    if (amount < 0 && actor.parry) {
+        io.emit('playerParried', { target: actor.netId, dealer });
+        if (dealerActor.parry) io.emit('playerParried', { target: dealer, dealer: actor.netId })
         return false;
     }
+    return true;
+}
+
+function enemyHit(actor, data) {
+    const { amount, dealer, target } = data;
+    const enemy = actorManager.enemies.find(a=>a.data.netId === target);
+    enemy.hit(data);
     return true;
 }
 

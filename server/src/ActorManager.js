@@ -1,5 +1,7 @@
 import { randomUUID } from "crypto";
 import actorDefaults, { randomPos } from "./ActorDefaults.js";
+import SrvEnemy from "./SrvEnemy.js";
+import ServerPhysics from "./ServerPhysics.js";
 
 export default class ActorManager {
     static instance = null;
@@ -7,8 +9,9 @@ export default class ActorManager {
         if (ActorManager.instance) return ActorManager.instance;
         this._actors = [];
         this.io = io;
-
         this.actorsByWorld = {};
+        this.physics = new ServerPhysics(this.io, this);
+        this.serverActors = [];
 
         this.hasSpawnedDefaults = false;
         this.spawnDefaultActors();
@@ -74,9 +77,10 @@ export default class ActorManager {
             this.actorsByWorld[actor.solWorld] = [];
         }
         this.actorsByWorld[actor.solWorld].push(actor);
+        if (data && data.enemy) {
+            this.serverActors.push(new SrvEnemy(this.physics[data.solWorld], actor));
+        }
         this.io.emit('newActor', actor);
-
-        console.log(actor);
         return actor;
     }
     removeActor(actor) {
@@ -87,11 +91,12 @@ export default class ActorManager {
     }
     createActor(type, data) {
         //const existingActor = this._actors.find(a => a.type === type && !a.active);
-        const defaults = actorDefaults[type];
+        const finalType = data?.enemy || type;
+        const defaults = actorDefaults[finalType];
         if (defaults) data = { ...defaults, ...data };
         if (data?.rndPos) data.pos = randomPos(data.rndXZ || 5, data.rndY || 5);
         //const id = randomUUID();
-        const actor = {
+        let actor = {
             type,
             maxHealth: 1,
             health: 1,
@@ -115,12 +120,16 @@ export default class ActorManager {
         this.hasSpawnedDefaults = true;
         const item = 6;
         const power = 12;
+        const enemies = 1;
         for (let i = 0; i < item; i++) {
             this.createActor('item');
         }
         for (let i = 0; i < power; i++) {
             const type = i % 2 ? 'health' : 'energy';
-            this.createActor('power', { power: type })
+            this.createActor('power', { power: type });
+        }
+        for (let i = 0; i < enemies; i++) {
+            this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: { x: i, y: 100, z: 0 } });
         }
     }
     remainingDuration(actor) {
@@ -147,6 +156,5 @@ export default class ActorManager {
     get playerActors() {
         return this._actors.filter(a => a.type === 'player');
     }
-    get enemies() {
-    }
+    get enemies() { return this.serverActors.filter(a => a.data.type === 'enemy') }
 }

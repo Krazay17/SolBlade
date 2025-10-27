@@ -1,10 +1,11 @@
-import RAPIER from '@dimforge/rapier3d';
-import { GRAVITY_DEF } from './ActorDefaults.js';
-import world3Data from '../worlds/world3.json' assert {type: 'json'};
+import RAPIER from '@dimforge/rapier3d-compat';
 import { Server } from "socket.io";
 import ActorManager from './ActorManager.js';
+import { loadJson } from './LoadJson.js';
 
-await RAPIER.init();
+const world3Data = await loadJson('../worlds/world3.json');
+
+await RAPIER.init({});
 
 export default class ServerPhysics {
     constructor(io, actorManager) {
@@ -14,6 +15,7 @@ export default class ServerPhysics {
         this.actorManager = actorManager
 
         this.world3 = this.makeWorld(world3Data);
+        //console.log(world3Data[0]);
 
         this.lastTime = Date.now();
         const timestep = 1 / 60;
@@ -25,9 +27,8 @@ export default class ServerPhysics {
 
             // You can step multiple times if dt > timestep
             while (dt > 0) {
-                this.world3.step(timestep);
                 dt -= timestep;
-                this.loop();
+                this.loop(timestep);
             }
         }, 1000 / 60);
 
@@ -36,18 +37,59 @@ export default class ServerPhysics {
         this.updateWorld3()
     }
     makeWorld(worldData) {
-        const world = new RAPIER.World(GRAVITY_DEF);
+        const world = new RAPIER.World({x:0, y:-9, z:0});
+
         for (const obj of worldData) {
-            const verts = new Float32Array(obj.vertices)
-            const indic = new Uint32Array(obj.indices)
-            //const desc = RAPIER.ColliderDesc.convexMesh(verts, indic)
-            const desc = RAPIER.ColliderDesc.trimesh(verts, indic);
-            world.createCollider(desc);
+            if (!obj.vertices?.length || !obj.indices?.length) {
+                console.warn("Skipping object with missing vertices or indices:", obj.name);
+                continue;
+            }
+
+            // Filter vertices to ensure each has 3 numbers
+            const filteredVerts = obj.vertices.filter(v => Array.isArray(v) && v.length === 3);
+            if (filteredVerts.length === 0) {
+                console.warn("Skipping object with no valid vertices:", obj.name);
+                continue;
+            }
+
+            const verts = new Float32Array(filteredVerts.flat());
+
+            // Flatten indices
+            const indic = new Uint32Array(obj.indices.flat());
+            const maxIndex = Math.max(...indic);
+            if (maxIndex >= verts.length / 3) {
+                console.warn("Skipping object with indices out of bounds:", obj.name);
+                continue;
+            }
+
+            try {
+                // Use trimesh for concave meshes
+                const desc = RAPIER.ColliderDesc.trimesh(verts, indic);
+                world.createCollider(desc);
+            } catch (e) {
+                console.error("Failed to create collider for object:", obj.name, e);
+            }
         }
+
         return world;
     }
+
+
     updateWorld3() {
+        if(!this.world3)return;
         this.world3.step();
-        const playersOfWorld3 = this.actorManager.playerActors.filter(a => a.solWorld === 'world3');
+        const actorsOfWorld = this.actorManager.actorsByWorld['world3'] || [];
+        const players = actorsOfWorld.filter(a => a.type === 'player');
+        const enemies = this.actorManager.serverActors.filter(a => a.data.solWorld === 'world3');
+
+        const enemyPositions = enemies.map(e => ({
+            id: e.data.netId,
+            pos: e.body.translation(),
+            rot: e.body.rotation(),
+        }))
+
+        for (const p of players) {
+            this.io.to(p.netId).emit('updateEnemies', enemyPositions);
+        }
     }
 }
