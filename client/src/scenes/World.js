@@ -264,8 +264,8 @@ export default class World {
           child.castShadow = true;
           child.receiveShadow = true;
 
-          const rBody = this.physics.createCollider(triMeshFromVerts(child.geometry));
-          this.worldColliders.push(rBody);
+          // const rBody = this.physics.createCollider(triMeshFromVerts(geomClone));
+          // this.worldColliders.push(rBody);
 
           const edges = new THREE.EdgesGeometry(child.geometry, 35);
           const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
@@ -285,6 +285,9 @@ export default class World {
       mergedGeom.computeBoundsTree();
       this.mergedLevel = new THREE.Mesh(mergedGeom);
 
+      const rBody = this.physics.createCollider(triMeshFromVerts(mergedGeom));
+      this.worldColliders.push(rBody);
+
       // MyEventEmitter.emit('spawnLocations', {
       //   itemLocations,
       //   healthLocations,
@@ -302,16 +305,23 @@ export default class World {
 }
 
 function triMeshFromVerts(geometry) {
-  const vertices = geometry.attributes.position.array;
+  // Ensure the geometry is up-to-date
+  geometry.computeBoundingBox();
+  geometry.computeBoundingSphere();
+
+  // Clone vertex and index arrays so Rapier gets unique, safe buffers
+  const vertices = new Float32Array(geometry.attributes.position.array);
   let indices;
 
   if (geometry.index) {
-    indices = geometry.index.array;
+    indices = new Uint32Array(geometry.index.array);
   } else {
     const count = vertices.length / 3;
-    indices = new Uint16Array(count);
+    indices = new Uint32Array(count);
     for (let i = 0; i < count; i++) indices[i] = i;
   }
+
+  // Create the collider safely
   const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
   colliderDesc.setFriction(0);
   colliderDesc.setRestitution(0);

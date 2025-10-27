@@ -2,6 +2,7 @@ const actorDefaults = {
     julian: {
         maxHealth: 100,
         health: 100,
+        respawn: 100,
     },
     lavaGolem: {
         maxHealth: 1000,

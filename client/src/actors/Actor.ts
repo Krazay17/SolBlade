@@ -23,6 +23,7 @@ export default class Actor extends Object3D {
     solWorld: string;
     team: string;
     data: any;
+    destroyed: boolean = false;
     actorType: string = '';
     replicate: boolean = false;
     isRemote: boolean = false;
@@ -149,7 +150,8 @@ export default class Actor extends Object3D {
         this.game.graphics?.remove(this);
     }
     destroy() {
-        this.active = false
+        this.active = false;
+        this.destroyed = true;
         this.game.graphics?.remove(this);
         this.game.actorManager?.removeActor(this);
         this.tempId = '';

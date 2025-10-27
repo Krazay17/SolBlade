@@ -147,13 +147,13 @@ export default class Game {
     if (!newWorld) return;
     if (this.world && !this.world.levelLoaded) return;
 
+    this.actorManager.clearActors();
+    this.lightManager.destroy();
+
     this.player.portalPos = pos;
     this.player.solWorld = world;
     this.player.tick = false;
     MyEventEmitter.emit('playerStateUpdate', this.player);
-
-    this.actorManager.clearActors();
-    this.lightManager.destroy();
 
     if (this.world?.onExit) this.world.onExit();
     this.world = newWorld;

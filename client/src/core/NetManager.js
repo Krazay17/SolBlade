@@ -150,7 +150,7 @@ function initBindings() {
     socket.on('newWorld', player => {
         const data = Actor.deserialize(player, (id) => scene.getActorById(id));
         const { type, netId, solWorld } = data;
-        if(netId === playerId) return;
+        if (netId === playerId) return;
         const actor = scene.getActorById(netId);
         if (actor && (scene.solWorld !== solWorld)) {
             //voiceChat.voiceMap[netId].gain.gain.value = 0;
@@ -212,10 +212,10 @@ function initBindings() {
             actor.stateUpdate(data);
         }
     });
-    socket.on('updateEnemies', (data)=>{
+    socket.on('updateEnemies', (data) => {
         for (const a of data) {
             const actor = scene.getActorById(a.id);
-            console.log(a);
+            if (!actor) return;
             actor.targetPosition = a.pos;
         }
     })

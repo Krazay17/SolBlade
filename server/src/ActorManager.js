@@ -16,6 +16,13 @@ export default class ActorManager {
         this.hasSpawnedDefaults = false;
         this.spawnDefaultActors();
 
+        this.lastTime = Date.now();
+        this.updateEnemies()
+        this.actorTick = setInterval(() => {
+            let dt = Date.now() - this.lastTime;
+            this.updateEnemies(dt)
+        }, 1000/20);
+
         ActorManager.instance = this;
     }
     actorDie(data) {
@@ -26,6 +33,10 @@ export default class ActorManager {
         if (targetActor) {
             const { type, name, pos, respawn, respawning, maxHealth, active, rndPos } = targetActor;
             if (!active) return;
+            if(type === 'enemy') {
+                const actorClass = this.serverActors.find(a=> a.data.netId === target);
+                actorClass.die();
+            }
             if (type !== 'player') {
                 targetActor.active = false;
                 if (respawn) {
@@ -78,7 +89,7 @@ export default class ActorManager {
         }
         this.actorsByWorld[actor.solWorld].push(actor);
         if (data && data.enemy) {
-            this.serverActors.push(new SrvEnemy(this.physics[data.solWorld], actor));
+            this.serverActors.push(new SrvEnemy(this.physics[data.solWorld], actor, this));
         }
         this.io.emit('newActor', actor);
         return actor;
@@ -131,6 +142,10 @@ export default class ActorManager {
         for (let i = 0; i < enemies; i++) {
             this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: { x: i, y: 100, z: 0 } });
         }
+        // setInterval(()=> {
+        //     if(this.serverActors.length > 20) return;
+        //     this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: { x: 0, y: 100, z: 0 } });
+        // }, 1000)
     }
     remainingDuration(actor) {
         const time = actor.time;
@@ -146,6 +161,9 @@ export default class ActorManager {
     }
     getActorsOfWorld(world) {
         return this._actors.filter(a => a.active && (a.solWorld === world) && this.remainingDuration(a));
+    }
+    updateEnemies(dt) {
+        for (const a of this.serverActors) { a.update(dt, this.playerActors.filter(p => p.solWorld === a.data.solWorld)) }
     }
     get actors() {
         return this._actors;

@@ -25,8 +25,10 @@ export default class WeaponSword extends Weapon {
             })) {
             this.enemyActors = this.game.hostiles;
             this.hitActors.clear();
+            this.hitPauseDiminish = 1;
             this.damageDelay = 415;
             this.damageDuration = 600;
+            this.hitPauseDiminish = 1;
             this.dashSpeed = Math.max(11, this.actor.body.velocity.length());
 
             this.actor.animationManager.playAnimation('spinSlash', false);
@@ -48,6 +50,7 @@ export default class WeaponSword extends Weapon {
             this.hitActors.clear();
             this.damageDelay = 250;
             this.damageDuration = 200;
+            this.hitPauseDiminish = 1;
             this.dashSpeed = Math.max(6, this.actor.body.velocity.length());
 
             const anim = this.slot === '0' ? 'attackLeft' : 'attackRight';
@@ -74,7 +77,10 @@ export default class WeaponSword extends Weapon {
                     sound: 'swordHit',
                 }));
 
-                this.actor.animationManager.changeTimeScale(0, 150);
+                if (this.hitPauseDiminish > .1) {
+                    this.actor.animationManager.changeTimeScale(0.1, 100 * this.hitPauseDiminish);
+                    this.hitPauseDiminish -= .2;
+                }
                 CameraFX.shake(0.14, 150);
                 const prevY = this.actor.body.velocity.y;
                 this.actor.body.velocityY = Math.max(prevY, 4);

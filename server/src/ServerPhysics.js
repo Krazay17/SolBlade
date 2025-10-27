@@ -37,7 +37,7 @@ export default class ServerPhysics {
         this.updateWorld3()
     }
     makeWorld(worldData) {
-        const world = new RAPIER.World({x:0, y:-9, z:0});
+        const world = new RAPIER.World({ x: 0, y: -9, z: 0 });
 
         for (const obj of worldData) {
             if (!obj.vertices?.length || !obj.indices?.length) {
@@ -76,10 +76,9 @@ export default class ServerPhysics {
 
 
     updateWorld3() {
-        if(!this.world3)return;
+        if (!this.world3) return;
         this.world3.step();
-        const actorsOfWorld = this.actorManager.actorsByWorld['world3'] || [];
-        const players = actorsOfWorld.filter(a => a.type === 'player');
+        const players = this.actorManager.playerActors.filter(a => a.solWorld === 'world3');
         const enemies = this.actorManager.serverActors.filter(a => a.data.solWorld === 'world3');
 
         const enemyPositions = enemies.map(e => ({
