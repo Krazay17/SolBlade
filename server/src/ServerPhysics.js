@@ -1,5 +1,5 @@
 import RAPIER from '@dimforge/rapier3d';
-import { GRAVITY_DEF } from '../../shared/ActorDefaults.js';
+import { GRAVITY_DEF } from './ActorDefaults.js';
 import world3Data from '../worlds/world3.json' assert {type: 'json'};
 import { Server } from "socket.io";
 import ActorManager from './ActorManager.js';

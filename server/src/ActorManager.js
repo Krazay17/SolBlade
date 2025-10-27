@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import actorDefaults, { randomPos } from "../../shared/ActorDefaults.js";
+import actorDefaults, { randomPos } from "./ActorDefaults.js";
 
 export default class ActorManager {
     static instance = null;
