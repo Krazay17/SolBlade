@@ -11,7 +11,7 @@ export default class EnergyManager {
         this.regenRate = baseRegen;
         this.drainRate = 0;
         this.canRegen = true;
-        this.regenDelay = 1000;
+        this.regenDelay = 1500;
         this._regenTimeout = null;
     }
     update(dt) {

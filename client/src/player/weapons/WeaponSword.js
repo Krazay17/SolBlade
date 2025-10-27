@@ -9,7 +9,6 @@ export default class WeaponSword extends Weapon {
         this.game = game;
         this.damageDuration = 0; // duration of the sword trace in milliseconds
         this.dashSpeed = 0;
-        console.log(slot);
     }
     hitFx(pos) {
         spawnParticles(pos, 25);

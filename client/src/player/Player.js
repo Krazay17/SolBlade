@@ -31,7 +31,7 @@ export default class Player extends Pawn {
         this.crownMesh = null;
 
         this.dashCost = 25;
-        this.doubleJumpCost = 35;
+        this.doubleJumpCost = 40;
 
         // Local Player setup
         if (!this.isRemote) {
@@ -246,7 +246,7 @@ export default class Player extends Pawn {
             this.game?.setWorld('world1');
         }
         if (this.input.keys['KeyF']) {
-            if(!LocalData.flags.dev) return;
+            if (!LocalData.flags.dev) return;
             const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
             const scaledConvertedDirection = new THREE.Vector3(direction.x, direction.y, direction.z).multiplyScalar(2);
             this.body.position = this.body.position.add(scaledConvertedDirection);
@@ -391,10 +391,8 @@ export default class Player extends Pawn {
         if (this.stateManager.currentStateName === 'blade') return;
         if (this.stateManager.currentStateName === 'dash') return;
         const neutral = this.movement.getInputDirection().length() === 0;
-        if (this.energy.current < this.dashCost) return false;
-        const energyCost = neutral ? 0 : this.dashCost;
-        if (!neutral && this.stateManager.setState('dash') && this.energy.tryUse(energyCost)) return;
-        if (this.stateManager.setState('blade') && this.energy.tryUse(energyCost)) {
+        if (!neutral && this.stateManager.setState('dash')) return;
+        if (this.stateManager.setState('blade')) {
             return true;
         }
         return false;

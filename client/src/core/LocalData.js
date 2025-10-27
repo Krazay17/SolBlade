@@ -1,6 +1,4 @@
-import MyEventEmitter from "./MyEventEmitter";
-
-const CURRENT_VERSION = 0.080;
+const CURRENT_VERSION = 0.081;
 export default {
     version: CURRENT_VERSION,
     name: "Player",

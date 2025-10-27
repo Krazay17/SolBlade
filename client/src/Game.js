@@ -24,6 +24,7 @@ import Inventory from './player/Inventory';
 import SoundPlayer from './core/SoundPlayer';
 import World4 from './scenes/World4';
 import { menuSlider } from './ui/Menu';
+import World5 from './scenes/World5';
 
 await RAPIER.init();
 
@@ -32,6 +33,7 @@ const worldRegistry = {
   world2: World2,
   world3: World3,
   world4: World4,
+  world5: World5,
 }
 
 export default class Game {

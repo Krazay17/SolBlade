@@ -10,12 +10,7 @@
     "@dimforge/rapier3d": "^0.19.2",
     "socket.io": "^4.8.1"
   },
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@shared/*": [
-        "../shared/*"
-      ]
-    }
+  "imports": {
+    "#shared/*": "./shared/*"
   }
 }

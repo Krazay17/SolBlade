@@ -194,7 +194,6 @@ export default class SoundPlayer {
                     if (position) audio.position.copy(position);
                     audio.setVolume(this.sfxVolume * this.masterVolume);
                     audio.play();
-                    console.log(url);
                 });
                 pool = this.posSoundPools.get(name);
             } else {

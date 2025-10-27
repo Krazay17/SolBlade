@@ -58,7 +58,6 @@ export default class ActorManager {
 
         const actor = new actorClass(this.game, finalData);
         if (!actor) return;
-        console.log(actor.actorType);
 
         this.actors.push(actor);
         if (!isRemote && replicate) {

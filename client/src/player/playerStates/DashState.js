@@ -44,6 +44,9 @@ export default class DashState extends PlayerState {
             }
         }
     }
+    canEnter() {
+        return this.actor.energy.tryUse(this.actor.dashCost);
+    }
     exit() {
         //this.actor.movement.dashStop();
         this.actor.energyRegen = 25;

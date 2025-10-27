@@ -28,10 +28,11 @@ export default class ActorManager {
                 if (respawn) {
                     if (!respawning) {
                         targetActor.respawning = true;
-                        targetActor.health = maxHealth;
                         setTimeout(() => {
                             this.createActor(type, {
                                 ...targetActor,
+                                health: maxHealth,
+                                pos: rndPos ?? pos,
                                 respawning: false,
                             });
                         }, respawn);
@@ -48,10 +49,10 @@ export default class ActorManager {
             const { type, respawn, respawning, maxHealth, active, rndPos } = targetActor;
             if (respawn && !respawning) {
                 targetActor.respawning = true;
-                targetActor.health = maxHealth;
                 setTimeout(() => {
                     this.createActor(type, {
                         ...targetActor,
+                        health: maxHealth,
                         respawning: false,
                     });
                 }, respawn);
@@ -60,15 +61,22 @@ export default class ActorManager {
 
     }
     addActor(data) {
-        const id = data.netId ? data.netId : randomUUID();
+        const id = data.type === 'player' && data.netId
+            ? data.netId
+            : randomUUID();
         const actor = {
             ...data,
             netId: id,
             time: performance.now(),
         }
         this._actors.push(actor);
-        //this.actorsByWorld[actor.solWorld] = {solWorld}
+        if (!this.actorsByWorld[actor.solWorld]) {
+            this.actorsByWorld[actor.solWorld] = [];
+        }
+        this.actorsByWorld[actor.solWorld].push(actor);
         this.io.emit('newActor', actor);
+
+        console.log(actor);
         return actor;
     }
     removeActor(actor) {
@@ -82,7 +90,7 @@ export default class ActorManager {
         const defaults = actorDefaults[type];
         if (defaults) data = { ...defaults, ...data };
         if (data?.rndPos) data.pos = randomPos(data.rndXZ || 5, data.rndY || 5);
-        const id = randomUUID();
+        //const id = randomUUID();
         const actor = {
             type,
             maxHealth: 1,
@@ -90,8 +98,8 @@ export default class ActorManager {
             pos: { x: 0, y: 0, z: 0 },
             rot: { x: 0, y: 0, z: 0, w: 1 },
             ...data,
-            time: performance.now(),
-            netId: id,
+            // time: performance.now(),
+            // netId: id,
             active: true,
         }
         //this._actors.push(actor);
