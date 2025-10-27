@@ -11,7 +11,6 @@ import Actor from "./Actor";
 import RAPIER from "@dimforge/rapier3d-compat";
 import PawnBody from "../core/PawnBody";
 import Game from "../Game";
-import { lerp } from "three/src/math/MathUtils.js";
 import { lerpAngle } from "../utils/Utils";
 
 export default class Pawn extends Actor {
@@ -45,8 +44,8 @@ export default class Pawn extends Actor {
 
         this.assignMesh(meshName);
 
-        if (!this.isRemote) {
             if (this.game.physics) this.body = new PawnBody(this.game.physics, data.pos, height, radius);
+        if (!this.isRemote) {
         } else {
             this.targetPosition = data.pos;
         }
@@ -67,7 +66,7 @@ export default class Pawn extends Actor {
             if (this.body) {
                 this.body.position = this.position;
             }
-            if (this.position.distanceToSquared(this.targetPosition) > 25) {
+            if (this.position.distanceToSquared(this.targetPosition) > 50) {
                 this.position.copy(this.targetPosition);
             } else {
                 this.position.lerp(this.targetPosition, 60 * dt);

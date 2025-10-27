@@ -35,3 +35,5 @@ export function randomPos(maxHoriz, maxHeight) {
 
     return { x, y, z };
 }
+
+const GRAVITY_DEF = { x: 0, y: -6, z: 0 };

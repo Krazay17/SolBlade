@@ -47,8 +47,8 @@ export default class WeaponSword extends Weapon {
             })) {
             this.enemyActors = this.game.hostiles;
             this.hitActors.clear();
-            this.damageDelay = 100;
-            this.damageDuration = 300;
+            this.damageDelay = 250;
+            this.damageDuration = 200;
             this.dashSpeed = Math.max(6, this.actor.body.velocity.length());
 
             const anim = this.slot === '0' ? 'attackLeft' : 'attackRight';
@@ -94,7 +94,7 @@ export default class WeaponSword extends Weapon {
             if (duration > performance.now()) {
                 this.dashSpeed = Math.max(0, this.dashSpeed - 6 * dt);
                 if (this.movement.isGrounded()) {
-                    this.actor.movement.dashForward(this.dashSpeed);
+                    this.actor.movement.dashForward(this.dashSpeed, true, true);
                 }
             }
             this.movement.smartMove(dt);

@@ -5,7 +5,6 @@ export default class IdleState extends PlayerState {
     enter(state) {
         this.actor.movement.grounded = true;
         this.actor.energy.regenRate = this.actor.energy.baseRegenRate;
-        console.log(state);
         if (state === 'attack') return this.idle();
         switch (this.pivot(true)) {
             case 'Front':

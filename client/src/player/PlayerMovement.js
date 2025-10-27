@@ -121,9 +121,10 @@ export default class PlayerMovement {
         }
     }
 
-    dashForward(speed = 7, restrictY = true) {
+    dashForward(speed = 7, restrictY = true, noY = false) {
         const forward = this.actor.getShootData().dir;
         if (restrictY) forward.y = Math.min(0, forward.y);
+        if (noY) forward.y = 0;
         forward.normalize();
         this.body.velocity = forward.multiplyScalar(speed);
     }

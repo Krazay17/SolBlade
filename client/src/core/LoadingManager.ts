@@ -1,12 +1,11 @@
 import * as THREE from 'three'
-import { DRACOLoader, GLTFLoader } from 'three/examples/jsm/Addons.js'
+import { GLTFLoader } from 'three/examples/jsm/Addons.js';
 
 export default class LoadingManager {
     textureLoader: THREE.TextureLoader = new THREE.TextureLoader();
     gltfLoader: GLTFLoader = new GLTFLoader();
     loadingBarContainer: HTMLElement | null = null;
     loadingBarFill: HTMLElement | null = null;
-    dracoLoader: DRACOLoader = new DRACOLoader();
     constructor() {
 
         if (this.gltfLoader) {

@@ -118,7 +118,7 @@ export default class Input {
       }
 
     });
-
+    
     window.addEventListener('blur', () => {
       Object.keys(this.keys).forEach(key => {
         this.keys[key] = false;
@@ -132,7 +132,11 @@ export default class Input {
         this.actionStates[state] = false;
       }
     })
-  };
+
+    window.devMode = ()=> {
+      LocalData.flags.dev = true;
+    }
+  }
 
   buttonPressed(action) {
     MyEventEmitter.emit(action);

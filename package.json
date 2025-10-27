@@ -1,0 +1,17 @@
+{
+  "name": "sol-blade",
+  "private": true,
+  "type": "module",
+  "dependencies": {},
+  "imports": {
+    "#shared/": "../shared/"
+  },
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": [
+        "shared/*"
+      ]
+    }
+  }
+}

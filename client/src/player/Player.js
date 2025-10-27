@@ -246,6 +246,7 @@ export default class Player extends Pawn {
             this.game?.setWorld('world1');
         }
         if (this.input.keys['KeyF']) {
+            if(!LocalData.flags.dev) return;
             const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
             const scaledConvertedDirection = new THREE.Vector3(direction.x, direction.y, direction.z).multiplyScalar(2);
             this.body.position = this.body.position.add(scaledConvertedDirection);

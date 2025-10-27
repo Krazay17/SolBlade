@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import actorDefaults, { randomPos } from "./ActorDefaults.js";
+import actorDefaults, { randomPos } from "../../shared/ActorDefaults.js";
 
 export default class ActorManager {
     static instance = null;
@@ -7,6 +7,8 @@ export default class ActorManager {
         if (ActorManager.instance) return ActorManager.instance;
         this._actors = [];
         this.io = io;
+
+        this.actorsByWorld = {};
 
         this.hasSpawnedDefaults = false;
         this.spawnDefaultActors();
@@ -65,6 +67,8 @@ export default class ActorManager {
             time: performance.now(),
         }
         this._actors.push(actor);
+        //this.actorsByWorld[actor.solWorld] = {solWorld}
+        this.io.emit('newActor', actor);
         return actor;
     }
     removeActor(actor) {
@@ -90,8 +94,9 @@ export default class ActorManager {
             netId: id,
             active: true,
         }
-        this._actors.push(actor);
-        this.io.emit('newActor', actor);
+        //this._actors.push(actor);
+        //this.io.emit('newActor', actor);
+        this.addActor(actor);
         return actor;
     }
     getActorById(id) {
@@ -133,5 +138,7 @@ export default class ActorManager {
     }
     get playerActors() {
         return this._actors.filter(a => a.type === 'player');
+    }
+    get enemies() {
     }
 }
