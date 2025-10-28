@@ -21,7 +21,7 @@ export default class ActorManager {
         this.actorTick = setInterval(() => {
             let dt = Date.now() - this.lastTime;
             this.updateEnemies(dt)
-        }, 1000/20);
+        }, 1000 / 20);
 
         ActorManager.instance = this;
     }
@@ -33,8 +33,8 @@ export default class ActorManager {
         if (targetActor) {
             const { type, name, pos, respawn, respawning, maxHealth, active, rndPos } = targetActor;
             if (!active) return;
-            if(type === 'enemy') {
-                const actorClass = this.serverActors.find(a=> a.data.netId === target);
+            if (type === 'enemy') {
+                const actorClass = this.serverActors.find(a => a.data.netId === target);
                 actorClass.die();
             }
             if (type !== 'player') {
@@ -142,10 +142,10 @@ export default class ActorManager {
         for (let i = 0; i < enemies; i++) {
             this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: { x: i, y: 100, z: 0 } });
         }
-        // setInterval(()=> {
-        //     if(this.serverActors.length > 20) return;
-        //     this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: { x: 0, y: 100, z: 0 } });
-        // }, 1000)
+        setInterval(()=> {
+            if(this.serverActors.length > 20) return;
+            this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: { x: 0, y: 100, z: 0 } });
+        }, 4000)
     }
     remainingDuration(actor) {
         const time = actor.time;

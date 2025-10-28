@@ -48,7 +48,7 @@ export default class Pawn extends Actor {
     }
     update(dt: number, time: number) {
         super.update(dt, time);
-        if (!this.active) return;
+        if (!this.active || this.destroyed) return;
         if (this.controller) this.controller.update?.(dt);
         if (this.stateManager) this.stateManager.update(dt, time);
         if (this.movement) this.movement.update?.(dt, time);
@@ -71,11 +71,11 @@ export default class Pawn extends Actor {
             //this.rotation.y = lerp(this.rotation.y, this.targetRotation, 60 * dt);
         }
     }
-    destroy(): void {
-        super.destroy();
-        if (this.body?.body) this.game.physics.removeRigidBody(this.body.body)
-        if (this.collider) this.game.physics.removeCollider(this.collider, true);
-    }
+    // destroy(): void {
+    //     super.destroy();
+    //     if (this.body?.body) this.game.physics.removeRigidBody(this.body.body);
+    //     if (this.collider) this.game.physics.removeCollider(this.collider, true);
+    // }
     async assignMesh(meshName: string) {
         const mesh = await this.scene.meshManager?.createSkeleMesh(meshName);
         if (this.destroyed || !mesh) return false;
