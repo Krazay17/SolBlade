@@ -16,6 +16,6 @@ export default class SvPower extends SvActor {
     }
     die() {
         super.die();
-        this.respawn(5000)
+        this.respawn(10000)
     }
 }

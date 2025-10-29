@@ -62,6 +62,7 @@ export default class SvEnemy extends SvActor {
         this.physics.removeCollider(this.collider);
         this.active = false;
         io.emit('actorEvent', { id: this.netId, event: 'applyDie', data: this.serialize() });
+        this.actorManager.createActor('item', { pos: this.position, solWorld: this.solWorld, doesRespawn: false });
     }
     update(dt) {
         if (!this.active) return;
