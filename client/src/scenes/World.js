@@ -27,7 +27,7 @@ export default class World {
   get player() { return this.game.player };
   get loadingManager() { return this.game.loadingManager };
   get graphics() { return this.game.graphicsWorld };
-  get physics() { return this.game.physicsWorld };
+  get physics() { return this.game.physics };
   get pawnManager() { return this.game.pawnManager };
   get meshManager() { return this.game.meshManager };
   get questManager() { return this.game.questManager };

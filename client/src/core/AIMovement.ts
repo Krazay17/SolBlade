@@ -5,10 +5,30 @@ export default class AIMovement {
     pawn: Pawn;
     tempVector: Vector3 = new Vector3;
     speed: number = 2;
+    velocityBuffer: number = 0;
+    lastPosition: Vector3 = new Vector3;
+    tempVec: Vector3 = new Vector3;
+    tempVec2: Vector3 = new Vector3;
     constructor(pawn: Pawn) {
         this.pawn = pawn;
+        this.lastPosition.copy(this.pawn.position);
     }
-    update(dt: number, time: number) { }
+    update(dt: number, time: number) {
+        if (!this.pawn.body) return;
+        const currentPos = this.tempVec.copy(this.pawn.position);
+        const velocity = this.tempVec2.copy(currentPos).sub(this.lastPosition).divideScalar(dt);
+        this.lastPosition.copy(currentPos);
+
+        if (velocity.length() > 0.001) {
+            this.velocityBuffer = 0;
+            this.pawn.animationManager?.playAnimation('walk', true);
+        } else {
+            this.velocityBuffer = Math.min(this.velocityBuffer + dt, 1);
+            if (this.velocityBuffer >= 0.1) {
+                this.pawn.animationManager?.playAnimation('idle', true);
+            }
+        }
+    }
     setSpeed(speed: number) {
         this.speed = speed;
     }

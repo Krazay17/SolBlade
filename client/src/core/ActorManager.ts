@@ -28,6 +28,22 @@ export default class ActorManager {
         this.actors = [];
         this.player = this.spawnLocalPlayer();
     }
+    get world() {
+        return this.game?.world;
+    }
+    get players() {
+        return this.actors.filter(a => a.actorType === 'player');
+    }
+    get hostiles() {
+        return this.actors.filter(a => (a !== this.player) && a.active && (a.team === 'A' || (a.team !== this.player.team)));
+    }
+    get allButPlayer() {
+        return this.actors.filter(a => a !== this.player);
+    }
+    get localActors() {
+        return this.actors.filter(a => !a.isRemote && a.replicate);
+    }
+    get remoteActors() { return this.actors.filter(a => a.isRemote) };
     destroy() {
         for (const a of this.actors) {
             a.destroy();
@@ -36,6 +52,9 @@ export default class ActorManager {
     }
     update(dt: number, time: number) {
         for (const a of this.actors) { a.update(dt, time) };
+    }
+    fixedUpdate(dt: number, time: number) {
+        for (const a of this.actors) { a.fixedUpdate(dt, time) };
     }
     spawnLocalPlayer() {
         const player = new actorRegistry['player'](this.game, { pos: LocalData.position || { x: 0, y: 1, z: 0 }, solWorld: LocalData.solWorld })
@@ -48,7 +67,7 @@ export default class ActorManager {
         isRemote: boolean = false,
         replicate: boolean = false,
     ): Actor | undefined | void {
-        const solWorld = this.game?.solWorld;
+        const solWorld = data.solWorld || this.game?.solWorld;
         // if (isRemote && (data.solWorld !== solWorld)) return;
         const finalData = { type, ...data, isRemote, replicate, solWorld, active: true };
         // const existingActor = this.getActorById(data.netId);
@@ -116,20 +135,4 @@ export default class ActorManager {
         }
         return inrange;
     }
-    get world() {
-        return this.game?.world;
-    }
-    get players() {
-        return this.actors.filter(a => a.actorType === 'player');
-    }
-    get hostiles() {
-        return this.actors.filter(a => (a !== this.player) && a.active && (a.team === 'A' || (a.team !== this.player.team)));
-    }
-    get allButPlayer() {
-        return this.actors.filter(a => a !== this.player);
-    }
-    get localActors() {
-        return this.actors.filter(a => !a.isRemote && a.replicate);
-    }
-    get remoteActors() { return this.actors.filter(a => a.isRemote) };
 }

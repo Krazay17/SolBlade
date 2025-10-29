@@ -7,10 +7,10 @@ export default class AnimationManager {
     mixer: THREE.AnimationMixer;
     animations: { [key: string]: THREE.AnimationClip };
     currentAction: THREE.AnimationAction | null = null;
-    timeScaleTimer: NodeJS.Timeout | null = null;
+    timeScaleTimer: any;
     currentAnimation: string | null = null;
     _onFinishedListener: any;
-    quedAnim: NodeJS.Timeout | null = null;
+    quedAnim: any;
     setAnimState = this.playAnimation;
     hitFreeze = this.changeTimeScale;
 

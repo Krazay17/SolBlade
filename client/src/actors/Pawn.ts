@@ -14,7 +14,7 @@ import Game from "../Game";
 import { lerpAngle } from "../utils/Utils";
 
 export default class Pawn extends Actor {
-    body: PawnBody | null = null;
+    body: PawnBody | null;
     collider: RAPIER.Collider | null = null;
     radius: number;
     height: number;
@@ -39,7 +39,7 @@ export default class Pawn extends Actor {
 
         this.assignMesh(this.skin);
 
-        if (this.game.physics && !this.destroyed) this.body = new PawnBody(this.game.physics, data.pos, this.height, this.radius, data.isRemote);
+        this.body = new PawnBody(this.game.physics, data.pos, this.height, this.radius, data.isRemote);
         if (!this.isRemote) {
         } else {
             this.targetPosition = data.pos;
@@ -53,29 +53,32 @@ export default class Pawn extends Actor {
         if (this.stateManager) this.stateManager.update(dt, time);
         if (this.movement) this.movement.update?.(dt, time);
         if (this.animationManager) this.animationManager.update(dt);
-        if (!this.isRemote) {
-            if (this.body) {
-                this.position.copy(this.body.position);
+        if (this.isRemote) {
+            if (this.position.distanceToSquared(this.targetPosition) > 50) {
+                if (this.body) this.body.position = this.targetPosition;
+            } else {
+                if (this.body) this.body.position = this.body.position.lerp(this.targetPosition, 60 * dt);
             }
-        } else {
-            // Remote Player
+            this.rotation.y = lerpAngle(this.rotation.y, this.targetRotation, 60 * dt)
+        }
+        if (this.body) {
+            this.position.copy(this.body.position);
+        }
+    }
+    fixedUpdate(dt: number, time: number): void {
+        if (this.isRemote) {
             if (this.body) {
                 this.body.position = this.position;
             }
-            if (this.position.distanceToSquared(this.targetPosition) > 50) {
-                this.position.copy(this.targetPosition);
-            } else {
-                this.position.lerp(this.targetPosition, 60 * dt);
-            }
-            this.rotation.y = lerpAngle(this.rotation.y, this.targetRotation, 60 * dt)
-            //this.rotation.y = lerp(this.rotation.y, this.targetRotation, 60 * dt);
         }
     }
-    // destroy(): void {
-    //     super.destroy();
-    //     if (this.body?.body) this.game.physics.removeRigidBody(this.body.body);
-    //     if (this.collider) this.game.physics.removeCollider(this.collider, true);
-    // }
+    destroy(): void {
+        super.destroy();
+        if (this.body?.body) this.game.physicsWorld.safeRemoveBody(this.body.body);
+        if (this.collider) this.game.physicsWorld.safeRemoveCollider(this.collider);
+        this.body = null;
+        this.collider = null;
+    }
     async assignMesh(meshName: string) {
         const mesh = await this.scene.meshManager?.createSkeleMesh(meshName);
         if (this.destroyed || !mesh) return false;
@@ -100,6 +103,4 @@ export default class Pawn extends Actor {
     getMeshBody() {
         return this.meshBody;
     }
-
-
 }

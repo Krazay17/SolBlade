@@ -74,14 +74,10 @@ export default class Player extends Pawn {
             this.devMenu = new DevMenu(this, this.movement);
 
             MyEventEmitter.on('KeyPressed', (key) => {
-                if (key === 'KeyR') {
+                if (key === 'KeyH') {
                     this.die('the void');
                 }
             });
-
-            MyEventEmitter.on('test', () => {
-                this.parried();
-            })
 
         } else {
             // Remote Player
@@ -174,6 +170,9 @@ export default class Player extends Pawn {
             dir: bulletDirection,
             camPos: camPosition,
         };
+    }
+    addEnergy(amnt) {
+        this.energy.add(amnt);
     }
 
     setDimmed(duration) {
@@ -330,8 +329,8 @@ export default class Player extends Pawn {
     hit(data) {
         super.hit(data);
     }
-    applyHit(data, health) {
-        super.applyHit(data, health);
+    applyHit(data) {
+        super.applyHit(data);
         /**@type {HitData} */
         const { type, amount, stun, impulse, dim } = data;
         //this.game.soundPlayer.applyPosSound('playerHit', this.position);
@@ -354,14 +353,10 @@ export default class Player extends Pawn {
     }
     healthChange(health) {
         super.healthChange(health);
-        MyEventEmitter.emit('playerHealthChange', { id: this.netId, health });
-        if (this.isRemote) {
-            this.namePlate?.setHealth(health);
-            return;
-        }
+        MyEventEmitter.emit('playerHealthChangeLocal', { id: this.netId, health });
         if (!this.isRemote) {
             LocalData.health = health;
-            netSocket.emit('playerHealthChangeLocal', { id: this.netId, health });
+            MyEventEmitter.emit('playerHealthChange', { id: this.netId, health });
         }
     }
     // only local
@@ -371,7 +366,9 @@ export default class Player extends Pawn {
         this.stateManager.setState('dead');
         MyEventEmitter.emit('iDied', this.lastHitData);
     }
-    applyDie() { }
+    applyDie() {
+        this.die();
+    }
     // only local
     unDie() {
         if (this.isRemote) return;
@@ -385,7 +382,8 @@ export default class Player extends Pawn {
         this.isDead = false;
         this.stateManager.setState('idle');
 
-        MyEventEmitter.emit('playerRespawn');
+        //MyEventEmitter.emit('playerRespawn');
+        MyEventEmitter.emit('actorHealthChangeLocal', this.health);
     }
     tryEnterBlade() {
         if (this.stateManager.currentStateName === 'blade') return;

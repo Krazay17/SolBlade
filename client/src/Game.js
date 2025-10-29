@@ -25,6 +25,8 @@ import SoundPlayer from './core/SoundPlayer';
 import World4 from './scenes/World4';
 import { menuSlider } from './ui/Menu';
 import World5 from './scenes/World5';
+import FXManager from './core/FXManager';
+import SolPhysics from './core/SolPhysics';
 
 await RAPIER.init();
 
@@ -60,7 +62,8 @@ export default class Game {
 
     this.graphicsWorld = new THREE.Scene();
 
-    this.physicsWorld = new RAPIER.World({ x: 0, y: -6, z: 0 });
+    //this.physicsWorld = new RAPIER.World({ x: 0, y: -6, z: 0 });
+    this.physicsWorld = new SolPhysics();
 
     this.loadingManager = new LoadingManager();
     this.meshManager = new MeshManager(this);
@@ -94,17 +97,39 @@ export default class Game {
     const newQuest = this.questManager.addQuest('playerKill');
     this.debugData = new DebugData(this.player);
     this.lightManager = new LightManager(this);
+    this.fxManager = new FXManager(this);
 
     this.worldReady = () => {
       this.player.setWorld(this.world);
       this.solRender.outlineObject = this.world.map;
       setNetScene(this.world);
+      this.running = true;
     }
     this.setWorld(LocalData.solWorld || 'world2');
 
     this.bindings();
     this.start();
   }
+  get solWorld() {
+    return this.world.solWorld || LocalData.solWorld;
+  }
+  get physics() {
+    return this.physicsWorld.world;
+  }
+  get graphics() {
+    return this.graphicsWorld;
+  }
+  /**@type {Player[]} */
+  get players() {
+    return this.actorManager.players;
+  }
+  get hostiles() {
+    return this.actorManager.hostiles;
+  }
+  get levelLOS() {
+    return this.world.mergedLevel;
+  }
+  get time() { return this.lastTime }
   initWindow() {
   }
   bindings() {
@@ -147,6 +172,7 @@ export default class Game {
     if (!newWorld) return;
     if (this.world && !this.world.levelLoaded) return;
 
+    this.running = false;
     this.actorManager.clearActors();
     this.lightManager.destroy();
 
@@ -180,12 +206,15 @@ export default class Game {
 
       this.accumulator += dt;
       this.accumulator = Math.min(this.accumulator, 0.25);
-      while (this.accumulator >= this.timeStep) {
-        this.physicsWorld.step();
+      while (this.running && (this.accumulator >= this.timeStep)) {
+        this.physics.step();
+        this.physicsWorld.remove();
         this.world?.fixedUpdate?.(this.timeStep, time);
+        this.actorManager?.fixedUpdate(this.timeStep, time);
+
         this.accumulator -= this.timeStep;
       }
-
+      this.fxManager?.update(dt, time);
       this.world?.update?.(dt, time);
       this.actorManager?.update(dt, time);
       this.questManager?.update(dt, time);
@@ -246,24 +275,5 @@ export default class Game {
   }
   remove(obj) {
     if (obj) this.graphicsWorld.remove(obj);
-  }
-  get solWorld() {
-    return this.world.solWorld || LocalData.solWorld;
-  }
-  get physics() {
-    return this.physicsWorld;
-  }
-  get graphics() {
-    return this.graphicsWorld;
-  }
-  /**@type {Player[]} */
-  get players() {
-    return this.actorManager.players;
-  }
-  get hostiles() {
-    return this.actorManager.hostiles;
-  }
-  get levelLOS() {
-    return this.world.mergedLevel;
   }
 }

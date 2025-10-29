@@ -11,7 +11,6 @@ export default class PartyFrame {
 
         MyEventEmitter.on('disconnect', () => {
             for (const [p, el] of this.players) {
-                console.log(p)
                 this.removePlayer(p)
             }
             this.players.clear();
@@ -41,7 +40,7 @@ export default class PartyFrame {
         const healthFill = document.createElement('div');
         healthFill.className = 'party-healthbar-fill';
         healthFill.style.width = `${player.health}%`;
-        MyEventEmitter.on('playerHealthChange', ({ id, health }) => {
+        MyEventEmitter.on('playerHealthChangeLocal', ({ id, health }) => {
             if (player.netId === id) {
                 healthFill.style.width = `${health}%`;
             }

@@ -26,6 +26,7 @@ export default class PowerPickup extends Pickup {
     touch(dealer) {
         super.touch(dealer);
         this.active = false;
+        this.deActivate();
     }
     applyTouch(data) {
         const { dealer, target } = data;

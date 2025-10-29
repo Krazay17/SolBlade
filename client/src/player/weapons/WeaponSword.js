@@ -27,7 +27,7 @@ export default class WeaponSword extends Weapon {
             this.hitActors.clear();
             this.hitPauseDiminish = 1;
             this.damageDelay = 415;
-            this.damageDuration = 600;
+            this.damageDuration = 520;
             this.hitPauseDiminish = 1;
             this.dashSpeed = Math.max(11, this.actor.body.velocity.length());
 

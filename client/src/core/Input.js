@@ -152,6 +152,6 @@ export default class Input {
     addButton('KeyUnpressed', 'KeyC', 'Inventory', 1, 7);
     addButton('KeyUnpressed', 'KeyB', 'Menu', 1, 6);
     addButton('KeyUnpressed', 'KeyT', 'Home', 1, 5);
-    addButton('KeyUnpressed', 'KeyR', 'Respawn', 1, 4);
+    addButton('KeyUnpressed', 'KeyH', 'Sudoku', 1, 4);
   };
 }

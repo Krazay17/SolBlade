@@ -53,6 +53,7 @@ function joinGame() {
     netPlayers[playerId] = player;
     initBindings();
     socket.emit('joinGame', player.serialize());
+
     socket.emit('newWorld', scene.solWorld);
     if (voiceChat) voiceChat.setScene(scene);
 }
@@ -91,8 +92,9 @@ function initBindings() {
         }
     });
     socket.on('playerHealthChange', ({ id, health }) => {
-        netPlayers[id].health = health;
-        MyEventEmitter.emit('playerHealthChange', { id, health });
+        const player = scene.getActorById(id);
+        if (!player) return;
+        player.health = health;
     });
     socket.on('playerPositionUpdate', ({ id, data }) => {
         const player = scene.getActorById(id);
@@ -127,11 +129,6 @@ function initBindings() {
         data = HitData.deserialize(data, (id) => scene.getActorById(id));
         MyEventEmitter.emit('playerDied', data);
     });
-    socket.on('playerRespawn', ({ id, health }) => {
-        const player = scene.getActorById(id);
-        if (player) player.health = health;
-        netPlayers[id].health = health;
-    });
     socket.on('changeAnimation', ({ id, data }) => {
         if (id === socket.id) return;
         const actor = scene.getActorById(id);
@@ -164,11 +161,15 @@ function initBindings() {
         for (const a of data) {
             const { type, tempId, netId } = a
             if (netId === playerId) continue;
-            const localActor = scene.actorManager.actors.find(a => (a.tempId === tempId) || a.netId === netId && a.active);
-            if (localActor) {
-                localActor.setNetId(netId);
+            const existingActor = scene.actorManager.actors.find(a =>
+                a.active && (a.tempId === tempId || a.netId === netId)
+            );
+            if (existingActor) {
+                existingActor.setNetId(netId);
+                existingActor.activate();
             } else {
                 const actorData = Actor.deserialize(a, (id) => scene.actorManager.getActorById(id));
+                console.log(actorData);
                 const newActor = scene.actorManager.spawnActor(type, actorData, true, false);
             }
         }
@@ -176,29 +177,32 @@ function initBindings() {
     socket.on('newActor', (data) => {
         const { type, tempId, netId, solWorld } = data
         if (netId === playerId) return;
-        const existingActor = scene.actorManager.actors.find(a => a.tempId === tempId) || scene.actorManager.actors.find(a => (a.netId === netId) && a.active);
+        const existingActor = scene.actorManager.actors.find(a =>
+            a.active && (a.tempId === tempId || a.netId === netId)
+        );
         if (existingActor) {
             existingActor.setNetId(netId);
+            existingActor.activate();
         } else {
             if (solWorld !== scene.solWorld) return;
             const actorData = Actor.deserialize(data, (id) => scene.actorManager.getActorById(id));
             const newActor = scene.actorManager.spawnActor(type, actorData, true, false);
         }
     });
-    socket.on('actorHit', ({ data, health }) => {
+    socket.on('actorHit', (data) => {
         data = HitData.deserialize(data, (id) => scene.getActorById(id));
         const { dealer, target } = data;
-        if (target) target.applyHit?.(data, health);
+        if (target) target.applyHit?.(data);
     });
-    socket.on('actorTouch', (data) => {
-        data = TouchData.deserialize(data, (id) => scene.getActorById(id));
-        const { dealer, target } = data;
-        if (target) target.applyTouch?.(data);
+    socket.on('actorTouch', ({ id, data }) => {
+        const actor = scene.getActorById(id);
+        if (data) data = TouchData.deserialize(data, (dataId) => scene.getActorById(dataId));
+        if (actor) actor.applyTouch?.(data);
     });
-    socket.on('actorDie', (data) => {
-        data = HitData.deserialize(data, (id) => scene.getActorById(id));
-        const { dealer, target } = data;
-        if (target) target.applyDie?.(data);
+    socket.on('actorDie', ({ id, data }) => {
+        const actor = scene.getActorById(id);
+        if (data) data = HitData.deserialize(data, (dataId) => scene.getActorById(dataId));
+        if (actor) actor.applyDie?.(data);
     });
     socket.on('playPosSound', ({ map, data }) => {
         if (map !== scene.solWorld) return;
@@ -206,7 +210,7 @@ function initBindings() {
     });
     socket.on('playerStateUpdate', (data) => {
         const { netId } = data;
-        if (netId === playerId) return
+        if (netId === playerId) return;
         const actor = scene.getActorById(netId);
         if (actor) {
             actor.stateUpdate(data);
@@ -217,23 +221,53 @@ function initBindings() {
             const actor = scene.getActorById(a.id);
             if (!actor) return;
             actor.targetPosition = a.pos;
+            actor.targetRotation = a.rot;
         }
-    })
+    });
+    socket.on('actorHealthChange', ({ id, health }) => {
+        const actor = scene.getActorById(id);
+        actor.health = health;
+    });
+    socket.on('actorEvent', ({ id, event, data }) => {
+        const actor = scene.getActorById(id);
+        if (actor && actor[event]) actor[event](data);
+
+    });
+    socket.on('spawnFX', ({ type, data }) => {
+        scene.fxManager.spawnFX(type, data, false);
+    });
 }
 
+MyEventEmitter.on('actorHealthChangeLocal', health => {
+    socket.emit('actorHealthChangeLocal', health);
+})
+MyEventEmitter.on('playerHealthChange', (data) => {
+    socket.emit('playerHealthChange', data);
+})
 MyEventEmitter.on('playPosSound', ({ name, pos }) => {
     socket.emit('playPosSound', { name, pos: { x: pos.x, y: pos.y, z: pos.z } });
 })
 MyEventEmitter.on('actorHit', (/**@type {HitData}*/data) => {
+    // if (socket.connected) {
+    //     socket.emit('actorHit', data.serialize());
+    // } else {
+    //     data.target.applyHit(data);
+    // }
     if (socket.connected) {
-        socket.emit('actorHit', data.serialize());
+        socket.emit('actorEvent', { id: data.target.netId, event: 'hit', data: data.serialize() });
     } else {
         data.target.applyHit(data);
     }
 });
 MyEventEmitter.on('actorTouch', (/**@type {TouchData}*/data) => {
+    // if (socket.connected) {
+    //     socket.emit('actorTouch', data.serialize());
+    // } else {
+    //     data.target.applyTouch(data);
+    // }
+    console.log(data);
     if (socket.connected) {
-        socket.emit('actorTouch', data.serialize());
+        socket.emit('actorEvent', { id: data.target.netId, event: 'touch', data: data.serialize() });
     } else {
         data.target.applyTouch(data);
     }
@@ -265,9 +299,6 @@ MyEventEmitter.on('playerStateUpdate', (data) => {
 })
 MyEventEmitter.on('actorStateUpdate', data => {
     socket.emit('actorStateUpdate', data?.serialize?.());
-});
-MyEventEmitter.on('playerRespawn', () => {
-    socket.emit('playerRespawn');
 });
 MyEventEmitter.on('newPlayer', (data) => {
     socket.emit('newPlayer', data.serialize());

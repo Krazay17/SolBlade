@@ -5,16 +5,11 @@
   "license": "ISC",
   "author": "Josh Massarella",
   "type": "module",
-  "main": "ExportColliders.js",
   "scripts": {
     "build": "node ExportColliders.js"
   },
   "dependencies": {
-    "@gltf-transform/core": "^4.2.1",
-    "@gltf-transform/extensions": "^4.2.1",
-    "three": "^0.179.1"
   },
   "devDependencies": {
-    "@types/three": "^0.180.0"
   }
 }

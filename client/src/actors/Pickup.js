@@ -21,7 +21,7 @@ export default class Pickup extends Actor {
         this.add(this.mesh);
     }
     touch(dealer) {
-        super.touch(dealer)
+        super.touch(dealer);
         this.active = false;
     }
     onTouch(dealer) {

@@ -17,12 +17,15 @@ export interface ActorData {
     [key: string]: any;
 }
 
-export default class Actor extends Object3D {
+export default class Actor {
     game: Game;
+    data: any;
+    graphics: Object3D;
+    type: string;
+    name: string;
     world: World;
     solWorld: string;
     team: string;
-    data: any;
     destroyed: boolean = false;
     actorType: string = '';
     replicate: boolean = false;
@@ -37,7 +40,6 @@ export default class Actor extends Object3D {
     _health: number = 100;
     targetPosition: Vector3 = new Vector3();
     constructor(game: Game, data: ActorData = {}) {
-        super();
         const {
             type = '',
             name = '',
@@ -59,12 +61,16 @@ export default class Actor extends Object3D {
         this.world = game.world;
         this.data = data;
 
-        this.actorType = type
+        this.graphics = new Object3D();
+        this.game.graphics?.add(this.graphics);
+        this.graphics.name = name;
+        this.position.copy(pos);
+        this.setRotationFromQuaternion(rot);
+
+        this.type = type
         this.name = name;
         this.solWorld = solWorld;
         this.team = team;
-        this.position.copy(pos);
-        this.setRotationFromQuaternion(rot);
         this.maxHealth = maxHealth;
         this._health = health;
         this.isDead = isDead;
@@ -76,13 +82,36 @@ export default class Actor extends Object3D {
 
         this.tempId = generateUUID();
 
-        this.game.graphics?.add(this);
 
         if (this.isRemote) {
             this.targetPosition = this.position.clone();
         }
     }
+    get position() { return this.graphics.position }
+    get rotation() { return this.graphics.rotation }
+    get scale() { return this.graphics.scale }
+    set rotation({ x, y, z }) { this.graphics.rotation.set(x, y, z) }
+    get quaternion() { return this.graphics.quaternion }
+    set health(amnt: number) {
+        const clamped = Math.max(0, Math.min(this.maxHealth, amnt));
+        if (clamped === this._health) return; // no change, no event
+        this._health = clamped;
+        this.healthChange(this._health);
+    }
+    healthChange(health: number) { }
+    get health() {
+        return this._health;
+    }
+    get scene() {
+        return this.game;
+    }
+
+    setRotationFromQuaternion(rot: Quaternion) { this.graphics.setRotationFromQuaternion(rot) }
+    remove(obj: any) { this.graphics.remove(obj) }
+    add(obj: any) { this.graphics.add(obj) }
     update(dt: number, time: number) { };
+    fixedUpdate(dt: number, time: number) { };
+
     serialize() {
         return {
             ...this.data,
@@ -90,7 +119,7 @@ export default class Actor extends Object3D {
             team: this.team,
             owner: this.owner?.netId,
             tempId: this.tempId,
-            type: this.actorType,
+            type: this.type,
             name: this.name,
             pos: this.position.toArray(),
             rot: this.quaternion.toArray(),
@@ -131,6 +160,7 @@ export default class Actor extends Object3D {
     }
     activate(data: any) {
         this.active = true;
+        if (!data) return;
         this.data = { ...this.data, ...data };
         if (data.pos) this.position.copy(data.pos);
         if (data.rot) this.setRotationFromQuaternion(data.rot);
@@ -138,7 +168,7 @@ export default class Actor extends Object3D {
         if (data.isDead !== undefined) this.isDead = data.isDead;
         if (data.isRemote !== undefined) this.isRemote = data.isRemote;
 
-        this.game.graphics?.add(this);
+        this.game.graphics?.add(this.graphics);
 
         if (!this.isRemote) MyEventEmitter.emit('newActor', this);
     }
@@ -147,12 +177,12 @@ export default class Actor extends Object3D {
     }
     deActivate() {
         this.active = false;
-        this.game.graphics?.remove(this);
+        this.game.graphics?.remove(this.graphics);
     }
     destroy() {
         this.active = false;
         this.destroyed = true;
-        this.game.graphics?.remove(this);
+        this.game.graphics?.remove(this.graphics);
         this.game.actorManager?.removeActor(this);
         this.tempId = '';
         this.netId = '';
@@ -163,15 +193,12 @@ export default class Actor extends Object3D {
         this.game.soundPlayer.playSound('hit');
         this.onHit(data);
     }
-    applyHit(data: HitData, health: number) {
+    applyHit(data: HitData) {
         const { dealer, type, impulse, stun, dim, dur, sound, hitPosition, amount } = data;
-        this.health = health ?? this.health + amount;
         if (sound) {
             this.game.soundPlayer.applyPosSound(sound, hitPosition);
         }
-
         if (data) this.lastHitData = data;
-        if (this.health <= 0) this.die(this.lastHitData);
         this.onHit(data);
     }
     onHit(data: any) {
@@ -196,18 +223,5 @@ export default class Actor extends Object3D {
     }
     onDie(data: any) {
         this.deActivate();
-    }
-    set health(amnt: number) {
-        const clamped = Math.max(0, Math.min(this.maxHealth, amnt));
-        if (clamped === this._health) return; // no change, no event
-        this._health = clamped;
-        this.healthChange(this._health);
-    }
-    healthChange(health: number) { }
-    get health() {
-        return this._health;
-    }
-    get scene() {
-        return this.game;
     }
 }

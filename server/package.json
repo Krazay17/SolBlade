@@ -9,8 +9,5 @@
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.19.2",
     "socket.io": "^4.8.1"
-  },
-  "imports": {
-    "#shared/*": "./shared/*"
   }
 }

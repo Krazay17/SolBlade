@@ -15,6 +15,8 @@ export default class PawnBody {
     _velocity: Vector3 = new Vector3();
     constructor(world: RAPIER.World, pos: Vector3 = new Vector3(0, 0, 0), height: number = 1, radius: number = 0.5, isRemote = false) {
         this.world = world;
+        if(!this.world) throw new Error("invalid world passed to PawnBody");
+        //const desc = isRemote ? RAPIER.RigidBodyDesc.kinematicPositionBased() : RAPIER.RigidBodyDesc.dynamic()
         this.body = world.createRigidBody(RAPIER.RigidBodyDesc.dynamic()
             .lockRotations()
             .setTranslation(pos.x || 0, pos.y || 0, pos.z || 0)
@@ -36,7 +38,8 @@ export default class PawnBody {
     get position() {
         return this._position.copy(this.body.translation());
     }
-    set position(pos: { x: number, y: number, z: number }) {
+    set position(pos: Vector3) {
+        const flatVector = { x: pos.x, y: pos.y, z: pos.z };
         this.body.setTranslation(pos, true);
     }
     get velocity(): Vector3 {

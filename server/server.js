@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
-import { sendDiscordMessage } from "./DiscordStuff.js";
 import http from "http";
-import ActorManager from "./src/ActorManager.js";
-import CrownQuest from "./src/CrownQuest.js";
+import { sendDiscordMessage } from "./DiscordStuff.js";
+import SvActorManager from "./src/SvActorManager.js";
+import CrownQuest from "./src/SvCrownQuest.js";
 
 const PORT = process.env.PORT || 3000;
 const server = http.createServer();
@@ -11,7 +11,7 @@ const isLocal = process.env.PORT === '3000'
     || !process.env.PORT;
 const origin = isLocal ? 'http://localhost:5173' : "https://solblade.online";
 
-const io = new Server(server, {
+export const io = new Server(server, {
     cors: {
         origin: origin,
         methods: ["GET", "POST"]
@@ -22,7 +22,7 @@ const io = new Server(server, {
     cleanupEmptyChildNamespaces: true,
 });
 
-const actorManager = new ActorManager(io);
+const actorManager = new SvActorManager(io);
 const crownQuest = new CrownQuest(io, actorManager);
 const quests = [crownQuest];
 let players = {};
@@ -65,15 +65,15 @@ io.on('connection', (socket) => {
 
     socket.on('joinGame', (data) => {
         if (players[socket.id]) return;
-        const player = actorManager.addActor({ ...data, netId: socket.id });
+        const player = actorManager.createActor('player', { ...data, netId: socket.id });
         players[socket.id] = player;
-        socket.emit('playersConnected', players);
-        socket.broadcast.emit('playerConnected', player)
+        socket.emit('playersConnected', serializePlayers());
+        socket.broadcast.emit('playerConnected', player.serialize())
 
         const bindGameplay = () => {
             socket.on('newWorld', (solWorld) => {
                 player.solWorld = solWorld;
-                socket.broadcast.emit('newWorld', player);
+                socket.broadcast.emit('newWorld', player.serialize());
                 socket.emit('currentActors', actorManager.getActorsOfWorld(solWorld));
             })
 
@@ -94,14 +94,7 @@ io.on('connection', (socket) => {
                 io.emit('playerNameChange', { id: socket.id, name });
             });
             socket.on('playerStateUpdate', data => {
-                const { solWorld, skin } = data;
-                const actor = actorManager.getActorById(socket.id);
-                if (solWorld) {
-                    actor.solWorld = solWorld;
-                }
-                if (skin) {
-                    actor.skin = skin
-                }
+                actorManager.updateActor(data);
 
                 socket.broadcast.emit('playerStateUpdate', data);
             })
@@ -125,52 +118,40 @@ io.on('connection', (socket) => {
             socket.on('parryUpdate', (doesParry) => {
                 if (players[socket.id]) {
                     players[socket.id].parry = doesParry;
-                    socket.broadcast.emit('parryUpdate', doesParry);
                 }
             });
-            socket.on('playerHealthChangeLocal', ({ id, health }) => {
-                players[id].health = health;
-                socket.broadcast.emit('playerHealthChange', { id, health });
-            });
-            socket.on('playerRespawn', () => {
-                const player = players[socket.id];
-                if (player) {
-                    player.health = player.maxHealth || 100;
-                    player.parry = false;
-                    player.lastHit = null;
-                }
-                socket.broadcast.emit('playerRespawn', { id: socket.id, health: player.health });
-                socket.broadcast.emit('playerHealthChange', { id: socket.id, health: player.health });
-            });
-            socket.on('fx', (data) => {
-                socket.broadcast.emit('fx', data);
-            });
-            socket.on('actorHit', (data) => {
-                const actor = actorManager.getActorById(data.target);
-                if (actor) {
-                    if (actor.type === 'player' && !playerHit(actor, data)) return;
-                    if (actor.type === 'enemy' && !enemyHit(actor, data)) return;
-                    actor.health = Math.max(0, Math.min(actor.maxHealth, actor.health + data.amount));
-                    actor.lastHit = data;
-                    io.emit('actorHit', { data, health: actor.health });
-                    if (actor.health <= 0) {
-                        actorManager.actorDie(actor.lastHit);
-                    }
-                }
-            });
-            socket.on('actorTouch', (data) => {
-                const actor = actorManager.getActorById(data.target);
-                if (actor && actor.active) {
-                    io.emit('actorTouch', data);
-                    if (data.die) actorManager.actorDie(data);
-                }
-            });
-            socket.on('actorDie', (data) => {
-                actorManager.actorDie(data);
-            });
+            // socket.on('playerHealthChange', ({ id, health }) => {
+            //     players[id].health = health;
+            //     socket.broadcast.emit('playerHealthChange', { id, health });
+            // });
+            // socket.on('fx', (data) => {
+            //     socket.broadcast.emit('fx', data);
+            // });
+            // socket.on('actorHit', (data) => {
+            //     const actor = actorManager.getActorById(data.target);
+            //     if (actor) {
+            //         if (actor.type === 'player' && !playerHit(actor, data)) return;
+            //         if (actor.type === 'enemy' && !enemyHit(actor, data)) return;
+            //         actor.health = Math.max(0, Math.min(actor.maxHealth, actor.health + data.amount));
+            //         actor.lastHit = data;
+            //         io.emit('actorHit', { data, health: actor.health });
+            //         if (actor.health <= 0) {
+            //             actorManager.actorDie(actor.lastHit);
+            //         }
+            //     }
+            // });
+            // socket.on('actorTouch', (data) => {
+            //     const actor = actorManager.getActorById(data.target);
+            //     if (actor && actor.active) {
+            //         io.emit('actorTouch', data);
+            //         if (data.die) actorManager.actorDie(data);
+            //     }
+            // });
+            // socket.on('actorDie', (data) => {
+            //     actorManager.actorDie(data);
+            // });
             socket.on('newActor', (data) => {
-                const actor = actorManager.addActor(data);
-                io.emit('newActor', actor);
+                actorManager.createActor(data.type, data);
             });
             socket.on('actorStateUpdate', data => {
                 const actor = actorManager.getActorById(data.netId);
@@ -201,6 +182,15 @@ io.on('connection', (socket) => {
             });
             socket.on('bootPlayer', id => {
                 playerSockets[id].disconnect();
+            });
+            socket.on('actorEvent', ({ id, event, data }) => {
+                const actor = actorManager.getActorById(id);
+                if (actor && actor[event]) actor[event](data);
+            });
+            socket.on('actorHealthChangeLocal', health => {
+                const actor = actorManager.getActorById(socket.id);
+                if (!actor) return;
+                actor.healthC.current = health;
             })
         }
         bindGameplay()
@@ -208,6 +198,14 @@ io.on('connection', (socket) => {
     });
     // player connected
 });
+
+function serializePlayers() {
+    const data = {}
+    for (const [id, p] of Object.entries(players)) {
+        data[id] = p.serialize();
+    }
+    return data;
+}
 
 function playerHit(actor, data) {
     const { amount, dealer } = data;
@@ -222,7 +220,7 @@ function playerHit(actor, data) {
 
 function enemyHit(actor, data) {
     const { amount, dealer, target } = data;
-    const enemy = actorManager.enemies.find(a=>a.data.netId === target);
+    const enemy = actorManager.enemies.find(a => a.data.netId === target);
     enemy.hit(data);
     return true;
 }
