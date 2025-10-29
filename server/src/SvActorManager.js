@@ -135,11 +135,11 @@ export default class SvActorManager {
             this.createActor('power', { solWorld: 'world2', power: powerType, pos: randomPos(20, 10) });
         }
         for (let i = 0; i < enemies; i++) {
-            this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(50, 15) });
+            this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
         }
         setInterval(() => {
             if (this.actorsOfWorld['world3'].enemies.length > 20) return;
-            this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(50, 15) });
+            this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
         }, 500)
 
         for (let i = 0; i < enemies; i++) {

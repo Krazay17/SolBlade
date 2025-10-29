@@ -75,7 +75,7 @@ export default class SvEnemy extends SvActor {
         if (data.impulse) {
             if (this.body) this.body.setLinvel({ x: data.impulse[0], y: data.impulse[1], z: data.impulse[2] }, true);
             this.stunned = true;
-            setTimeout(() => this.stunned = false, 800);
+            setTimeout(() => this.stunned = false, 600);
         }
     }
 }
