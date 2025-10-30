@@ -166,7 +166,7 @@ function initBindings() {
             );
             if (existingActor) {
                 existingActor.setNetId(netId);
-                existingActor.activate();
+                //existingActor.activate();
             } else {
                 const actorData = Actor.deserialize(a, (id) => scene.actorManager.getActorById(id));
                 console.log(actorData);
