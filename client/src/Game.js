@@ -100,9 +100,9 @@ export default class Game {
     this.fxManager = new FXManager(this);
 
     this.worldReady = () => {
+      setNetScene(this.world);
       this.player.setWorld(this.world);
       this.solRender.outlineObject = this.world.map;
-      setNetScene(this.world);
       this.running = true;
     }
     this.setWorld(LocalData.solWorld || 'world2');
