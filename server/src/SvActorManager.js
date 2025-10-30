@@ -70,9 +70,6 @@ export default class SvActorManager {
             const indx = this.actorsOfWorld[actor.solWorld].players.indexOf(actor)
             this.actorsOfWorld[actor.solWorld].players.splice(indx, 1);
             actor.solWorld = data.solWorld;
-            if (!this.actorsOfWorld[actor.solWorld]) {
-                this.actorsOfWorld[actor.solWorld] = { players: [], enemies: [] };
-            }
             this.actorsOfWorld[actor.solWorld].players.push(actor);
         }
     }
