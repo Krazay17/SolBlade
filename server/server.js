@@ -71,6 +71,7 @@ io.on('connection', (socket) => {
             socket.on('newWorld', (solWorld) => {
                 player.solWorld = solWorld;
                 socket.broadcast.emit('newWorld', player.serialize());
+                console.log(actorManager.getActorsOfWorld(solWorld).filter(a=>a.type === 'player'))
                 socket.emit('currentActors', actorManager.getActorsOfWorld(solWorld));
             })
 

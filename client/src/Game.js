@@ -172,6 +172,9 @@ export default class Game {
     if (!newWorld) return;
     if (this.world && !this.world.levelLoaded) return;
 
+    if (this.world?.onExit) this.world.onExit();
+    this.world = newWorld;
+
     this.running = false;
     this.actorManager.clearActors();
     this.lightManager.destroy();
@@ -179,9 +182,6 @@ export default class Game {
     this.player.portalPos = pos;
     this.player.solWorld = world;
     this.player.tick = false;
-
-    if (this.world?.onExit) this.world.onExit();
-    this.world = newWorld;
     if (this.world?.onEnter) this.world.onEnter(this.worldReady);
 
   }
