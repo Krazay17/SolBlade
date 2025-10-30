@@ -6,7 +6,7 @@ import CrownQuest from "./src/SvCrownQuest.js";
 import { sharedTest } from "@solblade/shared/Utils.js";
 
 const server = http.createServer();
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 80;
 const isLocal = PORT === 3000 || process.env.NODE_ENV === 'development';
 const origin = isLocal ? 'http://localhost:5173' : "https://solblade.online";
 

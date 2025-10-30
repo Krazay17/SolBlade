@@ -13,5 +13,6 @@
   "author": "Josh Massarella",
   "license": "ISC",
   "dependencies": {
+    "@solblade/shared": "*"
   }
 }

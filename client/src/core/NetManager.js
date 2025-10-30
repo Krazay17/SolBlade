@@ -10,8 +10,9 @@ import Globals from "../utils/Globals";
 import { menuButton } from "../ui/Menu";
 
 const serverURL = location.hostname === "localhost" ?
-    "http://localhost:3000"
-    : "solbladeserver-production.up.railway.app";
+    "http://localhost:80"
+    : "https://nonsubsiding-superexplicit-hye.ngrok-free.dev"
+//: "solbladeserver-production.up.railway.app";
 
 const socket = io(serverURL, {
     transports: ["websocket"],

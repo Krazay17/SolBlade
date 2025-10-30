@@ -1,5 +1,5 @@
 import { io } from "../../server.js";
-import { makeRandomItem, makeItem } from "../Item.js";
+import { makeRandomItem, makeItem } from "@solblade/shared/Item.js";
 import SvActor from "./SvActor.js";
 
 export default class SvCard extends SvActor {

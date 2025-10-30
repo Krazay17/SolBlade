@@ -19,7 +19,7 @@ export default class AIMovement {
         const velocity = this.tempVec2.copy(currentPos).sub(this.lastPosition).divideScalar(dt);
         this.lastPosition.copy(currentPos);
 
-        if (velocity.length() > 0.001) {
+        if (velocity.length() > 1) {
             this.velocityBuffer = 0;
             this.pawn.animationManager?.playAnimation('walk', true);
         } else {
