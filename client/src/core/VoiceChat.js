@@ -90,16 +90,16 @@ export default class VoiceChat {
             const forward = this.tempVector.set(0, 0, -1);
             forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerRot);
             if (this.audioContext.listener.forwardX) {
-                this.audioContext.listener.forwardX.linearRampToValueAtTime(forward.x, time + 0.06);
-                this.audioContext.listener.forwardY.linearRampToValueAtTime(forward.y, time + 0.06);
-                this.audioContext.listener.forwardZ.linearRampToValueAtTime(forward.z, time + 0.06);
+                this.audioContext.listener.forwardX.linearRampToValueAtTime(forward.x, time + 0.1);
+                this.audioContext.listener.forwardY.linearRampToValueAtTime(forward.y, time + 0.1);
+                this.audioContext.listener.forwardZ.linearRampToValueAtTime(forward.z, time + 0.1);
             } else {
                 this.audioContext.listener.setOrientation(forward.x, forward.y, forward.z, 0, 1, 0);
             }
             if (this.audioContext.listener.positionX) {
-                this.audioContext.listener.positionX.linearRampToValueAtTime(playerPos.x, time + 0.06);
-                this.audioContext.listener.positionY.linearRampToValueAtTime(playerPos.y, time + 0.06);
-                this.audioContext.listener.positionZ.linearRampToValueAtTime(playerPos.z, time + 0.06);
+                this.audioContext.listener.positionX.linearRampToValueAtTime(playerPos.x, time + 0.1);
+                this.audioContext.listener.positionY.linearRampToValueAtTime(playerPos.y, time + 0.1);
+                this.audioContext.listener.positionZ.linearRampToValueAtTime(playerPos.z, time + 0.1);
             } else {
                 this.audioContext.listener.setPosition(playerPos.x, playerPos.y, playerPos.z);
             }
@@ -113,15 +113,15 @@ export default class VoiceChat {
                 const audio = this.voiceMap[id];
                 if (!audio) return;
                 if (audio.gain) {
-                    audio.gain.gain.linearRampToValueAtTime(this.voicesVolume, time + 0.06);
+                    //audio.gain.gain.linearRampToValueAtTime(this.voicesVolume, time + 0.06);
                 }
                 /**@type {PannerNode} */
                 const panner = audio.panner;
                 if (panner) {
                     if (panner.positionX) {
-                        panner.positionX.linearRampToValueAtTime(pos.x, time + 0.06);
-                        panner.positionY.linearRampToValueAtTime(pos.y, time + 0.06);
-                        panner.positionZ.linearRampToValueAtTime(pos.z, time + 0.06);
+                        panner.positionX.linearRampToValueAtTime(pos.x, time + 0.1);
+                        panner.positionY.linearRampToValueAtTime(pos.y, time + 0.1);
+                        panner.positionZ.linearRampToValueAtTime(pos.z, time + 0.1);
                     } else {
                         panner.setPosition(pos.x, pos.y, pos.z);
                     }
@@ -129,56 +129,6 @@ export default class VoiceChat {
             });
         }, 50);
     }
-    update() {
-        if (!this.scene) return;
-        const player = this.scene.player;
-        if (!player) return;
-        const playerPos = player.position;
-        if (!playerPos.y) return;
-        const time = this.audioContext.currentTime;
-        const playerRot = player.rotation.y;
-        const forward = this.tempVector.set(0, 0, -1);
-        forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerRot);
-        if (this.audioContext.listener.forwardX) {
-            this.audioContext.listener.forwardX.linearRampToValueAtTime(forward.x, time + 0.06);
-            this.audioContext.listener.forwardY.linearRampToValueAtTime(forward.y, time + 0.06);
-            this.audioContext.listener.forwardZ.linearRampToValueAtTime(forward.z, time + 0.06);
-        } else {
-            this.audioContext.listener.setOrientation(forward.x, forward.y, forward.z, 0, 1, 0);
-        }
-        if (this.audioContext.listener.positionX) {
-            this.audioContext.listener.positionX.linearRampToValueAtTime(playerPos.x, time + 0.06);
-            this.audioContext.listener.positionY.linearRampToValueAtTime(playerPos.y, time + 0.06);
-            this.audioContext.listener.positionZ.linearRampToValueAtTime(playerPos.z, time + 0.06);
-        } else {
-            this.audioContext.listener.setPosition(playerPos.x, playerPos.y, playerPos.z);
-        }
-        /**@type {Map} */
-        const players = this.scene.getScenePlayersPos();
-        if (!players) return;
-
-        players.forEach((pos, id) => {
-            if (id === netSocket.id) return; // don't update our own
-            if (!this.voiceMap) return;
-            const audio = this.voiceMap[id];
-            if (!audio) return;
-            if (audio.gain) {
-                //audio.gain.gain.linearRampToValueAtTime(this.voicesVolume, time + 0.06);
-            }
-            /**@type {PannerNode} */
-            const panner = audio.panner;
-            if (panner) {
-                if (panner.positionX) {
-                    panner.positionX.linearRampToValueAtTime(pos.x, time + 0.06);
-                    panner.positionY.linearRampToValueAtTime(pos.y, time + 0.06);
-                    panner.positionZ.linearRampToValueAtTime(pos.z, time + 0.06);
-                } else {
-                    panner.setPosition(pos.x, pos.y, pos.z);
-                }
-            }
-        });
-    }
-
     setScene(scene) {
         this.scene = scene;
         if (!this.voiceMap) return;
@@ -216,8 +166,8 @@ export default class VoiceChat {
             const originalStream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     noiseSuppression: true,
-                    echoCancellation: false,
-                    autoGainControl: false,
+                    echoCancellation: true,
+                    autoGainControl: true,
                     sampleRate: 48000,
                 }
             });
@@ -228,7 +178,7 @@ export default class VoiceChat {
             // High-pass filter (remove low rumbles)
             const highPass = this.audioContext.createBiquadFilter();
             highPass.type = "highpass";
-            highPass.frequency.setValueAtTime(100, this.audioContext.currentTime);
+            highPass.frequency.setValueAtTime(150, this.audioContext.currentTime);
 
             const lowPass = this.audioContext.createBiquadFilter();
             lowPass.type = "lowpass";
@@ -236,12 +186,12 @@ export default class VoiceChat {
             highPass.connect(lowPass);
 
             // Compressor (tame spikes)
-            this.compressNode = this.audioContext.createDynamicsCompressor();
-            this.compressNode.threshold.setValueAtTime(-10, this.audioContext.currentTime);
-            this.compressNode.knee.setValueAtTime(20, this.audioContext.currentTime);
-            this.compressNode.ratio.setValueAtTime(6, this.audioContext.currentTime);
-            this.compressNode.attack.setValueAtTime(0.1, this.audioContext.currentTime);
-            this.compressNode.release.setValueAtTime(0.25, this.audioContext.currentTime);
+            // this.compressNode = this.audioContext.createDynamicsCompressor();
+            // this.compressNode.threshold.setValueAtTime(-10, this.audioContext.currentTime);
+            // this.compressNode.knee.setValueAtTime(20, this.audioContext.currentTime);
+            // this.compressNode.ratio.setValueAtTime(6, this.audioContext.currentTime);
+            // this.compressNode.attack.setValueAtTime(0.1, this.audioContext.currentTime);
+            // this.compressNode.release.setValueAtTime(0.25, this.audioContext.currentTime);
 
             // // Make a constant low-level signal
             // const noiseFloor = this.audioContext.createConstantSource();
@@ -265,7 +215,7 @@ export default class VoiceChat {
             source.connect(highPass)
                 .connect(lowPass)
                 .connect(this.gainNode)
-                .connect(this.compressNode)
+                //.connect(this.compressNode)
                 .connect(destination);
 
             this.localStream = destination.stream;

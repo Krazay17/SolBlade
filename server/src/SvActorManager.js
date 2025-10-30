@@ -127,7 +127,7 @@ export default class SvActorManager {
         if (this.hasSpawnedDefaults) return;
         this.hasSpawnedDefaults = true;
         const item = 6;
-        const power = 12;
+        const power = 100;
         const enemies = 4;
         for (let i = 0; i < item; i++) {
             this.createActor('item', { solWorld: 'world2', pos: randomPos(20, 10) });

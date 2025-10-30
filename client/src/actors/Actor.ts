@@ -27,7 +27,6 @@ export default class Actor {
     solWorld: string;
     team: string;
     destroyed: boolean = false;
-    actorType: string = '';
     replicate: boolean = false;
     isRemote: boolean = false;
     isDead: boolean = false;
