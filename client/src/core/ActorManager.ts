@@ -32,7 +32,7 @@ export default class ActorManager {
         return this.game?.world;
     }
     get players() {
-        return this.actors.filter(a => a.actorType === 'player');
+        return this.actors.filter(a => a.type === 'player');
     }
     get hostiles() {
         return this.actors.filter(a => (a !== this.player) && a.active && (a.team === 'A' || (a.team !== this.player.team)));

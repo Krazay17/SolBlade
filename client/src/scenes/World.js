@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { netSocket, setNetScene } from '../core/NetManager.js';
-import LocalData from '../core/LocalData.js';
 import SkyBox from '../actors/SkyBox.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
