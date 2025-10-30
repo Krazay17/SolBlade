@@ -16,7 +16,7 @@ const serverURL = location.hostname === "localhost"
 
 const socket = io(serverURL, {
     transports: ["websocket"],
-    reconnection: false,
+    reconnection: true,
     timeout: 5000,
 });
 export const netSocket = socket;
@@ -26,6 +26,7 @@ let netPlayers = {};
 let player = null;
 let playerId = null;
 let socketBound = false;
+let serverVersion = null;
 
 let voiceChat = new VoiceChat();
 voiceChat.createButton();
@@ -42,6 +43,12 @@ socket.on("connect", () => {
     socket.on('disconnect', () => {
         MyEventEmitter.emit('disconnect');
         console.log("disconnected from server");
+    });
+    socket.on('serverVersion', version => {
+        if (serverVersion && (serverVersion !== version)) {
+            location.reload();
+        }
+        serverVersion = version;
     });
     if (scene) {
         joinGame();

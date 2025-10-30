@@ -5,6 +5,8 @@ import SvActorManager from "./src/SvActorManager.js";
 import CrownQuest from "./src/SvCrownQuest.js";
 import { sharedTest } from "@solblade/shared/Utils.js";
 
+const SERVER_VERSION = 1.01;
+
 const server = http.createServer();
 const PORT = Number(process.env.PORT) || 80;
 const isLocal = PORT === 3000 || process.env.NODE_ENV === 'development';
@@ -35,12 +37,14 @@ io.on('connection', (socket) => {
     const ip = socket.handshake.address;
     console.log(`New connection from ${ip} with id: ${socket.id}`);
 
+    socket.emit('serverVersion', SERVER_VERSION);
+
     socket.on("join-voice", () => {
         // tell everyone else to start connecting to this peer
         socket.broadcast.emit("new-peer", socket.id);
     });
     // Tell others a new client joined
-    socket.broadcast.emit("new-peer", socket.id);
+    //socket.broadcast.emit("new-peer", socket.id);
     // Relay messages to a specific peer
     socket.on("offer", ({ targetId, offer }) => {
         io.to(targetId).emit("offer", { from: socket.id, offer });

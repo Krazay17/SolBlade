@@ -31,6 +31,7 @@ export default class VoiceChat {
         this.fallOff = .5;
 
         this.init();
+        this.initMic();
     }
 
     init() {
