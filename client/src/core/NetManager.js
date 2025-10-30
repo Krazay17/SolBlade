@@ -182,7 +182,7 @@ function initBindings() {
         );
         if (existingActor) {
             existingActor.setNetId(netId);
-            existingActor.activate();
+            //existingActor.activate();
         } else {
             if (solWorld !== scene.solWorld) return;
             const actorData = Actor.deserialize(data, (id) => scene.actorManager.getActorById(id));
