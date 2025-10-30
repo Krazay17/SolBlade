@@ -17,7 +17,9 @@ export const io = new Server(server, {
     cleanupEmptyChildNamespaces: true,
 });
 
+/**@type {SvActorManager} */
 let actorManager;
+/**@type {CrownQuest} */
 let crownQuest;
 let quests;
 let players = {};
@@ -90,7 +92,6 @@ io.on('connection', (socket) => {
             });
             socket.on('playerStateUpdate', data => {
                 actorManager.updateActor(data);
-
                 socket.broadcast.emit('playerStateUpdate', data);
             })
             socket.on('playerPositionSend', (data) => {

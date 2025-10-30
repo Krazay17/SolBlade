@@ -226,7 +226,7 @@ function initBindings() {
     });
     socket.on('actorHealthChange', ({ id, health }) => {
         const actor = scene.getActorById(id);
-        actor.health = health;
+        if (actor) actor.health = health;
     });
     socket.on('actorEvent', ({ id, event, data }) => {
         const actor = scene.getActorById(id);
