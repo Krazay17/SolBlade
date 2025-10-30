@@ -14,3 +14,7 @@ export function triMeshFromVerts(geometry) {
   colliderDesc.setRestitution(0);
   return colliderDesc;
 }
+
+export function sharedTest() {
+  console.log('shared folder import test!');
+}

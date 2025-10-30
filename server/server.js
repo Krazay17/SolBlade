@@ -3,6 +3,7 @@ import http from "http";
 import { sendDiscordMessage } from "./DiscordStuff.js";
 import SvActorManager from "./src/SvActorManager.js";
 import CrownQuest from "./src/SvCrownQuest.js";
+import { sharedTest } from "@solblade/shared/Utils.js";
 
 const server = http.createServer();
 const PORT = Number(process.env.PORT) || 3000;
@@ -24,6 +25,8 @@ let crownQuest;
 let quests;
 let players = {};
 let playerSockets = {};
+
+sharedTest();
 
 io.on('connection', (socket) => {
     if (socket.bound) return;

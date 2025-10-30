@@ -1,5 +1,6 @@
 {
     "name": "@solblade/shared",
     "main": "index.js",
-    "type": "module"
+    "type": "module",
+    "dependencies": {}
 }
