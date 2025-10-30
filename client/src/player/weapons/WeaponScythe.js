@@ -13,7 +13,7 @@ export default class WeaponScythe extends Weapon {
     use() {
         if (super.use()
             && this.stateManager.setState('attack', {weapon: this, duration: 800})) {
-            this.damageDelay = 400
+            this.damageDelay = 400;
         }
     }
     damageTick(dt) {

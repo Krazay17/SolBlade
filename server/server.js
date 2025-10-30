@@ -69,9 +69,9 @@ io.on('connection', (socket) => {
 
         const bindGameplay = () => {
             socket.on('newWorld', (solWorld) => {
-                player.solWorld = solWorld;
+                players[socket.id] = solWorld;
+                actorManager.updateActor({ netId: socket.id, solWorld })
                 socket.broadcast.emit('newWorld', player.serialize());
-                console.log(actorManager.getActorsOfWorld(solWorld).filter(a=>a.type === 'player'))
                 socket.emit('currentActors', actorManager.getActorsOfWorld(solWorld));
             })
 
