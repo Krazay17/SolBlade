@@ -4,9 +4,15 @@ import { spawnParticles } from "../../actors/ParticleEmitter";
 import HitData from "../../core/HitData";
 
 export default class WeaponSword extends Weapon {
-    constructor(actor, game, slot = 0) {
-        super(actor, 'Sword', 35, 2.9, 1250, slot); // name, damage, range, cooldown
-        this.game = game;
+    constructor(game, actor, slot = 0) {
+        super(game, actor, {
+            name: 'Sword',
+            damage: 35,
+            range: 2.9,
+            cooldown: 1250,
+            slot
+        });
+
         this.damageDuration = 0; // duration of the sword trace in milliseconds
         this.dashSpeed = 0;
     }
@@ -39,7 +45,7 @@ export default class WeaponSword extends Weapon {
     }
     use() {
         if (super.use() &&
-            this.actor.stateManager.setState('attack', {
+            this.stateManager.setState('attack', {
                 weapon: this,
                 duration: 550,
                 onExit: () => {

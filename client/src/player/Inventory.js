@@ -85,7 +85,7 @@ export default class Inventory {
             if (!slot.firstChild) {
                 slot.appendChild(el);
                 el.classList.add('spell');
-                this.actor.setSpell(slot.id, item); // pass real Item, not just name
+                this.actor.setWeapon(slot.id, item); // pass real Item, not just name
                 return;
             }
         }
@@ -113,7 +113,7 @@ export default class Inventory {
 
             if (originalParent.classList.contains("spell-slot")) {
                 originalParent.innerHTML = "";
-                this.actor.setSpell(originalParent.id, null);
+                this.actor.setWeapon(originalParent.id, null);
             } else {
                 originalParent.innerHTML = "";
             }
@@ -259,7 +259,7 @@ export default class Inventory {
 
             if (originalParent.classList.contains("spell-slot")) {
                 originalParent.innerHTML = "";
-                this.actor.setSpell(originalParent.id, null);
+                this.actor.setWeapon(originalParent.id, null);
                 console.log(originalParent.id);
             }
 
@@ -274,7 +274,7 @@ export default class Inventory {
                     if (originalParent.classList.contains("spell-slot")) {
                         slotFull.classList.add("spell");
                         originalParent.appendChild(slotFull);
-                        this.actor.setSpell(originalParent.id, slotFullData);
+                        this.actor.setWeapon(originalParent.id, slotFullData);
                     } else if (originalParent.classList.contains("inventory-slot")) {
                         slotFull.classList.remove("spell");
                         originalParent.appendChild(slotFull);
@@ -285,7 +285,7 @@ export default class Inventory {
                     dragged.classList.remove("dragging");
                     dragged.classList.add("spell");
                     slot.appendChild(dragged);
-                    this.actor.setSpell(slot.id, data);
+                    this.actor.setWeapon(slot.id, data);
                 } else if (slot.classList.contains("inventory-slot")) {
                     dragged.classList.remove("spell");
                     slot.appendChild(dragged);

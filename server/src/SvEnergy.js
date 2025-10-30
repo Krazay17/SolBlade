@@ -11,7 +11,6 @@ export default class SvEnergy {
         const clamped = Math.max(0, Math.min(this.max, value));
         if (clamped === this._current) return;
         this._current = clamped;
-        console.log(this._current);
         io.emit('actorEvent', { id: this.actor.netId, event: 'addEnergy', data: value });
     }
     add(value) {

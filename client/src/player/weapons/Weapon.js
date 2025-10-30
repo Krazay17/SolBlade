@@ -5,23 +5,33 @@ import Player from '../Player';
 import Game from '../../Game';
 
 export default class Weapon {
-    constructor(actor, name = 'Weapon', damage = 1, range = 10, cooldown = 1000, slot = 0) {
+    constructor(game, actor, data) {
+        const {
+            name = 'Weapon',
+            damage = 1,
+            range = 10,
+            cooldown = 1000,
+            slot = 0
+        } = data;
+        /**@type {Game} */
+        this.game = game;
         /**@type {Player} */
         this.actor = actor;
         this.name = name;
         this.damage = damage;
         this.range = range;
         this.cooldown = cooldown;
+        this.slot = slot
+
         this.position = new THREE.Vector3();
         this.direction = new THREE.Vector3();
         this.tempVector = new THREE.Vector3();
         this.tempVector2 = new THREE.Vector3();
         this.hitActors = new Set();
 
-        /**@type {Game} */
-        this.game = null;
-        this.slot = slot
         this.damageDelay = 0;
+        this.damageDuration = 0;
+        this.isCharging = false;
 
         if (this.slot > 1) {
             this.cooldown *= 8;
@@ -50,11 +60,23 @@ export default class Weapon {
         const now = performance.now()
         if (this.canUse(now)) {
             this.lastUsed = now;
+            this.isCharging = false;
             return true; // Weapon used successfully
         }
         return false; // Weapon is on cooldown
     }
-    update() { }
+    charge() {
+        this.isCharging = true;
+        this.stateManager.setState('charge', { onExit: () => this.isCharging = false });
+    }
+    update(dt) {
+        const delay = this.lastUsed + this.damageDelay;
+        const duration = delay + this.damageDuration;
+        if (delay < performance.now() && (duration > performance.now())) {
+            this.damageTick(dt);
+        }
+    }
+    damageTick(dt) { }
     meleeTrace(start, direction, length = 5, dot = 0.5, callback) {
         const actors = this.game.actorManager.hostiles;
         for (const actor of actors) {

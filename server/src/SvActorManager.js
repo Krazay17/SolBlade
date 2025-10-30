@@ -102,7 +102,7 @@ export default class SvActorManager {
         }
         if (!actor.solWorld) {
             console.warn(`Actor ${actor.netId} created without solWorld! Defaulting to 0`);
-            actor.solWorld = 0;
+            actor.solWorld = '0';
         }
         if (!this.actorsOfWorld[actor.solWorld]) {
             this.actorsOfWorld[actor.solWorld] = { players: [], enemies: [], others: [] };
@@ -116,6 +116,7 @@ export default class SvActorManager {
                 break;
             default:
                 this.actorsOfWorld[actor.solWorld].others.push(actor);
+                break;
         }
         this.actors.push(actor);
         this.io.emit('newActor', actor.serialize());

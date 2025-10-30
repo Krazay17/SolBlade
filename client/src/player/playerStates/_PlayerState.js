@@ -30,6 +30,7 @@ export default class PlayerState {
         this.duration = 0;
         this.exitTimer = 0;
         this.reEnter = false;
+        this.onExit = null
 
         Object.assign(this, options);
     }

@@ -41,11 +41,14 @@ export default class Player extends Pawn {
             this.direction = new THREE.Vector3();
             this.tempVector = new THREE.Vector3();
             this.energy = new EnergyManager(this, 100);
+            this.movement = new PlayerMovement(this);
+            this.stateManager = new PlayerStateManager(this.game, this);
+            this.devMenu = new DevMenu(this, this.movement);
 
             /**@type {Weapon.Weapon} */
-            this.weapon0 = new Weapon.WeaponFireball(this, game, '0');
+            this.weapon0 = new Weapon.WeaponFireball(game, this, '0');
             /**@type {Weapon.Weapon} */
-            this.weapon1 = new Weapon.WeaponSword(this, game, '1');
+            this.weapon1 = new Weapon.WeaponSword(game, this, '1');
             /**@type {Weapon.Weapon} */
             this.weapon2 = null;
             /**@type {Weapon.Weapon} */
@@ -69,9 +72,6 @@ export default class Player extends Pawn {
             this.cameraArm.add(this.camera);
             CameraFX.init(this.camera);
 
-            this.movement = new PlayerMovement(this);
-            this.stateManager = new PlayerStateManager(this.game, this);
-            this.devMenu = new DevMenu(this, this.movement);
 
             MyEventEmitter.on('KeyPressed', (key) => {
                 if (key === 'KeyH') {
@@ -133,17 +133,17 @@ export default class Player extends Pawn {
             this.remove(this.crownMesh);
         }
     }
-    setSpell(slot, weapon) {
+    setWeapon(slot, weapon) {
         const weaponName = weapon?.name || null;
         switch (weaponName) {
             case 'Fireball':
-                weapon = new Weapon.WeaponFireball(this, this.game, slot);
+                weapon = new Weapon.WeaponFireball(this.game, this, slot);
                 break;
             case 'Pistol':
-                weapon = new Weapon.WeaponPistol(this, this.game, slot);
+                weapon = new Weapon.WeaponPistol(this.game, this, slot);
                 break;
             case 'Sword':
-                weapon = new Weapon.WeaponSword(this, this.game, slot);
+                weapon = new Weapon.WeaponSword(this.game, this, slot);
                 break;
             default:
                 weapon = null;
@@ -204,12 +204,16 @@ export default class Player extends Pawn {
         this.cameraArm.rotation.x = this.input.pitch; // Pitch
         const canExitState = this.stateManager.activeState.canExit();
 
-        if (this.input.mice[0] && this.input.pointerLocked) {
+        if (this.input.actionStates.attackLeft && this.input.pointerLocked) {
             if (canExitState && this.weapon0?.canUse()) {
-                this.weapon0?.use();
+                //this.weapon0?.charge();
+                this.weapon0.use();
             }
         }
-        if (this.input.mice[2] && this.input.pointerLocked) {
+        // if (this.weapon0?.isCharging && !this.input.actionStates.attackLeft) {
+        //     this.weapon0.use();
+        // }
+        if (this.input.actionStates.attackRight && this.input.pointerLocked) {
             if (canExitState && this.weapon1?.canUse()) {
                 this.weapon1?.use();
             }

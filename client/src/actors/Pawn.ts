@@ -61,9 +61,7 @@ export default class Pawn extends Actor {
             }
             this.rotation.y = lerpAngle(this.rotation.y, this.targetRotation, 60 * dt)
         }
-        if (this.body) {
-            this.position.copy(this.body.position);
-        }
+        if (this.body) this.position.copy(this.body.position);
     }
     fixedUpdate(dt: number, time: number): void {
         if (this.isRemote) {

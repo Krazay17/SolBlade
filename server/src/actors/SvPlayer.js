@@ -1,3 +1,4 @@
+import { io } from "../../server.js";
 import SvEnergy from "../SvEnergy.js";
 import SvActor from "./SvActor.js";
 

@@ -11,6 +11,7 @@ export { default as BladeState } from './BladeState.js';
 export { default as ParryState } from './ParryState.js';
 export { default as BladeJumpState } from './BladeJumpState.js';
 export { default as KnockbackState } from './Knockback.js';
+export { default as ChargeState } from './ChargeState.js';
 // export { default as WallClingState } from './WallClingState.js';
 // export { default as WallSlideState } from './WallSlideState.js';
 // export { default as WallJumpState } from './WallJumpState.js';

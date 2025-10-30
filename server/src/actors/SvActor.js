@@ -8,7 +8,7 @@ export default class SvActor {
         netId: '',
         type: '',
         name: '',
-        solWorld: '',
+        solWorld: '0',
         pos: { x: 0, y: 1, z: 0 },
     }) {
         /**@type {ActorManager} */

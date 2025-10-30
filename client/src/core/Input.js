@@ -23,6 +23,8 @@ export default class Input {
     this.inputBlocked = false;
 
     this.actions = {
+      '0': 'attackLeft',
+      '2': 'attackRight',
       'KeyW': 'moveForward',
       'KeyS': 'moveBackward',
       'KeyA': 'moveLeft',
@@ -42,6 +44,8 @@ export default class Input {
     };
 
     this.actionStates = {
+      'attackLeft': false,
+      'attackRIght': false,
       'moveForward': false,
       'moveBackward': false,
       'moveLeft': false,
@@ -93,9 +97,14 @@ export default class Input {
     });
     this.domElement.addEventListener('mousedown', (e) => {
       this.mice[e.button] = true;
+      console.log(e.button);
+      const action = this.actions[e.button];
+      if (action) this.actionStates[action] = true;
     });
     this.domElement.addEventListener('mouseup', (e) => {
       this.mice[e.button] = false;
+      const action = this.actions[e.button];
+      if (action) this.actionStates[action] = false;
     });
     this.domElement.addEventListener('click', (e) => {
       if (this.gameElement === e.target) {
@@ -118,7 +127,7 @@ export default class Input {
       }
 
     });
-    
+
     window.addEventListener('blur', () => {
       Object.keys(this.keys).forEach(key => {
         this.keys[key] = false;
@@ -133,7 +142,7 @@ export default class Input {
       }
     })
 
-    window.devMode = ()=> {
+    window.devMode = () => {
       LocalData.flags.dev = true;
     }
   }

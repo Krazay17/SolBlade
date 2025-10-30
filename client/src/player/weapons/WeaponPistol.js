@@ -7,9 +7,14 @@ import { spawnParticles } from '../../actors/ParticleEmitter.js';
 import HitData from '../../core/HitData.js';
 
 export default class WeaponPistol extends Weapon {
-    constructor(actor, game, isSpell = false) {
-        super(actor, 'Pistol', 20, 50, 800, isSpell); // name, damage, range, cooldown
-        this.game = game;
+    constructor(game, actor, slot = '0') {
+        super(game, actor, {
+            weapon: 'Pistol',
+            damage: 20,
+            range: 50,
+            cooldown: 800,
+            slot
+        }); // name, damage, range, cooldown
         this.game.soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');
         this.meshTracer = new MeshTrace(this.game);
 

@@ -2,9 +2,14 @@ import * as THREE from 'three';
 import Weapon from './Weapon';
 
 export default class WeaponFireball extends Weapon {
-    constructor(actor, game, slot = 0) {
-        super(actor, 'Fireball', 30, 100, 1250, slot); // name, damage, range, cooldown
-        this.game = game;
+    constructor(game, actor, slot = 0) {
+        super(game, actor, {
+            name: 'Fireball',
+            damage: 30,
+            range: 100,
+            cooldown: 1250,
+            slot
+        }); // name, damage, range, cooldown
     }
 
     spellUse() {
