@@ -2,6 +2,12 @@
   "name": "sol-blade",
   "private": true,
   "type": "module",
+  "scripts": {
+    "server:start": "npm run start --workspace=server",
+    "server:dev": "npm run dev --workspace=server",
+    "client:start": "npm run start --workspace=client",
+    "client:dev": "npm run dev --workspace=client"
+  },
   "dependencies": {},
   "imports": {
     "#shared/": "../shared/"

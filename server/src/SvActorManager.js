@@ -64,13 +64,13 @@ export default class SvActorManager {
         /**@type {SvActor} */
         return this.actors.find(a => a.netId === id);
     }
-    updateActor(data) {
-        const actor = this.getActorById(data.netId);
+    updateActor(actor, data) {
+        actor = typeof actor === 'string' ? this.getActorById(actor) : actor;
         if (actor.solWorld !== data.solWorld) {
             const indx = this.actorsOfWorld[actor.solWorld].players.indexOf(actor);
             this.actorsOfWorld[actor.solWorld].players.splice(indx, 1);
             actor.solWorld = data.solWorld;
-            this.actorsOfWorld[actor.solWorld].players.push(actor);
+            if (!this.actorsOfWorld[actor.solWorld].players.includes(actor)) this.actorsOfWorld[actor.solWorld].players.push(actor);
         }
     }
     removeActor(actor) {

@@ -12,6 +12,7 @@ const itemRegister = {
         weight: 0.5,
         min: 5,
         max: 15,
+        pickupSound: 'pickup7',
     },
 }
 const itemPool1 = [
@@ -44,7 +45,7 @@ export default class Item {
         weight = 1,
         min = 1,
         max = 10,
-        extra = {},
+        pickupSound = 'pickup',
     } = {}
     ) {
         this.name = name;
@@ -52,7 +53,7 @@ export default class Item {
         this.weight = weight;
         this.min = min;
         this.max = max;
-        this.extra = extra;
+        this.pickupSound = pickupSound;
     }
 
     rollValue() {

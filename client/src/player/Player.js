@@ -113,20 +113,17 @@ export default class Player extends Pawn {
         LocalData.save();
         this.tick = true;
         this.body.wakeUp();
-        MyEventEmitter.emit('playerStateUpdate', this);
     }
     async assignMesh(skin) {
         if (await super.assignMesh(skin)) {
             if (this.isRemote) return;
-            MyEventEmitter.emit('playerStateUpdate', this);
+            //MyEventEmitter.emit('playerStateUpdate', this);
         }
     }
     stateUpdate(data) {
         const { skin } = data;
-        console.log(data);
         if (skin && (this.skin !== skin)) {
             this.assignMesh(skin);
-            console.log('tryChangeSkin');
         }
     }
     dropCrown() {

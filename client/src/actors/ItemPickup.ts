@@ -8,14 +8,12 @@ export default class ItemPickup extends Pickup {
     itemData: any;
     constructor(scene: World, data: any) {
         super(scene, data);
-        const {
-            item = null,
-            itemType = null,
-        } = data;
         if (data.item) this.itemData = data.item;
         else if (data.itemType) this.itemData = makeItem(data.itemType);
         else this.itemData = makeRandomItem()
 
+        this.pickupSound = data.item.pickupSound;
+        console.log(this.pickupSound)
         this.height = 1;
 
         this.init();

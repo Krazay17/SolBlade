@@ -6,11 +6,12 @@ export default class Pickup extends Actor {
         data.health = 1;
         super(scene, data);
         this.active = true;
-        /**@type {THREE.Object3D} */
+        /**@type {any} */
         this.mesh = null;
 
         this.height = 0;
         this.tempVector = new THREE.Vector3();
+        this.pickupSound = 'pickup';
     }
     async makeMesh(name, scale = 1) {
         this.mesh = await this.scene.meshManager.getMesh(name);
@@ -26,7 +27,7 @@ export default class Pickup extends Actor {
     }
     onTouch(dealer) {
         if (!this.active) return;
-        this.game.soundPlayer.applyPosSound('pickup', this.position);
+        this.game.soundPlayer.applyPosSound(this.pickupSound, this.position);
     }
     applyTouch(data) {
         super.applyTouch(data);
