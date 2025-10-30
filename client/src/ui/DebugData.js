@@ -34,7 +34,7 @@ export default class DebugData {
             <p>Player State: ${this.player.stateManager.currentStateName}</p>
             <p>Run Boost: ${this.player.movement.momentumBooster?.getBoost().toFixed(2) || 0}</p>
             <p>Player Speed: ${Math.round(Math.hypot(this.player.body.velocity.x, this.player.body.velocity.z) * 10)}</p>
-            <p>NetId: ${LocalData.version}<p>
+            <p>Version: ${LocalData.version}<p>
         `;
     }
 }
