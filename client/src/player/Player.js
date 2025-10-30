@@ -170,7 +170,7 @@ export default class Player extends Pawn {
         };
     }
     addEnergy(amnt) {
-        this.energy.add(amnt);
+        if (this.energy) this.energy.add(amnt);
     }
 
     setDimmed(duration) {

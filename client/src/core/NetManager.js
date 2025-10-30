@@ -9,9 +9,9 @@ import TouchData from "./TouchData";
 import Globals from "../utils/Globals";
 import { menuButton } from "../ui/Menu";
 
-const serverURL = location.hostname === "localhost" ?
-    "http://localhost:80"
-    : "https://nonsubsiding-superexplicit-hye.ngrok-free.dev"
+const serverURL = location.hostname === "localhost"
+    ? "http://localhost:80"
+    : "https://nonsubsiding-superexplicit-hye.ngrok-free.dev";
 //: "solbladeserver-production.up.railway.app";
 
 const socket = io(serverURL, {
