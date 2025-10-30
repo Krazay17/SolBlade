@@ -94,7 +94,6 @@ io.on('connection', (socket) => {
                 socket.broadcast.emit('playerStateUpdate', data);
             })
             socket.on('playerPositionSend', (data) => {
-                console.log(data);
                 if (players[socket.id]) players[socket.id].pos = data.pos;
                 socket.broadcast.emit('playerPositionUpdate', { id: socket.id, data });
             });

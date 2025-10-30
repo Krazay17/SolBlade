@@ -166,7 +166,6 @@ export default class Input {
   };
 }
 
-
 function normalizeAngle(a) {
   a = a % (Math.PI * 2);
   if (a > Math.PI) a -= Math.PI * 2;
