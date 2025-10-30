@@ -1,7 +1,7 @@
 {
-  "name": "sol-blade-client",
+  "name": "solblade-client",
   "version": "1.0.0",
-  "description": "Blade Game 3d",
+  "description": "SolBade Game Client",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -13,16 +13,5 @@
   "author": "Josh Massarella",
   "license": "ISC",
   "dependencies": {
-    "@dimforge/rapier3d-compat": "^0.19.2",
-    "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1",
-    "three": "^0.179.1",
-    "three-mesh-bvh": "^0.9.1"
-  },
-  "devDependencies": {
-    "@types/three": "^0.180.0",
-    "vite": "^7.0.6",
-    "vite-plugin-top-level-await": "^1.6.0",
-    "vite-plugin-wasm": "^3.5.0"
   }
 }

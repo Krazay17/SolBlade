@@ -1,0 +1,5 @@
+{
+    "name": "@solblade/shared",
+    "main": "index.js",
+    "type": "module"
+}

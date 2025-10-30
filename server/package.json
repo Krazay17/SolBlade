@@ -1,13 +1,13 @@
 {
-  "name": "sol-blade-server",
-  "description": "Server for SolBlade Online",
+  "name": "solblade-server",
+  "description": "SolBlade Game Server",
   "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "@dimforge/rapier3d-compat": "^0.19.2",
-    "socket.io": "^4.8.1"
+    "@solblade/shared": "*",
+    "ws": "^8.17.0"
   }
 }
