@@ -17,6 +17,7 @@ export default class PartyFrame {
         })
 
         MyEventEmitter.on('playerConnected', (player) => {
+            if(this.players.has(player))return;
             this.addPlayer(player);
         });
         MyEventEmitter.on('playerDisconnected', (player) => {

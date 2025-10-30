@@ -19,11 +19,15 @@ export default class SvActorManager {
         this._actors = [];
         this.io = io;
         this.physics = new SvServerPhysics(this.io, this);
-        this._actors = [];
-        this.actorsOfWorld = {};
+        this.actorsOfWorld = {
+            'world1': { players: [], enemies: [], others: [] },
+            'world2': { players: [], enemies: [], others: [] },
+            'world3': { players: [], enemies: [], others: [] },
+            'world4': { players: [], enemies: [], others: [] },
+        };
 
         this.hasSpawnedDefaults = false;
-        this.spawnDefaultActors();
+        setImmediate(() => this.spawnDefaultActors());
 
         this.lastTime = Date.now();
         this.updateEnemies()
