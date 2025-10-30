@@ -118,7 +118,8 @@ export default class Input {
 
       if (Math.abs(e.movementX) < 200 && Math.abs(e.movementY) < 200) {
         this.yaw -= e.movementX * this.sensitivity;
-        this.yaw = ((this.yaw + Math.PI) % (Math.PI * 2)) - Math.PI;
+        this.yaw = normalizeAngle(this.yaw);
+
 
         this.pitch = Math.max(
           -Math.PI / 2,
@@ -163,4 +164,12 @@ export default class Input {
     addButton('KeyUnpressed', 'KeyT', 'Home', 1, 5);
     addButton('KeyUnpressed', 'KeyH', 'Sudoku', 1, 4);
   };
+}
+
+
+function normalizeAngle(a) {
+  a = a % (Math.PI * 2);
+  if (a > Math.PI) a -= Math.PI * 2;
+  if (a < -Math.PI) a += Math.PI * 2;
+  return a;
 }

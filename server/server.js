@@ -4,27 +4,22 @@ import { sendDiscordMessage } from "./DiscordStuff.js";
 import SvActorManager from "./src/SvActorManager.js";
 import CrownQuest from "./src/SvCrownQuest.js";
 
-const PORT = process.env.PORT || 3000;
 const server = http.createServer();
-const isLocal = process.env.PORT === '3000'
-    || process.env.NODE_ENV === 'development'
-    || !process.env.PORT;
+const PORT = Number(process.env.PORT) || 3000;
+const isLocal = PORT === 3000 || process.env.NODE_ENV === 'development';
 const origin = isLocal ? 'http://localhost:5173' : "https://solblade.online";
 
 export const io = new Server(server, {
-    cors: {
-        origin: origin,
-        methods: ["GET", "POST"]
-    },
+    cors: { origin, methods: ["GET", "POST"] },
     connectTimeout: 5000,
     pingInterval: 10000,
     pingTimeout: 20000,
     cleanupEmptyChildNamespaces: true,
 });
 
-const actorManager = new SvActorManager(io);
-const crownQuest = new CrownQuest(io, actorManager);
-const quests = [crownQuest];
+let actorManager;
+let crownQuest;
+let quests;
 let players = {};
 let playerSockets = {};
 
@@ -99,6 +94,7 @@ io.on('connection', (socket) => {
                 socket.broadcast.emit('playerStateUpdate', data);
             })
             socket.on('playerPositionSend', (data) => {
+                console.log(data);
                 if (players[socket.id]) players[socket.id].pos = data.pos;
                 socket.broadcast.emit('playerPositionUpdate', { id: socket.id, data });
             });
@@ -181,7 +177,7 @@ io.on('connection', (socket) => {
                 socket.broadcast.emit('leaveWorld', { id: socket.id, world });
             });
             socket.on('bootPlayer', id => {
-                playerSockets[id].disconnect();
+                if (playerSockets[id]) playerSockets[id].disconnect();
             });
             socket.on('actorEvent', ({ id, event, data }) => {
                 const actor = actorManager.getActorById(id);
@@ -225,5 +221,9 @@ function enemyHit(actor, data) {
     return true;
 }
 
-server.listen(PORT);
+server.listen(PORT, () => {
+    actorManager = new SvActorManager(io);
+    crownQuest = new CrownQuest(io, actorManager);
+    quests = [crownQuest];
+});
 console.log(`Server is running on port ${PORT}`);

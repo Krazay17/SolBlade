@@ -190,8 +190,8 @@ export default class Player extends Pawn {
         // Local Player
         if (!this.isRemote) {
             if (this.energy) this.energy.update(dt);
-            tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
             this.handleInput(dt, time);
+            tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
             LocalData.position = this.position;
             LocalData.rotation = this.rotation.y;
             CameraFX.update(dt);
