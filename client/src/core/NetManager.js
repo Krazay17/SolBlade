@@ -29,7 +29,6 @@ let socketBound = false;
 let voiceChat = new VoiceChat();
 voiceChat.createButton();
 
-
 export function setNetScene(newScene) {
     scene = newScene;
     if (socket.connected && scene) {
@@ -53,6 +52,7 @@ function joinGame() {
     netPlayers[playerId] = player;
     initBindings();
     socket.emit('joinGame', player.serialize());
+
 
     socket.emit('newWorld', scene.solWorld);
     if (voiceChat) voiceChat.setScene(scene);

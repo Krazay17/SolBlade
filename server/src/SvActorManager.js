@@ -67,7 +67,7 @@ export default class SvActorManager {
     updateActor(data) {
         const actor = this.getActorById(data.netId);
         if (actor.solWorld !== data.solWorld) {
-            const indx = this.actorsOfWorld[actor.solWorld].players.indexOf(actor)
+            const indx = this.actorsOfWorld[actor.solWorld].players.indexOf(actor);
             this.actorsOfWorld[actor.solWorld].players.splice(indx, 1);
             actor.solWorld = data.solWorld;
             this.actorsOfWorld[actor.solWorld].players.push(actor);
@@ -76,7 +76,7 @@ export default class SvActorManager {
     removeActor(actor) {
         actor = typeof actor === 'string' ? this.getActorById(actor) : actor;
         if (!actor) return;
-        const index = this.actors.indexOf(actor)
+        const index = this.actors.indexOf(actor);
         this.actors.splice(index, 1);
         switch (actor.type) {
             case 'player':

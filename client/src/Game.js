@@ -179,7 +179,6 @@ export default class Game {
     this.player.portalPos = pos;
     this.player.solWorld = world;
     this.player.tick = false;
-    MyEventEmitter.emit('playerStateUpdate', this.player);
 
     if (this.world?.onExit) this.world.onExit();
     this.world = newWorld;

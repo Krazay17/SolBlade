@@ -113,6 +113,7 @@ export default class Player extends Pawn {
         LocalData.save();
         this.tick = true;
         this.body.wakeUp();
+        MyEventEmitter.emit('playerStateUpdate', this);
     }
     async assignMesh(skin) {
         if (await super.assignMesh(skin)) {
