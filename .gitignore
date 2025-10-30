@@ -19,8 +19,3 @@ npm-debug.log*
 
 # Environment files
 .env
-
-# Git metadata
-.git/
-.github/
-.gitignore

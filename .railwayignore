@@ -1,10 +1,9 @@
+node_modules/
 client/
+dist/
+tools/
+
+server/node_modules/
 
 .git/
 .github/
-.gitignore
-
-node_modules/
-server/node_modules/
-
-dist/
