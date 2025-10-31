@@ -1,4 +1,4 @@
-import { makeItem, makeRandomItem } from "../core/Item";
+import { makeItem, makeRandomItem } from "@solblade/shared/Item.js";
 import TouchData from "../core/TouchData";
 import World from "../scenes/World";
 import Pickup from "./Pickup";
@@ -13,7 +13,6 @@ export default class ItemPickup extends Pickup {
         else this.itemData = makeRandomItem()
 
         this.pickupSound = data.item.pickupSound;
-        console.log(this.pickupSound)
         this.height = 1;
 
         this.init();

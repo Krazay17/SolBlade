@@ -3,6 +3,8 @@ import { Server } from "socket.io";
 import ActorManager from './SvActorManager.js';
 import { loadJson } from './LoadJson.js';
 
+const world1Data = await loadJson('../worlds/world1.json');
+const world2Data = await loadJson('../worlds/world2.json');
 const world3Data = await loadJson('../worlds/world3.json');
 const world4Data = await loadJson('../worlds/world4.json');
 
@@ -15,6 +17,9 @@ export default class SvPhysics {
         /**@type {ActorManager} */
         this.actorManager = actorManager
 
+        this.world0 = new RAPIER.World({ x: 0, y: -9, z: 0 });
+        this.world1 = this.makeWorld(world1Data);
+        this.world2 = this.makeWorld(world2Data);
         this.world3 = this.makeWorld(world3Data);
         this.world4 = this.makeWorld(world4Data);
 
@@ -37,6 +42,8 @@ export default class SvPhysics {
 
     }
     loop(dt) {
+        this.updateWorld(dt, 'world1')
+        this.updateWorld(dt, 'world2')
         this.updateWorld(dt, 'world3')
         this.updateWorld(dt, 'world4')
     }
@@ -80,8 +87,7 @@ export default class SvPhysics {
     updateWorld(dt, world) {
         if (!this[world]) return;
         this[world].step();
-        const worldActors = this.actorManager.actorsOfWorld[world];
-        const { players, enemies } = worldActors;
+        const { players, enemies, others } = this.actorManager.actorsOfWorld[world];
 
         const enemyPositions = enemies.flatMap(e =>
             e.active ? [{ id: e.data.netId, pos: e.body.translation(), rot: e.rotation }] : []

@@ -1,9 +1,13 @@
 import { Box3, Object3D, Raycaster, Sphere, Vector3 } from "three";
 import Pawn from "../actors/Pawn";
+import Game from "../Game.js";
+import RAPIER from "@dimforge/rapier3d-compat";
 
 export default class MeshTrace {
-    constructor(game) {
+    constructor(game, actor) {
+        /**@type {Game} */
         this.game = game;
+        this.actor = actor;
         this.mapWalls = null;
         this.raycaster = new Raycaster();
         this.raycaster2 = new Raycaster();
@@ -17,7 +21,33 @@ export default class MeshTrace {
         this.tempBox = new Box3();
         this.tempSphere = new Sphere();
     }
+    shapeTrace(start, dir, length, callback) {
+        const shape = new RAPIER.Ball(0.1);
 
+        // Make sure 'dir' is normalized so distance is consistent
+        const direction = dir.clone().normalize();
+        const rotation = new RAPIER.Quaternion(0, 0, 0, 1); // identity rotation
+        const result = this.game.physicsWorld.castShape(
+            start,          // starting position
+            rotation,       // shape rotation (identity)
+            direction,      // movement direction
+            shape,          // shape
+            length,         // distance
+            true,
+            true,
+            undefined,
+            undefined,
+            this.actor.body.collider
+        );
+        console.log(this.actor.body.collider)
+        console.log(start, direction, result?.witness1, `Player collider: ${this.actor.body.collider?.handle}`, `Result collider: ${result?.collider.handle}`);
+        console.log(this.actor.body);
+
+        if (result) {
+            console.log(result);
+            if (callback) callback(result);
+        }
+    }
     lineTrace(start, direction, length, losStart, callback) {
         let savedStart = start instanceof Object3D ? start.position.clone() : start.clone();
         let savedDir = direction instanceof Object3D ? direction.position.clone().sub(savedStart).normalize() : direction.clone().normalize();

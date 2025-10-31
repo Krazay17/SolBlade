@@ -12,12 +12,28 @@ const itemRegister = {
         weight: 0.5,
         min: 5,
         max: 15,
+    },
+    scythe: {
+        name: 'Scythe',
+        imgUrl: 'assets/Scythe.png',
+        weight: 0.001,
+        min: 5,
+        max: 15,
         pickupSound: 'pickup7',
     },
+    pistol: {
+        name: 'Pistol',
+        imgUrl: 'assets/Pistol.png',
+        weight: 1,
+        min: 5,
+        max: 15,
+    }
 }
 const itemPool1 = [
     itemRegister.fireball,
     itemRegister.sword,
+    itemRegister.scythe,
+    itemRegister.pistol,
 ]
 export function makeItem(item) {
     return new Item(itemRegister[item]);

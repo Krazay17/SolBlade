@@ -14,8 +14,7 @@ export default class FXManager {
     update(dt, time) {
         for (const f of this.activeFX) { if (f.active) f.update(dt, time) }
     }
-    spawnFX(type, data, local = true) {
-        console.log(data);
+    spawnFX(type = 'explosion', data, local = true) {
         const obj = FXRegistry[type];
         const fx = new obj(this.game, data);
 

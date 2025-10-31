@@ -108,7 +108,6 @@ export default class MeshManager {
     async createSkeleMesh(skinName) {
         const pooledMesh = this.getSkeleMesh(skinName);
         if (pooledMesh) {
-            console.log(pooledMesh);
             return pooledMesh;
         }
         const { model, animations } = await this.loadSkeleMesh(skinName);

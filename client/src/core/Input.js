@@ -97,7 +97,6 @@ export default class Input {
     });
     this.domElement.addEventListener('mousedown', (e) => {
       this.mice[e.button] = true;
-      console.log(e.button);
       const action = this.actions[e.button];
       if (action) this.actionStates[action] = true;
     });

@@ -112,7 +112,9 @@ export default class Player extends Pawn {
         LocalData.solWorld = this.solWorld
         LocalData.save();
         this.tick = true;
-        this.body.wakeUp();
+        if (this.body) {
+            this.body.wakeUp();
+        }
     }
     async assignMesh(skin) {
         if (await super.assignMesh(skin)) {

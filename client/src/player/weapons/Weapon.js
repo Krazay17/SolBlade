@@ -42,6 +42,9 @@ export default class Weapon {
         return this.actor.stateManager;
     }
     get movement() { return this.actor.movement }
+    get animation() { return this.actor.animationManager }
+    get playAnimation() { return this.actor.animationManager.playAnimation.bind(this.actor.animationManager) }
+    get hand() { return this.slot === '0' ? 'attackLeft' : 'attackRight'; }
     canSpellUse() {
         return (performance.now() - this.lastUsed) >= this.cooldown;
     }

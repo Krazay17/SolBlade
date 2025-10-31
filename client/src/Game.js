@@ -56,19 +56,17 @@ export default class Game {
     this.timeStep = 1 / 120;
 
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    //this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     document.body.appendChild(this.renderer.domElement);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     this.graphicsWorld = new THREE.Scene();
 
-    //this.physicsWorld = new RAPIER.World({ x: 0, y: -6, z: 0 });
-    this.physicsWorld = new SolPhysics();
+    this.physics = new SolPhysics();
 
     this.loadingManager = new LoadingManager();
     this.meshManager = new MeshManager(this);
 
-    this.camera = new THREE.PerspectiveCamera(80, window.innerWidth / window.innerHeight, .8, 3000);
+    this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, .8, 3000);
 
     this.solRender = new SolRenderPass(this.renderer, this.graphicsWorld, this.camera);
     this.worldLight();
@@ -81,27 +79,20 @@ export default class Game {
 
     Globals.game = this;
     Globals.graphicsWorld = this.graphicsWorld;
-    Globals.physicsWorld = this.physicsWorld;
+    Globals.physicsWorld = this.physics.world;
     Globals.camera = this.camera;
     Globals.input = this.input;
 
     this.actorManager = new ActorManager(this);
-    this.player = this.actorManager.player;
-    Globals.player = this.player;
-    this.crosshair = new Crosshair(this.graphicsWorld);
-    this.playerInfo = new PlayerInfo(this.player);
-    this.inventory = new Inventory(this.player);
-    Globals.playerInfo = this.playerInfo;
+    this.initPlayer();
     this.partyFrame = new PartyFrame();
-    this.questManager = new QuestManager(this, this.player);
-    const newQuest = this.questManager.addQuest('playerKill');
-    this.debugData = new DebugData(this.player);
+    //this.debugData = new DebugData();
     this.lightManager = new LightManager(this);
     this.fxManager = new FXManager(this);
 
     this.worldReady = () => {
-      setNetScene(this.world);
       this.player.setWorld(this.world);
+      setNetScene(this.world);
       this.solRender.outlineObject = this.world.map;
       this.running = true;
     }
@@ -113,8 +104,8 @@ export default class Game {
   get solWorld() {
     return this.world.solWorld || LocalData.solWorld;
   }
-  get physics() {
-    return this.physicsWorld.world;
+  get physicsWorld() {
+    return this.physics.world;
   }
   get graphics() {
     return this.graphicsWorld;
@@ -131,6 +122,18 @@ export default class Game {
   }
   get time() { return this.lastTime }
   initWindow() {
+  }
+  initPlayer() {
+    //this.player = this.actorManager.spawnLocalPlayer();
+    this.player = this.actorManager.player;
+    Globals.player = this.player;
+    this.crosshair = new Crosshair(this.graphicsWorld);
+    this.playerInfo = new PlayerInfo(this.player);
+    Globals.playerInfo = this.playerInfo;
+    this.inventory = new Inventory(this.player);
+    this.questManager = new QuestManager(this, this.player);
+    this.questManager.addQuest('playerKill');
+
   }
   bindings() {
     window.addEventListener('resize', () => {
@@ -171,17 +174,20 @@ export default class Game {
     const newWorld = new worldRegistry[world](this);
     if (!newWorld) return;
     if (this.world && !this.world.levelLoaded) return;
+    this.running = false;
 
     if (this.world?.onExit) this.world.onExit();
     this.world = newWorld;
 
-    this.running = false;
     this.actorManager.clearActors();
     this.lightManager.destroy();
 
+    if(this.player) {
     this.player.portalPos = pos;
     this.player.solWorld = world;
     this.player.tick = false;
+    }
+      
     if (this.world?.onEnter) this.world.onEnter(this.worldReady);
 
   }
@@ -206,8 +212,8 @@ export default class Game {
       this.accumulator += dt;
       this.accumulator = Math.min(this.accumulator, 0.25);
       while (this.running && (this.accumulator >= this.timeStep)) {
-        this.physics.step();
-        this.physicsWorld.remove();
+        this.physicsWorld.step();
+        this.physics.remove();
         this.world?.fixedUpdate?.(this.timeStep, time);
         this.actorManager?.fixedUpdate(this.timeStep, time);
 
@@ -220,7 +226,6 @@ export default class Game {
       this.debugData?.update(dt, time);
 
       MyEventEmitter.emit('update', dt, time);
-      //this.renderer.render(this.graphicsWorld, this.camera);
       this.solRender.composer.render(dt);
     }
 

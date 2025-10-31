@@ -136,7 +136,11 @@ export default class PlayerMovement {
         const y = this.body.velocity.y < 0 ? this.body.velocity.y *= .9 ** scaledDelta : this.body.velocity.y *= .999 ** scaledDelta;
         this.body.velocity = { x, y, z };
     }
-
+    slowMove(dt, friction = 5, speed = 2, accel = 2) {
+        this.applyFriction(dt, friction);
+        const wishdir = this.getInputDirection();
+        this.accelerate(wishdir, speed, accel);
+    }
     attackMove(dt, friction = null, speed = null) {
         const wishdir = this.getInputDirection();
 

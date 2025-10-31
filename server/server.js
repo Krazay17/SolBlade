@@ -4,8 +4,9 @@ import { sendDiscordMessage } from "./DiscordStuff.js";
 import SvActorManager from "./src/SvActorManager.js";
 import CrownQuest from "./src/SvCrownQuest.js";
 import { sharedTest } from "@solblade/shared/Utils.js";
+import repl from 'repl';
 
-const SERVER_VERSION = 1.01;
+const SERVER_VERSION = 1.03;
 
 const server = http.createServer();
 const PORT = Number(process.env.PORT) || 80;
@@ -43,8 +44,6 @@ io.on('connection', (socket) => {
         // tell everyone else to start connecting to this peer
         socket.broadcast.emit("new-peer", socket.id);
     });
-    // Tell others a new client joined
-    //socket.broadcast.emit("new-peer", socket.id);
     // Relay messages to a specific peer
     socket.on("offer", ({ targetId, offer }) => {
         io.to(targetId).emit("offer", { from: socket.id, offer });
@@ -93,6 +92,9 @@ io.on('connection', (socket) => {
                     io.emit('playerDied', data);
                 }
             });
+            socket.on('spawnFX', (data) => {
+                socket.broadcast.emit('spawnFX', data);
+            })
             socket.on('playerNameChange', name => {
                 players[socket.id].name = name;
                 io.emit('playerNameChange', { id: socket.id, name });
@@ -123,36 +125,6 @@ io.on('connection', (socket) => {
                     players[socket.id].parry = doesParry;
                 }
             });
-            // socket.on('playerHealthChange', ({ id, health }) => {
-            //     players[id].health = health;
-            //     socket.broadcast.emit('playerHealthChange', { id, health });
-            // });
-            // socket.on('fx', (data) => {
-            //     socket.broadcast.emit('fx', data);
-            // });
-            // socket.on('actorHit', (data) => {
-            //     const actor = actorManager.getActorById(data.target);
-            //     if (actor) {
-            //         if (actor.type === 'player' && !playerHit(actor, data)) return;
-            //         if (actor.type === 'enemy' && !enemyHit(actor, data)) return;
-            //         actor.health = Math.max(0, Math.min(actor.maxHealth, actor.health + data.amount));
-            //         actor.lastHit = data;
-            //         io.emit('actorHit', { data, health: actor.health });
-            //         if (actor.health <= 0) {
-            //             actorManager.actorDie(actor.lastHit);
-            //         }
-            //     }
-            // });
-            // socket.on('actorTouch', (data) => {
-            //     const actor = actorManager.getActorById(data.target);
-            //     if (actor && actor.active) {
-            //         io.emit('actorTouch', data);
-            //         if (data.die) actorManager.actorDie(data);
-            //     }
-            // });
-            // socket.on('actorDie', (data) => {
-            //     actorManager.actorDie(data);
-            // });
             socket.on('newActor', (data) => {
                 actorManager.createActor(data.type, data);
             });
@@ -210,27 +182,17 @@ function serializePlayers() {
     return data;
 }
 
-function playerHit(actor, data) {
-    const { amount, dealer } = data;
-    const dealerActor = actorManager.getActorById(dealer);
-    if (amount < 0 && actor.parry) {
-        io.emit('playerParried', { target: actor.netId, dealer });
-        if (dealerActor.parry) io.emit('playerParried', { target: dealer, dealer: actor.netId })
-        return false;
-    }
-    return true;
-}
-
-function enemyHit(actor, data) {
-    const { amount, dealer, target } = data;
-    const enemy = actorManager.enemies.find(a => a.data.netId === target);
-    enemy.hit(data);
-    return true;
-}
-
 server.listen(PORT, () => {
     actorManager = new SvActorManager(io);
     crownQuest = new CrownQuest(io, actorManager);
     quests = [crownQuest];
 });
 console.log(`Server is running on port ${PORT}`);
+
+const r = repl.start({
+    prompt: 'Server> ',
+    input: process.stdin,
+    output: process.stdout,
+})
+
+r.context.sharedTest = sharedTest

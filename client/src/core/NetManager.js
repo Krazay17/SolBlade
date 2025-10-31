@@ -21,6 +21,7 @@ const socket = io(serverURL, {
 });
 export const netSocket = socket;
 
+let game = null;
 let scene = null;
 let netPlayers = {};
 let player = null;
@@ -68,6 +69,7 @@ function joinGame() {
 function initBindings() {
     if (socketBound || !scene) return;
     socketBound = true;
+    game = Globals.game;
 
     menuButton('disconnect', () => {
         socket.disconnect();
@@ -177,7 +179,6 @@ function initBindings() {
                 //existingActor.activate();
             } else {
                 const actorData = Actor.deserialize(a, (id) => scene.actorManager.getActorById(id));
-                console.log(actorData);
                 const newActor = scene.actorManager.spawnActor(type, actorData, true, false);
             }
         }
@@ -242,10 +243,15 @@ function initBindings() {
 
     });
     socket.on('spawnFX', ({ type, data }) => {
-        scene.fxManager.spawnFX(type, data, false);
+        game.fxManager.spawnFX(type, data, false);
     });
 }
 
+MyEventEmitter.on('spawnFX', (data) => {
+    if (socket.connected) {
+        socket.emit('spawnFX', data);
+    }
+})
 MyEventEmitter.on('actorHealthChangeLocal', health => {
     socket.emit('actorHealthChangeLocal', health);
 })

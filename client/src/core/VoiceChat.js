@@ -161,6 +161,8 @@ export default class VoiceChat {
                 this.localStream = null;
             }
         });
+        this.voiceActive = true;
+        button.classList.add('active');
     }
     async initMic() {
         if (!this.localStream) {
@@ -220,6 +222,8 @@ export default class VoiceChat {
                 .connect(destination);
 
             this.localStream = destination.stream;
+
+            netSocket.emit("join-voice"); // Notify others to connect
         }
     }
 

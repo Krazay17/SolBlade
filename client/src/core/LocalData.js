@@ -1,4 +1,5 @@
-const CURRENT_VERSION = 0.082;
+const CURRENT_VERSION = 0.083;
+
 export default {
     version: CURRENT_VERSION,
     name: "Player",

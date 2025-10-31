@@ -20,6 +20,7 @@ export default class SvActorManager {
         this.io = io;
         this.physics = new SvServerPhysics(this.io, this);
         this.actorsOfWorld = {
+            'world0': { players: [], enemies: [], others: [] },
             'world1': { players: [], enemies: [], others: [] },
             'world2': { players: [], enemies: [], others: [] },
             'world3': { players: [], enemies: [], others: [] },
@@ -103,7 +104,7 @@ export default class SvActorManager {
         }
         if (!actor.solWorld) {
             console.warn(`Actor ${actor.netId} created without solWorld! Defaulting to 0`);
-            actor.solWorld = '0';
+            actor.solWorld = 'world0';
         }
         if (!this.actorsOfWorld[actor.solWorld]) {
             this.actorsOfWorld[actor.solWorld] = { players: [], enemies: [], others: [] };
@@ -126,8 +127,8 @@ export default class SvActorManager {
     spawnDefaultActors() {
         if (this.hasSpawnedDefaults) return;
         this.hasSpawnedDefaults = true;
-        const item = 6;
-        const power = 100;
+        const item = 4;
+        const power = 50;
         const enemies = 4;
         for (let i = 0; i < item; i++) {
             this.createActor('item', { solWorld: 'world2', pos: randomPos(20, 10) });
@@ -140,7 +141,7 @@ export default class SvActorManager {
             this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
         }
         setInterval(() => {
-            if (this.actorsOfWorld['world3'].enemies.length > 20) return;
+            if (this.actorsOfWorld['world3'].enemies.length > 15) return;
             this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
         }, 500)
 

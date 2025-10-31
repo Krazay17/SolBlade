@@ -36,10 +36,10 @@ export default class Pawn extends Actor {
         this.radius = data.radius ?? .5;
         this.height = data.height ?? 1;
         this.skin = data.skin ?? 'spikeMan';
+        this.body = new PawnBody(this.game.physicsWorld, data.pos, this.height, this.radius, data.isRemote);
 
         this.assignMesh(this.skin);
 
-        this.body = new PawnBody(this.game.physics, data.pos, this.height, this.radius, data.isRemote);
         if (!this.isRemote) {
         } else {
             this.targetPosition = data.pos;
@@ -72,8 +72,8 @@ export default class Pawn extends Actor {
     }
     destroy(): void {
         super.destroy();
-        if (this.body?.body) this.game.physicsWorld.safeRemoveBody(this.body.body);
-        if (this.collider) this.game.physicsWorld.safeRemoveCollider(this.collider);
+        if (this.body?.body) this.game.physics.safeRemoveBody(this.body.body);
+        if (this.collider) this.game.physics.safeRemoveCollider(this.collider);
         this.body = null;
         this.collider = null;
     }

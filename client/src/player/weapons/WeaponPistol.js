@@ -5,6 +5,7 @@ import Globals from '../../utils/Globals.js';
 import MyEventEmitter from '../../core/MyEventEmitter.js';
 import { spawnParticles } from '../../actors/ParticleEmitter.js';
 import HitData from '../../core/HitData.js';
+import RAPIER from '@dimforge/rapier3d-compat';
 
 export default class WeaponPistol extends Weapon {
     constructor(game, actor, slot = '0') {
@@ -16,7 +17,7 @@ export default class WeaponPistol extends Weapon {
             slot
         }); // name, damage, range, cooldown
         this.game.soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');
-        this.meshTracer = new MeshTrace(this.game);
+        this.meshTracer = new MeshTrace(this.game, this.actor);
 
         MyEventEmitter.on('netFx', (data) => {
             if (data.type === 'pistolUse') {
@@ -51,34 +52,33 @@ export default class WeaponPistol extends Weapon {
             this.actor.stateManager.setState('attack', {
                 weapon: this, anim: 'gunShoot', duration: 250
             })) {
-            const offSetPos = pos.clone().add(this.tempVector.set(0, .8, 0));
-            let cameraPos = this.tempVector2;
-            this.actor.cameraArm.getWorldPosition(cameraPos);
+            const { dir, pos, camPos } = this.actor.getShootData();
             this.hitActors.clear();
             this.game.soundPlayer.playPosSound('pistolShoot', pos);
+            this.playAnimation(this.hand, false);
 
-            // this.useFx(offSetPos, dir);
-            // MyEventEmitter.emit('fx', { type: 'pistolUse', pos: offSetPos, dir: dir });
+            this.meshTracer.shapeTrace(camPos, dir, 10, (/**@type {RAPIER.ColliderShapeCastHit}*/r, hitCenter) => {
 
-            this.meshTracer.multiLineTrace(cameraPos, dir, this.game.actorManager.hostiles, this.range, offSetPos, (hit) => {
-                const actor = hit.object.userData.owner;
-                if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
-                    this.hitActors.add(actor);
-                    const scaledDir = dir.clone().normalize().multiplyScalar(4);
-                    actor.hit(new HitData({
-                        dealer: this.actor,
-                        target: actor,
-                        type: 'bullet',
-                        stun: 50,
-                        dim: 700,
-                        impulse: scaledDir,
-                        amount: this.damage,
-                        hitPosition: hit.point,
-                    }));
-                    // this.hitFx(hit.point, dir);
-                    // MyEventEmitter.emit('fx', { type: 'bulletHit', pos: hit.point, dir: dir });
-                }
-            }, 3, .15);
+                if (r) this.game.fxManager.spawnFX(undefined, { pos: hitCenter });
+            })
+
+            // this.meshTracer.multiLineTrace(camPos, dir, this.game.actorManager.hostiles, this.range, pos, (hit) => {
+            //     const actor = hit.object.userData.owner;
+            //     if (actor && actor !== this.actor && !this.hitActors.has(actor)) {
+            //         this.hitActors.add(actor);
+            //         const scaledDir = dir.clone().normalize().multiplyScalar(4);
+            //         actor.hit(new HitData({
+            //             dealer: this.actor,
+            //             target: actor,
+            //             type: 'bullet',
+            //             stun: 50,
+            //             dim: 700,
+            //             impulse: scaledDir,
+            //             amount: this.damage,
+            //             hitPosition: hit.point,
+            //         }));
+            //     }
+            // }, 3, .15);
 
             return true;
         }

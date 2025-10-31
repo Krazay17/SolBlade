@@ -35,7 +35,7 @@ export default class ActorManager {
         return this.actors.filter(a => a.type === 'player');
     }
     get hostiles() {
-        return this.actors.filter(a => (a !== this.player) && a.active && (a.team === 'A' || (a.team !== this.player.team)));
+        return this.actors.filter(a => a.active && (a !== this.player) && (a.team === 'A' || (a.team !== this.player.team)));
     }
     get allButPlayer() {
         return this.actors.filter(a => a !== this.player);
@@ -51,13 +51,14 @@ export default class ActorManager {
         this.actors = [];
     }
     update(dt: number, time: number) {
-        for (const a of this.actors) { a.update(dt, time) };
+        for (const a of this.actors) { a.update?.(dt, time) };
     }
     fixedUpdate(dt: number, time: number) {
-        for (const a of this.actors) { a.fixedUpdate(dt, time) };
+        for (const a of this.actors) { a.fixedUpdate?.(dt, time) };
     }
     spawnLocalPlayer() {
         const player = new actorRegistry['player'](this.game, { pos: LocalData.position || { x: 0, y: 1, z: 0 }, solWorld: LocalData.solWorld })
+        player.body.sleep();
         this.actors.push(player);
         return player;
     }
@@ -95,6 +96,7 @@ export default class ActorManager {
             a.destroy();
         }
         this.actors = [this.player];
+        //this.actors.length = 0;
     }
     clearRemoteActors() {
         for (const a of this.remoteActors) {

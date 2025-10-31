@@ -1,6 +1,6 @@
-import Item, { makeRandomItem } from "../core/Item";
 import LocalData from "../core/LocalData";
 import MyEventEmitter from "../core/MyEventEmitter";
+import { makeRandomItem } from "@solblade/shared/Item.js";
 
 export default class Inventory {
     constructor(actor) {
