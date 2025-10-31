@@ -5,11 +5,15 @@ import './ui/StyleUI.css';
 import { setupDiscordWindow } from "./ui/DiscordStuff";
 import setupChat from "./ui/Chat";
 
-LocalData.load();
-setupChat();
-const canvas = document.getElementById('webgl');
-const game = new Game(canvas);
-const menu = new Menu(game);
+async function main() {
+    LocalData.load();
+    setupChat();
+    const canvas = document.getElementById('webgl');
+    const game = new Game(canvas);
+    const menu = new Menu(game);
+
+}
+main()
 
 setupDiscordWindow();
 

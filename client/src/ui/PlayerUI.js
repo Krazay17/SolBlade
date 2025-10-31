@@ -1,6 +1,5 @@
 import MyEventEmitter from "../core/MyEventEmitter.js";
 import LocalData from "../core/LocalData.js";
-import { netSocket } from "../core/NetManager.js";
 import Globals from "../utils/Globals.js";
 
 export default class PlayerInfo {

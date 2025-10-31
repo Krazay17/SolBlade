@@ -172,7 +172,7 @@ function initBindings() {
             const { type, tempId, netId } = a
             if (netId === playerId) continue;
             const existingActor = scene.actorManager.actors.find(a =>
-                a.active && (a.tempId === tempId)
+                a.active && (a.tempId === tempId || a.netId === netId)
             );
             if (existingActor) {
                 existingActor.setNetId(netId);

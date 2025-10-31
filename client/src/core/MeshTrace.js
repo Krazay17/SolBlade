@@ -22,29 +22,25 @@ export default class MeshTrace {
         this.tempSphere = new Sphere();
     }
     shapeTrace(start, dir, length, callback) {
-        const shape = new RAPIER.Ball(0.1);
-
-        // Make sure 'dir' is normalized so distance is consistent
+        const shape = new RAPIER.Ball(.1);
+        const cloneStart = start.clone()
         const direction = dir.clone().normalize();
         const rotation = new RAPIER.Quaternion(0, 0, 0, 1); // identity rotation
         const result = this.game.physicsWorld.castShape(
-            start,          // starting position
-            rotation,       // shape rotation (identity)
-            direction,      // movement direction
-            shape,          // shape
-            length,         // distance
-            true,
-            true,
+            cloneStart,
+            rotation,
+            direction,
+            shape,
+            0,
+            500,
+            undefined,
             undefined,
             undefined,
             this.actor.body.collider
         );
-        console.log(this.actor.body.collider)
-        console.log(start, direction, result?.witness1, `Player collider: ${this.actor.body.collider?.handle}`, `Result collider: ${result?.collider.handle}`);
-        console.log(this.actor.body);
 
         if (result) {
-            console.log(result);
+            console.log(result.time_of_impact);
             if (callback) callback(result);
         }
     }

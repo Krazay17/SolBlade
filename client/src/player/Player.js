@@ -99,22 +99,26 @@ export default class Player extends Pawn {
     }
     setWorld(newWorld) {
         this.world = newWorld;
-        this.solWorld = this.world.solWorld;
-        if (LocalData.solWorld !== this.solWorld) {
-            if (this.portalPos) {
-                this.body.position = this.portalPos
-                this.portalPos = null;
-            } else {
-                this.body.position = this.world.spawnPos;
-            }
+        if (this.solWorld !== this.world.solWorld) {
+            this.lastWorld = this.solWorld;
+            this.solWorld = this.world.solWorld;
             this.body.velocity = { x: 0, y: 0, z: 0 };
+
+
         }
-        LocalData.solWorld = this.solWorld
-        LocalData.save();
+    }
+    worldReady() {
+        if (this.portalPos) {
+            this.body.position = this.portalPos;
+            this.portalPos = null;
+        } else if(this.lastWorld !== this.solWorld) {
+            this.body.position = this.world.spawnPos;
+        }
         this.tick = true;
         if (this.body) {
             this.body.wakeUp();
         }
+
     }
     async assignMesh(skin) {
         if (await super.assignMesh(skin)) {

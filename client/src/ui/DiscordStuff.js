@@ -1,6 +1,5 @@
 import LocalData from "../core/LocalData";
 
-
 const sec = document.getElementById("discord-section");
 export function setupDiscordWindow() {
     const moveDiscordButton = document.getElementById("discordHideButton");

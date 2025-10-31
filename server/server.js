@@ -6,7 +6,7 @@ import CrownQuest from "./src/SvCrownQuest.js";
 import { sharedTest } from "@solblade/shared/Utils.js";
 import repl from 'repl';
 
-const SERVER_VERSION = 1.03;
+const SERVER_VERSION = 1.05;
 
 const server = http.createServer();
 const PORT = Number(process.env.PORT) || 80;

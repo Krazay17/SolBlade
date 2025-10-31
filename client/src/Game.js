@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as RAPIER from '@dimforge/rapier3d-compat';
+import RAPIER from '@dimforge/rapier3d-compat';
 import Crosshair from './ui/Crosshair';
 import Input from './core/Input';
 import PlayerInfo from './ui/PlayerUI';
@@ -14,7 +14,6 @@ import MeshManager from './core/MeshManager';
 import SolRenderPass from './core/SolRenderPass';
 import World from './scenes/World';
 import ActorManager from './core/ActorManager';
-import DebugData from './ui/DebugData';
 import PartyFrame from './ui/PartyFrame';
 import QuestManager from './core/QuestManager';
 import { setNetScene } from './core/NetManager';
@@ -27,6 +26,7 @@ import { menuSlider } from './ui/Menu';
 import World5 from './scenes/World5';
 import FXManager from './core/FXManager';
 import SolPhysics from './core/SolPhysics';
+import DebugData from './ui/DebugData';
 
 await RAPIER.init();
 
@@ -86,14 +86,12 @@ export default class Game {
     this.actorManager = new ActorManager(this);
     this.initPlayer();
     this.partyFrame = new PartyFrame();
-    //this.debugData = new DebugData();
+    this.debugData = new DebugData();
     this.lightManager = new LightManager(this);
     this.fxManager = new FXManager(this);
 
     this.worldReady = () => {
-      this.player.setWorld(this.world);
-      setNetScene(this.world);
-      this.solRender.outlineObject = this.world.map;
+      this.player.worldReady();
       this.running = true;
     }
     this.setWorld(LocalData.solWorld || 'world2');
@@ -178,17 +176,20 @@ export default class Game {
 
     if (this.world?.onExit) this.world.onExit();
     this.world = newWorld;
+    LocalData.solWorld = this.world.solWorld;
+    LocalData.save();
 
     this.actorManager.clearActors();
     this.lightManager.destroy();
 
-    if(this.player) {
-    this.player.portalPos = pos;
-    this.player.solWorld = world;
-    this.player.tick = false;
+    if (this.player) {
+      this.player.portalPos = pos;
+      this.player.tick = false;
     }
-      
+    setNetScene(this.world);
+    this.player.setWorld(this.world);
     if (this.world?.onEnter) this.world.onEnter(this.worldReady);
+
 
   }
   start() {

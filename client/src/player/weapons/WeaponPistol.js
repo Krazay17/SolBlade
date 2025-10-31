@@ -57,9 +57,20 @@ export default class WeaponPistol extends Weapon {
             this.game.soundPlayer.playPosSound('pistolShoot', pos);
             this.playAnimation(this.hand, false);
 
-            this.meshTracer.shapeTrace(camPos, dir, 10, (/**@type {RAPIER.ColliderShapeCastHit}*/r, hitCenter) => {
-
-                if (r) this.game.fxManager.spawnFX(undefined, { pos: hitCenter });
+            this.meshTracer.shapeTrace(camPos, dir, 20, (/**@type {RAPIER.ColliderShapeCastHit}*/r) => {
+                if (r) {
+                    this.game.fxManager.spawnFX(undefined, { pos: r.witness1 });
+                    console.log(r.collider)
+                    const target = r.collider.actor;
+                    if(!target)return;
+                    target.hit(new HitData({
+                        dealer: this.actor,
+                        target,
+                        impulse: dir.multiplyScalar(2),
+                        amount: 10,
+                        stun: 100,
+                    }))
+                }
             })
 
             // this.meshTracer.multiLineTrace(camPos, dir, this.game.actorManager.hostiles, this.range, pos, (hit) => {

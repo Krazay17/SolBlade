@@ -28,7 +28,7 @@ export default class SoundPlayer {
     }
 
     init() {
-        this.loadMusic('music1', 'assets/Music1.mp3');
+        this.loadMusic('music1', '/assets/Music1.mp3');
         const playMusiconFirstClick = () => {
             this.playMusic(0);
             document.removeEventListener('mousedown', playMusiconFirstClick);
@@ -147,9 +147,9 @@ export default class SoundPlayer {
     }
 
     async loadAllMusic() {
-        this.loadMusic('music2', 'assets/Music2.mp3');
-        this.loadMusic('music3', 'assets/Music3.mp3');
-        this.loadMusic('music4', 'assets/Music4.mp3');
+        this.loadMusic('music2', '/assets/Music2.mp3');
+        this.loadMusic('music3', '/assets/Music3.mp3');
+        this.loadMusic('music4', '/assets/Music4.mp3');
     }
 
     setPosAudio(listener) {

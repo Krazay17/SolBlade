@@ -17,7 +17,9 @@ export default class VoiceChat {
     constructor() {
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)()
         this.localStream = null;
-        this.peers = {}; // peerId -> RTCPeerConnection
+        /** @type {{ [peerId: string]: RTCPeerConnection }} */
+        this.peers = {};
+
         this.voiceMap = {}
         this.voiceActive = false;
         this.gainNode = null;

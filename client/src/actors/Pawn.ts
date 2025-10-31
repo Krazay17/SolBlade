@@ -36,7 +36,7 @@ export default class Pawn extends Actor {
         this.radius = data.radius ?? .5;
         this.height = data.height ?? 1;
         this.skin = data.skin ?? 'spikeMan';
-        this.body = new PawnBody(this.game.physicsWorld, data.pos, this.height, this.radius, data.isRemote);
+        this.body = new PawnBody(this.game.physicsWorld, this, data.pos, this.height, this.radius, data.isRemote);
 
         this.assignMesh(this.skin);
 
