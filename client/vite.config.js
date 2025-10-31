@@ -14,7 +14,7 @@ export default defineConfig({
 	plugins: [wasm(), topLevelAwait()],
 	resolve: {
 		alias: {
-			"@shared": path.resolve(__dirname, "../shared"),
+			"@soulblade/shared": path.resolve(__dirname, "../shared"),
 		}
 	}
 });
