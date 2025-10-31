@@ -186,8 +186,8 @@ export default class Game {
       this.player.portalPos = pos;
       this.player.tick = false;
     }
-    setNetScene(this.world);
     this.player.setWorld(this.world);
+    setNetScene(this.world);
     if (this.world?.onEnter) this.world.onEnter(this.worldReady);
 
 

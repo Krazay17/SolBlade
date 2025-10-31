@@ -25,6 +25,7 @@ export default class Actor {
     name: string;
     world: World;
     solWorld: string;
+    lastWorld: string;
     team: string;
     destroyed: boolean = false;
     replicate: boolean = false;
@@ -69,6 +70,7 @@ export default class Actor {
         this.type = type
         this.name = name;
         this.solWorld = solWorld;
+        this.lastWorld = solWorld;
         this.team = team;
         this.maxHealth = maxHealth;
         this._health = health;

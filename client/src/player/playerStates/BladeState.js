@@ -21,6 +21,10 @@ export default class BladeState extends PlayerState {
         console.log('enter blade');
     }
     update(dt) {
+        if (!this.input.actionStates.blade || this.actor.energy <= 0) {
+            this.manager.setState('idle');
+            return;
+        }
         if (this.input.keys['Space'] && this.grounded && !this.jumping) {
             clearTimeout(this.floorTimer);
             this.grounded = false;
@@ -33,10 +37,6 @@ export default class BladeState extends PlayerState {
         else this.jumping = 0;
         this.actor.movement.bladeMove(dt);
 
-        if (!this.input.actionStates.blade || this.actor.energy <= 0) {
-            this.manager.setState('idle');
-            return;
-        }
         if (!this.actor.movement.isGrounded(.1)) {
             if (!this.floorTimer) {
                 this.floorTimer = setTimeout(() => {

@@ -28,13 +28,13 @@ export default class PawnBody {
         this.body = null;
         this.collider = null;
         if (!this.world) throw new Error("invalid world passed to PawnBody");
-        //const desc = isRemote ? RAPIER.RigidBodyDesc.kinematicPositionBased() : RAPIER.RigidBodyDesc.dynamic()
+        const desc = isRemote ? RAPIER.RigidBodyDesc.kinematicPositionBased() : RAPIER.RigidBodyDesc.dynamic()
 
         this.collideGroup = (GROUPS.WORLD | GROUPS.ENEMY) << 16 | GROUPS.PLAYER
         if (isRemote) {
             this.collideGroup = (GROUPS.PLAYER) << 16 | GROUPS.ENEMY;
         }
-        this.body = this.world.createRigidBody(RAPIER.RigidBodyDesc.dynamic()
+        this.body = this.world.createRigidBody(desc
             .lockRotations()
             .setTranslation(this.startPos.x || 0, this.startPos.y || 0, this.startPos.z || 0)
             .setLinearDamping(0)

@@ -8,6 +8,7 @@ export default class DashState extends PlayerState {
     }
     enter() {
         super.enter()
+        this.actor.energy.tryUse(this.actor.dashCost);
         this.actor.movement.dashStart();
         this.actor.energyRegen = 0;
         this.movement.momentumBooster.increaseBoost(2);
@@ -45,7 +46,7 @@ export default class DashState extends PlayerState {
         }
     }
     canEnter() {
-        return this.actor.energy.tryUse(this.actor.dashCost);
+        return this.actor.energy.current >= this.actor.dashCost;
     }
     exit() {
         //this.actor.movement.dashStop();

@@ -15,7 +15,7 @@ export default class Enemy extends Pawn {
         this.movement = new AIMovement(this);
         this.stateManager = new StateManager(this);
         //this.controller = new AIController(game, this);
-        this.namePlate = new NamePlate(this, this.height / 3 + 2);
+        this.namePlate = new NamePlate(this, this.height / 3 + 1);
     }
     fixedUpdate(dt: number, time: number) {
         super.fixedUpdate(dt, time);

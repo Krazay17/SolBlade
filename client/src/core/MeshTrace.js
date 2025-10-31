@@ -22,10 +22,10 @@ export default class MeshTrace {
         this.tempSphere = new Sphere();
     }
     shapeTrace(start, dir, length, callback) {
-        const shape = new RAPIER.Ball(.1);
+        const shape = new RAPIER.Ball(.2);
         const cloneStart = start.clone()
         const direction = dir.clone().normalize();
-        const rotation = new RAPIER.Quaternion(0, 0, 0, 1); // identity rotation
+        const rotation = new RAPIER.Quaternion(1, 0, 0, 0); // identity rotation
         const result = this.game.physicsWorld.castShape(
             cloneStart,
             rotation,
@@ -36,7 +36,7 @@ export default class MeshTrace {
             undefined,
             undefined,
             undefined,
-            this.actor.body.collider
+            this.actor.body.body,
         );
 
         if (result) {

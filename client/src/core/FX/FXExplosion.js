@@ -3,6 +3,7 @@ import * as THREE from 'three'
 
 export default class FXExplosion extends FX {
     init() {
+        this.duration = 200;
         this.ball = new THREE.Mesh(
             new THREE.SphereGeometry(.5),
             new THREE.MeshBasicMaterial({ color: 'white' })
@@ -11,8 +12,9 @@ export default class FXExplosion extends FX {
     }
     update(dt, time) {
         super.update(dt, time)
+        const scaledt = dt *20;
         if (this.ball) {
-            this.ball.scale.add(new THREE.Vector3(dt, dt, dt));
+            this.ball.scale.add(new THREE.Vector3(scaledt, scaledt, scaledt));
         }
     }
 }
