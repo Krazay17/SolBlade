@@ -53,14 +53,18 @@ export default class SvActorManager {
     get enemies() { return this.actors.filter(a => a.type === 'enemy') }
 
     getActorsOfWorld(world) {
-        let data = [];
-        for (const a of this.actors) {
+        const data = [
+            ...this.actorsOfWorld[world].players,
+            ...this.actorsOfWorld[world].enemies,
+            ...this.actorsOfWorld[world].others,
+        ];
+        
+        const serializedData = [];
+        for (const a of data) {
             if (!a.active) continue;
-            if (a.solWorld !== world) continue;
-            if (!this.remainingDuration(a)) continue;
-            data.push(a.serialize());
+            serializedData.push(a.serialize());
         }
-        return data;
+        return serializedData;
     }
     getActorById(id) {
         /**@type {SvActor} */

@@ -21,7 +21,11 @@ export default class SvActor {
         this.solWorld = data.solWorld;
         this.pos = data.pos;
 
-        this.active = true;
+        this._active = true;
+        this.isDead = false;
+        this.spawnTime = performance.now();
+        console.log(data.dur);
+        this.duration = data.dur;
 
         this.healthC = new SvHealth(this, data.maxHealth, data.health);
         this.healthC.onDeath = () => this.die();
@@ -29,6 +33,12 @@ export default class SvActor {
 
         this.lastHit = null;
     }
+    get active() {
+        if (!this._active) return false;
+        if (this.duration && (performance.now() > this.spawnTime + this.duration)) return false;
+        return true;
+    }
+    set active(a) { this._active = a }
     serialize() {
         const data = {
             ...this.data,

@@ -168,6 +168,7 @@ function initBindings() {
         }
     });
     socket.on('currentActors', (data) => {
+        console.log(data);
         for (const a of data) {
             const { type, tempId, netId } = a
             if (netId === playerId) continue;

@@ -162,7 +162,6 @@ io.on('connection', (socket) => {
                 if (playerSockets[id]) playerSockets[id].disconnect();
             });
             socket.on('actorEvent', ({ id, event, data }) => {
-                console.log(id, event, data);
                 const actor = actorManager.getActorById(id);
                 if (actor && actor[event]) actor[event](data);
             });

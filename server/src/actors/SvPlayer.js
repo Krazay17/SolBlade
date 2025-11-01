@@ -1,13 +1,17 @@
 import { io } from "../../server.js";
 import SvEnergy from "../SvEnergy.js";
 import SvActor from "./SvActor.js";
-import { COLLISION_GROUPS } from '@solblade/shared/SolConstants.js';
 
 export default class SvPlayer extends SvActor {
     constructor(actorManager, data = {}) {
         data.type = 'player';
         super(actorManager, data);
         this.energy = new SvEnergy(this, 100);
+    }
+    respawn() {
+        setTimeout(() => {
+            this.healthC.current = this.healthC.maxHealth;
+        }, 2500)
     }
     hit(data) {
         const { amount, dealer } = data;
@@ -18,5 +22,10 @@ export default class SvPlayer extends SvActor {
             return;
         }
         super.hit(data);
+    }
+    die(data) {
+        this.isDead = true;
+        io.emit('actorDie', { id: this.netId, data: data || this.lastHit });
+        this.respawn();
     }
 }
