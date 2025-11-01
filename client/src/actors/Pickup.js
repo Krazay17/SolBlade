@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import Actor from './Actor.js';
+import MyEventEmitter from '../core/MyEventEmitter.js';
 
 export default class Pickup extends Actor {
     constructor(scene, data) {
@@ -22,16 +23,17 @@ export default class Pickup extends Actor {
         this.add(this.mesh);
     }
     touch(dealer) {
-        super.touch(dealer);
-        this.active = false;
+        MyEventEmitter.emit('actorEvent', { id: this.netId, event: 'touch', data: dealer.serialize() });
         this.game.soundPlayer.playPosSound(this.pickupSound, this.position);
+        this.onTouch();
     }
     onTouch(dealer) {
         if (!this.active) return;
+        this.active = false;
+        this.deActivate();
     }
     applyTouch(data) {
-        super.applyTouch(data);
-        this.destroy();
+        this.onTouch()
     }
     checkDistanceToPlayer() {
         const player = this.scene.player;

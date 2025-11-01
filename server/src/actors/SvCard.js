@@ -13,8 +13,9 @@ export default class SvCard extends SvActor {
     }
     touch(data) {
         if (!this.active) return;
-        io.emit('actorTouch', { id: this.netId, data });
-        this.die();
+        //io.emit('actorTouch', { id: this.netId, data });
+        io.emit('actorEvent', {id:this.netId, event: 'applyTouch', data});
+        //this.die();
     }
     die() {
         super.die();

@@ -44,13 +44,13 @@ export default function setupChat() {
         }, 2000);
     });
 
-    document.addEventListener('mousedown', (e) => {
-        if (!section.contains(e.target)) textInput.blur();
-    })
-    textInput.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-        textInput.focus();
-    })
+    // document.addEventListener('mousedown', (e) => {
+    //     if (!section.contains(e.target)) textInput.blur();
+    // })
+    // textInput.addEventListener('mousedown', (e) => {
+    //     e.stopPropagation();
+    //     textInput.focus();
+    // })
     textInput.addEventListener('mouseup', (e) => {
         e.stopPropagation();
     })

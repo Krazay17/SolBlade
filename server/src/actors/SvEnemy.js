@@ -3,12 +3,16 @@ import SvHealth from "../SvHealth.js"
 import SrvAIController from "../SvAIController.js";
 import { io } from "../../server.js";
 import { COLLISION_GROUPS } from '@solblade/shared/SolConstants.js';
+import RAPIER from "@dimforge/rapier3d-compat";
 
 
 export default class SvEnemy extends SvActor {
     constructor(actorManager, data = {}) {
         data.maxHealth = 100;
         super(actorManager, data);
+
+        /**@type {RAPIER.World} */
+        this.physics = this.actorManager.physics[this.solWorld];
 
         this.healthC = new SvHealth(this, data.maxHealth, data.health);
         this.healthC.onDeath = () => this.die();
@@ -19,7 +23,7 @@ export default class SvEnemy extends SvActor {
         const height = data.height || 1;
         const radius = data.radius || 0.5;
         this._rotation = 0;
-        
+
         // only collide with world and player
         const collideGroup = (COLLISION_GROUPS.WORLD | COLLISION_GROUPS.PLAYER) << 16 | COLLISION_GROUPS.ENEMY;
         this.createCapsule(height, radius, collideGroup);
@@ -57,5 +61,20 @@ export default class SvEnemy extends SvActor {
             this.stunned = true;
             setTimeout(() => this.stunned = false, 600);
         }
+    }
+    createCapsule(height, radius, group) {
+        /**@type {RAPIER.RigidBody} */
+        this.body = this.physics.createRigidBody(RAPIER.RigidBodyDesc.dynamic()
+            .lockRotations()
+            .setTranslation(this.pos.x || 0, this.pos.y || 0, this.pos.z || 0)
+            .setLinearDamping(0)
+            .setAngularDamping(0)
+        );
+        this.collider = this.physics.createCollider(RAPIER.ColliderDesc.capsule(height / 2, radius)
+            .setCollisionGroups(group)
+            .setFriction(0)
+            .setRestitution(0),
+            this.body
+        );
     }
 }

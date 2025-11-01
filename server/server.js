@@ -6,7 +6,7 @@ import CrownQuest from "./src/SvCrownQuest.js";
 import { sharedTest } from "@solblade/shared/Utils.js";
 import repl from 'repl';
 
-const SERVER_VERSION = 1.07;
+const SERVER_VERSION = 1.08;
 
 const server = http.createServer();
 const PORT = Number(process.env.PORT) || 80;
@@ -78,6 +78,9 @@ io.on('connection', (socket) => {
                 actorManager.updateActor(player, { solWorld })
                 socket.broadcast.emit('newWorld', player.serialize());
                 socket.emit('currentActors', actorManager.getActorsOfWorld(solWorld));
+            })
+            socket.on('checkCurrentActors', (world)=>{
+                socket.emit('currentActors', actorManager.getActorsOfWorld(world));
             })
 
             io.emit('serverMessage', { player: 'Server', message: `Player Connected: ${data.name}!`, color: 'yellow' });
@@ -159,9 +162,14 @@ io.on('connection', (socket) => {
                 if (playerSockets[id]) playerSockets[id].disconnect();
             });
             socket.on('actorEvent', ({ id, event, data }) => {
+                console.log(id, event, data);
                 const actor = actorManager.getActorById(id);
                 if (actor && actor[event]) actor[event](data);
             });
+            socket.on('actorDie', (data)=>{
+                const actor = actorManager.getActorById(data.target);
+                if(actor) actor.die(data);
+            })
             socket.on('actorHealthChangeLocal', health => {
                 const actor = actorManager.getActorById(socket.id);
                 if (!actor) return;

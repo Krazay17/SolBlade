@@ -50,16 +50,7 @@ export default class PartyFrame {
         healthBar.appendChild(healthFill);
 
         playerElement.appendChild(healthBar);
-        playerElement.addEventListener('click', () => {
-            //this.selectPlayer(player);
-        });
 
-        playerElement.addEventListener('mousedown', (e) => {
-            if (e.button === 1) {
-                e.preventDefault();
-                MyEventEmitter.emit('bootPlayer', player);
-            }
-        });
 
         this.container.appendChild(playerElement);
         this.players.set(player, playerElement);

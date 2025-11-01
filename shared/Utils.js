@@ -1,19 +1,10 @@
-// export function triMeshFromVerts(geometry) {
-//   const vertices = geometry.attributes.position.array;
-//   let indices;
+export function randomPos(maxHoriz, maxHeight) {
+    const x = (Math.random() * 2 - 1) * maxHoriz;
+    const z = (Math.random() * 2 - 1) * maxHoriz;
+    const y = Math.random() * maxHeight;
 
-//   if (geometry.index) {
-//     indices = geometry.index.array;
-//   } else {
-//     const count = vertices.length / 3;
-//     indices = new Uint16Array(count);
-//     for (let i = 0; i < count; i++) indices[i] = i;
-//   }
-//   const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
-//   colliderDesc.setFriction(0);
-//   colliderDesc.setRestitution(0);
-//   return colliderDesc;
-// }
+    return { x, y, z };
+}
 
 export function sharedTest() {
   console.log('shared folder import test!');

@@ -2,7 +2,6 @@ import { io } from "../../server.js";
 import { randomPos } from "../ActorDefaults.js";
 import ActorManager from "../SvActorManager.js";
 import SvHealth from "../SvHealth.js";
-import RAPIER from "@dimforge/rapier3d-compat";
 
 export default class SvActor {
     constructor(actorManager, data = {
@@ -23,12 +22,6 @@ export default class SvActor {
         this.pos = data.pos;
 
         this.active = true;
-
-        /**@type {RAPIER.World} */
-        this.physics = this.actorManager.physics[this.solWorld];
-
-        this.body = null;
-        this.collider = null;
 
         this.healthC = new SvHealth(this, data.maxHealth, data.health);
         this.healthC.onDeath = () => this.die();
@@ -52,9 +45,9 @@ export default class SvActor {
         this.lastHit = data;
         io.emit('actorHit', data);
     }
-    die() {
+    die(data) {
         this.active = false;
-        io.emit('actorDie', { id: this.netId, data: this.lastHit });
+        io.emit('actorDie', { id: this.netId, data: data || this.lastHit });
     }
     destroy() {
         this.actorManager.removeActor(this);
@@ -64,20 +57,5 @@ export default class SvActor {
         setTimeout(() => {
             this.actorManager.createActor(this.type, { ...this.data, pos });
         }, time);
-    }
-    createCapsule(height, radius, group) {
-        /**@type {RAPIER.RigidBody} */
-        this.body = this.physics.createRigidBody(RAPIER.RigidBodyDesc.dynamic()
-            .lockRotations()
-            .setTranslation(this.pos.x || 0, this.pos.y || 0, this.pos.z || 0)
-            .setLinearDamping(0)
-            .setAngularDamping(0)
-        );
-        this.collider = this.physics.createCollider(RAPIER.ColliderDesc.capsule(height / 2, radius)
-            .setCollisionGroups(group)
-            .setFriction(0)
-            .setRestitution(0),
-            this.body
-        );
     }
 }

@@ -15,7 +15,7 @@ export default class SvPhysics {
         /**@type {Server} */
         this.io = io;
         /**@type {ActorManager} */
-        this.actorManager = actorManager
+        this.actorManager = actorManager;
 
         this.world0 = new RAPIER.World({ x: 0, y: -9, z: 0 });
         this.world1 = this.makeWorld(world1Data);

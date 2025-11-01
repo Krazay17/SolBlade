@@ -1,5 +1,4 @@
 import { makeItem, makeRandomItem } from "@solblade/shared/Item.js";
-import TouchData from "../core/TouchData";
 import World from "../scenes/World";
 import Pickup from "./Pickup";
 import * as THREE from 'three';
@@ -55,7 +54,7 @@ export default class ItemPickup extends Pickup {
 
         })
     }
-    applyTouch(data: TouchData): void {
+    applyTouch(data: any): void {
         super.applyTouch(data);
         const { dealer } = data;
         if (dealer === this.game.player) {

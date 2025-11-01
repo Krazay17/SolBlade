@@ -34,13 +34,11 @@ export default class WeaponFireball extends Weapon {
         }
     }
     use() {
-        if (super.use() &&
-            this.stateManager.setState('attack', {
-                weapon: this,
-                duration: 550,
-                onExit: () => { if (this.onAttack) clearTimeout(this.onAttack) }
-            })) {
-
+        if (super.use()
+            && this.stateManager.setState('attack', {
+                weapon: this, duration: 550, onExit: () => { if (this.onAttack) clearTimeout(this.onAttack) }
+            })
+        ) {
             this.onAttack = setTimeout(() => this.shootFireball(.4, 100, 15), 200);
             const anim = this.slot === '0' ? 'attackLeft' : 'attackRight';
             this.actor.animationManager.playAnimation(anim, false);
@@ -50,10 +48,7 @@ export default class WeaponFireball extends Weapon {
     }
 
     shootFireball(radius = 1, speed = 35, damage = 10) {
-        let pos = this.actor.getShootData().camPos;
-        const dir = this.actor.getShootData().dir;
-        pos = pos.add(dir.clone().multiplyScalar(1.5)); // Start a bit in front of the actor
-
+        const { pos, dir, camPos } = this.actor.getShootData()
         const projectile = this.game.actorManager.spawnActor('fireball', {
             pos,
             dir,

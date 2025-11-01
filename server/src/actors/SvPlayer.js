@@ -8,8 +8,6 @@ export default class SvPlayer extends SvActor {
         data.type = 'player';
         super(actorManager, data);
         this.energy = new SvEnergy(this, 100);
-        const collideGroup = (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.ENEMY) << 16 | COLLISION_GROUPS.PLAYER;
-        this.createCapsule(1, .5, collideGroup);
     }
     hit(data) {
         const { amount, dealer } = data;

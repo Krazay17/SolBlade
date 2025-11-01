@@ -106,10 +106,9 @@ export default class Input {
       if (action) this.actionStates[action] = false;
     });
     this.domElement.addEventListener('click', (e) => {
+      if (this.pointerLocked) return;
       if (this.gameElement === e.target) {
-        if (!this.pointerLocked) {
-          this.gameElement.requestPointerLock();
-        }
+        this.gameElement.requestPointerLock();
       }
     });
     this.domElement.addEventListener('mousemove', (e) => {

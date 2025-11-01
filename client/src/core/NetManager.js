@@ -5,7 +5,6 @@ import LocalData from "./LocalData";
 import HitData from "./HitData";
 import Actor from "../actors/Actor";
 import VoiceChat from './VoiceChat';
-import TouchData from "./TouchData";
 import Globals from "../utils/Globals";
 import { menuButton } from "../ui/Menu";
 
@@ -44,6 +43,7 @@ socket.on("connect", () => {
     socket.on('disconnect', () => {
         MyEventEmitter.emit('disconnect');
         console.log("disconnected from server");
+        if (netPlayers[playerId]) delete netPlayers[playerId]
     });
     socket.on('serverVersion', version => {
         if (serverVersion && (serverVersion !== version)) {
@@ -239,7 +239,7 @@ function initBindings() {
     });
     socket.on('actorEvent', ({ id, event, data }) => {
         const actor = scene.getActorById(id);
-        if (actor && actor[event]) actor[event](data);
+        if (actor && actor.active && actor[event]) actor[event](data);
 
     });
     socket.on('spawnFX', ({ type, data }) => {
@@ -261,6 +261,9 @@ MyEventEmitter.on('playerHealthChange', (data) => {
 MyEventEmitter.on('playPosSound', ({ name, pos }) => {
     socket.emit('playPosSound', { name, pos: { x: pos.x, y: pos.y, z: pos.z } });
 })
+MyEventEmitter.on('actorEvent', (data) => {
+    socket.emit('actorEvent', data);
+})
 MyEventEmitter.on('actorHit', (/**@type {HitData}*/data) => {
     // if (socket.connected) {
     //     socket.emit('actorHit', data.serialize());
@@ -273,32 +276,27 @@ MyEventEmitter.on('actorHit', (/**@type {HitData}*/data) => {
         data.target.applyHit(data);
     }
 });
-MyEventEmitter.on('actorTouch', (/**@type {TouchData}*/data) => {
-    // if (socket.connected) {
-    //     socket.emit('actorTouch', data.serialize());
-    // } else {
-    //     data.target.applyTouch(data);
-    // }
-    console.log(data);
-    if (socket.connected) {
-        socket.emit('actorEvent', { id: data.target.netId, event: 'touch', data: data.serialize() });
-    } else {
-        data.target.applyTouch(data);
-    }
-});
-MyEventEmitter.on('actorDie', (/**@type {HitData}*/data) => {
-    if (socket.connected) {
-        socket.emit('actorDie', data.serialize());
-    }
-    // else {
-    //     data.target.applyDie(data);
-    // }
-});
-MyEventEmitter.on('actorFX', ({ actor, fx }) => {
-    if (socket.connected) {
-        socket.emit('actorFX', { id: actor.netId, fx });
-    }
-});
+// MyEventEmitter.on('actorTouch', (/**@type {TouchData}*/data) => {
+//     // if (socket.connected) {
+//     //     socket.emit('actorTouch', data.serialize());
+//     // } else {
+//     //     data.target.applyTouch(data);
+//     // }
+//     console.log(data);
+//     if (socket.connected) {
+//         socket.emit('actorEvent', { id: data.target.netId, event: 'touch', data: data.serialize() });
+//     } else {
+//         data.target.applyTouch(data);
+//     }
+// });
+// MyEventEmitter.on('actorDie', (/**@type {HitData}*/data) => {
+//     if (socket.connected) {
+//         socket.emit('actorDie', data.serialize());
+//     }
+//     // else {
+//     //     data.target.applyDie(data);
+//     // }
+// });
 MyEventEmitter.on('enterWorld', world => {
     socket.emit('enterWorld', world);
 });
@@ -364,6 +362,10 @@ MyEventEmitter.on('changeAnimation', (data) => {
     socket.emit('changeAnimation', data);
 });
 
+const pollWorldActors = setInterval(() => {
+    socket.emit('checkCurrentActors', scene.solWorld);
+}, 5000)
+
 setInterval(() => {
     socket.emit('heartbeat');
 }, 5000);
@@ -378,3 +380,21 @@ export function tryUpdatePosition({ pos, rot }) {
         socket.emit('playerPositionSend', { pos: lastSentPosition, rot: lastSentRotation });
     }
 }
+
+
+
+// export default class NetManager {
+//     constructor(game, player) {
+//         this.game = game;
+//         this.player = player;
+
+//         this.socket = io(serverURL, {
+//             transports: ["websocket"],
+//             reconnection: true,
+//             timeout: 5000,
+//         });
+
+//         this.netPlayers = {};
+//         this.playerId = '';
+//     }
+// }

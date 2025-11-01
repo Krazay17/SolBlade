@@ -21,8 +21,8 @@ export default class MeshTrace {
         this.tempBox = new Box3();
         this.tempSphere = new Sphere();
     }
-    shapeTrace(start, dir, length, callback) {
-        const shape = new RAPIER.Ball(.2);
+    shapeTrace(start, dir, length, radius = 0.1, callback) {
+        const shape = new RAPIER.Ball(radius);
         const cloneStart = start.clone()
         const direction = dir.clone().normalize();
         const rotation = new RAPIER.Quaternion(1, 0, 0, 0); // identity rotation
@@ -32,7 +32,7 @@ export default class MeshTrace {
             direction,
             shape,
             0,
-            500,
+            length,
             undefined,
             undefined,
             undefined,

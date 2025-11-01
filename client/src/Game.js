@@ -213,7 +213,7 @@ export default class Game {
       this.accumulator += dt;
       this.accumulator = Math.min(this.accumulator, 0.25);
       while (this.running && (this.accumulator >= this.timeStep)) {
-        this.physicsWorld.step();
+        this.physics.step();
         this.physics.remove();
         this.world?.fixedUpdate?.(this.timeStep, time);
         this.actorManager?.fixedUpdate(this.timeStep, time);

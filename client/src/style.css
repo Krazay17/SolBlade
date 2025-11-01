@@ -21,12 +21,6 @@ canvas {
     overflow: hidden;
 }
 
-#particles {
-    z-index: 10;
-    pointer-events: auto;
-    /* ensures it can receive clicks */
-}
-
 #webgl {
     z-index: 1;
     overflow: hidden;

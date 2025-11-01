@@ -1,55 +1,18 @@
 import { Object3D, Quaternion, Vector3 } from "three";
-import HitData from "../core/HitData";
-import MyEventEmitter from "../core/MyEventEmitter";
 import { generateUUID } from "three/src/math/MathUtils.js";
-import Game from "../Game.js";
-import World from "../scenes/World.js";
-
-export interface ActorData {
-    type?: string;
-    pos?: Vector3;
-    rot?: Quaternion;
-    health?: number;
-    isRemote?: boolean;
-    replicate?: boolean;
-    active?: boolean
-    [key: string]: any;
-}
+import HitData from "./HitData.js";
+import MyEventEmitter from "./MyEventEmitter.js";
 
 export default class Actor {
-    game: Game;
-    data: any;
-    graphics: Object3D;
-    type: string;
-    name: string;
-    world: World;
-    solWorld: string;
-    lastWorld: string;
-    team: string;
-    destroyed: boolean = false;
-    replicate: boolean = false;
-    isRemote: boolean = false;
-    isDead: boolean = false;
-    tempId: string;
-    netId: string | null = null;
-    owner: Actor | null = null;
-    active: boolean = true;
-    maxHealth: number = 100;
-    lastHitData: HitData | null = null;
-    _health: number = 100;
-    targetPosition: Vector3 = new Vector3();
-    spawnTime: number;
-    constructor(game: Game, data: ActorData = {}) {
+    constructor(game, data = {}) {
         const {
             type = '',
             name = '',
             solWorld = 'world1',
-            team = 'A',
             pos = new Vector3(),
             rot = new Quaternion(),
             maxHealth = 100,
             health = 100,
-            isDead = false,
             isRemote = false,
             replicate = false,
             owner = null,
@@ -80,7 +43,6 @@ export default class Actor {
         this.owner = owner;
         this.netId = netId;
         this.active = active;
-        this.spawnTime = performance.now();
 
         this.tempId = generateUUID();
 
@@ -94,13 +56,13 @@ export default class Actor {
     get scale() { return this.graphics.scale }
     set rotation({ x, y, z }) { this.graphics.rotation.set(x, y, z) }
     get quaternion() { return this.graphics.quaternion }
-    set health(amnt: number) {
+    set health(amnt) {
         const clamped = Math.max(0, Math.min(this.maxHealth, amnt));
         if (clamped === this._health) return; // no change, no event
         this._health = clamped;
         this.healthChange(this._health);
     }
-    healthChange(health: number) { }
+    healthChange(health) { }
     get health() {
         return this._health;
     }
@@ -108,11 +70,11 @@ export default class Actor {
         return this.game;
     }
 
-    setRotationFromQuaternion(rot: Quaternion) { this.graphics.setRotationFromQuaternion(rot) }
-    remove(obj: any) { this.graphics.remove(obj) }
-    add(obj: any) { this.graphics.add(obj) }
-    update(dt: number, time: number) { };
-    fixedUpdate(dt: number, time: number) { };
+    setRotationFromQuaternion(rot) { this.graphics.setRotationFromQuaternion(rot) }
+    remove(obj) { this.graphics.remove(obj) }
+    add(obj) { this.graphics.add(obj) }
+    update(dt, time) { };
+    fixedUpdate(dt, time) { };
 
     serialize() {
         return {
@@ -134,7 +96,7 @@ export default class Actor {
             active: this.active,
         }
     }
-    static deserialize(data: any, getActor: (id: string) => Actor | null) {
+    static deserialize(data, getActor) {
         let pos, rot, owner;
 
         if (Array.isArray(data.pos))
@@ -157,10 +119,10 @@ export default class Actor {
 
         return { ...data, pos, rot, owner };
     }
-    setNetId(id: string) {
+    setNetId(id) {
         this.netId = id;
     }
-    activate(data: any) {
+    activate(data) {
         this.active = true;
         if (!data) return;
         this.data = { ...this.data, ...data };
@@ -174,7 +136,7 @@ export default class Actor {
 
         if (!this.isRemote) MyEventEmitter.emit('newActor', this);
     }
-    stateUpdate(data: any) {
+    stateUpdate(data) {
         console.log(data);
     }
     deActivate() {
@@ -189,13 +151,13 @@ export default class Actor {
         this.tempId = '';
         this.netId = '';
     }
-    hit(data: HitData) {
+    hit(data) {
         console.log(data);
         MyEventEmitter.emit('actorHit', data);
         this.game.soundPlayer.playSound('hit');
         this.onHit(data);
     }
-    applyHit(data: HitData) {
+    applyHit(data) {
         const { dealer, type, impulse, stun, dim, dur, sound, hitPosition, amount } = data;
         if (sound) {
             this.game.soundPlayer.applyPosSound(sound, hitPosition);
@@ -203,27 +165,5 @@ export default class Actor {
         if (data) this.lastHitData = data;
         this.onHit(data);
     }
-    onHit(data: any) {
-
-    }
-    // touch(dealer: any) {
-    //     MyEventEmitter.emit('actorTouch', new TouchData(dealer, this));
-    //     this.onTouch(dealer);
-    // }
-    // applyTouch(data: any) {
-    //     this.onTouch(data.dealer || null);
-    // }
-    // onTouch(dealer: any) {
-    //     this.deActivate();
-    // }
-    die(data: HitData | null) {
-        MyEventEmitter.emit('actorDie', data || new HitData({ target: this }));
-        this.onDie(data);
-    }
-    applyDie(data: HitData | null) {
-        this.onDie(data);
-    }
-    onDie(data: any) {
-        this.deActivate();
-    }
+    onHit(data) {    }
 }

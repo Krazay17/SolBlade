@@ -23,23 +23,4 @@ export default class PowerPickup extends Pickup {
         );
         this.add(mesh);
     }
-    touch(dealer) {
-        super.touch(dealer);
-        this.active = false;
-        this.deActivate();
-    }
-    applyTouch(data) {
-        const { dealer, target } = data;
-        if (dealer === this.game.player) {
-            switch (this.data.power) {
-                case 'health':
-                    dealer.health += 25;
-                    break;
-                case 'energy':
-                    dealer.energy.add(50);
-                    break;
-            }
-        }
-        super.applyTouch(data);
-    }
 }

@@ -97,22 +97,21 @@ export default class Player extends Pawn {
         }
         this.add(this.crownMesh);
     }
+    touch() { }
     setWorld(newWorld) {
         this.world = newWorld;
-        if (this.lastWorld !== this.world.solWorld) {
-            this.lastWorld = this.solWorld;
-            this.solWorld = this.world.solWorld;
-            this.body.velocity = { x: 0, y: 0, z: 0 };
-
-
-        }
+        this.solWorld = this.world.solWorld;
+        this.body.velocity = { x: 0, y: 0, z: 0 };
     }
     worldReady() {
-        if (this.portalPos) {
-            this.body.position = this.portalPos;
-            this.portalPos = null;
-        } else if (this.lastWorld !== this.solWorld) {
-            this.body.position = this.world.spawnPos;
+        if (this.lastWorld !== this.solWorld) {
+            this.lastWorld = this.solWorld;
+            if (this.portalPos) {
+                this.body.position = this.portalPos;
+                this.portalPos = null;
+            } else {
+                this.body.position = this.world.spawnPos;
+            }
         }
         if (this.body) {
             this.body.wakeUp();
@@ -210,13 +209,9 @@ export default class Player extends Pawn {
 
         if (this.input.actionStates.attackLeft && this.input.pointerLocked) {
             if (canExitState && this.weapon0?.canUse()) {
-                //this.weapon0?.charge();
                 this.weapon0.use();
             }
         }
-        // if (this.weapon0?.isCharging && !this.input.actionStates.attackLeft) {
-        //     this.weapon0.use();
-        // }
         if (this.input.actionStates.attackRight && this.input.pointerLocked) {
             if (canExitState && this.weapon1?.canUse()) {
                 this.weapon1?.use();

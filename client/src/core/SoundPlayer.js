@@ -30,8 +30,8 @@ export default class SoundPlayer {
     init() {
         this.loadMusic('music1', '/assets/Music1.mp3');
         const playMusiconFirstClick = () => {
-            this.playMusic(0);
             document.removeEventListener('mousedown', playMusiconFirstClick);
+            this.playMusic(0);
             this.loadAllMusic();
         }
         document.addEventListener('mousedown', playMusiconFirstClick);

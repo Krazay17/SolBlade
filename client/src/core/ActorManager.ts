@@ -57,7 +57,7 @@ export default class ActorManager {
         for (const a of this.actors) { a.fixedUpdate?.(dt, time) };
     }
     spawnLocalPlayer() {
-        const player = new actorRegistry['player'](this.game, { pos: LocalData.position || { x: 0, y: 1, z: 0 }, solWorld: LocalData.solWorld })
+        const player = new actorRegistry['player'](this.game, { pos: LocalData.position || { x: 0, y: 1, z: 0 }, solWorld: LocalData.solWorld || 'world2' })
         player.body.sleep();
         this.actors.push(player);
         return player;

@@ -14,7 +14,6 @@
     "client:dev": "npm run dev --workspace=client"
   },
   "dependencies": {
-    "@solblade/shared": "file:./shared",
     "@dimforge/rapier3d-compat": "^0.19.2",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",

@@ -1,11 +1,12 @@
 import { randomUUID } from "crypto";
-import actorDefaults, { randomPos } from "./ActorDefaults.js";
+import { randomPos } from "@solblade/shared/Utils.js";
 import SrvEnemy from "./actors/SvEnemy.js";
 import SvServerPhysics from "./SvPhysics.js";
 import SrvPlayer from "./actors/SvPlayer.js";
 import SvActor from "./actors/SvActor.js";
 import SvPower from "./actors/SvPower.js";
 import SvCard from "./actors/SvCard.js";
+
 
 const actorRegistry = {
     player: SrvPlayer,
@@ -112,6 +113,7 @@ export default class SvActorManager {
         switch (type) {
             case 'player':
                 this.actorsOfWorld[actor.solWorld].players.push(actor);
+                console.log(actor.solWorld);
                 break;
             case 'enemy':
                 this.actorsOfWorld[actor.solWorld].enemies.push(actor);
@@ -128,7 +130,7 @@ export default class SvActorManager {
         if (this.hasSpawnedDefaults) return;
         this.hasSpawnedDefaults = true;
         const item = 4;
-        const power = 500;
+        const power = 25;
         const enemies = 4;
         for (let i = 0; i < item; i++) {
             this.createActor('item', { solWorld: 'world2', pos: randomPos(20, 10) });
@@ -141,17 +143,17 @@ export default class SvActorManager {
             this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
         }
         setInterval(() => {
-            if (this.actorsOfWorld['world3'].enemies.length > 15) return;
+            if (this.actorsOfWorld['world3'].enemies.length > 12) return;
             this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
-        }, 500)
+        }, 2000)
 
         for (let i = 0; i < enemies; i++) {
             this.createActor('enemy', { enemy: 'julian', solWorld: 'world4', pos: randomPos(100, 15) });
         }
         setInterval(() => {
-            if (this.actorsOfWorld['world4'].enemies.length > 25) return;
+            if (this.actorsOfWorld['world4'].enemies.length > 12) return;
             this.createActor('enemy', { enemy: 'julian', solWorld: 'world4', pos: randomPos(100, 15) });
-        }, 5000)
+        }, 2000)
     }
     remainingDuration(actor) {
         const time = actor.time;

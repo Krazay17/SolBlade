@@ -1,7 +1,6 @@
 import Projectile from "./Projectile";
-import { spawnParticles } from "./ParticleEmitter";
-import { clamp } from "three/src/math/MathUtils.js";
 import HitData from "../core/HitData";
+import { spawnParticles } from './ParticleEmitter';
 
 export default class ProjectileFireball extends Projectile {
     constructor(scene, data) {
@@ -12,7 +11,7 @@ export default class ProjectileFireball extends Projectile {
         this.explode = false;
 
         this.createMesh();
-        this.setGravity(4);
+        this.setGravity(1);
     }
 
     update(dt) {

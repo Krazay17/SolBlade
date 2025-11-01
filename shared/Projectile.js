@@ -1,8 +1,7 @@
 import * as THREE from 'three';
-import Actor from './Actor';
-import MeshManager from '../core/MeshManager';
-import HitData from '../core/HitData';
 import RAPIER from '@dimforge/rapier3d-compat';
+import Actor from './Actor.js';
+import HitData from './HitData.js';
 
 export default class Projectile extends Actor {
     constructor(game, data) {
@@ -27,48 +26,11 @@ export default class Projectile extends Actor {
         this.radius = radius;
         this.damage = damage;
 
-        this.meshManager = MeshManager.getInstance();
-        this.mesh = null;
-        this.material = null;
-        this.texture = null;
-
         this.tempVector = new THREE.Vector3();
-        this.tempVector2 = new THREE.Vector3();
-        this.tempVector3 = new THREE.Vector3();
-        this.headOffset = new THREE.Vector3(0, 0, 0);
-        this.footOffset = new THREE.Vector3(0, 0, 0);
         this.gravity = 0; // Whether the projectile is affected by gravity
 
-        if (!this.isRemote) {
-            this.createBody();
-        }
-    }
-    createMesh() {
-        const geom = new THREE.SphereGeometry(this.radius, 16, 16);
-        const material = new THREE.MeshLambertMaterial({
-            emissive: 0xff0000,
-            emissiveIntensity: 1,
-            transparent: true,
-            opacity: .9,
-        });
-        this.mesh = new THREE.Mesh(
-            geom,
-            material,
-        );
-        this.add(this.mesh);
-        this.material = material
-        this.applyTexture();
-    }
-    async applyTexture() {
-        const texture = await this.meshManager.getTex('dirtMask.webp');
-        this.material.map = texture;
-        this.material.needsUpdate = true;
-        this.texture = texture;
-    }
-    createBody() {
-        this.body = new RAPIER.Ball(this.radius);
+        this.body = new RAPIER.Ball(this.radius / 2);
         this.bodyRot = new RAPIER.Quaternion(1, 0, 0, 0);
-
     }
     update(deltaTime) {
         if (!this.active) return;
@@ -78,15 +40,8 @@ export default class Projectile extends Actor {
             this.velocity.y -= this.gravity * deltaTime; // Apply gravity
         }
         this.position.add(this.tempVector);
-
-
-        if (this.spawnTime + this.duration < performance.now()) {
-            this.die();
-        }
-
         if (this.isRemote) return;
-        if(!this.body) return;
-
+        return;
         const result = this.game.physicsWorld.intersectionWithShape(
             this.position,
             this.bodyRot,
@@ -102,9 +57,13 @@ export default class Projectile extends Actor {
                 target.hit(new HitData({
                     dealer: this.owner,
                     target,
-                    amount: this.damage,
+                    damage: 50,
                 }))
             }
+            this.die();
+        }
+        this.duration -= deltaTime * 1000;
+        if (this.duration <= 0) {
             this.die();
         }
     }

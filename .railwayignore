@@ -1,9 +1,0 @@
-node_modules/
-client/
-dist/
-tools/
-
-server/node_modules/
-
-.git/
-.github/

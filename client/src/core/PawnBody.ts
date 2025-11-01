@@ -49,6 +49,7 @@ export default class PawnBody {
             this.body
         );
         (this.collider as any).actor = this.actor;
+        this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
     }
     // init() {
     //     if (!this.tryInitPhysics()) {
