@@ -3,15 +3,15 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "client",
-    "server",
-    "shared"
+    "src/client",
+    "src/server",
+    "src/shared"
   ],
   "scripts": {
-    "server:start": "npm run start --workspace=server",
-    "server:dev": "npm run dev --workspace=server",
-    "client:start": "npm run start --workspace=client",
-    "client:dev": "npm run dev --workspace=client"
+    "dev": "concurrently \"npm run dev-server\" \"vite\"",
+    "dev-client": "vite",
+    "dev-server": "npm run dev --workspace=src/server",
+    "start-server": "npm run start --workspace=src/server"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.19.2",
@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@types/three": "^0.180.0",
+    "concurrently": "^9.2.1",
     "vite": "^7.0.6",
     "vite-plugin-top-level-await": "^1.6.0",
     "vite-plugin-wasm": "^3.5.0"

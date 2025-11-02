@@ -1,0 +1,16 @@
+{
+  "name": "solblade-client",
+  "version": "1.0.0",
+  "description": "SolBade Game Client",
+  "main": "index.js",
+  "type": "module",
+  "author": "Josh Massarella",
+  "license": "ISC",
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.19.2",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "three": "^0.179.1",
+    "three-mesh-bvh": "^0.9.1"
+  }
+}
