@@ -11,7 +11,8 @@
     "dev": "concurrently \"npm run dev-server\" \"vite\"",
     "dev-client": "vite",
     "dev-server": "npm run dev --workspace=src/server",
-    "start-server": "npm run start --workspace=src/server"
+    "start-server": "npm run start --workspace=src/server",
+    "build": "vite build"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.19.2",
