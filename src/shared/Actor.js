@@ -1,4 +1,5 @@
-import { randomUUID } from 'crypto';
+import { Vector3, Quaternion } from "three";
+import { generateUUID } from "three/src/math/MathUtils";
 
 export default class Actor {
     constructor(data = {}) {
@@ -8,8 +9,8 @@ export default class Actor {
             netId = null,
             owner = null,
             solWorld = 'world1',
-            pos = { x: 0, y: 0, z: 0 },
-            rot = { x: 0, y: 0, z: 0, w: 1 },
+            pos = new Vector3(),
+            rot = new Quaternion(0, 0, 0, 1),
             isRemote = false,
             replicate = false,
             active = true,
@@ -24,7 +25,9 @@ export default class Actor {
         this.owner = owner;
         this.solWorld = solWorld;
 
+        /**@type {Vector3} */
         this.pos = pos;
+        /**@type {Quaternion} */
         this.rot = rot;
 
         this.isRemote = isRemote;
@@ -32,11 +35,12 @@ export default class Actor {
         this.active = active;
         this.destroyed = false;
 
-        this.tempId = randomUUID();
+        this.tempId = generateUUID();
     }
+    get position() { return this.pos };
+
     update(dt, time) { };
     fixedUpdate(dt, time) { };
-
     serialize() {
         return {
             ...this.data,

@@ -15,8 +15,8 @@ export default class WeaponPistol extends Weapon {
             range: 50,
             cooldown: 800,
             slot
-        }); // name, damage, range, cooldown
-        this.game.soundPlayer.loadPosAudio('pistolUse', 'assets/PistolUse.wav');
+        });
+        
         this.meshTracer = new MeshTrace(this.game, this.actor);
 
         MyEventEmitter.on('netFx', (data) => {

@@ -34,7 +34,7 @@ export default class GroundChecker {
         ];
     }
     floorTrace(slope = .3) {
-        const originBase = this.pawn.position;
+        const originBase = this.pawn.body.position;
 
         for (let offset of this.offsets) {
             const origin = this.tempVector.copy(originBase).add(offset);

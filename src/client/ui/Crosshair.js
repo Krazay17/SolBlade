@@ -6,7 +6,7 @@ export default class Crosshair {
     createCrosshair() {
         this.section = document.createElement('img');
         this.section.id = 'crosshair';
-        this.section.src = '/assets/CrossHair.png';
+        this.section.src = '/assets/CrossHair2.png';
         document.body.appendChild(this.section);
         return this.section;
     }

@@ -57,7 +57,7 @@ socket.on("connect", () => {
 });
 function joinGame() {
     player = Game.getGame().player;
-    player.setNetId(playerId);
+    player.netId = playerId;
     netPlayers[playerId] = player;
     initBindings();
     socket.emit('joinGame', player.serialize());
@@ -109,8 +109,7 @@ function initBindings() {
     socket.on('playerPositionUpdate', ({ id, data }) => {
         const player = scene.getActorById(id);
         if (player) {
-            player.targetPosition.copy(data.pos);
-            player.targetRotation = data.rot;
+            player.pos.copy(data.pos);
         }
     });
     socket.on('playAnimation', ({ id, data }) => {
@@ -176,7 +175,7 @@ function initBindings() {
                 a.active && (a.tempId === tempId || a.netId === netId)
             );
             if (existingActor) {
-                existingActor.setNetId(netId);
+                existingActor.netId = netId;
                 //existingActor.activate();
             } else {
                 const actorData = Actor.deserialize(a, (id) => scene.actorManager.getActorById(id));
@@ -191,7 +190,7 @@ function initBindings() {
             a.active && (a.tempId === tempId || a.netId === netId)
         );
         if (existingActor) {
-            existingActor.setNetId(netId);
+            existingActor.netId = netId;
             //existingActor.activate();
         } else {
             if (solWorld !== scene.solWorld) return;
@@ -246,8 +245,16 @@ function initBindings() {
     socket.on('spawnFX', ({ type, data }) => {
         game.fxManager.spawnFX(type, data, false);
     });
+    socket.on('playerRotation', ({ id, data }) => {
+        const actor = scene.getActorById(id);
+        //if (actor) actor.graphics.quaternion.copy(data);
+        if (actor) actor.rot.copy(data);
+    })
 }
 
+MyEventEmitter.on('playerRotation', (data) => {
+    socket.emit('playerRotation', data);
+})
 MyEventEmitter.on('spawnFX', (data) => {
     if (socket.connected) {
         socket.emit('spawnFX', data);
@@ -384,18 +391,27 @@ export function tryUpdatePosition({ pos, rot }) {
 
 
 
-// export default class NetManager {
-//     constructor(game, player) {
-//         this.game = game;
-//         this.player = player;
+export default class NetManager {
+    constructor(game) {
+        /**@type {Game} */
+        this.game = game;
+        this.world = this.game.world;
+        this.player = this.game.player;
+        this.netPlayers = {};
+        this.playerId = '';
 
-//         this.socket = io(serverURL, {
-//             transports: ["websocket"],
-//             reconnection: true,
-//             timeout: 5000,
-//         });
+        this.socket = io(serverURL, {
+            transports: ["websocket"],
+            reconnection: true,
+            timeout: 5000,
+        });
 
-//         this.netPlayers = {};
-//         this.playerId = '';
-//     }
-// }
+        this.voiceChat = new VoiceChat(this.socket);
+        voiceChat.createButton();
+
+        this.game.onWorldChange = (world) => this.worldChange(world);
+    }
+    worldChange(world) {
+        console.log('net world change', world);
+    }
+}

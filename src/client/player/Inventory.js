@@ -24,6 +24,8 @@ export default class Inventory {
         this.createInventoryUI();
         this.bindEvents();
         this.initItems();
+
+        this.addCards(1);
     }
     initItems() {
         LocalData.items.forEach(i => {

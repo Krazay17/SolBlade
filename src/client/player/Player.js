@@ -46,7 +46,7 @@ export default class Player extends Pawn {
             this.devMenu = new DevMenu(this, this.movement);
 
             /**@type {Weapon.Weapon} */
-            this.weapon0 = new Weapon.WeaponFireball(game, this, '0');
+            this.weapon0 = new Weapon.WeaponScythe(game, this, '0');
             /**@type {Weapon.Weapon} */
             this.weapon1 = new Weapon.WeaponSword(game, this, '1');
             /**@type {Weapon.Weapon} */
@@ -148,6 +148,9 @@ export default class Player extends Pawn {
             case 'Sword':
                 weapon = new Weapon.WeaponSword(this.game, this, slot);
                 break;
+            case 'Scythe':
+                weapon = new Weapon.WeaponScythe(this.game, this, slot);
+                break;
             default:
                 weapon = null;
                 break;
@@ -167,11 +170,13 @@ export default class Player extends Pawn {
         const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
         /**@type {THREE.Vector3} */
         const bulletDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
+        const rotation = this.camera.getWorldQuaternion(new THREE.Quaternion());
         const camPosition = this.camera.getWorldPosition(new THREE.Vector3());
         return {
             pos: bulletPosition,
             dir: bulletDirection,
             camPos: camPosition,
+            rot: rotation,
         };
     }
     addEnergy(amnt) {
@@ -194,19 +199,18 @@ export default class Player extends Pawn {
         if (!this.isRemote) {
             if (this.energy) this.energy.update(dt);
             this.handleInput(dt, time);
-            tryUpdatePosition({ pos: this.position, rot: this.rotation.y });
+            tryUpdatePosition({ pos: this.position, rot: this.rotationY });
             LocalData.position = this.position;
-            LocalData.rotation = this.rotation.y;
             CameraFX.update(dt);
         }
     }
     handleInput(dt, time) {
         if (!this.input) return;
-        // Rotate player
-        this.rotation.y = this.input.yaw;        // Yaw
-        this.cameraArm.rotation.x = this.input.pitch; // Pitch
-        const canExitState = this.stateManager.activeState.canExit();
 
+        this.quatY = this.input.yaw;                    // Yaw
+        this.cameraArm.rotation.x = this.input.pitch;       // Pitch
+
+        const canExitState = this.stateManager.activeState.canExit();
         if (this.input.actionStates.attackLeft && this.input.pointerLocked) {
             if (canExitState && this.weapon0?.canUse()) {
                 this.weapon0.use();

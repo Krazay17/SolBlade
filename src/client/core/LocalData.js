@@ -1,4 +1,4 @@
-const CURRENT_VERSION = 0.083;
+const CURRENT_VERSION = 0.087;
 
 export default {
     version: CURRENT_VERSION,
@@ -7,7 +7,7 @@ export default {
     health: 100,
     scene: 'Level2',
     solWorld: 'world2',
-    position: { x: 0, y: 1, z: 0 },
+    position: null,
     rotation: 0,
     masterVolume: 1,
     musicVolume: 1,

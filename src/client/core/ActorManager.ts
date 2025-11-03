@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import Actor, { ActorData } from "../actors/Actor";
+import ClientActor from "../actors/ClientActor";
 import ProjectileFireball from "../actors/ProjectileFireball";
 import Player from "../player/Player";
 import MyEventEmitter from "./MyEventEmitter";
@@ -9,6 +9,7 @@ import CrownPickup from "../actors/CrownPickup";
 import Game from "../Game";
 import LocalData from "./LocalData";
 import EnemyJulian from "../actors/EnemyJulian";
+import ProjectileScythe from "../actors/ProjectileScythe";
 
 const actorRegistry: Record<string, any> = {
     player: Player,
@@ -17,12 +18,13 @@ const actorRegistry: Record<string, any> = {
     power: PowerPickup,
     crown: CrownPickup,
     julian: EnemyJulian,
+    projectileScythe: ProjectileScythe,
 }
 
 export default class ActorManager {
     game: Game | null;
     player: Player;
-    actors: Actor[];
+    actors: ClientActor[];
     constructor(game: Game) {
         this.game = game;
         this.actors = [];
@@ -35,7 +37,7 @@ export default class ActorManager {
         return this.actors.filter(a => a.type === 'player');
     }
     get hostiles() {
-        return this.actors.filter(a => a.active && (a !== this.player) && (a.team === 'A' || (a.team !== this.player.team)));
+        return this.actors.filter(a => a.active && (a !== this.player));
     }
     get allButPlayer() {
         return this.actors.filter(a => a !== this.player);
@@ -57,10 +59,9 @@ export default class ActorManager {
         for (const a of this.actors) { a.fixedUpdate?.(dt, time) };
     }
     spawnLocalPlayer() {
-        const player = new actorRegistry['player'](
-            this.game, 
-            { pos: LocalData.position || { x: 0, y: 1, z: 0 }, solWorld: LocalData.solWorld || 'world2' },
-            
+        const pos = LocalData.position ? new Vector3().copy(LocalData.position) : new Vector3(0, 1, 0);
+        const player = new actorRegistry['player'](this.game, { pos, solWorld: LocalData.solWorld || 'world2' },
+
         )
         player.body.sleep();
         this.actors.push(player);
@@ -71,7 +72,7 @@ export default class ActorManager {
         data: any,
         isRemote: boolean = false,
         replicate: boolean = false,
-    ): Actor | undefined | void {
+    ): ClientActor | undefined | void {
         const solWorld = data.solWorld || this.game?.solWorld;
         // if (isRemote && (data.solWorld !== solWorld)) return;
         const finalData = { type, ...data, isRemote, replicate, solWorld, active: true };

@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier3d-compat"
-import Actor from "../actors/Actor.js"
+import Actor from "../actors/ClientActor.js"
 import { Vector3 } from "three";
 
 const GROUPS = {
@@ -88,6 +88,9 @@ export default class PawnBody {
     set position(pos: Vector3) {
         if (!this.body) return;
         this.body.setTranslation(pos, false);
+    }
+    get rotation() {
+        return this.body.rotation();
     }
     get velocity(): Vector3 {
         if (!this.body) return this._velocity.set(0, 0, 0);

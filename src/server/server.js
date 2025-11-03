@@ -79,7 +79,7 @@ io.on('connection', (socket) => {
                 socket.broadcast.emit('newWorld', player.serialize());
                 socket.emit('currentActors', actorManager.getActorsOfWorld(solWorld));
             })
-            socket.on('checkCurrentActors', (world)=>{
+            socket.on('checkCurrentActors', (world) => {
                 socket.emit('currentActors', actorManager.getActorsOfWorld(world));
             })
 
@@ -110,6 +110,10 @@ io.on('connection', (socket) => {
                 if (players[socket.id]) players[socket.id].pos = data.pos;
                 socket.broadcast.emit('playerPositionUpdate', { id: socket.id, data });
             });
+            socket.on('playerRotation', (data) => {
+                //if (players[socket.id]) players[socket.id].rot = data;
+                socket.broadcast.emit('playerRotation', { id: socket.id, data });
+            })
             socket.on('playAnimation', (data) => {
                 if (players[socket.id]) players[socket.id].anim = data;
                 socket.broadcast.emit('playAnimation', { id: socket.id, data })
@@ -165,9 +169,9 @@ io.on('connection', (socket) => {
                 const actor = actorManager.getActorById(id);
                 if (actor && actor[event]) actor[event](data);
             });
-            socket.on('actorDie', (data)=>{
+            socket.on('actorDie', (data) => {
                 const actor = actorManager.getActorById(data.target);
-                if(actor) actor.die(data);
+                if (actor) actor.die(data);
             })
             socket.on('actorHealthChangeLocal', health => {
                 const actor = actorManager.getActorById(socket.id);

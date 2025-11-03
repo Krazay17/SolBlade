@@ -79,7 +79,7 @@ export default class Game {
     this.actorManager = new ActorManager(this);
     this.initPlayer();
     this.partyFrame = new PartyFrame();
-    this.debugData = new DebugData();
+    //this.debugData = new DebugData();
     this.lightManager = new LightManager(this);
     this.fxManager = new FXManager(this);
 
@@ -87,6 +87,7 @@ export default class Game {
       this.player.worldReady();
       setNetScene(this.world);
       this.running = true;
+      if (this.onWorldChange) this.onWorldChange(this.world);
     }
     this.setWorld(LocalData.solWorld || 'world2');
 

@@ -7,13 +7,13 @@ import NamePlate from "../core/Nameplate";
 import AIMovement from "../core/AIMovement";
 import PlayerMovement from "../player/PlayerMovement";
 import AIController from "../core/AIController";
-import Actor from "./Actor";
+import ClientActor from "./ClientActor";
 import RAPIER from "@dimforge/rapier3d-compat";
 import PawnBody from "../core/PawnBody";
 import Game from "../Game";
 import { lerpAngle } from "../utils/Utils";
 
-export default class Pawn extends Actor {
+export default class Pawn extends ClientActor {
     body: PawnBody | null;
     collider: RAPIER.Collider | null = null;
     radius: number;
@@ -27,15 +27,21 @@ export default class Pawn extends Actor {
     stateManager: StateManager | PlayerStateManager | null = null;
     animationManager: AnimationManager | null = null;
     namePlate: NamePlate | null = null;
+    targetPosition: THREE.Vector3 = new THREE.Vector3();
+    yaw: number;
 
-    constructor(
-        game: Game,
-        data: any
-    ) {
+    constructor(game: Game, data: any) {
         super(game, data);
-        this.radius = data.radius ?? .5;
-        this.height = data.height ?? 1;
-        this.skin = data.skin ?? 'spikeMan';
+        const {
+            radius = .5,
+            height = 1,
+            skin = 'spikeMan',
+        } = data;
+        this.radius = radius;
+        this.height = height;
+        this.skin = skin;
+        this.yaw = this.rot.y;
+
         this.body = new PawnBody(this.game.physicsWorld, this, data.pos, this.height, this.radius, data.isRemote);
 
         this.assignMesh(this.skin);
@@ -46,6 +52,28 @@ export default class Pawn extends Actor {
         }
         MyEventEmitter.emit("pawnCreated", this);
     }
+    get position() { return this.body?.position }
+    get rotationY() { return this.yaw }
+    set rotationY(v) { this.graphics.rotation.y = v }
+    set quatY(r: number) {
+        this.yaw = r;
+        const yaw = r;
+        const halfYaw = yaw * 0.5;
+        const sin = Math.sin(halfYaw);
+        const cos = Math.cos(halfYaw);
+
+        const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
+        // const len = Math.hypot(q.x, q.y, q.z, q.w);
+        // q.x /= len; q.y /= len; q.z /= len; q.w /= len;
+
+        // this.rot.copy(q);
+        //this.body.body.setRotation(q, true);
+        this.graphics.quaternion.copy(q);
+        //this.graphics.rotation.y = r;
+
+        if (this.isRemote) return;
+        MyEventEmitter.emit('playerRotation', q);
+    }
     update(dt: number, time: number) {
         super.update(dt, time);
         if (!this.active || this.destroyed) return;
@@ -54,19 +82,18 @@ export default class Pawn extends Actor {
         if (this.movement) this.movement.update?.(dt, time);
         if (this.animationManager) this.animationManager.update(dt);
         if (this.isRemote) {
-            if (this.position.distanceToSquared(this.targetPosition) > 50) {
-                if (this.body) this.body.position = this.targetPosition;
-            } else {
-                if (this.body) this.body.position = this.body.position.lerp(this.targetPosition, 60 * dt);
-            }
-            this.rotation.y = lerpAngle(this.rotation.y, this.targetRotation, 60 * dt)
+            this.graphics.quaternion.slerp(this.rot, 60 * dt);
         }
-        if (this.body) this.position.copy(this.body.position);
+        if (this.body) this.graphics.position.copy(this.body.position);
     }
     fixedUpdate(dt: number, time: number): void {
         if (this.isRemote) {
             if (this.body) {
-                this.body.position = this.position;
+                if (this.body.position.distanceToSquared(this.pos) > 50) {
+                    this.body.position = this.pos;
+                } else {
+                    this.body.position = this.body.position.lerp(this.pos, 60 * dt);
+                }
             }
         }
     }
@@ -78,7 +105,7 @@ export default class Pawn extends Actor {
         this.collider = null;
     }
     async assignMesh(meshName: string) {
-        const mesh = await this.scene.meshManager?.createSkeleMesh(meshName);
+        const mesh = await this.game.meshManager?.createSkeleMesh(meshName);
         if (this.destroyed || !mesh) return false;
         if (this.mesh) {
             this.remove(this.mesh);
@@ -92,6 +119,9 @@ export default class Pawn extends Actor {
         this.data.skin = meshName;
 
         return true;
+    }
+    hit(data: any) {
+        console.log(data)
     }
     healthChange(health: number): void {
         if (this.isRemote) {
