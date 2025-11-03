@@ -1,4 +1,4 @@
-import Actor from "./Actor";
+import Actor from "../deprecated/Actor";
 
 export default class Portal extends Actor {
     init(pos, newWorld) {

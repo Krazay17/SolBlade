@@ -7,10 +7,7 @@ import Pawn from "./Pawn";
 
 export default class Enemy extends Pawn {
     stateManager: StateManager | null;
-    constructor(
-        game: Game,
-        data: any = {},
-    ) {
+    constructor(game: Game, data: any = {},) {
         super(game, data);
         this.movement = new AIMovement(this);
         this.stateManager = new StateManager(this);

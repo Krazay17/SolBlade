@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import LocalData from '../core/LocalData';
 import MyEventEmitter from '../core/MyEventEmitter';
 import * as Weapon from './weapons/index';
-import { netSocket, tryUpdatePosition } from '../core/NetManager';
+import { tryUpdatePosition } from '../core/NetManager';
 import CameraFX from '../core/CameraFX';
 import PlayerMovement from './PlayerMovement';
 import DevMenu from '../ui/DevMenu';
@@ -11,17 +11,14 @@ import Pawn from '../actors/Pawn';
 import PlayerStateManager from './playerStates/PlayerStateManager';
 import HitData from '../core/HitData';
 import { menuButton } from '../ui/Menu';
-import EnergyManager from '../core/EnergyManager';
-import Game from '../Game';
+import Energy from '../core/Energy';
 
 export default class Player extends Pawn {
-    constructor(game, data = {}, input, camera) {
-        if (!data.isRemote) {
-            data.type = 'player';
-            data.health = LocalData.health;
-            data.name = LocalData.name;
-        }
-        super(game, data);
+    constructor(game, data = {}) {
+        super(game, {
+            ...data,
+            type: "player",
+        });
         this.tick = true;
 
         this.world = game.world;
@@ -40,7 +37,7 @@ export default class Player extends Pawn {
 
             this.direction = new THREE.Vector3();
             this.tempVector = new THREE.Vector3();
-            this.energy = new EnergyManager(this, 100);
+            this.energy = new Energy(this, 100);
             this.movement = new PlayerMovement(this.game, this);
             this.stateManager = new PlayerStateManager(this.game, this);
             this.devMenu = new DevMenu(this, this.movement);
@@ -81,12 +78,23 @@ export default class Player extends Pawn {
 
         } else {
             // Remote Player
-
             this.namePlate = new NamePlate(this, this.height);
             // !!!!pre load crown for net player!!!!
             if (this.data.hasCrown) {
                 this.pickupCrown();
             }
+        }
+    }
+    update(dt, time) {
+        if (!this.tick) return;
+        super.update(dt, time);
+        // Local Player
+        if (!this.isRemote) {
+            if (this.energy) this.energy.update(dt);
+            this.handleInput(dt, time);
+            tryUpdatePosition({ pos: this.position, rot: this.quatY });
+            LocalData.position = this.position;
+            CameraFX.update(dt);
         }
     }
     async pickupCrown() {
@@ -181,6 +189,7 @@ export default class Player extends Pawn {
     }
     addEnergy(amnt) {
         if (this.energy) this.energy.add(amnt);
+        console.log(amnt);
     }
 
     setDimmed(duration) {
@@ -190,19 +199,6 @@ export default class Player extends Pawn {
 
     getDimmed() {
         return this.dimmed ? this.dimmed > performance.now() : false;
-    }
-
-    update(dt, time) {
-        if (!this.tick) return;
-        super.update(dt, time);
-        // Local Player
-        if (!this.isRemote) {
-            if (this.energy) this.energy.update(dt);
-            this.handleInput(dt, time);
-            tryUpdatePosition({ pos: this.position, rot: this.rotationY });
-            LocalData.position = this.position;
-            CameraFX.update(dt);
-        }
     }
     handleInput(dt, time) {
         if (!this.input) return;
@@ -337,10 +333,11 @@ export default class Player extends Pawn {
         super.hit(data);
     }
     applyHit(data) {
-        super.applyHit(data);
+        data = HitData.deserialize(data, (id) => this.game.getActorById(id));
         /**@type {HitData} */
-        const { type, amount, stun, impulse, dim } = data;
+        const { type, amount, stun, impulse, dim, sound } = data;
         //this.game.soundPlayer.applyPosSound('playerHit', this.position);
+        this.game.soundPlayer.applyPosSound(sound, this.pos);
         if (this.isRemote) return;
         if (amount !== 0) {
             if (type === 'physical' || type === 'explosion') {
@@ -385,12 +382,10 @@ export default class Player extends Pawn {
         this.body.velocity = { x: 0, y: 0, z: 0 };
         this.position.copy(this.body.position);
         this.lastHitData = null;
-        this.health = this.maxHealth;
         this.isDead = false;
         this.stateManager.setState('idle');
 
-        //MyEventEmitter.emit('playerRespawn');
-        MyEventEmitter.emit('actorHealthChangeLocal', this.health);
+        //MyEventEmitter.emit('actorHealthChangeLocal', this.health);
     }
     tryEnterBlade() {
         if (this.stateManager.currentStateName === 'blade') return;

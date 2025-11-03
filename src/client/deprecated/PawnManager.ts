@@ -2,7 +2,7 @@ import { SkinnedMesh, Vector3 } from "three";
 import Enemy from "../actors/Enemy";
 import Pawn from "../actors/Pawn";
 import World from "../scenes/World";
-import AIMovement from "./AIMovement";
+import AIMovement from "../core/AIMovement";
 
 type Team = 'A' | 'B' | 'C';
 
@@ -60,7 +60,7 @@ export default class PawnManager {
         this.teamMap.set(pawn, team);
     }
     get hostileMeshes(): SkinnedMesh[] {
-        return this.hostiles.map(pawn => pawn.getMeshBody() as SkinnedMesh).filter(Boolean);
+        return this.hostiles.map(pawn => pawn.meshBody as SkinnedMesh).filter(Boolean);
     }
     get hostiles(): Pawn[] {
         if (!this.player) return [];

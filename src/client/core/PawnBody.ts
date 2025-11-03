@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier3d-compat"
-import Actor from "../actors/ClientActor.js"
+import ClientActor from "../actors/ClientActor.js"
 import { Vector3 } from "three";
 
 const GROUPS = {
@@ -10,7 +10,7 @@ const GROUPS = {
 
 export default class PawnBody {
     world: RAPIER.World;
-    actor: Actor;
+    actor: ClientActor;
     body: RAPIER.RigidBody;
     collider: RAPIER.Collider;
     _position: Vector3 = new Vector3();
@@ -19,7 +19,7 @@ export default class PawnBody {
     startPos: Vector3;
     height: number;
     radius: number;
-    constructor(world: RAPIER.World, actor: Actor, pos: Vector3 = new Vector3(0, 0, 0), height: number = 1, radius: number = 0.5, isRemote = false) {
+    constructor(world: RAPIER.World, actor: ClientActor, pos: Vector3 = new Vector3(0, 0, 0), height: number = 1, radius: number = 0.5, isRemote = false) {
         this.world = world;
         this.actor = actor;
         this.height = height;

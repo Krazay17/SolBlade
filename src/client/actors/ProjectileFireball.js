@@ -1,17 +1,15 @@
-import Projectile from "./Projectile";
 import HitData from "../core/HitData";
 import { spawnParticles } from './ParticleEmitter';
+import ClientProjectile from "./ClientProjectile";
 
-export default class ProjectileFireball extends Projectile {
+export default class ProjectileFireball extends ClientProjectile {
     constructor(scene, data) {
-        data.dur ??= 20000;
-        data.name ??= 'fireball';
         super(scene, data);
 
         this.explode = false;
 
         this.createMesh();
-        this.setGravity(1);
+        this.onCollide = ()=>this.collide()
     }
 
     update(dt) {
@@ -19,20 +17,23 @@ export default class ProjectileFireball extends Projectile {
         if (this.texture) this.texture.rotation += dt;
         if (this.explode) {
             const sizeDelta = 50 * dt;
-            this.scale.add({ x: sizeDelta, y: sizeDelta, z: sizeDelta })
-            if (this.scale.x > 8) {
+            this.graphics.scale.add({ x: sizeDelta, y: sizeDelta, z: sizeDelta })
+            if (this.graphics.scale.x > 8) {
                 this.explode = false;
                 this.destroy();
             }
         }
     }
 
-    die(data) {
-        super.die(data);
+    collide() {
+        this.game.soundPlayer.applyPosSound('fireballImpact', this.position);
+        spawnParticles(this.position, 55);
+        this.active = false;
+        this.explode = true;
 
         if (this.isRemote) return;
         const explosionRange = this.radius * 20;
-        const enemiesInRange = this.scene.actorManager.getActorsInRange(this.owner, this, this.position, explosionRange);
+        const enemiesInRange = this.game.actorManager.getActorsInRange(this.owner, this, this.position, explosionRange);
         for (const [enemy, range] of enemiesInRange) {
             const distance = Math.min((1 - ((range - this.radius) / explosionRange)), 1);
             const damage = this.damage * distance;
@@ -48,11 +49,6 @@ export default class ProjectileFireball extends Projectile {
                 dim: 500,
             }));
         }
-    }
-    onDie() {
-        this.game.soundPlayer.applyPosSound('fireballImpact', this.position);
-        spawnParticles(this.position, 55);
-        this.active = false;
-        this.explode = true;
+
     }
 }

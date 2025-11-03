@@ -3,20 +3,16 @@ import ClientActor from "../actors/ClientActor";
 import ProjectileFireball from "../actors/ProjectileFireball";
 import Player from "../player/Player";
 import MyEventEmitter from "./MyEventEmitter";
-import ItemPickup from "../actors/ItemPickup";
-import PowerPickup from "../actors/PowerPickup";
-import CrownPickup from "../actors/CrownPickup";
 import Game from "../Game";
 import LocalData from "./LocalData";
 import EnemyJulian from "../actors/EnemyJulian";
 import ProjectileScythe from "../actors/ProjectileScythe";
+import Power from "../actors/Power";
 
 const actorRegistry: Record<string, any> = {
     player: Player,
+    power: Power,
     fireball: ProjectileFireball,
-    item: ItemPickup,
-    power: PowerPickup,
-    crown: CrownPickup,
     julian: EnemyJulian,
     projectileScythe: ProjectileScythe,
 }
@@ -60,9 +56,12 @@ export default class ActorManager {
     }
     spawnLocalPlayer() {
         const pos = LocalData.position ? new Vector3().copy(LocalData.position) : new Vector3(0, 1, 0);
-        const player = new actorRegistry['player'](this.game, { pos, solWorld: LocalData.solWorld || 'world2' },
-
-        )
+        const player = new actorRegistry['player'](this.game, {
+            pos,
+            solWorld: LocalData.solWorld || 'world2',
+            currentHealth: LocalData.health,
+            name: LocalData.name
+        })
         player.body.sleep();
         this.actors.push(player);
         return player;
@@ -108,11 +107,11 @@ export default class ActorManager {
             a.destroy();
         }
     }
-    addActor(actor: Actor) {
+    addActor(actor: ClientActor) {
         if (!actor) return;
         this.actors.push(actor);
     }
-    removeActor(actor: Actor | string | undefined = undefined) {
+    removeActor(actor: ClientActor | string | undefined = undefined) {
         actor = typeof actor === 'string' ? this.getActorById(actor) : actor;
         if (!actor) return;
         const index = this.actors.indexOf(actor);
@@ -121,14 +120,14 @@ export default class ActorManager {
     getActorById(id: string) {
         return this.actors.find(a => a.netId === id);
     }
-    getActiveActors(self: Actor, owner: Actor) {
+    getActiveActors(self: ClientActor, owner: ClientActor) {
         return this.actors.filter(a =>
             a.active &&
             a !== self &&
             !(owner && (a === owner || a.owner === owner))
         );
     }
-    getActorsInRange(owner: Actor, actor: Actor, pos: Vector3, range: number) {
+    getActorsInRange(owner: ClientActor, actor: ClientActor, pos: Vector3, range: number) {
         let inrange = new Map();
         for (const a of this.actors) {
             if (!a.active) continue;

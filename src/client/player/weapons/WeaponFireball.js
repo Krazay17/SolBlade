@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import Weapon from './Weapon';
 
 export default class WeaponFireball extends Weapon {
@@ -9,7 +8,7 @@ export default class WeaponFireball extends Weapon {
             range: 100,
             cooldown: 1250,
             slot
-        }); // name, damage, range, cooldown
+        });
     }
 
     spellUse() {
@@ -55,8 +54,8 @@ export default class WeaponFireball extends Weapon {
             radius,
             damage,
             speed,
-            dur: 30000,
+            liftetime: 30000,
             owner: this.actor,
-        }, false, true);
+        }, false);
     }
 }

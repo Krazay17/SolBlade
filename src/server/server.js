@@ -3,7 +3,7 @@ import http from "http";
 import { sendDiscordMessage } from "./DiscordStuff.js";
 import SvActorManager from "./SvActorManager.js";
 import CrownQuest from "./SvCrownQuest.js";
-import { sharedTest } from "@solblade/shared/Utils.js";
+import { sharedTest } from "@solblade/shared";
 import repl from 'repl';
 
 const SERVER_VERSION = 1.08;
@@ -166,6 +166,7 @@ io.on('connection', (socket) => {
                 if (playerSockets[id]) playerSockets[id].disconnect();
             });
             socket.on('actorEvent', ({ id, event, data }) => {
+                console.log(id, event, data);
                 const actor = actorManager.getActorById(id);
                 if (actor && actor[event]) actor[event](data);
             });

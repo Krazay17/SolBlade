@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
-import Actor from "./Actor";
+import Actor from "./Actor.js";
 import RAPIER from "@dimforge/rapier3d-compat";
-import HitData from "./HitData"
+import HitData from "../HitData.js"
 
 export default class Projectile extends Actor {
     constructor(physics, data = {}) {
@@ -11,11 +11,12 @@ export default class Projectile extends Actor {
             speed = 1,
             gravity = 5,
             dir = new Vector3(),
-            lifetime = 10,
+            lifetime = 10000,
             ignoreBody = null,
             damage = 1,
             damageType = 'normal',
-            hitCallback = null,
+            onHit = null,
+            onCollide = () => this.destroy(),
         } = data;
 
         /**@type {RAPIER.World} */
@@ -26,13 +27,14 @@ export default class Projectile extends Actor {
         this.gravity = gravity;
         /**@type {Vector3} */
         this.dir = dir;
-        this.lifetime = lifetime;
         this.ignoreBody = ignoreBody;
+
+        this.timestamp = performance.now();
+        this.lifetime = lifetime;
         this.age = 0;
 
         this.damage = damage;
         this.damageType = damageType;
-
 
         this.hitData = new HitData({
             dealer: this.owner,
@@ -45,11 +47,17 @@ export default class Projectile extends Actor {
 
         this.body = new RAPIER.Ball(this.radius);
 
-        this.onHit = hitCallback;
+        this.onHit = onHit;
+        this.onCollide = onCollide;
     }
     fixedUpdate(dt, time) {
+        if (!this.active) return;
+        this.age = performance.now() - this.timestamp;
+        if (this.age >= this.lifetime) this.destroy();
+
         this.tempVec.copy(this.veloctiy).multiplyScalar(dt);
         if (this.gravity) this.tempVec.y -= this.gravity * dt;
+
         this.pos.add(this.tempVec);
 
         if (!this.body) return;
@@ -65,12 +73,15 @@ export default class Projectile extends Actor {
 
         if (result) {
             const target = result.actor;
-            if (target && target !== this.owner && !this.hasHit) {
+            if (target === this.owner) return;
+            if (target && !this.hasHit) {
                 this.hasHit = true;
                 this.hitData.target = target;
                 this.hitData.hitPosition = this.pos;
                 target.hit?.(this.hitData);
+                if (this.onHit) this.onHit(result);
             }
+            if (this.onCollide) this.onCollide(result);
         }
     }
 }

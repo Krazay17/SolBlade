@@ -11,10 +11,9 @@ import ClientActor from "./ClientActor";
 import RAPIER from "@dimforge/rapier3d-compat";
 import PawnBody from "../core/PawnBody";
 import Game from "../Game";
-import { lerpAngle } from "../utils/Utils";
+import Health from "../core/Health";
 
 export default class Pawn extends ClientActor {
-    body: PawnBody | null;
     collider: RAPIER.Collider | null = null;
     radius: number;
     height: number;
@@ -28,7 +27,8 @@ export default class Pawn extends ClientActor {
     animationManager: AnimationManager | null = null;
     namePlate: NamePlate | null = null;
     targetPosition: THREE.Vector3 = new THREE.Vector3();
-    yaw: number;
+    _quatY: number;
+    health: Health;
 
     constructor(game: Game, data: any) {
         super(game, data);
@@ -40,36 +40,30 @@ export default class Pawn extends ClientActor {
         this.radius = radius;
         this.height = height;
         this.skin = skin;
-        this.yaw = this.rot.y;
+        this._quatY = this.rot.y;
+
+        this.health = new Health(this, data.maxHealth, data.currentHealth)
+        this.health.onChange = (v: number) => this.healthChange(v);
 
         this.body = new PawnBody(this.game.physicsWorld, this, data.pos, this.height, this.radius, data.isRemote);
 
         this.assignMesh(this.skin);
 
-        if (!this.isRemote) {
-        } else {
-            this.targetPosition = data.pos;
-        }
         MyEventEmitter.emit("pawnCreated", this);
     }
     get position() { return this.body?.position }
-    get rotationY() { return this.yaw }
     set rotationY(v) { this.graphics.rotation.y = v }
+    get rotationY() { return this.graphics.rotation.y };
+    get quatY() { return this._quatY }
     set quatY(r: number) {
-        this.yaw = r;
+        this._quatY = r;
         const yaw = r;
         const halfYaw = yaw * 0.5;
         const sin = Math.sin(halfYaw);
         const cos = Math.cos(halfYaw);
-
         const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
-        // const len = Math.hypot(q.x, q.y, q.z, q.w);
-        // q.x /= len; q.y /= len; q.z /= len; q.w /= len;
 
-        // this.rot.copy(q);
-        //this.body.body.setRotation(q, true);
         this.graphics.quaternion.copy(q);
-        //this.graphics.rotation.y = r;
 
         if (this.isRemote) return;
         MyEventEmitter.emit('playerRotation', q);
@@ -121,14 +115,16 @@ export default class Pawn extends ClientActor {
         return true;
     }
     hit(data: any) {
-        console.log(data)
+        super.hit(data);
+        MyEventEmitter.emit('actorEvent', { id: this.netId, event: 'hit', data: data.serialize?.() });
+    }
+    touched(target: any) {
+        console.log(target);
     }
     healthChange(health: number): void {
         if (this.isRemote) {
             this.namePlate?.setHealth(health);
         }
-    }
-    getMeshBody() {
-        return this.meshBody;
+        this.data.currentHealth = health;
     }
 }

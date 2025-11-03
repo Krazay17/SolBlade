@@ -90,7 +90,7 @@ export default class VoiceChat {
             const playerPos = player.position;
             if (!playerPos.y) return;
             const time = this.audioContext.currentTime;
-            const playerRot = player.yaw;
+            const playerRot = player.rotationY;
             const forward = this.tempVector.set(0, 0, -1);
             forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), playerRot);
             if (this.audioContext.listener.forwardX) {

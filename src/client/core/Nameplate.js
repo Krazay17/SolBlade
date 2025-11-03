@@ -1,12 +1,11 @@
 import * as THREE from 'three';
-import MyEventEmitter from './MyEventEmitter';
 
 export default class NamePlate extends THREE.Object3D {
     constructor(actor, offset) {
         super();
         this.actor = actor;
         this.name = actor.name;
-        this.health = actor.health || 100;
+        this.health = actor.health.current || 100;
         this.energy = actor.energy;
         this.money = actor.money;
 

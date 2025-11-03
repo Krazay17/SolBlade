@@ -1,18 +1,14 @@
 import { randomUUID } from "crypto";
-import { randomPos } from "@solblade/shared/Utils.js";
-import SrvEnemy from "./actors/SvEnemy.js";
+import { randomPos } from "@solblade/shared";
 import SvServerPhysics from "./SvPhysics.js";
-import SrvPlayer from "./actors/SvPlayer.js";
-import SvActor from "./actors/SvActor.js";
-import SvPower from "./actors/SvPower.js";
-import SvCard from "./actors/SvCard.js";
+import SPlayer from "./newactors/SPlayer.js";
+import SActor from "./newactors/SActor.js";
+import SPower from "./newactors/SPower.js";
 
 
 const actorRegistry = {
-    player: SrvPlayer,
-    enemy: SrvEnemy,
-    power: SvPower,
-    item: SvCard,
+    player: SPlayer,
+    power: SPower,
 }
 
 export default class SvActorManager {
@@ -58,7 +54,7 @@ export default class SvActorManager {
             ...this.actorsOfWorld[world].enemies,
             ...this.actorsOfWorld[world].others,
         ];
-        
+
         const serializedData = [];
         for (const a of data) {
             if (!a.active) continue;
@@ -67,12 +63,12 @@ export default class SvActorManager {
         return serializedData;
     }
     getActorById(id) {
-        /**@type {SvActor} */
+        /**@type {SActor} */
         return this.actors.find(a => a.netId === id);
     }
     updateActor(actor, data) {
         actor = typeof actor === 'string' ? this.getActorById(actor) : actor;
-        if (actor.solWorld !== data.solWorld) {
+        if (actor && (actor.solWorld !== data.solWorld)) {
             const indx = this.actorsOfWorld[actor.solWorld].players.indexOf(actor);
             this.actorsOfWorld[actor.solWorld].players.splice(indx, 1);
             actor.solWorld = data.solWorld;
@@ -97,16 +93,18 @@ export default class SvActorManager {
         }
     }
     createActor(type, data) {
+        let actor;
+
         const id = type === 'player' && data.netId
             ? data.netId
             : randomUUID();
         const actorClass = actorRegistry[type];
-        let actor;
         if (actorClass) {
             actor = new actorClass(this, { ...data, type, netId: id });
         } else {
-            actor = new SvActor(this, { ...data, type, netId: id });
+            actor = new SActor(this, { ...data, type, netId: id });
         }
+        if (!actor) return;
         if (!actor.solWorld) {
             console.warn(`Actor ${actor.netId} created without solWorld! Defaulting to 0`);
             actor.solWorld = 'world0';
@@ -117,7 +115,6 @@ export default class SvActorManager {
         switch (type) {
             case 'player':
                 this.actorsOfWorld[actor.solWorld].players.push(actor);
-                console.log(actor.solWorld);
                 break;
             case 'enemy':
                 this.actorsOfWorld[actor.solWorld].enemies.push(actor);
@@ -134,30 +131,30 @@ export default class SvActorManager {
         if (this.hasSpawnedDefaults) return;
         this.hasSpawnedDefaults = true;
         const item = 4;
-        const power = 25;
+        const power = 16;
         const enemies = 4;
-        for (let i = 0; i < item; i++) {
-            this.createActor('item', { solWorld: 'world2', pos: randomPos(20, 10) });
-        }
+        // for (let i = 0; i < item; i++) {
+        //     this.createActor('item', { solWorld: 'world2', pos: randomPos(20, 10) });
+        // }
         for (let i = 0; i < power; i++) {
             const powerType = i % 2 ? 'health' : 'energy';
             this.createActor('power', { solWorld: 'world2', power: powerType, pos: randomPos(20, 10) });
         }
-        for (let i = 0; i < enemies; i++) {
-            this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
-        }
-        setInterval(() => {
-            if (this.actorsOfWorld['world3'].enemies.length > 12) return;
-            this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
-        }, 2000)
+        // for (let i = 0; i < enemies; i++) {
+        //     this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
+        // }
+        // setInterval(() => {
+        //     if (this.actorsOfWorld['world3'].enemies.length > 12) return;
+        //     this.createActor('enemy', { enemy: 'julian', solWorld: 'world3', pos: randomPos(25, 15) });
+        // }, 2000)
 
-        for (let i = 0; i < enemies; i++) {
-            this.createActor('enemy', { enemy: 'julian', solWorld: 'world4', pos: randomPos(100, 15) });
-        }
-        setInterval(() => {
-            if (this.actorsOfWorld['world4'].enemies.length > 12) return;
-            this.createActor('enemy', { enemy: 'julian', solWorld: 'world4', pos: randomPos(100, 15) });
-        }, 2000)
+        // for (let i = 0; i < enemies; i++) {
+        //     this.createActor('enemy', { enemy: 'julian', solWorld: 'world4', pos: randomPos(100, 15) });
+        // }
+        // setInterval(() => {
+        //     if (this.actorsOfWorld['world4'].enemies.length > 12) return;
+        //     this.createActor('enemy', { enemy: 'julian', solWorld: 'world4', pos: randomPos(100, 15) });
+        // }, 2000)
     }
     remainingDuration(actor) {
         const time = actor.time;

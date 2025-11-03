@@ -1,6 +1,6 @@
 import { io } from "./server.js";
 
-export default class SvEnergy {
+export default class SEnergy {
     constructor(actor, max) {
         this.actor = actor;
         this.max = max;

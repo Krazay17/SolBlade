@@ -1,4 +1,4 @@
-import Actor from "../actors/Actor";
+import Actor from "../deprecated/Actor";
 
 export default class AIRemoteController {
     actor: Actor;

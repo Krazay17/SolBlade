@@ -1,5 +1,5 @@
 import SvActor from "./SvActor.js";
-import SvHealth from "../SvHealth.js"
+import SHealth from "../SHealth.js"
 import SrvAIController from "../SvAIController.js";
 import { io } from "../server.js";
 import { COLLISION_GROUPS } from '@solblade/shared/SolConstants.js';
@@ -14,7 +14,7 @@ export default class SvEnemy extends SvActor {
         /**@type {RAPIER.World} */
         this.physics = this.actorManager.physics[this.solWorld];
 
-        this.healthC = new SvHealth(this, data.maxHealth, data.health);
+        this.healthC = new SHealth(this, data.maxHealth, data.health);
         this.healthC.onDeath = () => this.die();
         this.healthC.onChange = (a) => {
             this.data.health = a;

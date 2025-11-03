@@ -1,33 +1,8 @@
 import { Vector3 } from "three";
-import Actor from "./Actor";
+import Actor from "./actors/Actor.js";
 
-export interface HitDataArgs {
-    dealer?: Actor;
-    target?: Actor;
-    type?: string;
-    amount?: number;
-    hitPosition?: Vector3 | null;
-    impulse?: Vector3 | null;
-    stun?: number;
-    dim?: number;
-    dur?: number;
-    critMult?: number;
-    sound?: string | null;
-}
 
-export default class HitData implements HitDataArgs {
-    dealer: Actor | undefined;
-    target: Actor | undefined;
-    type: string = "physical";
-    amount: number = 0;
-    dur: number = 0;
-    hitPosition: Vector3 | null = null;
-    impulse: Vector3 | null = null;
-    critMult: number = 1;
-    stun: number = 0;
-    dim: number = 0;
-    sound: string | null;
-
+export default class HitData {
     constructor({
         dealer,
         target,
@@ -40,7 +15,7 @@ export default class HitData implements HitDataArgs {
         dur = 0,
         critMult = 1,
         sound = null,
-    }: HitDataArgs = {}) {
+    } = {}) {
         this.dealer = dealer;
         this.target = target;
         this.type = type;
@@ -55,7 +30,7 @@ export default class HitData implements HitDataArgs {
     }
 
     serialize() {
-        const data: any = {};
+        const data = {};
         for (const [key, value] of Object.entries(this)) {
             if (value === null || value === undefined) continue;
             if (typeof value === "boolean" && value === false) continue;
@@ -68,7 +43,7 @@ export default class HitData implements HitDataArgs {
         return data;
     }
 
-    static deserialize(data: any, actorLookup: (id: string) => Actor | null) {
+    static deserialize(data, actorLookup) {
         return new HitData({
             dealer: actorLookup(data.dealer) ?? data.dealer,
             target: actorLookup(data.target) ?? data.target,

@@ -22,7 +22,7 @@ import SoundPlayer from './core/SoundPlayer';
 import World4 from './scenes/World4';
 import { menuSlider } from './ui/Menu';
 import World5 from './scenes/World5';
-import FXManager from './core/FXManager';
+import FXManager from './core/FX/FXManager';
 import SolPhysics from './core/SolPhysics';
 import DebugData from './ui/DebugData';
 

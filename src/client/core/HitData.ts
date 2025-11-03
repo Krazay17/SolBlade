@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import Actor from "../actors/Actor";
+import { Actor } from "@solblade/shared"
 
 export interface HitDataArgs {
     dealer?: Actor;

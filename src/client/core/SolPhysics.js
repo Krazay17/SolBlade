@@ -1,6 +1,5 @@
 import RAPIER, { World } from "@dimforge/rapier3d-compat";
 import { Vector3 } from "three";
-import HitData from "./HitData";
 
 export default class SolPhysics {
     constructor() {
@@ -11,14 +10,15 @@ export default class SolPhysics {
     }
     step() {
         this.world.step(this.eventQue);
-        this.eventQue.drainCollisionEvents((handle1, handle2, started)=>{
+        this.eventQue.drainCollisionEvents((handle1, handle2, started) => {
             const collider1 = this.world.getCollider(handle1);
             const collider2 = this.world.getCollider(handle2);
 
             const actor1 = collider1.actor;
             const actor2 = collider2.actor;
 
-            if(started) {
+            if (!actor1 || !actor2) return;
+            if (started) {
                 actor2.touch?.(actor1);
             } else {
                 console.log(`Collision ended- actor1: ${actor1}, actor2: ${actor2}`);

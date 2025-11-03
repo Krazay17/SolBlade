@@ -1,5 +1,5 @@
-import FXExplosion from "./FX/FXExplosion";
-import MyEventEmitter from "./MyEventEmitter";
+import FXExplosion from "./FXExplosion";
+import MyEventEmitter from "../MyEventEmitter";
 
 
 const FXRegistry = {

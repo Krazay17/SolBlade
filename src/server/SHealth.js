@@ -1,6 +1,6 @@
 import { io } from "./server.js";
 
-export default class SvHealth {
+export default class SHealth {
     constructor(actor, maxHealth = 1, current) {
         this.actor = actor;
         this.maxHealth = maxHealth;

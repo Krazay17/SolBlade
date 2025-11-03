@@ -12,12 +12,16 @@ export default class ClientProjectile extends Projectile {
         this.graphics.quaternion.copy(this.rot);
         this.game.add(this.graphics);
     }
+
+    destroy() {
+        this.game.actorManager.removeActor(this);
+        this.game.remove(this.graphics);
+        super.destroy();
+    }
     async createMesh(meshName) {
         let mesh;
         if (meshName) {
-            await this.game.meshManager.getMesh(meshName).then((m) => {
-                mesh = m;
-            })
+            mesh = await this.game.meshManager.getMesh(meshName)
         } else {
             mesh = new Mesh(
                 new SphereGeometry(.5),

@@ -1,7 +1,7 @@
 import Player from "../player/Player";
 import MyEventEmitter from "./MyEventEmitter";
 
-export default class EnergyManager {
+export default class Energy {
     constructor(owner, maxEnergy = 100, baseRegen = 30) {
         /**@type {Player} */
         this.owner = owner;

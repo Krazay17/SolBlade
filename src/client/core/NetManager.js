@@ -3,7 +3,7 @@ import MyEventEmitter from "./MyEventEmitter";
 import { Vector3 } from "three";
 import LocalData from "./LocalData";
 import HitData from "./HitData";
-import Actor from "../actors/Actor";
+import Actor from "../deprecated/Actor";
 import VoiceChat from './VoiceChat';
 import { menuButton } from "../ui/Menu";
 import Game from "../Game";
@@ -235,10 +235,11 @@ function initBindings() {
     });
     socket.on('actorHealthChange', ({ id, health }) => {
         const actor = scene.getActorById(id);
-        if (actor) actor.health = health;
+        if (actor) actor.health.current = health;
     });
     socket.on('actorEvent', ({ id, event, data }) => {
         const actor = scene.getActorById(id);
+        console.log(actor);
         if (actor && actor.active && actor[event]) actor[event](data);
 
     });
@@ -270,20 +271,21 @@ MyEventEmitter.on('playPosSound', ({ name, pos }) => {
     socket.emit('playPosSound', { name, pos: { x: pos.x, y: pos.y, z: pos.z } });
 })
 MyEventEmitter.on('actorEvent', (data) => {
+    if (!socket.connected) return;
     socket.emit('actorEvent', data);
 })
-MyEventEmitter.on('actorHit', (/**@type {HitData}*/data) => {
-    // if (socket.connected) {
-    //     socket.emit('actorHit', data.serialize());
-    // } else {
-    //     data.target.applyHit(data);
-    // }
-    if (socket.connected) {
-        socket.emit('actorEvent', { id: data.target.netId, event: 'hit', data: data.serialize() });
-    } else {
-        data.target.applyHit(data);
-    }
-});
+// MyEventEmitter.on('actorHit', (/**@type {HitData}*/data) => {
+//     if (socket.connected) {
+//         socket.emit('actorHit', data.serialize());
+//     } else {
+//         data.target.applyHit(data);
+//     }
+//     if (socket.connected) {
+//         socket.emit('actorEvent', { id: data.target.netId, event: 'hit', data: data.serialize() });
+//     } else {
+//         data.target.applyHit(data);
+//     }
+// });
 // MyEventEmitter.on('actorTouch', (/**@type {TouchData}*/data) => {
 //     // if (socket.connected) {
 //     //     socket.emit('actorTouch', data.serialize());

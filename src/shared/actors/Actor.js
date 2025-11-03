@@ -1,5 +1,4 @@
 import { Vector3, Quaternion } from "three";
-import { generateUUID } from "three/src/math/MathUtils";
 
 export default class Actor {
     constructor(data = {}) {
@@ -35,10 +34,10 @@ export default class Actor {
         this.active = active;
         this.destroyed = false;
 
-        this.tempId = generateUUID();
+        this.tempId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 10);
     }
     get position() { return this.pos };
-
+    init() { };
     update(dt, time) { };
     fixedUpdate(dt, time) { };
     serialize() {

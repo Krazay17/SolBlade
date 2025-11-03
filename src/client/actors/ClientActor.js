@@ -1,5 +1,5 @@
 import { Actor } from "@solblade/shared";
-import { Object3D, Quaternion, Vector3 } from "three";
+import { Mesh, MeshBasicMaterial, Object3D, SphereGeometry } from "three";
 import Game from "../Game";
 
 export default class ClientActor extends Actor {
@@ -12,16 +12,37 @@ export default class ClientActor extends Actor {
         this.graphics.position.copy(this.pos);
         this.graphics.quaternion.copy(this.rot);
         this.game.add(this.graphics);
+
+        this.init();
+    }
+    async createMesh(meshName, color = "white") {
+        let mesh;
+        if (meshName) {
+            mesh = await this.game.meshManager.getMesh(meshName)
+        } else {
+            mesh = new Mesh(
+                new SphereGeometry(.5),
+                new MeshBasicMaterial({ color })
+            );
+        }
+        if (!mesh) return;
+        this.graphics.add(mesh);
     }
     destroy() {
+        super.destroy()
         this.game.actorManager.removeActor(this);
         this.game.remove(this.graphics);
-        super.destroy()
     }
     add(obj) {
         this.graphics.add(obj)
     }
     remove(obj) {
         this.graphics.remove(obj)
+    }
+    hit(data){
+        this.game.soundPlayer.playSound('hit');
+    }
+    applyHit(data){
+        this.destroy();
     }
 }

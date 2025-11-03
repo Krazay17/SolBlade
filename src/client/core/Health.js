@@ -1,33 +1,29 @@
 export default class Health {
-    constructor(maxHealth = 100) {
+    constructor(actor, maxHealth = 100, current) {
+        this.actor = actor;
         this.maxHealth = maxHealth;
-        this.currentHealth = maxHealth;
-        this.screenFlash = false;
-    }
+        this._current = current ?? maxHealth;
 
-    takeDamage(amount) {
-        this.currentHealth -= amount;
-        if (this.currentHealth < 0) {
-            this.currentHealth = 0;
-        }
-        return this.currentHealth === 0;
+        this.onChange = null;
+        this.onDeath = null;
     }
+    get current() { return this._current; }
+    set current(value) {
+        // Clamp between 0 and maxHealth
+        const clamped = Math.max(0, Math.min(this.maxHealth, value));
+        if (clamped === this._current) return;
 
-    heal(amount) {
-        this.currentHealth += amount;
-        if (this.currentHealth > this.maxHealth) {
-            this.currentHealth = this.maxHealth;
-        }
-    }
+        this._current = clamped;
 
-    adjust(amount) {
-        this.currentHealth += amount;
-        if (this.currentHealth > this.maxHealth) {
-            this.currentHealth = this.maxHealth;
+        // Notify listeners
+        if (this.onChange) this.onChange(this._current);
+
+        // Death callback
+        if (this._current <= 0 && this.onDeath) {
+            this.onDeath();
         }
-        if (this.currentHealth < 0) {
-            this.currentHealth = 0;
-        }
-        return this.currentHealth === 0;
     }
+    add(value) { this.current = this._current + value; }
+
+    subtract(value) { this.current = this._current - value; }
 }
