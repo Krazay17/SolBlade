@@ -191,7 +191,7 @@ function initBindings() {
         );
         if (existingActor) {
             existingActor.netId = netId;
-            //existingActor.activate();
+            existingActor.activate();
         } else {
             if (solWorld !== scene.solWorld) return;
             const actorData = Actor.deserialize(data, (id) => scene.actorManager.getActorById(id));
@@ -372,9 +372,9 @@ MyEventEmitter.on('changeAnimation', (data) => {
     socket.emit('changeAnimation', data);
 });
 
-const pollWorldActors = setInterval(() => {
-    socket.emit('checkCurrentActors', scene.solWorld);
-}, 5000)
+// const pollWorldActors = setInterval(() => {
+//     socket.emit('checkCurrentActors', scene.solWorld);
+// }, 5000)
 
 setInterval(() => {
     socket.emit('heartbeat');

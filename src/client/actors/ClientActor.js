@@ -32,6 +32,12 @@ export default class ClientActor extends Actor {
         if (!mesh) return;
         this.graphics.add(mesh);
     }
+    activate(data) {
+        super.activate(data);
+        this.graphics.position.copy(this.pos);
+        this.graphics.quaternion.copy(this.rot);
+        this.game.add(this.graphics);
+    }
     deActivate() {
         if (!this.active) return;
         this.game.actorManager.removeActor(this);
@@ -53,6 +59,7 @@ export default class ClientActor extends Actor {
         this.graphics.remove(obj)
     }
     hit(data) {
+        if(!this.active)return;
         MyEventEmitter.emit('actorEvent', { id: this.netId, event: "hit", data: data.serialize() });
         this.game.soundPlayer.playSound('hit');
     }

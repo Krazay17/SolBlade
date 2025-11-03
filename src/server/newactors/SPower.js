@@ -13,6 +13,12 @@ export default class SPower extends SActor {
                 break;
             default: console.log('no power type!');
         }
-        this.destroy();
+
+        this.deActivate();
+    }
+    deActivate() {
+        super.deActivate();
+        
+        this.respawn();
     }
 }

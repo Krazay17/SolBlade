@@ -8,7 +8,6 @@ export default class ProjectileFireball extends ClientProjectile {
         super(scene, data);
 
         this.explode = false;
-        console.log(this.damage);
 
         this.createMesh();
     }

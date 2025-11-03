@@ -59,6 +59,13 @@ export default class Actor {
             destroyed: this.destroyed,
         }
     }
+    activate(data = {}) {
+        Object.assign(this, data);
+        this.active = true;
+        if (data.pos) {
+            this.pos = data.pos;
+        }
+    }
     deActivate() {
         this.active = false;
     }

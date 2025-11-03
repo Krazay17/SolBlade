@@ -19,23 +19,34 @@ export default class Power extends ClientActor {
         this.createMesh(null, color);
         this.createBody(1);
     }
+    activate(data) {
+        super.activate(data);
+
+        this.createBody(1);
+    }
     deActivate() {
-        if(!this.active)return;
+        if (!this.active) return;
         if (this.body) {
             this.game.physics.safeRemoveBody(this.body)
+            this.body = null;
         }
         if (this.collider) {
             this.collider.actor = null;
             this.game.physics.safeRemoveCollider(this.collider);
+            this.collider = null;
         }
-        
+
         super.deActivate();
+    }
+    hit(data) {
+        super.hit(data);
+        this.deActivate();
     }
     touch(dealer) {
         if (!this.active) return;
+        this.deActivate()
         MyEventEmitter.emit('actorEvent', { id: this.netId, event: "touch", data: dealer.netId });
         this.game.soundPlayer.playPosSound('pickup', this.pos);
-        this.destroy()
     }
     update(dt, time) {
         if (this.body) this.graphics.position.copy(this.body.translation?.());
