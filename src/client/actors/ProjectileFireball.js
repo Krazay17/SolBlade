@@ -1,15 +1,16 @@
 import HitData from "../core/HitData";
 import { spawnParticles } from './ParticleEmitter';
 import ClientProjectile from "./ClientProjectile";
+import MyEventEmitter from "../core/MyEventEmitter";
 
 export default class ProjectileFireball extends ClientProjectile {
     constructor(scene, data) {
         super(scene, data);
 
         this.explode = false;
+        console.log(this.damage);
 
         this.createMesh();
-        this.onCollide = ()=>this.collide()
     }
 
     update(dt) {
@@ -24,8 +25,21 @@ export default class ProjectileFireball extends ClientProjectile {
             }
         }
     }
-
-    collide() {
+    onHit(result) {
+        const actor = result.actor;
+        if (actor) {
+            const hitData = new HitData({
+                dealer: this.owner,
+                target: actor,
+                amount: this.damage,
+                type: 'fire',
+                hitPosition: this.position,
+                dim: 500,
+            })
+            actor.hit(hitData);
+        }
+    }
+    onCollide() {
         this.game.soundPlayer.applyPosSound('fireballImpact', this.position);
         spawnParticles(this.position, 55);
         this.active = false;
@@ -39,7 +53,7 @@ export default class ProjectileFireball extends ClientProjectile {
             const damage = this.damage * distance;
             const direction = enemy.position.clone().sub(this.position).normalize();
             const force = direction.multiplyScalar(Math.min(16, ((damage * .7) * (1 - (range / explosionRange)))));
-            enemy.hit(new HitData({
+            const hitData = new HitData({
                 dealer: this.owner,
                 target: enemy,
                 amount: damage,
@@ -47,7 +61,8 @@ export default class ProjectileFireball extends ClientProjectile {
                 type: 'fire',
                 hitPosition: this.position,
                 dim: 500,
-            }));
+            })
+            enemy.hit(hitData);
         }
 
     }

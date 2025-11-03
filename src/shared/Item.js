@@ -16,7 +16,7 @@ const itemRegister = {
     scythe: {
         name: 'Scythe',
         imgUrl: 'assets/Scythe.png',
-        weight: 2,
+        weight: .02,
         min: 5,
         max: 15,
         pickupSound: 'pickup7',

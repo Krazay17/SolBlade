@@ -114,10 +114,6 @@ export default class Pawn extends ClientActor {
 
         return true;
     }
-    hit(data: any) {
-        super.hit(data);
-        MyEventEmitter.emit('actorEvent', { id: this.netId, event: 'hit', data: data.serialize?.() });
-    }
     touched(target: any) {
         console.log(target);
     }

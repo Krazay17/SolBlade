@@ -43,7 +43,7 @@ export default class Player extends Pawn {
             this.devMenu = new DevMenu(this, this.movement);
 
             /**@type {Weapon.Weapon} */
-            this.weapon0 = new Weapon.WeaponScythe(game, this, '0');
+            this.weapon0 = new Weapon.WeaponFireball(game, this, '0');
             /**@type {Weapon.Weapon} */
             this.weapon1 = new Weapon.WeaponSword(game, this, '1');
             /**@type {Weapon.Weapon} */
@@ -327,10 +327,6 @@ export default class Player extends Pawn {
         if (!this.isRemote) {
             this.stateManager.setState('parry', { pos });
         }
-    }
-
-    hit(data) {
-        super.hit(data);
     }
     applyHit(data) {
         data = HitData.deserialize(data, (id) => this.game.getActorById(id));

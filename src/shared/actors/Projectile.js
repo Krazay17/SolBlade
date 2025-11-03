@@ -15,8 +15,8 @@ export default class Projectile extends Actor {
             ignoreBody = null,
             damage = 1,
             damageType = 'normal',
-            onHit = null,
-            onCollide = () => this.destroy(),
+            hitCallback = null,
+            collideCallback = null,
         } = data;
 
         /**@type {RAPIER.World} */
@@ -47,8 +47,8 @@ export default class Projectile extends Actor {
 
         this.body = new RAPIER.Ball(this.radius);
 
-        this.onHit = onHit;
-        this.onCollide = onCollide;
+        this.hitCallback = hitCallback;
+        this.collideCallback = collideCallback;
     }
     fixedUpdate(dt, time) {
         if (!this.active) return;
@@ -78,10 +78,14 @@ export default class Projectile extends Actor {
                 this.hasHit = true;
                 this.hitData.target = target;
                 this.hitData.hitPosition = this.pos;
-                target.hit?.(this.hitData);
-                if (this.onHit) this.onHit(result);
+                //target.hit?.(this.hitData);
+                if (this.hitCallback) this.hitCallback(result);
+                this.onHit(result);
             }
-            if (this.onCollide) this.onCollide(result);
+            if (this.collideCallback) this.collideCallback(result);
+            this.onCollide(result);
         }
     }
+    onCollide(result) { }
+    onHit(result) { }
 }

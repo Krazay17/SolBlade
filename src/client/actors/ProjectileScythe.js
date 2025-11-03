@@ -5,6 +5,7 @@ export default class ProjectileScythe extends ClientProjectile {
         super(game, {
             ...data,
             speed: 15,
+            gravity: 0,
         });
         this.createMesh("4Scythe");
     }

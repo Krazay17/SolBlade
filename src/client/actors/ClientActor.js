@@ -1,6 +1,7 @@
 import { Actor } from "@solblade/shared";
 import { Mesh, MeshBasicMaterial, Object3D, SphereGeometry } from "three";
 import Game from "../Game";
+import MyEventEmitter from "../core/MyEventEmitter";
 
 export default class ClientActor extends Actor {
     constructor(game, data) {
@@ -12,6 +13,9 @@ export default class ClientActor extends Actor {
         this.graphics.position.copy(this.pos);
         this.graphics.quaternion.copy(this.rot);
         this.game.add(this.graphics);
+
+        this.body = null;
+        this.collider = null;
 
         this.init();
     }
@@ -28,10 +32,19 @@ export default class ClientActor extends Actor {
         if (!mesh) return;
         this.graphics.add(mesh);
     }
-    destroy() {
-        super.destroy()
+    deActivate() {
+        if (!this.active) return;
         this.game.actorManager.removeActor(this);
         this.game.remove(this.graphics);
+
+        super.deActivate();
+    }
+    destroy() {
+        if (this.destroyed) return;
+        this.game.actorManager.removeActor(this);
+        this.game.remove(this.graphics);
+
+        super.destroy()
     }
     add(obj) {
         this.graphics.add(obj)
@@ -39,10 +52,11 @@ export default class ClientActor extends Actor {
     remove(obj) {
         this.graphics.remove(obj)
     }
-    hit(data){
+    hit(data) {
+        MyEventEmitter.emit('actorEvent', { id: this.netId, event: "hit", data: data.serialize() });
         this.game.soundPlayer.playSound('hit');
     }
-    applyHit(data){
-        this.destroy();
+    applyHit(data) {
+        this.deActivate();
     }
 }

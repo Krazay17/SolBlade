@@ -41,7 +41,7 @@ export default class SolPhysics {
                     this.world.removeRigidBody(r.obj);
                     break;
                 case 'collider':
-                    this.world.removeCollider(r.obj, false);
+                    this.world.removeCollider(r.obj);
                     break;
                 default:
                     console.log('no type!');

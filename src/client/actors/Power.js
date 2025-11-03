@@ -15,15 +15,21 @@ export default class Power extends ClientActor {
                 break;
             default:
                 color = 'white';
-
         }
         this.createMesh(null, color);
-        this.body = this.createBody(1);
+        this.createBody(1);
     }
-    hit(data) {
-        if (!this.active) return;
-        super.hit(data);
-        MyEventEmitter.emit('actorEvent', { id: this.netId, event: "hit", data: data.serialize() });
+    deActivate() {
+        if(!this.active)return;
+        if (this.body) {
+            this.game.physics.safeRemoveBody(this.body)
+        }
+        if (this.collider) {
+            this.collider.actor = null;
+            this.game.physics.safeRemoveCollider(this.collider);
+        }
+        
+        super.deActivate();
     }
     touch(dealer) {
         if (!this.active) return;
@@ -35,14 +41,13 @@ export default class Power extends ClientActor {
         if (this.body) this.graphics.position.copy(this.body.translation?.());
     }
     createBody(radius) {
-        const body = this.game.physicsWorld.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased()
+        this.body = this.game.physicsWorld.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased()
             .setTranslation(this.pos.x, this.pos.y, this.pos.z)
         );
         this.collider = this.game.physicsWorld.createCollider(RAPIER.ColliderDesc.ball(radius)
             .setSensor(true),
-            body
+            this.body
         );
         this.collider.actor = this;
-        return body;
     }
 }

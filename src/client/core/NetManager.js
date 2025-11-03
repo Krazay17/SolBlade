@@ -238,8 +238,8 @@ function initBindings() {
         if (actor) actor.health.current = health;
     });
     socket.on('actorEvent', ({ id, event, data }) => {
+        console.log(event, data);
         const actor = scene.getActorById(id);
-        console.log(actor);
         if (actor && actor.active && actor[event]) actor[event](data);
 
     });
