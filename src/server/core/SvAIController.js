@@ -1,4 +1,4 @@
-import ActorManager from "./SvActorManager.js";
+import ActorManager from "./SActorManager.js";
 
 export default class SrvAIController {
     constructor(actor, actorManager) {
@@ -31,7 +31,7 @@ export default class SrvAIController {
         const strength = 1.0;     // how strongly they push away
         const result = { x: 0, z: 0 };
 
-        const worldActors = this.actorManager.actorsOfWorld[this.actor.solWorld];
+        const worldActors = this.actorManager.actorsOfWorld[this.actor.sceneName];
         if (!worldActors || !worldActors.enemies) return result;
 
         const myPos = this.actor.position;
@@ -56,7 +56,7 @@ export default class SrvAIController {
     }
 
     findNearestPlayer() {
-        const { players } = this.actorManager.actorsOfWorld[this.actor.data.solWorld]
+        const { players } = this.actorManager.actorsOfWorld[this.actor.data.sceneName]
         if (!players.length) return;
 
         // get this enemy's position

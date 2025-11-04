@@ -1,7 +1,7 @@
 import SvActor from "./SvActor.js";
-import SHealth from "../SHealth.js"
-import SrvAIController from "../SvAIController.js";
-import { io } from "../server.js";
+import SHealth from "../core/SHealth.js"
+import SrvAIController from "../core/SvAIController.js";
+import { io } from "../SMain.js";
 import { COLLISION_GROUPS } from '@solblade/shared/SolConstants.js';
 import RAPIER from "@dimforge/rapier3d-compat";
 
@@ -12,7 +12,7 @@ export default class SvEnemy extends SvActor {
         super(actorManager, data);
 
         /**@type {RAPIER.World} */
-        this.physics = this.actorManager.physics[this.solWorld];
+        this.physics = this.actorManager.physics[this.sceneName];
 
         this.healthC = new SHealth(this, data.maxHealth, data.health);
         this.healthC.onDeath = () => this.die();
@@ -45,8 +45,8 @@ export default class SvEnemy extends SvActor {
         this.actorManager.removeActor(this);
         this.physics.removeCollider(this.collider);
         this.active = false;
-        io.emit('actorEvent', { id: this.netId, event: 'applyDie', data: this.serialize() });
-        this.actorManager.createActor('item', { pos: this.position, solWorld: this.solWorld, doesRespawn: false });
+        io.emit('actorEvent', { id: this.id, event: 'applyDie', data: this.serialize() });
+        this.actorManager.createActor('item', { pos: this.position, sceneName: this.sceneName, doesRespawn: false });
     }
     update(dt) {
         if (!this.active) return;

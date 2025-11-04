@@ -16,7 +16,7 @@ export default class QuestCrown extends Quest {
         this.setNotification('Enter Crown Game', 'quest-blue');
 
         const joinCrownGame = () => {
-            if (netSocket.connected && this.player.netId) {
+            if (netSocket.connected && this.player.id) {
                 this.gameOn = true;
                 netSocket.emit('crownGameEnter');
             } else {
@@ -32,7 +32,7 @@ export default class QuestCrown extends Quest {
         this.onGameEnd = (id) => {
             this.gameOn = false;
             const player = this.game.getActorById(id)?.name ?? 'Unknown';
-            if (id === this.player.netId) {
+            if (id === this.player.id) {
                 this.completeQuest();
             }
             this.setNotification(`${player} Wins!!!`);
@@ -114,6 +114,6 @@ export default class QuestCrown extends Quest {
         this.text = questText;
     }
     update() {
-        if (this.manager.game.solWorld !== 'world2') this.manager.remove(this)
+        if (this.manager.game.sceneName !== 'world2') this.manager.remove(this)
     }
 }

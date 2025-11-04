@@ -2,7 +2,7 @@ import AIController from "../core/AIController";
 import AIMovement from "../core/AIMovement";
 import NamePlate from "../core/Nameplate";
 import StateManager from "../core/states/StateManager";
-import Game from "../Game";
+import Game from "../CGame";
 import Pawn from "./Pawn";
 
 export default class Enemy extends Pawn {

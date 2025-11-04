@@ -1,6 +1,6 @@
 import MyEventEmitter from "../core/MyEventEmitter.js";
 import LocalData from "../core/LocalData.js";
-import Game from "../Game.js";
+import Game from "../CGame.js";
 
 export default class PlayerInfo {
     constructor(player) {
@@ -47,7 +47,7 @@ export default class PlayerInfo {
         healthBar.id = 'health-bar';
         healthBar.style.width = `${this.health}%`;
         MyEventEmitter.on('playerHealthChange', ({ id, health }) => {
-            if (id !== Game.getGame().player.netId) return;
+            if (id !== Game.getGame().player.id) return;
             this.health = health;
             healthBar.style.width = `${this.health}%`;
         });

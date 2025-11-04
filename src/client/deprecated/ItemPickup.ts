@@ -1,5 +1,5 @@
 import { makeItem, makeRandomItem } from "@solblade/shared/Item"
-import World from "../scenes/World";
+import World from "../scenes/Scene";
 import Pickup from "./Pickup";
 import * as THREE from 'three';
 

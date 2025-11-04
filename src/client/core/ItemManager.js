@@ -1,4 +1,4 @@
-import World from "../scenes/World";
+import World from "../scenes/Scene";
 import Item from "./Item";
 
 export default class ItemManager {

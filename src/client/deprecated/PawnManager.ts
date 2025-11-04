@@ -1,7 +1,7 @@
 import { SkinnedMesh, Vector3 } from "three";
 import Enemy from "../actors/Enemy";
 import Pawn from "../actors/Pawn";
-import World from "../scenes/World";
+import World from "../scenes/Scene";
 import AIMovement from "../core/AIMovement";
 
 type Team = 'A' | 'B' | 'C';

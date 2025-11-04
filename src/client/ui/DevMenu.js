@@ -1,4 +1,4 @@
-import Game from "../Game";
+import Game from "../CGame";
 
 export default class DevMenu {
     constructor(actor, movementComp) {

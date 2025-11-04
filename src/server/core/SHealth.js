@@ -1,4 +1,4 @@
-import { io } from "./server.js";
+import { io } from "../SMain.js";
 
 export default class SHealth {
     constructor(actor, maxHealth = 1, current) {
@@ -19,7 +19,7 @@ export default class SHealth {
 
         // Notify listeners
         if (this.onChange) this.onChange(this._current);
-        io.emit('actorHealthChange', { id: this.actor.netId, health: this.current });
+        io.emit('actorHealthChange', { id: this.actor.id, health: this.current });
 
         // Death callback
         if (this._current <= 0 && this.onDeath) {

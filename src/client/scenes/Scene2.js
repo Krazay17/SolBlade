@@ -1,8 +1,8 @@
-import World from "./World";
+import Scene from "./Scene";
 
-export default class World2 extends World {
+export default class Scene2 extends Scene {
     constructor(game) {
-        super(game, 'world2', { killFloor: -15 });
+        super(game, 'scene2', { killFloor: -15 });
     }
     get spawnPos() { return this.getRespawnPoint() }
     // update(dt, time) {

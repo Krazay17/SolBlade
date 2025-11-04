@@ -10,7 +10,6 @@ export default class Projectile extends Actor {
             radius = 1,
             speed = 1,
             gravity = 5,
-            dir = new Vector3(),
             lifetime = 10000,
             ignoreBody = null,
             damage = 1,
@@ -18,15 +17,13 @@ export default class Projectile extends Actor {
             hitCallback = null,
             collideCallback = null,
         } = data;
+        this.data = { ...data };
 
         /**@type {RAPIER.World} */
         this.physics = physics;
-        this.type = 'projectile';
         this.radius = radius;
         this.speed = speed;
         this.gravity = gravity;
-        /**@type {Vector3} */
-        this.dir = dir;
         this.ignoreBody = ignoreBody;
 
         this.timestamp = performance.now();
@@ -42,8 +39,8 @@ export default class Projectile extends Actor {
             amount: this.damage,
         })
 
-        this.veloctiy = this.dir.multiplyScalar(this.speed);
         this.tempVec = new Vector3();
+        this.veloctiy = this.dir.clone().multiplyScalar(this.speed);
 
         this.body = new RAPIER.Ball(this.radius);
 
@@ -73,9 +70,8 @@ export default class Projectile extends Actor {
 
         if (result) {
             const target = result.actor;
-            if (target === this.owner) return;
-            if (target && !this.hasHit) {
-                this.hasHit = true;
+            if (target) {
+                if (target === this.owner) return;
                 this.hitData.target = target;
                 this.hitData.hitPosition = this.pos;
                 //target.hit?.(this.hitData);

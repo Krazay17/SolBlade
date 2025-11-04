@@ -4,7 +4,7 @@ import RAPIER from "@dimforge/rapier3d-compat";
 
 export default class Power extends ClientActor {
     init() {
-        console.log(this.netId)
+        console.log(this.id)
         let color;
         switch (this.data.power) {
             case 'energy':
@@ -45,11 +45,8 @@ export default class Power extends ClientActor {
     touch(dealer) {
         if (!this.active) return;
         this.deActivate()
-        MyEventEmitter.emit('actorEvent', { id: this.netId, event: "touch", data: dealer.netId });
+        MyEventEmitter.emit('actorEvent', { id: this.id, event: "touch", data: dealer.id });
         this.game.soundPlayer.playPosSound('pickup', this.pos);
-    }
-    update(dt, time) {
-        if (this.body) this.graphics.position.copy(this.body.translation?.());
     }
     createBody(radius) {
         this.body = this.game.physicsWorld.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased()

@@ -1,4 +1,4 @@
-import World from "../scenes/World";
+import World from "../scenes/Scene";
 
 export default class Manager {
     scene: World;

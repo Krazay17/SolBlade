@@ -18,7 +18,6 @@ export default class BladeState extends PlayerState {
         this.floorTimer = null;
         this.animationManager.playAnimation('blade', true);
         this.actor.energy.drainRate = 5;
-        console.log('enter blade');
     }
     update(dt) {
         if (this.input.keys['Space'] && this.grounded && !this.jumping) {

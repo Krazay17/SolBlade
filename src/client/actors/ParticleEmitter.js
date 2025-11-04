@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import Game from '../Game';
+import Game from '../CGame';
 
 export function spawnParticles(position, count = 8) {
     for (let i = 0; i < count; i++) {

@@ -1,14 +1,13 @@
-const CURRENT_VERSION = 0.087;
+const CURRENT_VERSION = 0.0908;
 
 export default {
     version: CURRENT_VERSION,
     name: "Player",
     money: 0,
     health: 100,
-    scene: 'Level2',
-    solWorld: 'world2',
-    position: null,
-    rotation: 0,
+    sceneName: 'scene2',
+    position: [],
+    rotation: [],
     masterVolume: 1,
     musicVolume: 1,
     sfxVolume: 1,
@@ -37,7 +36,7 @@ export default {
             money: this.money,
             health: this.health,
             scene: this.scene,
-            solWorld: this.solWorld,
+            sceneName: this.sceneName,
             position: this.position,
             rotation: this.rotation,
             masterVolume: this.masterVolume,
@@ -79,7 +78,7 @@ export default {
         this.money = parsed.money ?? this.money;
         this.health = parsed.health ?? this.health;
         this.scene = parsed.scene ?? this.scene;
-        this.solWorld = parsed.solWorld ?? this.solWorld;
+        this.sceneName = parsed.sceneName ?? this.sceneName;
         this.position = parsed.position ?? this.position;
         this.rotation = parsed.rotation ?? this.rotation;
         this.masterVolume = parsed.masterVolume ?? this.masterVolume;
@@ -99,7 +98,7 @@ export default {
         this.money = keep.money ?? this.money;
         this.health = keep.health ?? this.health;
         this.scene = keep.scene ?? this.scene;
-        this.solWorld = keep.solWorld ?? this.solWorld;
+        this.sceneName = keep.sceneName ?? this.sceneName;
         this.position = keep.position ?? this.position;
         this.rotation = keep.rotation ?? this.rotation;
         this.masterVolume = keep.masterVolume ?? this.masterVolume;

@@ -15,7 +15,7 @@ export default class Input {
       console.log('Test function called');
     };
 
-    this.yaw = LocalData.rotation;
+    this.yaw = 0
     this.pitch = 0;
     this.keys = {};
     this.mice = {};
@@ -33,10 +33,10 @@ export default class Input {
       'Space': 'jump',
       'ShiftLeft': 'blade',
       'KeyC': 'openInventory',
-      'KeyT': 'goHome',
-      'KeyY': 'goCrown',
-      'KeyU': 'world3',
-      'KeyI': 'world4',
+      'KeyT': 'scene1',
+      'KeyY': 'scene2',
+      'KeyU': 'scene3',
+      'KeyI': 'scene4',
       'Digit1': 'spell1',
       'Digit2': 'spell2',
       'Digit3': 'spell3',

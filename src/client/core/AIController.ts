@@ -4,7 +4,7 @@ import Enemy from "../actors/Enemy";
 import AIMovement from "./AIMovement";
 import { Vector2, Vector3 } from "three";
 import PawnBody from "./PawnBody";
-import Game from "../Game";
+import Game from "../CGame";
 
 export default class AIController {
     game: Game;

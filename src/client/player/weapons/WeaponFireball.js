@@ -47,7 +47,7 @@ export default class WeaponFireball extends Weapon {
     }
 
     shootFireball(radius = 1, speed = 35, damage = 10) {
-        const { pos, dir, camPos } = this.actor.getShootData()
+        const { pos, dir } = this.actor.getShootData()
         const projectile = this.game.actorManager.spawnActor('fireball', {
             pos,
             dir,
@@ -55,7 +55,7 @@ export default class WeaponFireball extends Weapon {
             damage,
             speed,
             liftetime: 30000,
-            owner: this.actor,
-        }, false);
+            owner: this.actor.id,
+        }, false, true);
     }
 }

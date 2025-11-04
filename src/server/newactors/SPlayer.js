@@ -1,6 +1,6 @@
-import SEnergy from "../SEnergy.js";
-import { io } from "../server.js";
-import SHealth from "../SHealth.js";
+import SEnergy from "../core/SEnergy.js";
+import { io } from "../SMain.js";
+import SHealth from "../core/SHealth.js";
 import SActor from "./SActor.js";
 
 export default class SPlayer extends SActor {
@@ -20,24 +20,24 @@ export default class SPlayer extends SActor {
         const { amount, dealer } = data;
         const dealerActor = this.actorManager.getActorById(dealer);
         if (amount > 0 && this.parry) {
-            io.emit('playerParried', { target: this.netId, dealer });
-            if (dealerActor.parry) io.emit('playerParried', { target: dealer, dealer: this.netId })
+            io.emit('playerParried', { target: this.id, dealer });
+            if (dealerActor.parry) io.emit('playerParried', { target: dealer, dealer: this.id })
             return;
         }
         this.health.subtract(data.amount);
         this.lastHit = data;
-        io.emit('actorEvent', { id: this.netId, event: "applyHit", data });
+        io.emit('actorEvent', { id: this.id, event: "applyHit", data });
     }
     die(data) {
         this.isDead = true;
-        io.emit('actorDie', { id: this.netId, data: data || this.lastHit });
+        io.emit('actorDie', { id: this.id, data: data || this.lastHit });
         this.respawn();
     }
     respawn() {
         setTimeout(() => {
             this.health.current = this.health.maxHealth;
             this.isDead = false
-            //io.emit('actorEvent', {id:this.netId, event: "unDie"});
+            //io.emit('actorEvent', {id:this.id, event: "unDie"});
         }, 2500)
     }
 }

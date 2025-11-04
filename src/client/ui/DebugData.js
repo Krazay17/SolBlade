@@ -1,5 +1,5 @@
 import LocalData from "../core/LocalData";
-import Game from "../Game";
+import Game from "../CGame";
 
 export default class DebugData {
     constructor() {

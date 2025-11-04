@@ -1,10 +1,7 @@
-import ActorManager from "./SvActorManager.js";
-
-export default class CrownQuest {
-    constructor(io, actorManager) {
+export default class SCrownQuest {
+    constructor(game, io) {
+        this.game = game;
         this.io = io;
-        /**@type {ActorManager} */
-        this.actorManager = actorManager;
 
         this.players = {}
         this.started = false;
@@ -22,7 +19,7 @@ export default class CrownQuest {
         delete this.players[id];
     }
     init() {
-        this.actorManager.createActor('crown', { pos: this.defaultPos });
+        this.game.createActor('crown', { pos: this.defaultPos });
     }
     start() {
         if (this.started) return;
@@ -59,7 +56,7 @@ export default class CrownQuest {
             player.hasCrown = false;
             clearInterval(this.crownPointsInterval);
             pos = pos || this.defaultPos;
-            this.actorManager.createActor('crown', { pos });
+            this.game.createActor('crown', { pos });
             this.io.emit('dropCrown', id);
         }
     }

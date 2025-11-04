@@ -21,7 +21,7 @@ export default class Player extends Pawn {
         });
         this.tick = true;
 
-        this.world = game.world;
+        this.scene = game.scene;
         this.parry = false;
         this.dimmed = 0;
         this.crownMesh = null;
@@ -93,7 +93,6 @@ export default class Player extends Pawn {
             if (this.energy) this.energy.update(dt);
             this.handleInput(dt, time);
             tryUpdatePosition({ pos: this.position, rot: this.quatY });
-            LocalData.position = this.position;
             CameraFX.update(dt);
         }
     }
@@ -106,20 +105,15 @@ export default class Player extends Pawn {
         this.add(this.crownMesh);
     }
     touch() { }
-    setWorld(newWorld) {
-        this.world = newWorld;
-        this.solWorld = this.world.solWorld;
+    setScene(newScene) {
+        this.scene = newScene;
+        this.sceneName = this.scene.sceneName;
         this.body.velocity = { x: 0, y: 0, z: 0 };
     }
-    worldReady() {
-        if (this.lastWorld !== this.solWorld) {
-            this.lastWorld = this.solWorld;
-            if (this.portalPos) {
-                this.body.position = this.portalPos;
-                this.portalPos = null;
-            } else {
-                this.body.position = this.world.spawnPos;
-            }
+    sceneReady() {
+        if (LocalData.sceneName !== this.sceneName) {
+            LocalData.sceneName = this.sceneName;
+            this.body.position = this.scene.spawnPos;
         }
         if (this.body) {
             this.body.wakeUp();
@@ -244,9 +238,6 @@ export default class Player extends Pawn {
         if (this.input.actionStates.blade) {
             this.tryEnterBlade();
         }
-        if (this.input.actionStates.goHome) {
-            this.game?.setWorld('world1');
-        }
         if (this.input.keys['KeyF']) {
             if (!LocalData.flags.dev) return;
             const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
@@ -353,10 +344,10 @@ export default class Player extends Pawn {
     }
     healthChange(health) {
         super.healthChange(health);
-        MyEventEmitter.emit('playerHealthChangeLocal', { id: this.netId, health });
+        MyEventEmitter.emit('playerHealthChangeLocal', { id: this.id, health });
         if (!this.isRemote) {
             LocalData.health = health;
-            MyEventEmitter.emit('playerHealthChange', { id: this.netId, health });
+            MyEventEmitter.emit('playerHealthChange', { id: this.id, health });
         }
     }
     // only local
@@ -372,7 +363,7 @@ export default class Player extends Pawn {
     // only local
     unDie() {
         if (this.isRemote) return;
-        let spawnPoint = this.world.getRespawnPoint();
+        let spawnPoint = this.scene.getRespawnPoint();
         if (!spawnPoint) spawnPoint = { x: 0, y: 1, z: 0 };
         this.body.position = { x: spawnPoint.x, y: spawnPoint.y, z: spawnPoint.z };
         this.body.velocity = { x: 0, y: 0, z: 0 };

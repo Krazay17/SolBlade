@@ -1,5 +1,5 @@
 import { PointLight } from "three";
-import Game from "../Game";
+import Game from "../CGame";
 
 export default class LightManager {
     constructor(/**@type {Game}*/game) {

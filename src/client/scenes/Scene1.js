@@ -1,9 +1,9 @@
 //import { sharedTest } from "../../../shared/Utils";
-import World from "./World";
+import Scene from "./Scene";
 
-export default class World1 extends World {
+export default class Scene1 extends Scene {
     constructor(game) {
-        super(game, 'world1');
+        super(game, 'scene1');
         //sharedTest();
     }
     get spawnPos() { return this.getRespawnPoint() }

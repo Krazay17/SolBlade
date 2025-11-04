@@ -1,11 +1,13 @@
 import HitData from "../core/HitData";
 import { spawnParticles } from './ParticleEmitter';
 import ClientProjectile from "./ClientProjectile";
-import MyEventEmitter from "../core/MyEventEmitter";
 
 export default class ProjectileFireball extends ClientProjectile {
-    constructor(scene, data) {
-        super(scene, data);
+    constructor(game, data) {
+        super(game, {
+            ...data,
+            type: 'fireball',
+        });
 
         this.explode = false;
 
@@ -61,7 +63,7 @@ export default class ProjectileFireball extends ClientProjectile {
                 hitPosition: this.position,
                 dim: 500,
             })
-            enemy.hit(hitData);
+            enemy.hit?.(hitData);
         }
 
     }

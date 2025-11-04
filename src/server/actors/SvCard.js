@@ -1,4 +1,4 @@
-import { io } from "../server.js";
+import { io } from "../SMain.js";
 import { makeRandomItem, makeItem } from "@solblade/shared/Item.js";
 import SvActor from "./SvActor.js";
 
@@ -13,8 +13,8 @@ export default class SvCard extends SvActor {
     }
     touch(data) {
         if (!this.active) return;
-        //io.emit('actorTouch', { id: this.netId, data });
-        io.emit('actorEvent', {id:this.netId, event: 'applyTouch', data});
+        //io.emit('actorTouch', { id: this.id, data });
+        io.emit('actorEvent', {id:this.id, event: 'applyTouch', data});
         //this.die();
     }
     die() {

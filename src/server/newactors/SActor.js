@@ -1,28 +1,28 @@
 import { Actor, randomPos } from "@solblade/shared";
-import SvActorManager from "../SvActorManager.js";
-import { io } from "../server.js";
+import { io } from "../SMain.js";
+import SGame from "../SGame.js";
 
 export default class SActor extends Actor {
-    constructor(actorManager, data) {
-        super(data)
-        /**@type { SvActorManager} */
-        this.actorManager = actorManager;
+    constructor(game, data) {
+        super(data);
+        /**@type {SGame} */
+        this.game = game;
 
         this.init();
     }
     activate(data = {}) {
         super.activate(data)
-        io.emit('newActor', this.serialize());
+        io.emit('newActor', this);
     }
     deActivate() {
-        if(!this.active) return;
+        if (!this.active) return;
         super.deActivate();
-        io.emit('actorEvent', {id:this.netId, event: 'deactivate'});
+        io.emit('actorEvent', { id: this.id, event: 'deactivate' });
     }
     hit(data) {
-        if(!this.active)return;
+        if (!this.active) return;
         this.deActivate();
-        io.emit('actorEvent', { id: this.netId, event: "applyHit", data });
+        io.emit('actorEvent', { id: this.id, event: "applyHit", data });
     }
     respawn(data = {}) {
         const {
@@ -30,7 +30,7 @@ export default class SActor extends Actor {
             pos = randomPos(20, 10),
         } = data;
         setTimeout(() => {
-            this.activate({ ...data, pos })
+            this.activate({ ...data, pos });
         }, respawnTime)
     }
 }

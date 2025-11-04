@@ -1,6 +1,6 @@
 import RAPIER from '@dimforge/rapier3d-compat';
 import { Server } from "socket.io";
-import ActorManager from './SvActorManager.js';
+import ActorManager from './SActorManager.js';
 import { loadJson } from './LoadJson.js';
 
 const world1Data = await loadJson('./worlds/world1.json');
@@ -9,38 +9,20 @@ const world3Data = await loadJson('./worlds/world3.json');
 const world4Data = await loadJson('./worlds/world4.json');
 await RAPIER.init({});
 
-export default class SvPhysics {
-    constructor(io, actorManager) {
+export default class SPhysics {
+    constructor(game, io) {
+
+        this.game = game;
         /**@type {Server} */
         this.io = io;
-        /**@type {ActorManager} */
-        this.actorManager = actorManager;
 
         this.world0 = new RAPIER.World({ x: 0, y: -9, z: 0 });
         this.world1 = this.makeWorld(world1Data);
         this.world2 = this.makeWorld(world2Data);
         this.world3 = this.makeWorld(world3Data);
         this.world4 = this.makeWorld(world4Data);
-
-        this.lastTime = Date.now();
-        this.accumulator = 0;
-        const timestep = 1 / 60;
-
-        setInterval(() => {
-            const now = Date.now();
-            const frameTime = (now - this.lastTime) / 1000;
-            this.lastTime = now;
-
-            this.accumulator += frameTime;
-            while (this.accumulator >= timestep) {
-                this.loop(timestep);
-                this.accumulator -= timestep;
-            }
-        }, 1000 / 60);
-
-
     }
-    loop(dt) {
+    update(dt) {
         this.updateWorld(dt, 'world1')
         this.updateWorld(dt, 'world2')
         this.updateWorld(dt, 'world3')
@@ -89,7 +71,7 @@ export default class SvPhysics {
         const { players, enemies, others } = this.actorManager.actorsOfWorld[world];
 
         const enemyPositions = enemies.flatMap(e =>
-            e.active ? [{ id: e.data.netId, pos: e.body.translation(), rot: e.rotation }] : []
+            e.active ? [{ id: e.data.id, pos: e.body.translation(), rot: e.rotation }] : []
         );
 
 
@@ -97,9 +79,8 @@ export default class SvPhysics {
         if (this.timeSinceLastUpdate >= 0.01) {
             this.timeSinceLastUpdate = 0;
             for (const p of players) {
-                this.io.to(p.netId).emit('updateEnemies', enemyPositions);
+                this.io.to(p.id).emit('updateEnemies', enemyPositions);
             }
         }
-
     }
 }

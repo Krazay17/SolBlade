@@ -36,7 +36,7 @@ export default class HitData {
             if (typeof value === "boolean" && value === false) continue;
             if (typeof value === "number" && value === 0 && key !== "amount") continue;
 
-            if (value instanceof Actor) data[key] = value.netId;
+            if (value instanceof Actor) data[key] = value.id;
             else if (value instanceof Vector3) data[key] = [value.x, value.y, value.z];
             else data[key] = value;
         }

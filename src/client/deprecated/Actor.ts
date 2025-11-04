@@ -2,8 +2,8 @@ import { Object3D, Quaternion, Vector3 } from "three";
 import HitData from "../core/HitData";
 import MyEventEmitter from "../core/MyEventEmitter";
 import { generateUUID } from "three/src/math/MathUtils.js";
-import Game from "../Game.js";
-import World from "../scenes/World.js";
+import Game from "../CGame.js";
+import World from "../scenes/Scene.js";
 
 export interface ActorData {
     type?: string;

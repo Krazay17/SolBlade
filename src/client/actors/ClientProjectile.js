@@ -1,18 +1,35 @@
 import { Projectile } from "@solblade/shared";
-import { Mesh, MeshBasicMaterial, Object3D, SphereGeometry } from "three";
-import Game from "../Game";
+import { Mesh, MeshBasicMaterial, Object3D, SphereGeometry, Vector3, Quaternion } from "three";
+import Game from "../CGame";
 
 export default class ClientProjectile extends Projectile {
     constructor(game, data) {
-        super(game.physicsWorld, data);
+        const posArr = data.pos;
+        const dirArr = data.dir;
+        const rotArr = data.rot;
+
+        const pos = Array.isArray(posArr)
+            ? new Vector3(posArr[0] || 0, posArr[1] || 0, posArr[2] || 0)
+            : new Vector3(posArr?.x || 0, posArr?.y || 0, posArr?.z || 0);
+
+        const dir = Array.isArray(dirArr)
+            ? new Vector3(dirArr[0] || 0, dirArr[1] || 0, dirArr[2] || 0)
+            : new Vector3(dirArr?.x || 0, dirArr?.y || 0, dirArr?.z || 0);
+
+        const rot = Array.isArray(rotArr)
+            ? new Quaternion(rotArr[0] || 0, rotArr[1] || 0, rotArr[2] || 0, rotArr[3] || 1)
+            : new Quaternion(rotArr?.x || 0, rotArr?.y || 0, rotArr?.z || 0, rotArr?.w || 1);
+
+        super(game.physicsWorld, { ...data, pos, dir, rot });
         /**@type {Game} */
         this.game = game;
+
         this.graphics = new Object3D();
         this.graphics.position.copy(this.pos);
         this.graphics.quaternion.copy(this.rot);
         this.game.add(this.graphics);
     }
-
+    get position() { return this.pos };
     destroy() {
         this.game.actorManager.removeActor(this);
         this.game.remove(this.graphics);

@@ -20,7 +20,7 @@ export default class WeaponScythe extends Weapon {
             const { pos, rot, dir, camPos } = this.actor.getShootData()
             /**@type {ClientProjectile} */
             const projectile = this.game.actorManager.spawnActor('projectileScythe', {
-                pos, rot, dir, owner: this.actor,
+                pos, rot, dir, owner: this.actor.id,
             }, false);
 
             this.playAnimation(this.hand, false);

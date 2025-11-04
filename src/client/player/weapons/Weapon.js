@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import MyEventEmitter from '../../core/MyEventEmitter';
 import MeshTrace from '../../core/MeshTrace';
 import Player from '../Player';
-import Game from '../../Game';
+import Game from '../../CGame';
 
 export default class Weapon {
     constructor(game, actor, data) {

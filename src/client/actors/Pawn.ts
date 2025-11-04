@@ -10,7 +10,7 @@ import AIController from "../core/AIController";
 import ClientActor from "./ClientActor";
 import RAPIER from "@dimforge/rapier3d-compat";
 import PawnBody from "../core/PawnBody";
-import Game from "../Game";
+import Game from "../CGame";
 import Health from "../core/Health";
 
 export default class Pawn extends ClientActor {
@@ -45,7 +45,7 @@ export default class Pawn extends ClientActor {
         this.health = new Health(this, data.maxHealth, data.currentHealth)
         this.health.onChange = (v: number) => this.healthChange(v);
 
-        this.body = new PawnBody(this.game.physicsWorld, this, data.pos, this.height, this.radius, data.isRemote);
+        this.body = new PawnBody(this.game.physicsWorld, this, this.pos, this.height, this.radius, this.isRemote);
 
         this.assignMesh(this.skin);
 
@@ -89,6 +89,9 @@ export default class Pawn extends ClientActor {
                     this.body.position = this.body.position.lerp(this.pos, 60 * dt);
                 }
             }
+        } else {
+            this.pos = this.body.position;
+            this.rot = this.graphics.quaternion;
         }
     }
     destroy(): void {

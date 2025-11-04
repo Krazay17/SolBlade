@@ -1,5 +1,5 @@
 import Player from "../player/Player";
-import Game from "../Game";
+import Game from "../CGame";
 import MyEventEmitter from "./MyEventEmitter";
 import QuestCrown from "./QuestCrown";
 import QuestPlayerKill from "./QuestPlayerKill";

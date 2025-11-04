@@ -1,9 +1,9 @@
-import { Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
 import ClientActor from "../actors/ClientActor";
 import ProjectileFireball from "../actors/ProjectileFireball";
 import Player from "../player/Player";
 import MyEventEmitter from "./MyEventEmitter";
-import Game from "../Game";
+import Game from "../CGame";
 import LocalData from "./LocalData";
 import EnemyJulian from "../actors/EnemyJulian";
 import ProjectileScythe from "../actors/ProjectileScythe";
@@ -26,9 +26,6 @@ export default class ActorManager {
         this.actors = [];
         this.player = this.spawnLocalPlayer();
     }
-    get world() {
-        return this.game?.world;
-    }
     get players() {
         return this.actors.filter(a => a.type === 'player');
     }
@@ -39,7 +36,7 @@ export default class ActorManager {
         return this.actors.filter(a => a !== this.player);
     }
     get localActors() {
-        return this.actors.filter(a => !a.isRemote && a.replicate);
+        return this.actors.filter(a => !a.isRemote);
     }
     get remoteActors() { return this.actors.filter(a => a.isRemote) };
     destroy() {
@@ -55,13 +52,15 @@ export default class ActorManager {
         for (const a of this.actors) { a.fixedUpdate?.(dt, time) };
     }
     spawnLocalPlayer() {
-        const pos = LocalData.position ? new Vector3().copy(LocalData.position) : new Vector3(0, 1, 0);
+        const pos = LocalData.position;
+        const rot = LocalData.rotation;
         const player = new actorRegistry['player'](this.game, {
             pos,
-            solWorld: LocalData.solWorld || 'world2',
+            rot,
+            sceneName: LocalData.sceneName || 'scene2',
             currentHealth: LocalData.health,
             name: LocalData.name
-        })
+        });
         player.body.sleep();
         this.actors.push(player);
         return player;
@@ -72,10 +71,11 @@ export default class ActorManager {
         isRemote: boolean = false,
         replicate: boolean = false,
     ): ClientActor | undefined | void {
-        const solWorld = data.solWorld || this.game?.solWorld;
-        // if (isRemote && (data.solWorld !== solWorld)) return;
-        const finalData = { type, ...data, isRemote, replicate, solWorld, active: true };
-        // const existingActor = this.getActorById(data.netId);
+        const sceneName = data.sceneName || this.game?.sceneName;
+        // if (isRemote && (data.sceneName !== sceneName)) return;
+        const finalData = { ...data, isRemote, replicate, sceneName, active: true };
+
+        // const existingActor = this.getActorById(data.id);
         // if (existingActor) return existingActor.activate(finalData);
         const finalType = data?.enemy || type;
         const actorClass = actorRegistry[finalType];
@@ -83,6 +83,7 @@ export default class ActorManager {
 
         const actor = new actorClass(this.game, finalData);
         if (!actor) return;
+        console.log(actor);
 
         this.actors.push(actor);
         if (!isRemote && replicate) {
@@ -118,7 +119,7 @@ export default class ActorManager {
         this.actors.splice(index, 1);
     }
     getActorById(id: string) {
-        return this.actors.find(a => a.netId === id);
+        return this.actors.find(a => a.id === id);
     }
     getActiveActors(self: ClientActor, owner: ClientActor) {
         return this.actors.filter(a =>

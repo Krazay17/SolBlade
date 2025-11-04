@@ -1,5 +1,5 @@
 import MyEventEmitter from "../core/MyEventEmitter";
-import Game from "../Game";
+import Game from "../CGame";
 
 export default class PartyFrame {
     constructor() {
@@ -42,7 +42,7 @@ export default class PartyFrame {
         healthFill.className = 'party-healthbar-fill';
         healthFill.style.width = `${player.health}%`;
         MyEventEmitter.on('playerHealthChangeLocal', ({ id, health }) => {
-            if (player.netId === id) {
+            if (player.id === id) {
                 healthFill.style.width = `${health}%`;
             }
         })

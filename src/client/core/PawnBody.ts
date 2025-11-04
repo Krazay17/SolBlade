@@ -49,38 +49,9 @@ export default class PawnBody {
                 .setRestitution(0),
             this.body
         );
-        (this.collider as any).actor = this.actor;
+        (this.collider as any).actor = this.actor.id;
         this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
     }
-    // init() {
-    //     if (!this.tryInitPhysics()) {
-    //         setTimeout(() => this.init(), 10);
-    //         console.log('body init');
-    //     }
-    // }
-    // tryInitPhysics() {
-    //     if (!this.world || !this.world.timestep) {
-    //         return false;
-    //     }
-
-    //     this.body = this.world.createRigidBody(RAPIER.RigidBodyDesc.dynamic()
-    //         .lockRotations()
-    //         .setTranslation(this.startPos.x || 0, this.startPos.y || 0, this.startPos.z || 0)
-    //         .setLinearDamping(0)
-    //         .setAngularDamping(0)
-    //     );
-
-    //     this.collider = this.world.createCollider(
-    //         RAPIER.ColliderDesc.capsule(this.height / 2, this.radius)
-    //             .setCollisionGroups(this.collideGroup)
-    //             .setFriction(0)
-    //             .setRestitution(0),
-    //         this.body
-    //     );
-    //     console.log(this.collider.handle);
-    //     if (this.collider && this.collider.handle !== 0) return true;
-    //     else return false
-    // }
     get position() {
         if (!this.body) return this._position.set(0, 0, 0)
         return this._position.copy(this.body?.translation());

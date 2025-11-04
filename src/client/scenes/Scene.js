@@ -1,10 +1,9 @@
 import * as THREE from 'three';
-import { netSocket, setNetScene } from '../core/NetManager.js';
 import SkyBox from '../core/SkyBox.js';
 import MyEventEmitter from '../core/MyEventEmitter.js';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import Game from '../Game.js';
+import Game from '../CGame.js';
 import Portal from '../actors/Portal.js';
 import RAPIER from '@dimforge/rapier3d-compat';
 
@@ -12,14 +11,14 @@ THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
 THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 THREE.Mesh.prototype.raycast = acceleratedRaycast;
 
-export default class World {
-  constructor(game, solWorld = 'world1', data = {}) {
+export default class Scene {
+  constructor(game, sceneName = 'scene1', data = {}) {
     const {
-      killFloor = -100,
+      killFloor = -50,
     } = data;
     /**@type {Game} */
     this.game = game; // Access camera, renderer, input, etc.
-    this.solWorld = solWorld;
+    this.sceneName = sceneName
     this.data = data;
   }
   get actorManager() { return this.game.actorManager };
@@ -33,7 +32,7 @@ export default class World {
   get spawnPos() { return { x: 0, y: 1, z: 0 } };
   get soundPlayer() { return this.game.soundPlayer };
   onExit() {
-    MyEventEmitter.emit('leaveWorld', this.solWorld);
+    MyEventEmitter.emit('leaveScene', this.sceneName);
     this.destroy();
   }
   onEnter(callback) {
@@ -50,9 +49,9 @@ export default class World {
 
     this.map = null;
     this.worldColliders = [];
-    this.spawnLevel(this.solWorld, callback);
+    this.spawnLevel(this.sceneName, callback);
 
-    MyEventEmitter.emit('enterWorld', this.solWorld);
+    MyEventEmitter.emit('enterScene', this.sceneName);
   }
   destroy() {
     if (this.map) {
@@ -79,9 +78,6 @@ export default class World {
   getActorById(id) {
     return this.actorManager.getActorById(id)
   }
-  getIsConnected() {
-    return netSocket.connected;
-  }
   getOtherActorMeshes() {
     return this.actorMeshes.filter(a => a !== this.player.meshBody);
   }
@@ -98,7 +94,7 @@ export default class World {
     const pawns = [...this.actorManager.players];
     const posMap = new Map();
     for (const p of pawns) {
-      posMap.set(p.netId, p.position);
+      posMap.set(p.id, p.position);
     }
     return posMap;
   }
@@ -150,7 +146,7 @@ export default class World {
     portal.position.set(pos.x, pos.y, pos.z);
     portal.init(targetPos, newWorld);
   }
-  spawnLevel(name = 'world2', callback) {
+  spawnLevel(name = 'scene2', callback) {
     if (this.mapLoaded[name]) return;
     this.game.loadingManager.gltfLoader.load(`/assets/${name}.glb`, (gltf) => {
       const model = gltf.scene;

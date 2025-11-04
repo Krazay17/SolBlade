@@ -1,4 +1,4 @@
-import Game from "../Game";
+import Game from "../CGame";
 import MyEventEmitter from "./MyEventEmitter";
 import QuestManager from "./QuestManager";
 

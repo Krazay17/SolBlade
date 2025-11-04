@@ -3,7 +3,7 @@ import PlayerMovement from '../PlayerMovement';
 import Player from '../Player';
 import PlayerStateManager from './PlayerStateManager';
 import PawnBody from '../../core/PawnBody';
-import Game from '../../Game';
+import Game from '../../CGame';
 import { vectorsToLateralDegrees } from '../../utils/Utils';
 import Input from '../../core/Input';
 export default class PlayerState {

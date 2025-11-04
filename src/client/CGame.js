@@ -4,13 +4,15 @@ import Crosshair from './ui/Crosshair';
 import PlayerInfo from './ui/PlayerUI';
 import MyEventEmitter from './core/MyEventEmitter';
 import LoadingManager from './core/LoadingManager';
-import World1 from './scenes/World1';
-import World2 from './scenes/World2';
+import Scene from './scenes/Scene';
+import Scene1 from './scenes/Scene1';
+import Scene2 from './scenes/Scene2';
+import Scene3 from './scenes/Scene3';
+import Scene4 from './scenes/Scene4';
+import Scene5 from './scenes/Scene5';
 import LocalData from './core/LocalData';
-import World3 from './scenes/World3';
 import MeshManager from './core/MeshManager';
 import SolRenderPass from './core/SolRenderPass';
-import World from './scenes/World';
 import ActorManager from './core/ActorManager';
 import PartyFrame from './ui/PartyFrame';
 import QuestManager from './core/QuestManager';
@@ -19,31 +21,29 @@ import Player from './player/Player';
 import LightManager from './core/LightManager';
 import Inventory from './player/Inventory';
 import SoundPlayer from './core/SoundPlayer';
-import World4 from './scenes/World4';
 import { menuSlider } from './ui/Menu';
-import World5 from './scenes/World5';
 import FXManager from './core/FX/FXManager';
 import SolPhysics from './core/SolPhysics';
 import DebugData from './ui/DebugData';
 
 await RAPIER.init();
 
-const worldRegistry = {
-  world1: World1,
-  world2: World2,
-  world3: World3,
-  world4: World4,
-  world5: World5,
+const sceneRegistry = {
+  scene1: Scene1,
+  scene2: Scene2,
+  scene3: Scene3,
+  scene4: Scene4,
+  scene5: Scene5,
 }
 
-export default class Game {
+export default class CGame {
   static instance = null;
   constructor(canvas, input) {
     this.canvas = canvas;
     this.input = input;
 
-    /**@type {World} */
-    this.world = null;
+    /**@type {Scene} */
+    this.scene = null;
 
     this.settings = {
       timeStep: 1 / 120,
@@ -83,27 +83,27 @@ export default class Game {
     this.lightManager = new LightManager(this);
     this.fxManager = new FXManager(this);
 
-    this.worldReady = () => {
-      this.player.worldReady();
-      setNetScene(this.world);
+    this.sceneReady = () => {
+      this.player.sceneReady();
+      setNetScene(this.scene);
       this.running = true;
-      if (this.onWorldChange) this.onWorldChange(this.world);
+      if (this.onSceneChange) this.onSceneChange(this.scene);
     }
-    this.setWorld(LocalData.solWorld || 'world2');
+    this.setScene(LocalData.sceneName || 'scene2');
 
     this.bindings();
     this.start();
 
-    Game.instance = this;
+    CGame.instance = this;
   }
   /**@returns {Game} */
   static getGame(canvas) {
-    if (Game.instance) return Game.instance;
-    else if (canvas) return new Game(canvas);
+    if (CGame.instance) return CGame.instance;
+    else if (canvas) return new CGame(canvas);
     else throw new Error("Initialize Game with canvas first!")
   }
-  get solWorld() {
-    return this.world.solWorld || LocalData.solWorld;
+  get sceneName() {
+    return this.scene.sceneName || LocalData.sceneName;
   }
   get physicsWorld() {
     return this.physics.world;
@@ -119,11 +119,10 @@ export default class Game {
     return this.actorManager.hostiles;
   }
   get levelLOS() {
-    return this.world.mergedLevel;
+    return this.scene.mergedLevel;
   }
   get time() { return this.lastTime }
-  initWindow() {
-  }
+  
   initPlayer() {
     this.player = this.actorManager.player;
     this.crosshair = new Crosshair(this.graphicsWorld);
@@ -131,7 +130,11 @@ export default class Game {
     this.inventory = new Inventory(this.player);
     this.questManager = new QuestManager(this, this.player);
     this.questManager.addQuest('playerKill');
-
+  }
+  savePlayerState() {
+    LocalData.position = this.player.pos.toArray();
+    LocalData.rotation = this.player.rot.toArray();
+    LocalData.sceneName = this.sceneName;
   }
   bindings() {
     window.addEventListener('resize', () => {
@@ -141,17 +144,17 @@ export default class Game {
       this.camera.aspect = w / h;
       this.camera.updateProjectionMatrix();
     });
-    MyEventEmitter.on('goHome', () => {
-      this.setWorld('world1');
+    MyEventEmitter.on('scene1', () => {
+      this.setScene('scene1');
     });
-    MyEventEmitter.on('goCrown', () => {
-      this.setWorld('world2');
+    MyEventEmitter.on('scene2', () => {
+      this.setScene('scene2');
     });
-    MyEventEmitter.on('world3', () => {
-      this.setWorld('world3');
+    MyEventEmitter.on('scene3', () => {
+      this.setScene('scene3');
     });
-    MyEventEmitter.on('world4', () => {
-      this.setWorld('world4');
+    MyEventEmitter.on('scene4', () => {
+      this.setScene('scene4');
     })
     window.addEventListener('focus', () => {
       this.running = true;
@@ -168,26 +171,23 @@ export default class Game {
       this.actorManager.clearRemoteActors();
     })
   }
-  setWorld(world, pos) {
-    const newWorld = new worldRegistry[world](this);
-    if (!newWorld) return;
-    if (this.world && !this.world.levelLoaded) return;
+  setScene(scene) {
+    const newScene = new sceneRegistry[scene](this);
+    if (!newScene) return;
+    if (this.scene && !this.scene.levelLoaded) return;
     this.running = false;
 
-    if (this.world?.onExit) this.world.onExit();
-    this.world = newWorld;
-    LocalData.solWorld = this.world.solWorld;
-    LocalData.save();
+    if (this.scene?.onExit) this.scene.onExit();
+    this.scene = newScene;
 
     this.actorManager.clearActors();
     this.lightManager.destroy();
 
     if (this.player) {
-      this.player.portalPos = pos;
       this.player.tick = false;
     }
-    this.player.setWorld(this.world);
-    if (this.world?.onEnter) this.world.onEnter(this.worldReady);
+    this.player.setScene(this.scene);
+    if (this.scene?.onEnter) this.scene.onEnter(this.sceneReady);
   }
   start() {
     requestAnimationFrame(this.loop.bind(this));
@@ -204,7 +204,7 @@ export default class Game {
       this.handleSleep();
     }
 
-    if (this.running && this.world) {
+    if (this.running && this.scene) {
       MyEventEmitter.emit('preUpdate', dt, time);
 
       this.accumulator += dt;
@@ -212,13 +212,13 @@ export default class Game {
       while (this.running && (this.accumulator >= this.timeStep)) {
         this.physics.step();
         this.physics.remove();
-        this.world?.fixedUpdate?.(this.timeStep, time);
+        this.scene?.fixedUpdate?.(this.timeStep, time);
         this.actorManager?.fixedUpdate(this.timeStep, time);
 
         this.accumulator -= this.timeStep;
       }
       this.fxManager?.update(dt, time);
-      this.world?.update?.(dt, time);
+      this.scene?.update?.(dt, time);
       this.actorManager?.update(dt, time);
       this.questManager?.update(dt, time);
       this.debugData?.update(dt, time);
