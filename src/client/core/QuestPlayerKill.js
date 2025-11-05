@@ -25,12 +25,11 @@ export default class QuestPlayerKill extends Quest {
         this.manager.addQuest('playerKill');
     }
     updateQuest(data) {
-        if (data.dealer === this.player) {
-            this.killCount++;
-            this.text = `${this.killCount}/${this.requirement}`;
-            this.setNotification(`${data.target.name} slain! ${this.killCount}/${this.requirement}`);
-        }
-        if(this.killCount >= this.requirement) {
+        if (data.dealer !== this.game.player) return;
+        this.killCount++;
+        this.text = `${this.killCount}/${this.requirement}`;
+        this.setNotification(`${data.target.name} slain! ${this.killCount}/${this.requirement}`);
+        if (this.killCount >= this.requirement) {
             this.completeQuest();
         }
     }

@@ -27,10 +27,20 @@ export default class SPlayer extends SActor {
         this.health.subtract(data.amount);
         this.lastHit = data;
         io.emit('actorEvent', { id: this.id, event: "applyHit", data });
+
+        if (this.lastHitTimer) clearTimeout(this.lastHitTimer);
+        this.lastHitTimer = setTimeout(() => {
+            this.lastHit = null;
+        }, 5000);
     }
     die(data) {
+        if (this.isDead) return;
         this.isDead = true;
-        io.emit('actorEvent', { id: this.id, event: "die", data: data || this.lastHit });
+        const targetName = this.name;
+        let dealerName = 'The Void';
+        if (this.lastHit && this.lastHit.dealer) { dealerName = this.actorManager.getActorById(this.lastHit.dealer).name; }
+        io.emit('serverMessage', { player: 'Server', message: `${targetName} slain by: ${dealerName}`, color: 'orange' });
+        io.emit('playerDied', this.lastHit || { target: this.id });
         this.respawn();
     }
     respawn() {

@@ -104,7 +104,7 @@ export default class Scene {
     if (!this.player) return;
     if (!this.player.isDead) {
       if (this.player.body && (this.player.body.position.y < (this.data.killFloor || -100))) {
-        this.player.die('The Void');
+        MyEventEmitter.emit('iDied');
       }
     }
     if (this.panningTextures) {

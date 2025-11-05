@@ -6,9 +6,9 @@ import HitData from "./HitData";
 import VoiceChat from './VoiceChat';
 import { menuButton } from "../ui/Menu";
 import Game from "../CGame";
-import ClientActor from "../actors/ClientActor";
 import Player from "../player/Player";
-import { Actor } from "@solblade/shared";
+import CGame from "../CGame";
+import Scene from "../scenes/Scene";
 
 const serverURL = location.hostname === "localhost"
     ? "http://localhost:80"
@@ -22,7 +22,9 @@ const socket = io(serverURL, {
 });
 export const netSocket = socket;
 
+/**@type {CGame} */
 let game = null;
+/**@type {Scene} */
 let scene = null;
 let netPlayers = {};
 /**@type {Player} */
@@ -137,8 +139,10 @@ function initBindings() {
     socket.on('crownGamePlayers', data => {
         MyEventEmitter.emit('crownGamePlayers', data);
     });
-    socket.on('playerDied', data => {
-        data = HitData.deserialize(data, (id) => scene.getActorById(id));
+    socket.on('playerDied', (data) => {
+        console.log(data);
+        if (data.target === playerId) player.die();
+        if (data) data = HitData.deserialize(data, (id) => scene.getActorById(id));
         MyEventEmitter.emit('playerDied', data);
     });
     socket.on('changeAnimation', ({ id, data }) => {

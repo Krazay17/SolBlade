@@ -350,11 +350,11 @@ export default class Player extends Pawn {
             MyEventEmitter.emit('playerHealthChange', { id: this.id, health });
         }
     }
-    die() {
-        if (this.isRemote) return;
+    die(data) {
         if (this.isDead) return;
+        if (this.isRemote) return;
         this.stateManager.setState('dead');
-        MyEventEmitter.emit('iDied', this.lastHitData);
+        MyEventEmitter.emit('iDied', data);
     }
     unDie() {
         if (this.isRemote) return;

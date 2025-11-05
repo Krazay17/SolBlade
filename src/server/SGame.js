@@ -81,13 +81,7 @@ export default class SGame {
         sendDiscordMessage(`Player Connected: ${player.name}!`);
 
         socket.on('iDied', (data) => {
-            const { dealer, target } = data;
-            const targetName = this.actorManager.getActorById(target)?.name || 'The Void';
-            const dealerName = this.actorManager.getActorById(dealer)?.name || 'The Void';
-            if (player) {
-                this.io.emit('serverMessage', { player: 'Server', message: `${targetName} slain by: ${dealerName}`, color: 'orange' });
-                this.io.emit('playerDied', data);
-            }
+            if (player) { player.die(data); }
         });
         socket.on('spawnFX', (data) => {
             socket.broadcast.emit('spawnFX', data);
