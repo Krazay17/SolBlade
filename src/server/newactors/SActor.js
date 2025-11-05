@@ -10,14 +10,23 @@ export default class SActor extends Actor {
 
         this.init();
     }
+    get actorManager() { return this.game.actorManager }
+    update(dt) {
+        this.age = performance.now() - this.timestamp;
+        if (this.lifetime) {
+            if (this.age >= this.lifetime) this.destroy();
+        }
+    }
     activate(data = {}) {
-        super.activate(data)
         io.emit('newActor', this);
     }
     deActivate() {
         if (!this.active) return;
         super.deActivate();
         io.emit('actorEvent', { id: this.id, event: 'deactivate' });
+    }
+    destroy() {
+        this.actorManager.removeActor(this);
     }
     hit(data) {
         if (!this.active) return;

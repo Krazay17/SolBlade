@@ -3,7 +3,7 @@ import SActor from "./SActor.js";
 export default class SPower extends SActor {
     touch(data) {
         if (!this.active) return;
-        data = this.actorManager.getActorById(data);
+        data = this.game.actorManager.getActorById(data);
         switch (this.data.power) {
             case "energy":
                 data.energy.add(50);

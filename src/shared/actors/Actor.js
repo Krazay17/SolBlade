@@ -9,7 +9,10 @@ export default class Actor {
             pos = [0, 0, 0],
             dir = [0, 0, 0],
             rot = [0, 0, 0, 1],
-            active = true
+            active = true,
+            lifetime = 0,
+            isRemote = false,
+            tempId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 10),
         } = data;
         this.data = data;
 
@@ -18,13 +21,18 @@ export default class Actor {
         this.name = name;
         this.owner = owner;
         this.sceneName = sceneName;
-        this.tempId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 10);
+        this.tempId = tempId;
 
         this.pos = pos;
         this.dir = dir;
         this.rot = rot;
 
+        this.isRemote = isRemote;
         this.active = active;
+        this.lifetime = lifetime;
+
+        this.age = 0;
+        this.timestamp = performance.now();
     }
     init() { };
     update(dt, time) { };
@@ -40,12 +48,18 @@ export default class Actor {
             tempId: this.tempId,
 
             pos: this.pos.toArray ? this.pos.toArray() : this.pos,
-            rot: this.rot.toArray ? this.rot.toArray() : this.rot,
             dir: this.dir.toArray ? this.dir.toArray() : this.dir,
+            rot: this.rot.toArray ? this.rot.toArray() : this.rot,
 
             active: this.active,
+            isRemote: this.isRemote,
+            lifetime: this.lifetime,
+
+            age: this.age,
+            timestamp: this.timestamp,
         }
     }
+    activate() { }
     deActivate() { }
     destroy() { }
 }

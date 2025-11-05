@@ -4,8 +4,8 @@ import SHealth from "../core/SHealth.js";
 import SActor from "./SActor.js";
 
 export default class SPlayer extends SActor {
-    constructor(actorManager, data) {
-        super(actorManager, data);
+    constructor(game, data) {
+        super(game, data);
         this.health = new SHealth(this, 100, data.currentHealth);
         this.health.onChange = (v) => this.data.currentHealth = v
         this.health.onDeath = () => this.die();
@@ -30,7 +30,7 @@ export default class SPlayer extends SActor {
     }
     die(data) {
         this.isDead = true;
-        io.emit('actorDie', { id: this.id, data: data || this.lastHit });
+        io.emit('actorEvent', { id: this.id, event: "die", data: data || this.lastHit });
         this.respawn();
     }
     respawn() {

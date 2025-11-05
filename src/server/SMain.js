@@ -1,6 +1,5 @@
 import { Server } from "socket.io";
 import http from "http";
-import { sendDiscordMessage } from "./core/DiscordStuff.js";
 import { sharedTest } from "@solblade/shared";
 import repl from 'repl';
 import SGame from "./SGame.js";
@@ -26,7 +25,6 @@ const playerSockets = {};
 const game = new SGame(io);
 const voiceChat = new SVoiceChat(io);
 
-sharedTest();
 
 io.on('connection', (socket) => {
     if (socket.bound) return;
@@ -40,14 +38,10 @@ io.on('connection', (socket) => {
     voiceChat.bindSockets(socket);
 
     socket.on('disconnect', () => {
+        console.log('user disconnected: ' + socket.id);
         socket.broadcast.emit('userDisconnected', socket.id);
         game.userDisconnect(socket.id);
-
-        io.emit('serverMessage', { player: 'Server', message: `Player Disconnected: ${players[socket.id]?.name || 'null'}!`, color: 'red' });
-        if (!isLocal && players[socket.id]) sendDiscordMessage(`Player Disconnected: ${players[socket.id].name}!`);
-        console.log('user disconnected: ' + socket.id);
     });
-
     socket.on('joinGame', (data) => {
         game.userJoin(socket, data)
     });

@@ -350,17 +350,12 @@ export default class Player extends Pawn {
             MyEventEmitter.emit('playerHealthChange', { id: this.id, health });
         }
     }
-    // only local
     die() {
         if (this.isRemote) return;
         if (this.isDead) return;
         this.stateManager.setState('dead');
         MyEventEmitter.emit('iDied', this.lastHitData);
     }
-    applyDie() {
-        this.die();
-    }
-    // only local
     unDie() {
         if (this.isRemote) return;
         let spawnPoint = this.scene.getRespawnPoint();
@@ -372,7 +367,7 @@ export default class Player extends Pawn {
         this.isDead = false;
         this.stateManager.setState('idle');
 
-        //MyEventEmitter.emit('actorHealthChangeLocal', this.health);
+        MyEventEmitter.emit('actorHealthChangeLocal', this.health.maxHealth);
     }
     tryEnterBlade() {
         if (this.stateManager.currentStateName === 'blade') return;

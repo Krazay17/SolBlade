@@ -1,8 +1,7 @@
-import Actor from "../deprecated/Actor";
+import ClientActor from "./ClientActor";
 
-export default class Portal extends Actor {
-    init(pos, newWorld) {
-        this.portalToPos = pos;
+export default class Portal extends ClientActor {
+    init(newWorld, targetPos) {
         this.newWorld = newWorld;
         this.game.actorManager.addActor(this);
     }
@@ -12,7 +11,7 @@ export default class Portal extends Actor {
             const dist = player.position.distanceToSquared(this.position);
             if (dist < 15) {
                 if (this.newWorld) {
-                    this.game.setWorld(this.newWorld, this.portalToPos);
+                    this.game.setScene(this.newWorld);
                 }
             }
         }

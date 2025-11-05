@@ -27,17 +27,11 @@ export default class ProjectileFireball extends ClientProjectile {
         }
     }
     onHit(result) {
-        const actor = result.actor;
+        const actor = this.actorManager.getActorById(result.actor);
         if (actor) {
-            const hitData = new HitData({
-                dealer: this.owner,
-                target: actor,
-                amount: this.damage,
-                type: 'fire',
-                hitPosition: this.position,
-                dim: 500,
-            })
-            actor.hit(hitData);
+            Object.assign(this.hitData, { hitPosition: this.pos, dim: 500 });
+
+            actor.hit?.(this.hitData);
         }
     }
     onCollide() {

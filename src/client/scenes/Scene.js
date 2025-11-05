@@ -141,10 +141,10 @@ export default class Scene {
     light.position.copy(pos);
     this.graphics.add(light);
   }
-  createPortal(pos, targetPos, newWorld) {
+  createPortal(pos, newWorld, targetPos) {
     const portal = new Portal(this.game);
     portal.position.set(pos.x, pos.y, pos.z);
-    portal.init(targetPos, newWorld);
+    portal.init(newWorld, targetPos);
   }
   spawnLevel(name = 'scene2', callback) {
     if (this.mapLoaded[name]) return;
@@ -230,8 +230,8 @@ export default class Scene {
           const pos = userData.pos ? { x: userData.pos[0], y: userData.pos[1], z: userData.pos[2] } : undefined
           this.createPortal(
             child.position,
-            pos,
-            userData.world
+            userData.world,
+            pos
           );
           return;
         }

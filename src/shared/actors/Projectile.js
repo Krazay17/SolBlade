@@ -1,19 +1,16 @@
 import { Vector3 } from "three";
 import Actor from "./Actor.js";
 import RAPIER from "@dimforge/rapier3d-compat";
-import HitData from "../HitData.js"
 
 export default class Projectile extends Actor {
     constructor(physics, data = {}) {
-        super(data);
+        super({ ...data, lifetime: data.lifetime ?? 10000 });
         const {
             radius = 1,
             speed = 1,
             gravity = 5,
-            lifetime = 10000,
             ignoreBody = null,
             damage = 1,
-            damageType = 'normal',
             hitCallback = null,
             collideCallback = null,
         } = data;
@@ -26,23 +23,12 @@ export default class Projectile extends Actor {
         this.gravity = gravity;
         this.ignoreBody = ignoreBody;
 
-        this.timestamp = performance.now();
-        this.lifetime = lifetime;
-        this.age = 0;
-
-        this.damage = damage;
-        this.damageType = damageType;
-
-        this.hitData = new HitData({
-            dealer: this.owner,
-            type: this.damageType,
-            amount: this.damage,
-        })
-
         this.tempVec = new Vector3();
         this.veloctiy = this.dir.clone().multiplyScalar(this.speed);
 
         this.body = new RAPIER.Ball(this.radius);
+
+        this.damage = damage;
 
         this.hitCallback = hitCallback;
         this.collideCallback = collideCallback;
@@ -50,7 +36,9 @@ export default class Projectile extends Actor {
     fixedUpdate(dt, time) {
         if (!this.active) return;
         this.age = performance.now() - this.timestamp;
-        if (this.age >= this.lifetime) this.destroy();
+        if (this.lifetime) {
+            if (this.age >= this.lifetime) this.destroy();
+        }
 
         this.tempVec.copy(this.veloctiy).multiplyScalar(dt);
         if (this.gravity) this.tempVec.y -= this.gravity * dt;
@@ -58,6 +46,8 @@ export default class Projectile extends Actor {
         this.pos.add(this.tempVec);
 
         if (!this.body) return;
+        if (this.isRemote) return;
+
         const result = this.physics.intersectionWithShape(
             this.pos,
             this.rot,
@@ -72,9 +62,6 @@ export default class Projectile extends Actor {
             const target = result.actor;
             if (target) {
                 if (target === this.owner) return;
-                this.hitData.target = target;
-                this.hitData.hitPosition = this.pos;
-                //target.hit?.(this.hitData);
                 if (this.hitCallback) this.hitCallback(result);
                 this.onHit(result);
             }

@@ -20,10 +20,11 @@ export default class ClientActor extends Actor {
         const rot = Array.isArray(rotArr)
             ? new Quaternion(rotArr[0] || 0, rotArr[1] || 0, rotArr[2] || 0, rotArr[3] || 1)
             : new Quaternion(rotArr?.x || 0, rotArr?.y || 0, rotArr?.z || 0, rotArr?.w || 1);
-            
+
         super({ ...data, pos, dir, rot });
         /**@type {Game} */
         this.game = game;
+
         this.destroyed = false;
         this.isRemote = data.isRemote ?? false;
 
@@ -42,6 +43,7 @@ export default class ClientActor extends Actor {
         this.init();
     }
     get position() { return this.pos };
+    get actorManager() { return this.game.actorManager };
     async createMesh(meshName, color = "white") {
         let mesh;
         if (meshName) {

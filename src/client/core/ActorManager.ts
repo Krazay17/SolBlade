@@ -72,18 +72,13 @@ export default class ActorManager {
         replicate: boolean = false,
     ): ClientActor | undefined | void {
         const sceneName = data.sceneName || this.game?.sceneName;
-        // if (isRemote && (data.sceneName !== sceneName)) return;
-        const finalData = { ...data, isRemote, replicate, sceneName, active: true };
-
-        // const existingActor = this.getActorById(data.id);
-        // if (existingActor) return existingActor.activate(finalData);
         const finalType = data?.enemy || type;
         const actorClass = actorRegistry[finalType];
+        const finalData = { ...data, isRemote, replicate, sceneName, active: true };
         if (!actorClass) return console.warn(`Unknown actor: ${type}`, data);
 
         const actor = new actorClass(this.game, finalData);
         if (!actor) return;
-        console.log(actor);
 
         this.actors.push(actor);
         if (!isRemote && replicate) {
@@ -134,7 +129,7 @@ export default class ActorManager {
             if (!a.active) continue;
             const dist = a.position.distanceToSquared(pos);
             if ((dist <= range)) {
-                if (owner && owner === a) continue;
+                if (owner && owner === a.id) continue;
                 if (actor && actor === a) continue;
                 inrange.set(a, dist);
             }

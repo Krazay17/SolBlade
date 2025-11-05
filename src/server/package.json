@@ -3,8 +3,8 @@
   "description": "SolBlade Game Server",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node SMain.js",
+    "dev": "nodemon SMain.js"
   },
   "dependencies": {
     "@solblade/shared": "file:../shared",

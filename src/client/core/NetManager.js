@@ -7,6 +7,8 @@ import VoiceChat from './VoiceChat';
 import { menuButton } from "../ui/Menu";
 import Game from "../CGame";
 import ClientActor from "../actors/ClientActor";
+import Player from "../player/Player";
+import { Actor } from "@solblade/shared";
 
 const serverURL = location.hostname === "localhost"
     ? "http://localhost:80"
@@ -23,6 +25,7 @@ export const netSocket = socket;
 let game = null;
 let scene = null;
 let netPlayers = {};
+/**@type {Player} */
 let player = null;
 let playerId = null;
 let socketBound = false;
@@ -57,7 +60,7 @@ socket.on("connect", () => {
 });
 function joinGame() {
     player = Game.getGame().player;
-    player.id = playerId;
+    player.setId(playerId);
     netPlayers[playerId] = player;
     initBindings();
     socket.emit('joinGame', player.serialize());
@@ -75,7 +78,7 @@ function initBindings() {
         socket.disconnect();
     });
 
-    socket.on('playerDisconnected', (id) => {
+    socket.on('userDisconnected', (id) => {
         if (id === playerId) return;
         MyEventEmitter.emit('playerDisconnected', netPlayers[id]);
         delete netPlayers[id];
@@ -153,8 +156,7 @@ function initBindings() {
             MyEventEmitter.emit('playerNameUpdate', ({ player, name }));
         }
     });
-    socket.on('newScene', (player) => {
-        const data = ClientActor.deserialize(player);
+    socket.on('newScene', (data) => {
         const { type, id, sceneName } = data;
         if (id === playerId) return;
         const actor = scene.getActorById(id);
@@ -166,7 +168,6 @@ function initBindings() {
         }
     });
     socket.on('currentActors', (data) => {
-        console.log(data);
         for (const a of data) {
             const { type, tempId, id } = a
             if (id === playerId) continue;

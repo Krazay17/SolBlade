@@ -1,6 +1,7 @@
 import { Projectile } from "@solblade/shared";
 import { Mesh, MeshBasicMaterial, Object3D, SphereGeometry, Vector3, Quaternion } from "three";
 import Game from "../CGame";
+import HitData from "../core/HitData";
 
 export default class ClientProjectile extends Projectile {
     constructor(game, data) {
@@ -28,8 +29,18 @@ export default class ClientProjectile extends Projectile {
         this.graphics.position.copy(this.pos);
         this.graphics.quaternion.copy(this.rot);
         this.game.add(this.graphics);
+
+        this.hitData = new HitData({
+            dealer:this.owner,
+            amount: this.damage,
+            critMult: 2
+        })
     }
     get position() { return this.pos };
+    get actorManager() { return this.game.actorManager };
+    update(dt, time) {
+        this.graphics.position.lerp(this.pos, dt * 60);
+    }
     destroy() {
         this.game.actorManager.removeActor(this);
         this.game.remove(this.graphics);
@@ -46,8 +57,5 @@ export default class ClientProjectile extends Projectile {
             );
         }
         this.graphics.add(mesh);
-    }
-    update(dt, time) {
-        this.graphics.position.lerp(this.pos, dt * 60);
     }
 }

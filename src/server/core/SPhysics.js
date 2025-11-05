@@ -1,32 +1,30 @@
 import RAPIER from '@dimforge/rapier3d-compat';
-import { Server } from "socket.io";
-import ActorManager from './SActorManager.js';
 import { loadJson } from './LoadJson.js';
+import SGame from '../SGame.js';
 
-const world1Data = await loadJson('./worlds/world1.json');
-const world2Data = await loadJson('./worlds/world2.json');
-const world3Data = await loadJson('./worlds/world3.json');
-const world4Data = await loadJson('./worlds/world4.json');
+const scene1Data = await loadJson('../worlds/scene1.json');
+const scene2Data = await loadJson('../worlds/scene2.json');
+const scene3Data = await loadJson('../worlds/scene3.json');
+const scene4Data = await loadJson('../worlds/scene4.json');
 await RAPIER.init({});
 
 export default class SPhysics {
     constructor(game, io) {
-
+        /**@type {SGame} */
         this.game = game;
-        /**@type {Server} */
         this.io = io;
 
-        this.world0 = new RAPIER.World({ x: 0, y: -9, z: 0 });
-        this.world1 = this.makeWorld(world1Data);
-        this.world2 = this.makeWorld(world2Data);
-        this.world3 = this.makeWorld(world3Data);
-        this.world4 = this.makeWorld(world4Data);
+        this.scene0 = new RAPIER.World({ x: 0, y: -9, z: 0 });
+        this.scene1 = this.makeWorld(scene1Data);
+        this.scene2 = this.makeWorld(scene2Data);
+        this.scene3 = this.makeWorld(scene3Data);
+        this.scene4 = this.makeWorld(scene4Data);
     }
     update(dt) {
-        this.updateWorld(dt, 'world1')
-        this.updateWorld(dt, 'world2')
-        this.updateWorld(dt, 'world3')
-        this.updateWorld(dt, 'world4')
+        this.updateWorld(dt, 'scene1')
+        this.updateWorld(dt, 'scene2')
+        this.updateWorld(dt, 'scene3')
+        this.updateWorld(dt, 'scene4')
     }
     makeWorld(worldData) {
         const world = new RAPIER.World({ x: 0, y: -9, z: 0 });
@@ -65,10 +63,10 @@ export default class SPhysics {
 
         return world;
     }
-    updateWorld(dt, world) {
-        if (!this[world]) return;
-        this[world].step();
-        const { players, enemies, others } = this.actorManager.actorsOfWorld[world];
+    updateWorld(dt, scene) {
+        if (!this[scene]) return;
+        this[scene].step();
+        const { players, enemies, others } = this.game.actorManager.actorsOfScene[scene];
 
         const enemyPositions = enemies.flatMap(e =>
             e.active ? [{ id: e.data.id, pos: e.body.translation(), rot: e.rotation }] : []

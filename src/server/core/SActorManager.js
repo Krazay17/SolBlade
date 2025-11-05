@@ -25,7 +25,7 @@ export default class SActorManager {
         };
 
         this.hasSpawnedDefaults = false;
-        setImmediate(() => this.spawnDefaultActors());
+        //setImmediate(() => this.spawnDefaultActors());
 
         SActorManager.instance = this;
     }
@@ -98,9 +98,9 @@ export default class SActorManager {
             : randomUUID();
         const actorClass = actorRegistry[type];
         if (actorClass) {
-            actor = new actorClass(this, { ...data, type, id: id });
+            actor = new actorClass(this.game, { ...data, type, id });
         } else {
-            actor = new SActor(this, { ...data, type, id: id });
+            actor = new SActor(this.game, { ...data, type, id });
         }
         if (!actor) return;
         if (!this.actorsOfScene[actor.sceneName]) {
@@ -119,6 +119,7 @@ export default class SActorManager {
         }
         this.actors.push(actor);
         this.io.emit('newActor', actor.serialize());
+        console.log(actor.serialize())
         return actor;
     }
     spawnDefaultActors() {

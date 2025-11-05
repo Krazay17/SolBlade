@@ -1,4 +1,4 @@
-import SCrownQuest from "./SCrownQuest";
+import SCrownQuest from "./SCrownQuest.js";
 
 export default class SQuestManager {
     constructor(game, io) {

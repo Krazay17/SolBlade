@@ -68,6 +68,10 @@ export default class Pawn extends ClientActor {
         if (this.isRemote) return;
         MyEventEmitter.emit('playerRotation', q);
     }
+    setId(id: string){
+        this.id = id;
+        this.body.collider.actor = id;
+    }
     update(dt: number, time: number) {
         super.update(dt, time);
         if (!this.active || this.destroyed) return;

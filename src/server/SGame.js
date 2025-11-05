@@ -1,6 +1,7 @@
-import SActorManager from "./core/SActorManager";
-import SPhysics from "./core/SPhysics";
-import SQuestManager from "./core/SQuestManager";
+import { sendDiscordMessage } from "./core/DiscordStuff.js";
+import SActorManager from "./core/SActorManager.js";
+import SPhysics from "./core/SPhysics.js";
+import SQuestManager from "./core/SQuestManager.js";
 
 export default class SGame {
     constructor(io) {
@@ -8,12 +9,22 @@ export default class SGame {
 
         this.sockets = new Map();
         this.players = {};
-
         this.actorManager = new SActorManager(this, io);
         this.physics = new SPhysics(this, io);
         this.questManager = new SQuestManager(this, io);
 
-
+        this.init();
+    }
+    get allActors() { return this.actorManager.actors }
+    get allPlayersSerialized() {
+        const serializedData = {}
+        for (const [id, a] of Object.entries(this.players)) {
+            if (!a.active) continue;
+            serializedData[id] = a.serialize();
+        }
+        return serializedData;
+    }
+    init() {
         this.lastTime = performance.now();
         this.accumulator = 0;
         const timestep = 1 / 60;
@@ -29,7 +40,6 @@ export default class SGame {
             }
         }, 1000 / 60);
     }
-    get allActors() { return this.actorManager.actors }
     createActor(type, data) {
         this.actorManager.createActor(type, data)
     }
@@ -41,65 +51,69 @@ export default class SGame {
         this.sockets.set(socket.id, socket);
     }
     userDisconnect(id) {
-        this.sockets.delete(id);
-        this.actorManager.removeActor(id);
-    }
-    userJoin(socket) {
-        this.bindGameEvents(socket);
-    }
-    bindGameEvents(socket) {
-        if (players[socket.id]) return;
-        const player = this.actorManager.createActor('player', { ...data, id: socket.id });
-        players[socket.id] = player;
-        socket.emit('playersConnected', players);
-        socket.broadcast.emit('playerConnected', player)
+        this.io.emit('serverMessage', { player: 'Server', message: `Player Disconnected: ${this.players[id]?.name || 'null'}!`, color: 'red' });
+        if (this.players[id]) sendDiscordMessage(`Player Disconnected: ${this.players[id].name}!`);
 
+        this.actorManager.removeActor(id);
+        this.sockets.delete(id);
+        delete this.players[id];
+    }
+    userJoin(socket, data) {
+        if (this.players[socket.id]) return;
+        const player = this.actorManager.createActor('player', { ...data, id: socket.id });
+        this.players[socket.id] = player;
+        socket.emit('playersConnected', this.allPlayersSerialized);
+        socket.broadcast.emit('playerConnected', player.serialize())
+
+        this.bindGameEvents(socket, player);
+    }
+    bindGameEvents(socket, player) {
         socket.on('newScene', (scene) => {
-            this.actorManager.onNewScene(player, scene)
-            socket.broadcast.emit('newScene', player);
+            this.actorManager.onNewScene(socket.id, scene)
+            socket.broadcast.emit('newScene', player.serialize());
             socket.emit('currentActors', this.actorManager.getActorsOfScene(scene));
         });
         socket.on('checkCurrentActors', (scene) => {
             socket.emit('currentActors', this.actorManager.getActorsOfScene(scene));
         });
 
-        io.emit('serverMessage', { player: 'Server', message: `Player Connected: ${data.name}!`, color: 'yellow' });
-        if (!isLocal) sendDiscordMessage(`Player Connected: ${data.name}!`);
+        this.io.emit('serverMessage', { player: 'Server', message: `Player Connected: ${player.name}!`, color: 'yellow' });
+        sendDiscordMessage(`Player Connected: ${player.name}!`);
 
         socket.on('iDied', (data) => {
             const { dealer, target } = data;
             const targetName = this.actorManager.getActorById(target)?.name || 'The Void';
             const dealerName = this.actorManager.getActorById(dealer)?.name || 'The Void';
             if (player) {
-                io.emit('serverMessage', { player: 'Server', message: `${targetName} slain by: ${dealerName}`, color: 'orange' });
-                io.emit('playerDied', data);
+                this.io.emit('serverMessage', { player: 'Server', message: `${targetName} slain by: ${dealerName}`, color: 'orange' });
+                this.io.emit('playerDied', data);
             }
         });
         socket.on('spawnFX', (data) => {
             socket.broadcast.emit('spawnFX', data);
         });
         socket.on('playerNameChange', name => {
-            players[socket.id].name = name;
-            io.emit('playerNameChange', { id: socket.id, name });
+            this.players[socket.id].name = name;
+            this.io.emit('playerNameChange', { id: socket.id, name });
         });
         socket.on('playerStateUpdate', data => {
             //actorManager.updateActor(data);
             socket.broadcast.emit('playerStateUpdate', data);
         });
         socket.on('playerPositionSend', (data) => {
-            if (players[socket.id]) players[socket.id].pos = data.pos;
+            if (this.players[socket.id]) this.players[socket.id].pos = data.pos;
             socket.broadcast.emit('playerPositionUpdate', { id: socket.id, data });
         });
         socket.on('playerRotation', (data) => {
-            //if (players[socket.id]) players[socket.id].rot = data;
+            //if (this.players[socket.id]) this.players[socket.id].rot = data;
             socket.broadcast.emit('playerRotation', { id: socket.id, data });
         });
         socket.on('playAnimation', (data) => {
-            if (players[socket.id]) players[socket.id].anim = data;
+            if (this.players[socket.id]) this.players[socket.id].anim = data;
             socket.broadcast.emit('playAnimation', { id: socket.id, data })
         });
         socket.on('changeAnimation', (data) => {
-            const player = players[socket.id];
+            const player = this.players[socket.id];
             if (player) {
                 socket.broadcast.emit('changeAnimation', { id: socket.id, data });
             }
@@ -108,15 +122,12 @@ export default class SGame {
             socket.broadcast.emit('chatMessageUpdate', { id: socket.id, data: { player, message, color } });
         });
         socket.on('parryUpdate', (doesParry) => {
-            if (players[socket.id]) {
-                players[socket.id].parry = doesParry;
+            if (this.players[socket.id]) {
+                this.players[socket.id].parry = doesParry;
             }
         });
         socket.on('newActor', (data) => {
-            console.log(data);
-            const deserializeData = Actor.deserialize(data);
-            console.log(deserializeData);
-            this.actorManager.createActor(data.type, deserializeData);
+            this.actorManager.createActor(data.type, data);
         });
         socket.on('actorStateUpdate', (data) => {
             const actor = this.actorManager.getActorById(data.id);
@@ -144,9 +155,6 @@ export default class SGame {
         })
         socket.on('leaveScene', (scene) => {
             socket.broadcast.emit('leavescene', { id: socket.id, scene });
-        });
-        socket.on('bootPlayer', id => {
-            if (playerSockets[id]) playerSockets[id].disconnect();
         });
         socket.on('actorEvent', ({ id, event, data }) => {
             console.log(event);
