@@ -75,7 +75,7 @@ export default class ActorManager {
         const sceneName = data.sceneName || this.game?.sceneName;
         const finalType = data?.enemy || type;
         const actorClass = actorRegistry[finalType];
-        const finalData = { ...data, isRemote, replicate, sceneName, active: true };
+        const finalData = { ...data, type, isRemote, replicate, sceneName, active: true };
         if (!actorClass) return console.warn(`Unknown actor: ${type}`, data);
 
         const actor = new actorClass(this.game, finalData);

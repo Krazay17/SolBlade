@@ -2,18 +2,19 @@ import ClientPickup from "./ClientPickup";
 
 export default class ClientCard extends ClientPickup {
     init() {
-        this.itemData = this.data.itemData;
-        console.log(this.itemData.name);
         this.build();
     }
     async build() {
         const mesh = await this.createMesh('item');
+        mesh.scale.x = .5;
+        mesh.scale.y = .5;
+        mesh.scale.z = .5;
         const tex = await this.makeTexture(mesh);
         const geom = mesh.children[0].geometry;
         this.createBody(null, geom);
     }
     async makeTexture(mesh) {
-        await this.game.meshManager?.getTex(this.itemData.name + '.png').then((tex) => {
+        await this.game.meshManager?.getTex(this.data.itemData.name + '.png').then((tex) => {
             if (!mesh || !mesh.children) return;
 
             const mesh1 = mesh.children[0];

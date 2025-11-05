@@ -186,7 +186,7 @@ export default class Player extends Pawn {
     dropItem(item) {
         const { pos, dir } = this.getShootData();
         const dropPos = pos.add(dir.multiplyScalar(2));
-        this.game.actorManager.spawnActor('item', { item, pos: dropPos }, false, true);
+        this.game.actorManager.spawnActor('card', { itemData: item, pos: dropPos }, false, true);
     }
     getShootData() {
         const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));

@@ -12,7 +12,7 @@ export default class Actor {
             active = true,
             lifetime = 0,
             isRemote = false,
-            tempId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 10),
+            tempId = data.tempId ?? crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 10),
         } = data;
         this.data = data;
 
@@ -65,7 +65,7 @@ export default class Actor {
     deActivate() {
         this.active = false;
     }
-    destroy() { 
+    destroy() {
         this.destroyed = true;
     }
 }

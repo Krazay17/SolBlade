@@ -133,7 +133,7 @@ export default class SGame {
         });
         socket.on('playPosSound', (data) => {
             socket.broadcast.emit('playPosSound', { sceneName: player.sceneName, data });
-        })
+        });
         socket.on('crownGameEnter', () => {
             crownQuest.join(socket.id);
         });
@@ -142,10 +142,10 @@ export default class SGame {
         });
         socket.on('crownPickup', () => {
             crownQuest.pickupCrown(socket.id);
-        })
+        });
         socket.on('dropCrown', (pos) => {
             crownQuest.dropCrown(socket.id, pos);
-        })
+        });
         socket.on('leaveScene', (scene) => {
             socket.broadcast.emit('leavescene', { id: socket.id, scene });
         });

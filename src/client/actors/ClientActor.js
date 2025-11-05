@@ -98,7 +98,9 @@ export default class ClientActor extends Actor {
     }
     setId(id) {
         this.id = id;
-        this.collider.actor = id;
+        if (this.collider) {
+            this.collider.actor = id;
+        }
     }
     update(dt, time) {
         if (!this.active) return;
@@ -132,7 +134,7 @@ export default class ClientActor extends Actor {
     }
     activate(data) {
         if (this.active) return;
-        if(data)Object.assign(this, data);
+        if (data) Object.assign(this, data);
         if (this.graphics) {
             this.graphics.position.copy(this.pos);
             this.graphics.quaternion.copy(this.rot);
@@ -144,7 +146,7 @@ export default class ClientActor extends Actor {
             this.body.wakeUp();
             this.collider.setEnabled(true);
         }
-        if(!this.collider) {
+        if (!this.collider) {
 
         }
 

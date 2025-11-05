@@ -179,7 +179,7 @@ function initBindings() {
             );
             if (existingActor) {
                 existingActor.setId(id);
-                existingActor.activate();
+                //existingActor.activate();
             } else {
                 const newActor = scene.actorManager.spawnActor(type, a, true, false);
             }
@@ -193,7 +193,7 @@ function initBindings() {
         );
         if (existingActor) {
             existingActor.setId(id);
-            existingActor.activate(data);
+            //existingActor.activate(data);
         } else {
             if (sceneName !== scene.sceneName) return;
             const newActor = scene.actorManager.spawnActor(type, data, true, false);

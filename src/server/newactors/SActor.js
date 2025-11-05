@@ -36,7 +36,8 @@ export default class SActor extends Actor {
     deActivate() {
         if (!this.active) return;
         super.deActivate();
-        io.emit('actorEvent', { id: this.id, event: 'deactivate' });
+        // DEACTIVATE IS DESTROYING ON CLIENT FOR NOW
+        io.emit('actorEvent', { id: this.id, event: 'destroy' });
         if (this.onDeactivate) this.onDeactivate();
     }
     destroy() {
