@@ -2,18 +2,19 @@ import Player from "../player/Player";
 import MyEventEmitter from "./MyEventEmitter";
 
 export default class Energy {
-    constructor(owner, maxEnergy = 100, baseRegen = 30) {
+    constructor(owner, maxEnergy = 100, baseRegen = 50) {
         /**@type {Player} */
         this.owner = owner;
         this.max = maxEnergy;
         this.current = maxEnergy;
-        this.baseRegenRate = baseRegen;
+        this._baseRegenRate = baseRegen;
         this.regenRate = baseRegen;
         this.drainRate = 0;
         this.canRegen = true;
         this.regenDelay = 1500;
         this._regenTimeout = null;
     }
+    get baseRegenRate() { return this._baseRegenRate }
     update(dt) {
         if (this.drainRate > 0) return this._applyDrain(dt);
         if (this.canRegen && this.regenRate > 0) this._applyRegen(dt);

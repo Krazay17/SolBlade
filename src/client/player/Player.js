@@ -31,58 +31,65 @@ export default class Player extends Pawn {
 
         // Local Player setup
         if (!this.isRemote) {
-            this.tick = false
-            this.input = this.game.input;
-            this.camera = this.game.camera;
-
-            this.direction = new THREE.Vector3();
-            this.tempVector = new THREE.Vector3();
-            this.energy = new Energy(this, 100);
-            this.movement = new PlayerMovement(this.game, this);
-            this.stateManager = new PlayerStateManager(this.game, this);
-            this.devMenu = new DevMenu(this, this.movement);
-
-            /**@type {Weapon.Weapon} */
-            this.weapon0 = new Weapon.WeaponFireball(game, this, '0');
-            /**@type {Weapon.Weapon} */
-            this.weapon1 = new Weapon.WeaponSword(game, this, '1');
-            /**@type {Weapon.Weapon} */
-            this.weapon2 = null;
-            /**@type {Weapon.Weapon} */
-            this.weapon3 = null;
-            /**@type {Weapon.Weapon} */
-            this.weapon4 = null;
-            /**@type {Weapon.Weapon} */
-            this.weapon5 = null;
-
-            menuButton('spikeMan', () => {
-                this.assignMesh('spikeMan');
-            });
-            menuButton('knightGirl', () => {
-                this.assignMesh('knightGirl');
-            });
-
-            this.cameraArm = new THREE.Object3D();
-            this.cameraArm.position.set(.666, .666, -.333);
-            this.add(this.cameraArm);
-            this.camera.position.z = 1.666;
-            this.cameraArm.add(this.camera);
-            CameraFX.init(this.camera);
-
-
-            MyEventEmitter.on('KeyPressed', (key) => {
-                if (key === 'KeyH') {
-                    this.die('the void');
-                }
-            });
-
+            this.localInit()
         } else {
-            // Remote Player
-            this.namePlate = new NamePlate(this, this.height);
-            // !!!!pre load crown for net player!!!!
-            if (this.data.hasCrown) {
-                this.pickupCrown();
+            this.remoteInit();
+        }
+    }
+    localInit(game) {
+        this.tick = false
+        this.input = this.game.input;
+        this.camera = this.game.camera;
+
+        this.direction = new THREE.Vector3();
+        this.tempVector = new THREE.Vector3();
+        this.energy = new Energy(this, 100);
+        this.movement = new PlayerMovement(this.game, this);
+        this.stateManager = new PlayerStateManager(this.game, this);
+        this.devMenu = new DevMenu(this, this.movement);
+
+        /**@type {Weapon.Weapon} */
+        this.weapon0 = new Weapon.WeaponFireball(this.game, this, '0');
+        /**@type {Weapon.Weapon} */
+        this.weapon1 = new Weapon.WeaponSword(this.game, this, '1');
+        /**@type {Weapon.Weapon} */
+        this.weapon2 = null;
+        /**@type {Weapon.Weapon} */
+        this.weapon3 = null;
+        /**@type {Weapon.Weapon} */
+        this.weapon4 = null;
+        /**@type {Weapon.Weapon} */
+        this.weapon5 = null;
+
+        menuButton('spikeMan', () => {
+            this.assignMesh('spikeMan');
+        });
+        menuButton('knightGirl', () => {
+            this.assignMesh('knightGirl');
+        });
+
+        this.cameraArm = new THREE.Object3D();
+        this.cameraArm.position.set(.666, .666, -.333);
+        this.add(this.cameraArm);
+        this.camera.position.z = 1.666;
+        this.cameraArm.add(this.camera);
+        CameraFX.init(this.camera);
+
+        MyEventEmitter.on('keyJustDown', (e) => {
+            if (e === 'Space') this.stateManager.setState('jump');
+            console.log('keydown')
+        });
+
+        MyEventEmitter.on('KeyPressed', (key) => {
+            if (key === 'KeyH') {
+                this.die('the void');
             }
+        });
+    }
+    remoteInit() {
+        this.namePlate = new NamePlate(this, this.height);
+        if (this.data.hasCrown) {
+            this.pickupCrown();
         }
     }
     update(dt, time) {

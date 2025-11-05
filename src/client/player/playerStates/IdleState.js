@@ -31,16 +31,10 @@ export default class IdleState extends PlayerState {
             this.body.velocity = { x: 0, y: 0, z: 0 };
             this.body.sleep();
         }
-
         if (this.actor.movement.getInputDirection().length() > 0) {
             this.manager.setState('run', this.actor.movement.floorTrace());
             return;
         }
-
-        if (this.input.keys['Space'] && this.manager.setState('jump')) {
-            return;
-        }
-
         if (!this.actor.movement.isGrounded()) {
             this.manager.setState('fall');
             return;

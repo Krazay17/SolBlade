@@ -51,6 +51,7 @@ export default class Pawn extends ClientActor {
 
         MyEventEmitter.emit("pawnCreated", this);
     }
+    get velocity() { return this.body.velocity }
     get position() { return this.body?.position }
     set rotationY(v) { this.graphics.rotation.y = v }
     get rotationY() { return this.graphics.rotation.y };
@@ -68,7 +69,7 @@ export default class Pawn extends ClientActor {
         if (this.isRemote) return;
         MyEventEmitter.emit('playerRotation', q);
     }
-    setId(id: string){
+    setId(id: string) {
         this.id = id;
         this.body.collider.actor = id;
     }

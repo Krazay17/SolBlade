@@ -7,6 +7,7 @@ export default class ClientActor extends Actor {
     constructor(game, data = {}) {
         const posArr = data.pos;
         const dirArr = data.dir;
+        const velArr = data.vel;
         const rotArr = data.rot;
 
         const pos = Array.isArray(posArr)
@@ -16,12 +17,17 @@ export default class ClientActor extends Actor {
         const dir = Array.isArray(dirArr)
             ? new Vector3(dirArr[0] || 0, dirArr[1] || 0, dirArr[2] || 0)
             : new Vector3(dirArr?.x || 0, dirArr?.y || 0, dirArr?.z || 0);
+        const vel = Array.isArray(velArr)
+            ? new Vector3(velArr[0] || 0, velArr[1] || 0, velArr[2] || 0)
+            : new Vector3(velArr?.x || 0, velArr?.y || 0, velArr?.z || 0);
 
         const rot = Array.isArray(rotArr)
             ? new Quaternion(rotArr[0] || 0, rotArr[1] || 0, rotArr[2] || 0, rotArr[3] || 1)
             : new Quaternion(rotArr?.x || 0, rotArr?.y || 0, rotArr?.z || 0, rotArr?.w || 1);
 
-        super({ ...data, pos, dir, rot });
+
+
+        super({ ...data, pos, dir, rot, vel });
         /**@type {Game} */
         this.game = game;
 

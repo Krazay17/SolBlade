@@ -23,10 +23,6 @@ export default class RunState extends PlayerState {
             this.manager.setState('idle');
             return;
         }
-        if (input.actionStates.jump && this.grounded
-            && this.manager.setState('jump')) {
-            return;
-        }
         switch (this.pivot(false)) {
             case 'Front':
                 this.animationManager.playAnimation('run');

@@ -37,7 +37,7 @@ export default class PlayerMovement {
             },
             air: {
                 friction: 0,
-                accel: 2,
+                accel: 4,
                 speed: 4,
                 tap: 0.01
             },

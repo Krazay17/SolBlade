@@ -53,48 +53,42 @@ export default class PawnBody {
         this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
     }
     get position() {
-        if (!this.body) return this._position.set(0, 0, 0)
         return this._position.copy(this.body?.translation());
     }
     set position(pos: Vector3) {
-        if (!this.body) return;
         this.body.setTranslation(pos, false);
     }
     get rotation() {
         return this.body.rotation();
     }
     get velocity(): Vector3 {
-        if (!this.body) return this._velocity.set(0, 0, 0);
         return this._velocity.copy(this.body.linvel());
     }
     set velocity(vel: { x: number, y: number, z: number }) {
-        if (!this.body) return;
         this.body.setLinvel(vel, true);
     }
     set velocityX(x: number) {
-        if (!this.body) return;
         const y = this.body.linvel().y;
         const z = this.body.linvel().z;
         this.body.setLinvel({ x, y, z }, true);
     }
     set velocityY(y: number) {
-        if (!this.body) return;
         const x = this.body.linvel().x;
         const z = this.body.linvel().z;
         this.body.setLinvel({ x, y, z }, true);
     }
+    get velocityY() {
+        return this.body.linvel().y
+    }
     set velocityZ(z: number) {
-        if (!this.body) return;
         const x = this.body.linvel().x;
         const y = this.body.linvel().y;
         this.body.setLinvel({ x, y, z }, true);
     }
     sleep() {
-        if (!this.body) return;
         this.body.sleep();
     }
     wakeUp() {
-        if (!this.body) return;
         this.body.wakeUp();
     }
 }

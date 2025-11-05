@@ -6,6 +6,7 @@ const scene1Data = await loadJson('../worlds/scene1.json');
 const scene2Data = await loadJson('../worlds/scene2.json');
 const scene3Data = await loadJson('../worlds/scene3.json');
 const scene4Data = await loadJson('../worlds/scene4.json');
+const scene5Data = await loadJson('../worlds/scene5.json');
 await RAPIER.init({});
 
 export default class SPhysics {
@@ -19,12 +20,14 @@ export default class SPhysics {
         this.scene2 = this.makeWorld(scene2Data);
         this.scene3 = this.makeWorld(scene3Data);
         this.scene4 = this.makeWorld(scene4Data);
+        this.scene5 = this.makeWorld(scene5Data);
     }
     update(dt) {
         this.updateWorld(dt, 'scene1')
         this.updateWorld(dt, 'scene2')
         this.updateWorld(dt, 'scene3')
         this.updateWorld(dt, 'scene4')
+        this.updateWorld(dt, 'scene5')
     }
     makeWorld(worldData) {
         const world = new RAPIER.World({ x: 0, y: -9, z: 0 });

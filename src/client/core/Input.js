@@ -85,6 +85,9 @@ export default class Input {
     });
     this.domElement.addEventListener('keydown', (e) => {
       if (this.inputBlocked) return;
+      if (!this.actionStates.jump) {
+        MyEventEmitter.emit('keyJustDown', e.code);
+      }
       this.keys[e.code] = true;
       const action = this.actions[e.code];
       if (action) this.actionStates[action] = true;

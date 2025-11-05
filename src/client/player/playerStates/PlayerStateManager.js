@@ -27,6 +27,10 @@ export default class PlayerStateManager {
         this.currentStateName = 'idle';
         this.currentActionStateName = null;
         this.lastState = null;
+
+        this.init();
+    }
+    init() {
     }
 
     update(dt, time) {
@@ -52,7 +56,7 @@ export default class PlayerStateManager {
     }
 
     setActionState(state, enterParams) {
-        if(!state && this.actionState?.canExit()) {
+        if (!state && this.actionState?.canExit()) {
             this.actionState?.exit();
             this.actionState = null;
             return true;
