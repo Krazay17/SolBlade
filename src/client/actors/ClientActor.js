@@ -41,6 +41,7 @@ export default class ClientActor extends Actor {
         this.body = null;
         /**@type {RAPIER.Collider} */
         this.collider = null;
+        this.colliderDesc = null;
 
         if (!this.isRemote) {
             this.lastSentPos = this.pos;
@@ -131,6 +132,7 @@ export default class ClientActor extends Actor {
     }
     activate(data) {
         if (this.active) return;
+        if(data)Object.assign(this, data);
         if (this.graphics) {
             this.graphics.position.copy(this.pos);
             this.graphics.quaternion.copy(this.rot);
@@ -138,8 +140,12 @@ export default class ClientActor extends Actor {
         }
 
         if (this.body && this.collider) {
+            this.position = this.pos;
             this.body.wakeUp();
             this.collider.setEnabled(true);
+        }
+        if(!this.collider) {
+
         }
 
         this.active = true;
@@ -149,12 +155,11 @@ export default class ClientActor extends Actor {
         this.game.actorManager.removeActor(this);
         this.game.remove(this.graphics);
 
-        if (this.body) {
-            this.body.sleep();
-        }
         if (this.collider) {
             this.collider.setEnabled(false);
-            console.log(this.collider.isEnabled())
+        }
+        if (this.body) {
+            this.body.sleep();
         }
 
         super.deActivate();

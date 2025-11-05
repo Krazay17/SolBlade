@@ -24,14 +24,15 @@ export default class ClientPickup extends ClientActor {
     }
     hit(data) {
         super.hit(data)
+        console.log(`i got hit ${this}`);
 
-        this.deActivate();
+        this.destroy();
     }
     touch(dealer) {
         if (!this.active) return;
         MyEventEmitter.emit('actorEvent', { id: this.id, event: "touch", data: dealer });
         this.game.soundPlayer.playPosSound('pickup', this.pos);
 
-        this.deActivate()
+        this.destroy()
     }
 }

@@ -193,7 +193,7 @@ function initBindings() {
         );
         if (existingActor) {
             existingActor.id = id;
-            existingActor.activate();
+            existingActor.activate(data);
         } else {
             if (sceneName !== scene.sceneName) return;
             const newActor = scene.actorManager.spawnActor(type, data, true, false);
