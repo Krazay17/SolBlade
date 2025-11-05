@@ -1,4 +1,4 @@
-const CURRENT_VERSION = 0.0909;
+const CURRENT_VERSION = 0.091;
 
 export default {
     version: CURRENT_VERSION,
@@ -6,7 +6,7 @@ export default {
     money: 0,
     health: 100,
     sceneName: 'scene2',
-    position: [],
+    position: [0, 1, 0],
     rotation: [],
     masterVolume: 1,
     musicVolume: 1,
