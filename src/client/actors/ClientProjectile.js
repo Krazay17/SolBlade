@@ -38,6 +38,9 @@ export default class ClientProjectile extends Projectile {
     }
     get position() { return this.pos };
     get actorManager() { return this.game.actorManager };
+    setId(id){
+        this.id = id;
+    }
     update(dt, time) {
         this.graphics.position.lerp(this.pos, dt * 60);
     }

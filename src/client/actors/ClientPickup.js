@@ -24,7 +24,6 @@ export default class ClientPickup extends ClientActor {
     }
     hit(data) {
         super.hit(data)
-        console.log(`i got hit ${this}`);
 
         this.destroy();
     }

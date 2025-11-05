@@ -178,7 +178,7 @@ function initBindings() {
                 a.active && (a.tempId === tempId || a.id === id)
             );
             if (existingActor) {
-                existingActor.id = id;
+                existingActor.setId(id);
                 existingActor.activate();
             } else {
                 const newActor = scene.actorManager.spawnActor(type, a, true, false);
@@ -192,7 +192,7 @@ function initBindings() {
             a.active && (a.tempId === tempId || a.id === id)
         );
         if (existingActor) {
-            existingActor.id = id;
+            existingActor.setId(id);
             existingActor.activate(data);
         } else {
             if (sceneName !== scene.sceneName) return;
@@ -248,6 +248,9 @@ function initBindings() {
     socket.on('playerRotation', ({ id, data }) => {
         const actor = scene.getActorById(id);
         if (actor) actor.rot.copy(data);
+    });
+    socket.on('addCard', data => {
+        game.inventory.aquireItem(data);
     })
 }
 

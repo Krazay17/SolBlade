@@ -29,8 +29,7 @@ export default class SActor extends Actor {
             if (this.age >= this.lifetime) this.destroy();
         }
     }
-    activate(data = {}) {
-        Object.assign(this, data);
+    activate() {
         this.active = true;
         io.emit('newActor', this.serialize());
     }
@@ -48,13 +47,9 @@ export default class SActor extends Actor {
         this.deActivate();
         io.emit('actorEvent', { id: this.id, event: "applyHit", data });
     }
-    respawn(data = {}) {
-        const {
-            respawnTime = 1000,
-            pos = randomPos(20, 10),
-        } = data;
+    respawn(respawnTime) {
         setTimeout(() => {
-            this.activate({ ...data, pos });
+            this.activate();
         }, respawnTime)
     }
 }

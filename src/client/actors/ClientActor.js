@@ -167,7 +167,6 @@ export default class ClientActor extends Actor {
     destroy() {
         if (this.destroyed) return;
         this.destroyed = true;
-        this.game.actorManager.removeActor(this);
         this.game.remove(this.graphics);
 
         if (this.body) {
@@ -179,6 +178,10 @@ export default class ClientActor extends Actor {
             this.game.physics.safeRemoveCollider(this.collider);
             this.collider = null;
         }
+
+        this.game.actorManager.removeActor(this);
+        this.id = null;
+        this.tempId = null;
 
     }
     add(obj) {

@@ -3,6 +3,7 @@ import ClientPickup from "./ClientPickup";
 export default class ClientCard extends ClientPickup {
     init() {
         this.itemData = this.data.itemData;
+        console.log(this.itemData.name);
         this.build();
     }
     async build() {
