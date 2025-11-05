@@ -8,6 +8,7 @@
     padding: 1%;
     padding-bottom: 0;
     border: 1px solid rgba(85, 85, 85, 0.541);
+    z-index: 2
 }
 
 .kb-button {

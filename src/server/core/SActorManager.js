@@ -22,6 +22,7 @@ export default class SActorManager {
             'scene2': { players: [], enemies: [], others: [] },
             'scene3': { players: [], enemies: [], others: [] },
             'scene4': { players: [], enemies: [], others: [] },
+            'scene5': { players: [], enemies: [], others: [] },
         };
 
         this.hasSpawnedDefaults = false;
