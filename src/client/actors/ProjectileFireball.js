@@ -29,7 +29,7 @@ export default class ProjectileFireball extends ClientProjectile {
     onHit(result) {
         const actor = this.actorManager.getActorById(result.actor);
         if (actor) {
-            Object.assign(this.hitData, { hitPosition: this.pos, dim: 500 });
+            Object.assign(this.hitData, { target: result.actor, hitPosition: this.pos, dim: 500 });
 
             actor.hit?.(this.hitData);
         }

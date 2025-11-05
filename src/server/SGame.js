@@ -91,7 +91,6 @@ export default class SGame {
             this.io.emit('playerNameChange', { id: socket.id, name });
         });
         socket.on('playerStateUpdate', data => {
-            //actorManager.updateActor(data);
             socket.broadcast.emit('playerStateUpdate', data);
         });
         socket.on('playerPositionSend', (data) => {
@@ -155,10 +154,6 @@ export default class SGame {
             const actor = this.actorManager.getActorById(id);
             if (actor && actor[event]) actor[event](data);
         });
-        socket.on('actorDie', (data) => {
-            const actor = this.actorManager.getActorById(data.target);
-            if (actor) actor.die(data);
-        })
         socket.on('actorHealthChangeLocal', health => {
             const actor = this.actorManager.getActorById(socket.id);
             if (!actor) return;
