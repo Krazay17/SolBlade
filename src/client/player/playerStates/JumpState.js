@@ -2,7 +2,6 @@ import PlayerState from "./_PlayerState";
 
 export default class JumpState extends PlayerState {
     enter() {
-        console.log(this.manager.currentStateName);
         const anim = this.grounded ? 'jump' : 'frontFlip';
         this.actor.animationManager?.playAnimation(anim, false);
         this.jumpTimer = performance.now() + 550;

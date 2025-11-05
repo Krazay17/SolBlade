@@ -150,7 +150,7 @@ export default class SGame {
             socket.broadcast.emit('leavescene', { id: socket.id, scene });
         });
         socket.on('actorEvent', ({ id, event, data }) => {
-            console.log(event);
+            console.log(performance.now(), event);
             const actor = this.actorManager.getActorById(id);
             if (actor && actor[event]) actor[event](data);
         });

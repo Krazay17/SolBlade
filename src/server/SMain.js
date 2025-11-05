@@ -9,7 +9,7 @@ const SERVER_VERSION = 1.08;
 
 const server = http.createServer();
 const PORT = Number(process.env.PORT) || 80;
-const isLocal = PORT === 3000 || process.env.NODE_ENV === 'development';
+const isLocal = PORT === 3000 || process.env.NODE_ENV === 'development' || PORT === 80;
 const origin = isLocal ? 'http://localhost:5173' : "https://solblade.online";
 
 export const io = new Server(server, {

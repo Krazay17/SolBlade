@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 import MyEventEmitter from "./MyEventEmitter";
-import { Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
 import LocalData from "./LocalData";
 import HitData from "./HitData";
 import VoiceChat from './VoiceChat';
@@ -140,7 +140,6 @@ function initBindings() {
         MyEventEmitter.emit('crownGamePlayers', data);
     });
     socket.on('playerDied', (data) => {
-        console.log(data);
         if (data.target === playerId) player.die();
         if (data) data = HitData.deserialize(data, (id) => scene.getActorById(id));
         MyEventEmitter.emit('playerDied', data);
@@ -221,8 +220,16 @@ function initBindings() {
         for (const a of data) {
             const actor = scene.getActorById(a.id);
             if (!actor) return;
-            actor.targetPosition = a.pos;
-            actor.targetRotation = a.rot;
+            actor.pos = convertVector(a.pos);
+            actor.rot = convertQuat(a.rot);
+        }
+    });
+    socket.on('updateActors', (data) => {
+        for (const a of data) {
+            const actor = scene.getActorById(a.id);
+            if (!actor) return;
+            actor.pos = convertVector(a.pos);
+            actor.rot = convertQuat(a.rot);
         }
     });
     socket.on('actorHealthChange', ({ id, health }) => {
@@ -374,4 +381,17 @@ export default class NetManager {
     sceneChange(scene) {
         console.log('net scene change', scene);
     }
+}
+
+function convertVector(v) {
+    const vec = Array.isArray(v)
+        ? new Vector3(v[0] || 0, v[1] || 0, v[2] || 0)
+        : new Vector3(v?.x || 0, v?.y || 0, v?.z || 0);
+    return vec;
+}
+function convertQuat(v) {
+    const rot = Array.isArray(v)
+        ? new Quaternion(v[0] || 0, v[1] || 0, v[2] || 0, v[3] || 1)
+        : new Quaternion(v?.x || 0, v?.y || 0, v?.z || 0, v?.w || 1);
+    return rot;
 }

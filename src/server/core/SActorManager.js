@@ -3,11 +3,13 @@ import { randomPos } from "@solblade/shared";
 import SPlayer from "../newactors/SPlayer.js";
 import SActor from "../newactors/SActor.js";
 import SPower from "../newactors/SPower.js";
+import SCard from "../newactors/SCard.js";
 
 
 const actorRegistry = {
     player: SPlayer,
     power: SPower,
+    card: SCard,
 }
 
 export default class SActorManager {
@@ -26,7 +28,7 @@ export default class SActorManager {
         };
 
         this.hasSpawnedDefaults = false;
-        //setImmediate(() => this.spawnDefaultActors());
+        setImmediate(() => this.spawnDefaultActors());
 
         SActorManager.instance = this;
     }
@@ -120,36 +122,35 @@ export default class SActorManager {
         }
         this.actors.push(actor);
         this.io.emit('newActor', actor.serialize());
-        console.log(actor.serialize())
         return actor;
     }
     spawnDefaultActors() {
         if (this.hasSpawnedDefaults) return;
         this.hasSpawnedDefaults = true;
-        const item = 4;
-        const power = 5;
+        const item = 5;
+        const power = 15;
         const enemies = 4;
-        // for (let i = 0; i < item; i++) {
-        //     this.createActor('item', { scene: 'scene2', pos: randomPos(20, 10) });
-        // }
+        for (let i = 0; i < item; i++) {
+            this.createActor('card', { sceneName: 'scene2', pos: randomPos(20, 10) });
+        }
         for (let i = 0; i < power; i++) {
             const powerType = i % 2 ? 'health' : 'energy';
-            this.createActor('power', { scene: 'scene2', power: powerType, pos: randomPos(20, 10) });
+            this.createActor('power', { sceneName: 'scene2', power: powerType, pos: randomPos(20, 10) });
         }
         // for (let i = 0; i < enemies; i++) {
-        //     this.createActor('enemy', { enemy: 'julian', scene: 'scene3', pos: randomPos(25, 15) });
+        //     this.createActor('enemy', { enemy: 'julian', sceneName: 'scene3', pos: randomPos(25, 15) });
         // }
         // setInterval(() => {
         //     if (this.actorsOfScene['scene3'].enemies.length > 12) return;
-        //     this.createActor('enemy', { enemy: 'julian', scene: 'scene3', pos: randomPos(25, 15) });
+        //     this.createActor('enemy', { enemy: 'julian', sceneName: 'scene3', pos: randomPos(25, 15) });
         // }, 2000)
 
         // for (let i = 0; i < enemies; i++) {
-        //     this.createActor('enemy', { enemy: 'julian', scene: 'scene4', pos: randomPos(100, 15) });
+        //     this.createActor('enemy', { enemy: 'julian', sceneName: 'scene4', pos: randomPos(100, 15) });
         // }
         // setInterval(() => {
         //     if (this.actorsOfScene['scene4'].enemies.length > 12) return;
-        //     this.createActor('enemy', { enemy: 'julian', scene: 'scene4', pos: randomPos(100, 15) });
+        //     this.createActor('enemy', { enemy: 'julian', sceneName: 'scene4', pos: randomPos(100, 15) });
         // }, 2000)
     }
 }

@@ -103,7 +103,7 @@ export default class Scene {
     if (this.skyBox) this.skyBox.update();
     if (!this.player) return;
     if (!this.player.isDead) {
-      if (this.player.body && (this.player.body.position.y < (this.data.killFloor || -100))) {
+      if (this.player && (this.player.position.y < (this.data.killFloor || -100))) {
         MyEventEmitter.emit('iDied');
       }
     }

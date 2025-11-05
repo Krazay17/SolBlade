@@ -20,7 +20,7 @@ export default class MovementManager {
 
     constructor(pawn: Pawn) {
         this.pawn = pawn;
-        this.body = pawn.body;
+        this.body = pawn.pawnBody;
         this.groundChecker = new GroundChecker(pawn, 1, pawn.radius)
 
         this.groundFriction = 1;

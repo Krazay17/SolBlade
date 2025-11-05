@@ -40,8 +40,8 @@ export default class Projectile extends Actor {
             if (this.age >= this.lifetime) this.destroy();
         }
 
+        if (this.gravity) this.veloctiy.y -= this.gravity * dt;
         this.tempVec.copy(this.veloctiy).multiplyScalar(dt);
-        if (this.gravity) this.tempVec.y -= this.gravity * dt;
 
         this.pos.add(this.tempVec);
 

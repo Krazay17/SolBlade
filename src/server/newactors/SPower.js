@@ -3,13 +3,14 @@ import SActor from "./SActor.js";
 export default class SPower extends SActor {
     touch(data) {
         if (!this.active) return;
-        data = this.game.actorManager.getActorById(data);
+        const actor = this.game.actorManager.getActorById(data);
+        if (!actor) return;
         switch (this.data.power) {
             case "energy":
-                data.energy.add(50);
+                actor.energy.add(50);
                 break;
             case "health":
-                data.health.add(25);
+                actor.health.add(25);
                 break;
             default: console.log('no power type!');
         }
@@ -18,7 +19,7 @@ export default class SPower extends SActor {
     }
     deActivate() {
         super.deActivate();
-        
-        this.respawn();
+
+        this.respawn({respawnTime: 20000});
     }
 }

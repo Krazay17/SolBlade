@@ -1,10 +1,8 @@
 import * as THREE from "three";
-import Pawn from "../actors/Pawn";
 
 export default class GroundChecker {
     constructor(game, pawn, rayLength = 1.1, spread = 0.5) {
         this.game = game;
-        /**@type {Pawn} */
         this.pawn = pawn;
         this.body = pawn.body;
         this.world = this.game.physicsWorld;
@@ -34,7 +32,7 @@ export default class GroundChecker {
         ];
     }
     floorTrace(slope = .3) {
-        const originBase = this.pawn.body.position;
+        const originBase = this.pawn.position;
 
         for (let offset of this.offsets) {
             const origin = this.tempVector.copy(originBase).add(offset);

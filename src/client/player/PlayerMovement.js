@@ -12,7 +12,7 @@ export default class PlayerMovement {
     constructor(game, actor) {
         this.game = game
         this.actor = actor;
-        this.body = actor.body;
+        this.body = actor.pawnBody;
         this.input = actor.input;
 
         this.momentumBooster = new RunBoost(actor);
@@ -37,7 +37,7 @@ export default class PlayerMovement {
             },
             air: {
                 friction: 0,
-                accel: 4,
+                accel: 2.5,
                 speed: 4,
                 tap: 0.01
             },

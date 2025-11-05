@@ -27,8 +27,10 @@ export default class Actor {
         this.dir = dir;
         this.rot = rot;
 
-        this.isRemote = isRemote;
         this.active = active;
+        this.destroyed = false;
+
+        this.isRemote = isRemote;
         this.lifetime = lifetime;
 
         this.age = 0;
@@ -60,6 +62,10 @@ export default class Actor {
         }
     }
     activate() { }
-    deActivate() { }
-    destroy() { }
+    deActivate() {
+        this.active = false;
+    }
+    destroy() { 
+        this.destroyed = true;
+    }
 }

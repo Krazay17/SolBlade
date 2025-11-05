@@ -72,7 +72,10 @@ export default class SPhysics {
         const { players, enemies, others } = this.game.actorManager.actorsOfScene[scene];
 
         const enemyPositions = enemies.flatMap(e =>
-            e.active ? [{ id: e.data.id, pos: e.body.translation(), rot: e.rotation }] : []
+            e.active ? [{ id: e.id, pos: e.pos, rot: e.rot }] : []
+        );
+        const otherPositions = others.flatMap(e =>
+            e.active && e.auth ? [{ id: e.id, pos: e.pos, rot: e.rot }] : []
         );
 
 
@@ -81,6 +84,7 @@ export default class SPhysics {
             this.timeSinceLastUpdate = 0;
             for (const p of players) {
                 this.io.to(p.id).emit('updateEnemies', enemyPositions);
+                this.io.to(p.id).emit('updateActors', otherPositions);
             }
         }
     }

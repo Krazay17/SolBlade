@@ -36,6 +36,20 @@ export default class Player extends Pawn {
             this.remoteInit();
         }
     }
+
+    get quatY() { return this._quatY }
+    set quatY(r) {
+        this._quatY = r;
+        const yaw = r;
+        const halfYaw = yaw * 0.5;
+        const sin = Math.sin(halfYaw);
+        const cos = Math.cos(halfYaw);
+        const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
+        this.rot = q;
+        if (this.isRemote) return;
+        this.graphics.quaternion.copy(q);
+        MyEventEmitter.emit('playerRotation', q);
+    }
     localInit(game) {
         this.tick = false
         this.input = this.game.input;
@@ -77,7 +91,6 @@ export default class Player extends Pawn {
 
         MyEventEmitter.on('keyJustDown', (e) => {
             if (e === 'Space') this.stateManager.setState('jump');
-            console.log('keydown')
         });
 
         MyEventEmitter.on('KeyPressed', (key) => {
@@ -120,10 +133,10 @@ export default class Player extends Pawn {
     sceneReady() {
         if (LocalData.sceneName !== this.sceneName) {
             LocalData.sceneName = this.sceneName;
-            this.body.position = this.scene.spawnPos;
+            this.position = this.scene.spawnPos;
         }
         if (this.body) {
-            this.body.wakeUp();
+            this.wakeUp();
         }
         this.tick = true;
 
@@ -249,8 +262,8 @@ export default class Player extends Pawn {
             if (!LocalData.flags.dev) return;
             const direction = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
             const scaledConvertedDirection = new THREE.Vector3(direction.x, direction.y, direction.z).multiplyScalar(2);
-            this.body.position = this.body.position.add(scaledConvertedDirection);
-            this.body.velocity = { x: 0, y: 0, z: 0 };
+            this.position = this.position.add(scaledConvertedDirection);
+            this.velocity = { x: 0, y: 0, z: 0 };
         }
         if (this.input.keys['Digit6']) {
             this.stateManager.tryEmote('rumbaDancing');
@@ -341,8 +354,7 @@ export default class Player extends Pawn {
                 this.stateManager.setState('stun', { stun, anim: 'knockback' });
             }
             if (impulse) {
-                this.body.wakeUp();
-                this.body.velocity = impulse;
+                this.velocity = impulse;
             }
             if (dim) {
                 this.setDimmed(dim);
@@ -367,9 +379,8 @@ export default class Player extends Pawn {
         if (this.isRemote) return;
         let spawnPoint = this.scene.getRespawnPoint();
         if (!spawnPoint) spawnPoint = { x: 0, y: 1, z: 0 };
-        this.body.position = { x: spawnPoint.x, y: spawnPoint.y, z: spawnPoint.z };
-        this.body.velocity = { x: 0, y: 0, z: 0 };
-        this.position.copy(this.body.position);
+        this.position = { x: spawnPoint.x, y: spawnPoint.y, z: spawnPoint.z };
+        this.velocity = { x: 0, y: 0, z: 0 };
         this.lastHitData = null;
         this.isDead = false;
         this.stateManager.setState('idle');

@@ -19,7 +19,7 @@ export default class WeaponFireball extends Weapon {
                 anim: 'attackSpell',
                 onExit: () => { if (this.onAttack) clearTimeout(this.onAttack) }
             })) {
-            this.onAttack = setTimeout(() => this.shootFireball(1, 35, 30), 800);
+            this.onAttack = setTimeout(() => this.shootFireball(1.2, 35, 30), 800);
             this.actor.animationManager.playAnimation('attackSpell', false);
             this.game.soundPlayer.playPosSound('fireWhoosh', this.actor.position);
             return true;
@@ -38,7 +38,7 @@ export default class WeaponFireball extends Weapon {
                 weapon: this, duration: 550, onExit: () => { if (this.onAttack) clearTimeout(this.onAttack) }
             })
         ) {
-            this.onAttack = setTimeout(() => this.shootFireball(.4, 100, 15), 200);
+            this.onAttack = setTimeout(() => this.shootFireball(.35, 70, 15), 200);
             const anim = this.slot === '0' ? 'attackLeft' : 'attackRight';
             this.actor.animationManager.playAnimation(anim, false);
             this.game.soundPlayer.playPosSound('fireballUse', this.actor.position);
@@ -47,13 +47,14 @@ export default class WeaponFireball extends Weapon {
     }
 
     shootFireball(radius = 1, speed = 35, damage = 10) {
-        const { pos, dir } = this.actor.getShootData()
+        const { pos, dir, camPos } = this.actor.getShootData()
         const projectile = this.game.actorManager.spawnActor('fireball', {
-            pos,
+            pos: camPos,
             dir,
             radius,
             damage,
             speed,
+            gravity: 7,
             liftetime: 30000,
             owner: this.actor.id,
         }, false, true);

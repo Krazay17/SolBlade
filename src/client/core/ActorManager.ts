@@ -8,13 +8,14 @@ import LocalData from "./LocalData";
 import EnemyJulian from "../actors/EnemyJulian";
 import ProjectileScythe from "../actors/ProjectileScythe";
 import Power from "../actors/Power";
+import ClientCard from "../actors/ClientCard";
 
 const actorRegistry: Record<string, any> = {
     player: Player,
-    power: Power,
     fireball: ProjectileFireball,
-    julian: EnemyJulian,
     projectileScythe: ProjectileScythe,
+    power: Power,
+    card: ClientCard,
 }
 
 export default class ActorManager {

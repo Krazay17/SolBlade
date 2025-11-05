@@ -2,6 +2,7 @@ import { Actor } from "@solblade/shared";
 import { Mesh, MeshBasicMaterial, Object3D, SphereGeometry, Vector3, Quaternion } from "three";
 import Game from "../CGame";
 import MyEventEmitter from "../core/MyEventEmitter";
+import RAPIER from "@dimforge/rapier3d-compat";
 
 export default class ClientActor extends Actor {
     constructor(game, data = {}) {
@@ -25,21 +26,20 @@ export default class ClientActor extends Actor {
             ? new Quaternion(rotArr[0] || 0, rotArr[1] || 0, rotArr[2] || 0, rotArr[3] || 1)
             : new Quaternion(rotArr?.x || 0, rotArr?.y || 0, rotArr?.z || 0, rotArr?.w || 1);
 
-
-
-        super({ ...data, pos, dir, rot, vel });
+        super({ ...data, pos, dir, rot, vel, active: false });
         /**@type {Game} */
         this.game = game;
 
-        this.destroyed = false;
         this.isRemote = data.isRemote ?? false;
+        this._quatY = this.rot.y;
+        this._position = new Vector3();
+        this._velocity = new Vector3();
 
         this.graphics = new Object3D();
-        this.graphics.position.copy(this.pos);
-        this.graphics.quaternion.copy(this.rot);
-        this.game.add(this.graphics);
 
+        /**@type {RAPIER.RigidBody} */
         this.body = null;
+        /**@type {RAPIER.Collider} */
         this.collider = null;
 
         if (!this.isRemote) {
@@ -47,9 +47,74 @@ export default class ClientActor extends Actor {
         }
 
         this.init();
+        this.activate();
     }
-    get position() { return this.pos };
     get actorManager() { return this.game.actorManager };
+    get position() {
+        return this._position.copy(this.body?.translation());
+    }
+    set position(pos) {
+        this.body?.setTranslation(pos, false);
+    }
+    get rotation() {
+        return this.body?.rotation();
+    }
+    get velocity() {
+        return this._velocity.copy(this.body?.linvel());
+    }
+    get velocityX() {
+        return this.body?.linvel().x
+    }
+    get velocityY() {
+        return this.body?.linvel().y
+    }
+    get velocityZ() {
+        return this.body?.linvel().z
+    }
+    set velocity(vel) {
+        this.body.setLinvel(vel, true);
+    }
+    set velocityX(x) {
+        const y = this.body?.linvel().y;
+        const z = this.body?.linvel().z;
+        this.body?.setLinvel({ x, y, z }, true);
+    }
+    set velocityY(y) {
+        const x = this.body.linvel().x;
+        const z = this.body.linvel().z;
+        this.body?.setLinvel({ x, y, z }, true);
+    }
+    set velocityZ(z) {
+        const x = this.body?.linvel().x;
+        const y = this.body?.linvel().y;
+        this.body?.setLinvel({ x, y, z }, true);
+    }
+    sleep() {
+        this.body?.sleep();
+    }
+    wakeUp() {
+        this.body?.wakeUp();
+    }
+    setId(id) {
+        this.id = id;
+        this.collider.actor = id;
+    }
+    update(dt, time) {
+        if (!this.active) return;
+        if (this.body) {
+            this.graphics.position.lerp(this.body.translation(), 120 * dt);
+            this.graphics.quaternion.slerp(this.rot, 120 * dt);
+        }
+    }
+    fixedUpdate(dt) {
+        if (!this.active) return;
+        if (this.isRemote) {
+            if (this.body) {
+                this.body.setRotation(this.rot, true)
+                this.body.setTranslation(this.pos, true);
+            }
+        }
+    }
     async createMesh(meshName, color = "white") {
         let mesh;
         if (meshName) {
@@ -62,25 +127,54 @@ export default class ClientActor extends Actor {
         }
         if (!mesh) return;
         this.graphics.add(mesh);
+        return mesh;
     }
     activate(data) {
-        this.graphics.position.copy(this.pos);
-        this.graphics.quaternion.copy(this.rot);
-        this.game.add(this.graphics);
+        if (this.active) return;
+        if (this.graphics) {
+            this.graphics.position.copy(this.pos);
+            this.graphics.quaternion.copy(this.rot);
+            this.game.add(this.graphics);
+        }
+
+        if (this.body && this.collider) {
+            this.body.wakeUp();
+            this.collider.setEnabled(true);
+        }
+
+        this.active = true;
     }
     deActivate() {
         if (!this.active) return;
         this.game.actorManager.removeActor(this);
         this.game.remove(this.graphics);
 
+        if (this.body) {
+            this.body.sleep();
+        }
+        if (this.collider) {
+            this.collider.setEnabled(false);
+            console.log(this.collider.isEnabled())
+        }
+
         super.deActivate();
     }
     destroy() {
         if (this.destroyed) return;
+        this.destroyed = true;
         this.game.actorManager.removeActor(this);
         this.game.remove(this.graphics);
 
-        super.destroy()
+        if (this.body) {
+            this.game.physics.safeRemoveBody(this.body)
+            this.body = null;
+        }
+        if (this.collider) {
+            this.collider.actor = null;
+            this.game.physics.safeRemoveCollider(this.collider);
+            this.collider = null;
+        }
+
     }
     add(obj) {
         this.graphics.add(obj)

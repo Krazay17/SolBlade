@@ -61,7 +61,7 @@ export default class CGame {
 
     this.graphicsWorld = new THREE.Scene();
 
-    this.physics = new SolPhysics();
+    this.physics = new SolPhysics(this);
 
     this.loadingManager = new LoadingManager();
     this.meshManager = new MeshManager(this);
@@ -211,7 +211,6 @@ export default class CGame {
       this.accumulator = Math.min(this.accumulator, 0.25);
       while (this.running && (this.accumulator >= this.timeStep)) {
         this.physics.step();
-        this.physics.remove();
         this.scene?.fixedUpdate?.(this.timeStep, time);
         this.actorManager?.fixedUpdate(this.timeStep, time);
 

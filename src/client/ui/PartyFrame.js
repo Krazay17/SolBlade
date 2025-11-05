@@ -63,8 +63,4 @@ export default class PartyFrame {
         this.container.removeChild(el);
         this.players.delete(player);
     }
-
-    selectPlayer(player) {
-        Game.getGame().player.body.position = player.pos;
-    }
 }

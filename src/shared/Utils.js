@@ -1,3 +1,5 @@
+import RAPIER from "@dimforge/rapier3d-compat";
+
 export function sharedTest() {
   console.log('shared folder import test!');
 }
@@ -48,4 +50,23 @@ export function lerpAngle(a, b, t) {
   while (diff < -Math.PI) diff += Math.PI * 2;
   while (diff > Math.PI) diff -= Math.PI * 2;
   return a + diff * t;
+}
+
+export function triMeshFromVerts(geometry) {
+  // Clone vertex and index arrays so Rapier gets unique, safe buffers
+  const vertices = new Float32Array(geometry.attributes.position.array);
+  let indices;
+
+  if (geometry.index) {
+    indices = new Uint32Array(geometry.index.array);
+  } else {
+    const count = vertices.length / 3;
+    indices = new Uint32Array(count);
+    for (let i = 0; i < count; i++) indices[i] = i;
+  }
+  // Create the collider safely
+  const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+  colliderDesc.setFriction(0);
+  colliderDesc.setRestitution(0);
+  return colliderDesc;
 }

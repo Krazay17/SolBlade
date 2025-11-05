@@ -31,7 +31,7 @@ export default class ClientProjectile extends Projectile {
         this.game.add(this.graphics);
 
         this.hitData = new HitData({
-            dealer:this.owner,
+            dealer: this.owner,
             amount: this.damage,
             critMult: 2
         })
@@ -52,7 +52,7 @@ export default class ClientProjectile extends Projectile {
             mesh = await this.game.meshManager.getMesh(meshName)
         } else {
             mesh = new Mesh(
-                new SphereGeometry(.5),
+                new SphereGeometry(this.radius),
                 new MeshBasicMaterial({ color: 'white' })
             );
         }
