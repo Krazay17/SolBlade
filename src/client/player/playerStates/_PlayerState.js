@@ -61,7 +61,7 @@ export default class PlayerState {
         const lookDir = this.actor.getShootData().dir;
         let moveDir;
         if (useVel) {
-            moveDir = this.body.velocity;
+            moveDir = this.velocity;
             const lateral = Math.atan2(moveDir.x, moveDir.z);
             if (lateral === 0) return "Neutral";
             moveDir.normalize();
