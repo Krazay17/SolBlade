@@ -111,7 +111,7 @@ function initBindings() {
         if (!player) return;
         player.health = health;
     });
-    socket.on('playerPositionUpdate', ({ id, data }) => {
+    socket.on('playerPosition', ({ id, data }) => {
         if (id === playerId) return;
         const player = scene.getActorById(id);
         if (player) {
