@@ -19,7 +19,7 @@ export default class PlayerState {
         /**@type {PlayerStateManager} */
         this.manager = manager;
         /**@type {PawnBody} */
-        this.body = actor.body;
+        this.body = actor.pawnBody;
         /**@type {Input} */
         this.input = actor.input;
 
