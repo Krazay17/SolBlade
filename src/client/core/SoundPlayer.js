@@ -3,8 +3,8 @@ import LocalData from "./LocalData";
 import MyEventEmitter from "./MyEventEmitter";
 
 /**@type {SoundPlayer} */
-let currentInstance = null;
 export default class SoundPlayer {
+    static instance = null;
     constructor(game, listener) {
         this.game = game;
         this.audioListener = listener;
@@ -24,9 +24,8 @@ export default class SoundPlayer {
         this.loadSfx('hit', '/assets/hit.mp3');
 
         this.init();
-        currentInstance = this;
+        SoundPlayer.instance = this;
     }
-
     init() {
         this.loadMusic('music1', '/assets/Music1.mp3');
         const playMusiconFirstClick = () => {
@@ -231,4 +230,10 @@ export default class SoundPlayer {
 
 export function playPosSound(name, pos) {
     if (currentInstance) currentInstance.playPosSound(name, pos);
+}
+
+
+export function getSoundPlayer() {
+    if (SoundPlayer.instance) return SoundPlayer.instance;
+    else throw new Error('SoundPlayer not initialized');
 }

@@ -7,14 +7,14 @@ export default class ParryState extends PlayerState {
         this.actor.setParry(true);
         this.startTime = performance.now();
         this.duration = 300;
-        this.actor.body.sleep();
+        this.actor.sleep();
         CameraFX.shake(0.25, 450, .02);
         this.direction = this.actor.position.clone()
             .sub(pos)
             .normalize()
             .multiplyScalar(6);
-        this.actor.body.velocity = { x: 0, y: 0, z: 0 };
-        this.actor.body.sleep();
+        this.actor.velocity = { x: 0, y: 0, z: 0 };
+        this.actor.sleep();
     }
     update(dt) {
         if (performance.now() > this.startTime + this.duration) {
@@ -24,8 +24,8 @@ export default class ParryState extends PlayerState {
     }
     exit() {
         this.actor.animationManager?.changeTimeScale(-.5, 300);
-        this.actor.body.wakeUp();
-        this.actor.body.velocity = { x: this.direction.x, y: this.direction.y, z: this.direction.z };
+        this.actor.wakeUp();
+        this.actor.velocity = { x: this.direction.x, y: this.direction.y, z: this.direction.z };
         this.actor.setParry(false);
         MyEventEmitter.emit('playerParryUpdate', false);
     }

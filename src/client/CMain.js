@@ -11,7 +11,7 @@ LocalData.load();
 const canvas = document.getElementById('webgl');
 
 const input = new Input(canvas);
-setupChat();
+setupChat(input);
 const game = new CGame(canvas, input);
 const menu = new Menu(game);
 //const net = new NetManager(game);
