@@ -112,6 +112,7 @@ function initBindings() {
         player.health = health;
     });
     socket.on('playerPositionUpdate', ({ id, data }) => {
+        if (id === playerId) return;
         const player = scene.getActorById(id);
         if (player) {
             player.pos.copy(data.pos);
@@ -216,22 +217,20 @@ function initBindings() {
             actor.stateUpdate(data);
         }
     });
-    socket.on('updateEnemies', (data) => {
-        for (const a of data) {
+    socket.on('worldUpdate', ({ enemyPositions, otherPositions }) => {
+        for (const a of enemyPositions) {
             const actor = scene.getActorById(a.id);
             if (!actor) return;
             actor.pos = convertVector(a.pos);
             actor.rot = convertQuat(a.rot);
         }
-    });
-    socket.on('updateActors', (data) => {
-        for (const a of data) {
+        for (const a of otherPositions) {
             const actor = scene.getActorById(a.id);
             if (!actor) return;
             actor.pos = convertVector(a.pos);
             actor.rot = convertQuat(a.rot);
         }
-    });
+    })
     socket.on('actorHealthChange', ({ id, health }) => {
         const actor = scene.getActorById(id);
         if (actor) actor.health.current = health;
@@ -368,7 +367,7 @@ export function tryUpdatePosition({ pos, rot }) {
         || lastSentRotation !== rot) {
         lastSentPosition.copy(pos);
         lastSentRotation = rot;
-        socket.emit('playerPositionSend', { pos: lastSentPosition, rot: lastSentRotation });
+        socket.emit('playerPosition', { pos: lastSentPosition, rot: lastSentRotation });
     }
 }
 

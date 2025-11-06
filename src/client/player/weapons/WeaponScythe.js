@@ -17,14 +17,17 @@ export default class WeaponScythe extends Weapon {
             && this.stateManager.setState('attack', { weapon: this, duration: 800 })) {
             this.damageDelay = 400;
 
-            const { pos, rot, dir, camPos } = this.actor.getShootData()
+            const { pos, dir, rot } = this.actor.getAim()
             /**@type {ClientProjectile} */
-            const projectile = this.game.actorManager.spawnActor('projectileScythe', {
-                pos, rot, dir, owner: this.actor.id,
-            }, false);
+            const projectile = this.game.actorManager.spawnActor('scythe', {
+                pos, 
+                rot, 
+                dir, 
+                owner: this.actor.id,
+            }, false, true);
 
             this.playAnimation(this.hand, false);
-            this.playSound('dash', pos)
+            this.playSound('heavySword', pos)
         }
     }
     damageTick(dt) {

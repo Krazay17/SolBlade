@@ -98,9 +98,9 @@ export default class SGame {
         socket.on('playerStateUpdate', data => {
             socket.broadcast.emit('playerStateUpdate', data);
         });
-        socket.on('playerPositionSend', (data) => {
+        socket.on('playerPosition', (data) => {
             if (this.players[socket.id]) this.players[socket.id].pos = data.pos;
-            socket.broadcast.emit('playerPositionUpdate', { id: socket.id, data });
+            socket.broadcast.emit('playerPosition', { id: socket.id, data });
         });
         socket.on('playerRotation', (data) => {
             //if (this.players[socket.id]) this.players[socket.id].rot = data;

@@ -22,6 +22,7 @@ export default class SoundPlayer {
         this.threeAudioLoader = new THREE.AudioLoader();
 
         this.loadSfx('hit', '/assets/hit.mp3');
+        this.loadSfx('badHit', '/assets/badHit.mp3');
 
         this.init();
         SoundPlayer.instance = this;

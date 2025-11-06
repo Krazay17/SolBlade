@@ -80,4 +80,9 @@ export default class CPawn extends CActor {
         }
         this.data.currentHealth = health;
     }
+    hit(data) {
+        if (!this.active) return;
+        MyEventEmitter.emit('actorEvent', { id: this.id, event: "hit", data: data.serialize() });
+        this.game.soundPlayer.playSound('hit');
+    }
 }

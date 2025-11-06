@@ -72,6 +72,7 @@ export default class Actor {
             this.respawn(this.respawntime)
         }
     }
+    respawn() { }
     destroy() {
         this.destroyed = true;
     }

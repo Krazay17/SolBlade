@@ -1,22 +1,22 @@
 import { Quaternion, Vector3 } from "three";
-import ClientActor from "../actors/CActor";
-import ProjectileFireball from "../actors/CFireball";
 import Player from "../player/Player";
 import MyEventEmitter from "./MyEventEmitter";
 import Game from "../CGame";
 import LocalData from "./LocalData";
-import EnemyJulian from "../actors/CJulian";
-import ProjectileScythe from "../actors/CScythe";
-import Power from "../actors/CPower";
-import ClientCard from "../actors/CCard";
+import ClientActor from "../actors/CActor";
+import CFireball from "../actors/CFireball";
+import CJulian from "../actors/CJulian";
+import CScythe from "../actors/CScythe";
+import CPower from "../actors/CPower";
+import CCard from "../actors/CCard";
 
 const actorRegistry: Record<string, any> = {
     player: Player,
-    fireball: ProjectileFireball,
-    projectileScythe: ProjectileScythe,
-    power: Power,
-    card: ClientCard,
-    julian: EnemyJulian,
+    fireball: CFireball,
+    scythe: CScythe,
+    power: CPower,
+    card: CCard,
+    julian: CJulian,
 }
 
 export default class ActorManager {

@@ -11,7 +11,10 @@ export default class SAIController {
         let dir = { x: 0, y: 0, z: 0 };
         if (player) {
             dir = this.directionToPlayer(player);
+            this.moveToPlayer(dt, dir);
         }
+    }
+    moveToPlayer(dt, dir) {
         const avoid = this.avoidOtherEnemies();
         dir.x += avoid.x;
         dir.z += avoid.z;

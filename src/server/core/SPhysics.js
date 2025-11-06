@@ -1,6 +1,7 @@
 import RAPIER from '@dimforge/rapier3d-compat';
 import { loadJson } from './LoadJson.js';
 import SGame from '../SGame.js';
+import { COLLISION_GROUPS } from '@solblade/shared';
 
 const scene1Data = await loadJson('../worlds/scene1.json');
 const scene2Data = await loadJson('../worlds/scene2.json');
@@ -23,11 +24,11 @@ export default class SPhysics {
         this.scene5 = this.makeWorld(scene5Data);
     }
     update(dt) {
-        this.updateWorld(dt, 'scene1')
+        //this.updateWorld(dt, 'scene1')
         this.updateWorld(dt, 'scene2')
         this.updateWorld(dt, 'scene3')
         this.updateWorld(dt, 'scene4')
-        this.updateWorld(dt, 'scene5')
+        //this.updateWorld(dt, 'scene5')
     }
     makeWorld(worldData) {
         const world = new RAPIER.World({ x: 0, y: -9, z: 0 });
@@ -58,7 +59,10 @@ export default class SPhysics {
             try {
                 // Use trimesh for concave meshes
                 const desc = RAPIER.ColliderDesc.trimesh(verts, indic);
-                world.createCollider(desc);
+                world.createCollider(desc
+                    .setCollisionGroups(COLLISION_GROUPS.ENEMY << 16 | COLLISION_GROUPS.WORLD)
+                    .setActiveCollisionTypes(0)
+                )
             } catch (e) {
                 console.error("Failed to create collider for object:", obj.name, e);
             }
@@ -83,8 +87,10 @@ export default class SPhysics {
         if (this.timeSinceLastUpdate >= 0.01) {
             this.timeSinceLastUpdate = 0;
             for (const p of players) {
-                this.io.to(p.id).emit('updateEnemies', enemyPositions);
-                this.io.to(p.id).emit('updateActors', otherPositions);
+                //this.io.to(p.id).emit('updateEnemies', enemyPositions);
+                //this.io.to(p.id).emit('updateActors', otherPositions);
+                this.io.to(p.id).emit('worldUpdate', { enemyPositions, otherPositions });
+
             }
         }
     }

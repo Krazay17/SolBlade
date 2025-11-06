@@ -12,6 +12,8 @@ import PlayerStateManager from './playerStates/PlayerStateManager';
 import HitData from '../core/HitData';
 import { menuButton } from '../ui/Menu';
 import Energy from '../core/Energy';
+import { Ray } from '@dimforge/rapier3d-compat';
+import { COLLISION_GROUPS } from '@solblade/shared';
 
 export default class Player extends Pawn {
     constructor(game, data = {}) {
@@ -188,15 +190,44 @@ export default class Player extends Pawn {
         const dropPos = pos.add(dir.multiplyScalar(2));
         this.game.actorManager.spawnActor('card', { itemData: item, pos: dropPos }, false, true);
     }
+    getAim() {
+        const camPosition = this.camera.getWorldPosition(new THREE.Vector3());
+        const camDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
+        const rot = this.camera.getWorldQuaternion(new THREE.Quaternion());
+        const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
+        const ray = new Ray(camPosition, camDirection);
+        const result = this.game.physicsWorld.castRay(
+            ray,
+            100,
+            false,
+            undefined,
+            undefined,
+            undefined,
+            this.body
+        )
+        let dir;
+        if (result) {
+            const hitPos = camPosition.add(camDirection.multiplyScalar(result.timeOfImpact));
+            dir = hitPos.sub(bulletPosition);
+            dir.normalize();
+        } else {
+            dir = camDirection;
+        }
+        return {
+            pos: bulletPosition,
+            dir,
+            rot,
+        }
+    }
     getShootData() {
         const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
         /**@type {THREE.Vector3} */
-        const bulletDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
+        const camDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
         const rotation = this.camera.getWorldQuaternion(new THREE.Quaternion());
         const camPosition = this.camera.getWorldPosition(new THREE.Vector3());
         return {
             pos: bulletPosition,
-            dir: bulletDirection,
+            dir: camDirection,
             camPos: camPosition,
             rot: rotation,
         };

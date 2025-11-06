@@ -1,12 +1,7 @@
 import RAPIER from "@dimforge/rapier3d-compat"
 import ClientActor from "../actors/CActor.js"
 import { Vector3 } from "three";
-
-const GROUPS = {
-    WORLD: 0b0001,
-    PLAYER: 0b0010,
-    ENEMY: 0b0100,
-};
+import { COLLISION_GROUPS } from "@solblade/shared";
 
 export default class PawnBody {
     world: RAPIER.World;
@@ -19,6 +14,7 @@ export default class PawnBody {
     startPos: Vector3;
     height: number;
     radius: number;
+    isRemote: boolean;
     constructor(world: RAPIER.World, actor: ClientActor, pos: Vector3 = new Vector3(0, 0, 0), height: number = 1, radius: number = 0.5, isRemote = false) {
         this.world = world;
         this.actor = actor;
@@ -27,12 +23,13 @@ export default class PawnBody {
         this.startPos = pos;
         this.body = null;
         this.collider = null;
+        this.isRemote = isRemote;
         if (!this.world) throw new Error("invalid world passed to PawnBody");
         const desc = isRemote ? RAPIER.RigidBodyDesc.kinematicPositionBased() : RAPIER.RigidBodyDesc.dynamic()
 
-        this.collideGroup = (GROUPS.WORLD | GROUPS.ENEMY) << 16 | GROUPS.PLAYER
+        this.collideGroup = (COLLISION_GROUPS.WORLD | COLLISION_GROUPS.ENEMY) << 16 | COLLISION_GROUPS.PLAYER
         if (isRemote) {
-            this.collideGroup = (GROUPS.PLAYER) << 16 | GROUPS.ENEMY;
+            this.collideGroup = COLLISION_GROUPS.PLAYER << 16 | COLLISION_GROUPS.ENEMY;
         }
         this.body = this.world.createRigidBody(desc
             .lockRotations()
@@ -50,7 +47,7 @@ export default class PawnBody {
             this.body
         );
         (this.collider as any).actor = this.actor.id;
-        this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+        if (!this.isRemote) this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
     }
     get position() {
         return this._position.copy(this.body?.translation());

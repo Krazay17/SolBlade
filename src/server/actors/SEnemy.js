@@ -69,11 +69,12 @@ export default class SEnemy extends SActor {
         this.body = this.physics.createRigidBody(RAPIER.RigidBodyDesc.dynamic()
             .lockRotations()
             .setTranslation(this.pos.x || 0, this.pos.y || 0, this.pos.z || 0)
-            .setLinearDamping(0)
+            .setLinearDamping(0.2)
             .setAngularDamping(0)
         );
         this.collider = this.physics.createCollider(RAPIER.ColliderDesc.capsule(height / 2, radius)
             .setCollisionGroups(group)
+            .setActiveEvents(0)
             .setFriction(0)
             .setRestitution(0),
             this.body
@@ -81,8 +82,9 @@ export default class SEnemy extends SActor {
         this.collider.actor = this.id
     }
     activate() {
+        this.body.setTranslation(randomPos(20, 10))
+        this.pos = this.body.translation();
         this.health.current = this.health.maxHealth;
-        this.pos = randomPos(20, 10);
         super.activate()
     }
 }

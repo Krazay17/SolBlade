@@ -201,6 +201,6 @@ export default class CActor extends Actor {
     hit(data) {
         if (!this.active) return;
         MyEventEmitter.emit('actorEvent', { id: this.id, event: "hit", data: data.serialize() });
-        this.game.soundPlayer.playSound('hit');
+        this.game.soundPlayer.playSound('badHit');
     }
 }
