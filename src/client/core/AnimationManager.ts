@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import MyEventEmitter from './MyEventEmitter';
-import Pawn from '../actors/Pawn';
+import Pawn from '../actors/CPawn';
 
 export default class AnimationManager {
     pawn: Pawn;

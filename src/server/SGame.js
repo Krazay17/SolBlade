@@ -12,6 +12,7 @@ export default class SGame {
         this.actorManager = new SActorManager(this, io);
         this.physics = new SPhysics(this, io);
         this.questManager = new SQuestManager(this, io);
+        this.questManager.startCrownQuest();
 
         this.init();
     }
@@ -43,9 +44,13 @@ export default class SGame {
     createActor(type, data) {
         this.actorManager.createActor(type, data)
     }
+    removeActor(actor) {
+        this.actorManager.removeActor(actor);
+    }
     loop(dt) {
         this.physics.update(dt);
         this.actorManager.update(dt);
+        this.questManager.update(dt);
     }
     userConnect(socket) {
         this.sockets.set(socket.id, socket);

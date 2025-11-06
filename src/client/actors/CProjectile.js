@@ -4,7 +4,7 @@ import Game from "../CGame";
 import HitData from "../core/HitData";
 import MyEventEmitter from "../core/MyEventEmitter";
 
-export default class ClientProjectile extends Projectile {
+export default class CProjectile extends Projectile {
     constructor(game, data) {
         const posArr = data.pos;
         const dirArr = data.dir;

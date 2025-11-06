@@ -1,6 +1,6 @@
 import { SkinnedMesh, Vector3 } from "three";
-import Enemy from "../actors/Enemy";
-import Pawn from "../actors/Pawn";
+import Enemy from "../actors/CEnemy";
+import Pawn from "../actors/CPawn";
 import World from "../scenes/Scene";
 import AIMovement from "../core/AIMovement";
 

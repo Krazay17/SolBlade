@@ -1,6 +1,6 @@
-import ClientPickup from "./ClientPickup.js";
+import CPickup from "./CPickup.js";
 
-export default class Power extends ClientPickup {
+export default class CPower extends CPickup {
     init() {
         let color;
         switch (this.data.power) {

@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 import * as THREE from "three";
 import { SkeletonUtils } from "three/examples/jsm/Addons.js";
 import { MeshBVH, SAH } from 'three-mesh-bvh';
+import MyEventEmitter from "./MyEventEmitter";
 
 const modelRegister = new Map([
     ['knightGirl', '/assets/KnightGirl.glb'],
@@ -26,11 +27,14 @@ export default class MeshManager {
         this.skinMap = new Map();
         this.texMap = new Map();
         this.tempVec = new Vector3();
+        this.donePreLoad = false;
 
         this.skinMap.set('KnightGirl', '/assets/KnightGirl.glb');
         this.skinMap.set('NinjaDude', '/assets/NinjaDude.glb');
         this.skinMap.set('julian', '/assets/julian.glb');
         this.skinMap.set('LavaGolem', '/assets/LavaGolem.glb');
+
+        this.preLoad();
     }
     static getInstance() {
         if (!MeshManager.instance) {
@@ -38,7 +42,11 @@ export default class MeshManager {
         }
         return MeshManager.instance;
     }
-
+    async preLoad() {
+        await this.loadSkeleMesh('julian');
+        this.donePreLoad = true;
+        MyEventEmitter.emit('donePreload');
+    }
     meshInitProperties(meshName) {
         let offset = this.tempVec.set(0, -1, 0);
         let rotation = Math.PI;
@@ -77,6 +85,7 @@ export default class MeshManager {
         if (this.skinCache[skinName]) {
             return this.skinCache[skinName];
         }
+        console.log('load new mesh')
         const url = modelRegister.get(skinName);
         return new Promise((resolve, reject) => {
             this.loader.load(url, (gltf) => {

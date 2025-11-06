@@ -1,6 +1,6 @@
-import ClientProjectile from "./ClientProjectile";
+import CProjectile from "./CProjectile";
 
-export default class ProjectileScythe extends ClientProjectile {
+export default class CScythe extends CProjectile {
     constructor(game, data) {
         super(game, {
             ...data,

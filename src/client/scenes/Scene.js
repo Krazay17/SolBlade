@@ -4,7 +4,7 @@ import MyEventEmitter from '../core/MyEventEmitter.js';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import Game from '../CGame.js';
-import Portal from '../actors/Portal.js';
+import Portal from '../actors/CPortal.js';
 import RAPIER from '@dimforge/rapier3d-compat';
 
 THREE.BufferGeometry.prototype.computeBoundsTree = computeBoundsTree;
@@ -35,7 +35,7 @@ export default class Scene {
     MyEventEmitter.emit('leaveScene', this.sceneName);
     this.destroy();
   }
-  onEnter(callback) {
+  async onEnter(callback) {
     this.levelLoaded = false;
     this.allGeoms = [];
     this.mergedLevel = null;
@@ -49,8 +49,12 @@ export default class Scene {
 
     this.map = null;
     this.worldColliders = [];
-    this.spawnLevel(this.sceneName, callback);
-
+    await this.spawnLevel(this.sceneName);
+    if (this.game.meshManager.donePreLoad) {
+      callback();
+    } else {
+      MyEventEmitter.once('donePreload', () => callback());
+    }
     MyEventEmitter.emit('enterScene', this.sceneName);
   }
   destroy() {
@@ -146,156 +150,158 @@ export default class Scene {
     portal.position.set(pos.x, pos.y, pos.z);
     portal.init(newWorld, targetPos);
   }
-  spawnLevel(name = 'scene2', callback) {
+  async spawnLevel(name = 'scene2', callback) {
     if (this.mapLoaded[name]) return;
-    this.game.loadingManager.gltfLoader.load(`/assets/${name}.glb`, (gltf) => {
-      const model = gltf.scene;
-      const itemLocations = [];
-      const healthLocations = [];
-      const energyLocations = [];
-      const respawnLocations = [];
-      const enemyLocations = [];
-      model.position.set(0, 0, 0);
-      model.scale.set(1, 1, 1); // Adjust size if needed
+    return new Promise((resolve, reject) => {
+      this.game.loadingManager.gltfLoader.load(`/assets/${name}.glb`, (gltf) => {
+        const model = gltf.scene;
+        const itemLocations = [];
+        const healthLocations = [];
+        const energyLocations = [];
+        const respawnLocations = [];
+        const enemyLocations = [];
+        model.position.set(0, 0, 0);
+        model.scale.set(1, 1, 1); // Adjust size if needed
 
-      this.map = model;
-      this.game.graphicsWorld.add(this.map);
-      model.traverse((child) => {
-        /**@type {string} */
-        const childName = child.name;
-        const userData = child.userData;
-        if (childName.startsWith('Skip')) {
-          child.visible = false;
-          return;
-        }
-        if (childName.startsWith('itemLocation')) {
-          child.visible = false;
-          itemLocations.push(child.position);
-          return;
-        };
-        if (childName.startsWith('healthLocation')) {
-          child.visible = false;
-          healthLocations.push(child.position);
-          return;
-        };
-        if (childName.startsWith('energyLocation')) {
-          child.visible = false;
-          energyLocations.push(child.position);
-          return;
-        };
-        if (childName.startsWith("SpawnEnemy")) {
-          child.visible = false;
-          enemyLocations.push(child.position);
-          return;
-        }
-        if (childName.startsWith("SpawnPoint")) {
-          child.visible = false;
-          if (!this.spawnPoints) this.spawnPoints = [];
-          this.spawnPoints.push(child.position.clone());
-          return;
-        }
-        if (childName.startsWith('SpotLight')) {
-          this.createSpotLight(child.position, child.rotation);
-          return;
-        }
-        if (childName.startsWith('PointLight')) {
-          //this.createPointLight(child.position, child.scale, userData.color);
-          this.game.lightManager.spawnLight({ type: 'pointLight', pos: child.position, color: userData.color, intensity: child.scale.x * 10 });
-          return;
-        }
-        if (childName.includes('PanningTex')) {
-          this.panningTextures.push(child.material.map);
-        }
-        if (childName.startsWith('Landscape')) {
-          child.material.map.repeat.set(40, 40);
-        }
-        if (userData.texRepeat) {
-          //child.material = child.material.clone()
-          child.material.map = child.material.map.clone();
-          child.material.map.repeat.set(userData.texRepeat, userData.texRepeat);
-          child.material.map.needsUpdate = true;
-        }
-        if (childName.includes('Translucent')) {
-          child.material.transparent = true;
-          child.material.opacity = .2;
-        }
-        if (childName.includes('Alpha')) {
-          child.material.transparent = true;
-          child.material.opacity = 6;
-          //child.material.depthWrite = false;
-          child.renderOrder = 1;
-        }
-        if (childName.startsWith('Visual')) return;
-        if (childName.startsWith('Portal')) {
-          const pos = userData.pos ? { x: userData.pos[0], y: userData.pos[1], z: userData.pos[2] } : undefined
-          this.createPortal(
-            child.position,
-            userData.world,
-            pos
-          );
-          return;
-        }
-        // Collision and bvh
-        if (child.isMesh) {
-          // if(!child.geometry) return;
-          // child.updateMatrix(); // ensure local matrix matches position/rotation/scale
-          // child.geometry.applyMatrix4(child.matrix); // bake transform into geometry
-          // child.position.set(0, 0, 0);
-          // child.rotation.set(0, 0, 0);
-          // child.scale.set(1, 1, 1);
-          // child.updateMatrix();
-          // if (!child.visible) child.visible = true;
-          const geomClone = child.geometry.clone(); // clone for BVH
-          geomClone.computeBoundsTree();
-
-          // remove vertex colors only from the clone
-          Object.keys(geomClone.attributes).forEach(a => {
-            if (a.startsWith('color')) {
-              geomClone.deleteAttribute(a);
-            }
-          });
-
-          this.allGeoms.push(geomClone);
-          child.castShadow = true;
-          child.receiveShadow = true;
-
-          // const rBody = this.physics.createCollider(triMeshFromVerts(geomClone));
-          // this.worldColliders.push(rBody);
-
-          const edges = new THREE.EdgesGeometry(child.geometry, 35);
-          const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
-          child.add(line);
-          child.material.dithering = true;
-
-        }
-      });
-      for (const geom of this.allGeoms) {
-        Object.keys(geom.attributes).forEach(a => {
-          if (a.startsWith('color')) {
-            geom.deleteAttribute(a);
+        this.map = model;
+        this.game.graphicsWorld.add(this.map);
+        model.traverse((child) => {
+          /**@type {string} */
+          const childName = child.name;
+          const userData = child.userData;
+          if (childName.startsWith('Skip')) {
+            child.visible = false;
+            return;
           }
-        })
-      }
-      const mergedGeom = mergeGeometries(this.allGeoms);
-      mergedGeom.computeBoundsTree();
-      this.mergedLevel = new THREE.Mesh(mergedGeom);
+          if (childName.startsWith('itemLocation')) {
+            child.visible = false;
+            itemLocations.push(child.position);
+            return;
+          };
+          if (childName.startsWith('healthLocation')) {
+            child.visible = false;
+            healthLocations.push(child.position);
+            return;
+          };
+          if (childName.startsWith('energyLocation')) {
+            child.visible = false;
+            energyLocations.push(child.position);
+            return;
+          };
+          if (childName.startsWith("SpawnEnemy")) {
+            child.visible = false;
+            enemyLocations.push(child.position);
+            return;
+          }
+          if (childName.startsWith("SpawnPoint")) {
+            child.visible = false;
+            if (!this.spawnPoints) this.spawnPoints = [];
+            this.spawnPoints.push(child.position.clone());
+            return;
+          }
+          if (childName.startsWith('SpotLight')) {
+            this.createSpotLight(child.position, child.rotation);
+            return;
+          }
+          if (childName.startsWith('PointLight')) {
+            //this.createPointLight(child.position, child.scale, userData.color);
+            this.game.lightManager.spawnLight({ type: 'pointLight', pos: child.position, color: userData.color, intensity: child.scale.x * 10 });
+            return;
+          }
+          if (childName.includes('PanningTex')) {
+            this.panningTextures.push(child.material.map);
+          }
+          if (childName.startsWith('Landscape')) {
+            child.material.map.repeat.set(40, 40);
+          }
+          if (userData.texRepeat) {
+            //child.material = child.material.clone()
+            child.material.map = child.material.map.clone();
+            child.material.map.repeat.set(userData.texRepeat, userData.texRepeat);
+            child.material.map.needsUpdate = true;
+          }
+          if (childName.includes('Translucent')) {
+            child.material.transparent = true;
+            child.material.opacity = .2;
+          }
+          if (childName.includes('Alpha')) {
+            child.material.transparent = true;
+            child.material.opacity = 6;
+            //child.material.depthWrite = false;
+            child.renderOrder = 1;
+          }
+          if (childName.startsWith('Visual')) return;
+          if (childName.startsWith('Portal')) {
+            const pos = userData.pos ? { x: userData.pos[0], y: userData.pos[1], z: userData.pos[2] } : undefined
+            this.createPortal(
+              child.position,
+              userData.world,
+              pos
+            );
+            return;
+          }
+          // Collision and bvh
+          if (child.isMesh) {
+            // if(!child.geometry) return;
+            // child.updateMatrix(); // ensure local matrix matches position/rotation/scale
+            // child.geometry.applyMatrix4(child.matrix); // bake transform into geometry
+            // child.position.set(0, 0, 0);
+            // child.rotation.set(0, 0, 0);
+            // child.scale.set(1, 1, 1);
+            // child.updateMatrix();
+            // if (!child.visible) child.visible = true;
+            const geomClone = child.geometry.clone(); // clone for BVH
+            geomClone.computeBoundsTree();
 
-      const rBody = this.physics.createCollider(triMeshFromVerts(mergedGeom));
-      this.worldColliders.push(rBody);
+            // remove vertex colors only from the clone
+            Object.keys(geomClone.attributes).forEach(a => {
+              if (a.startsWith('color')) {
+                geomClone.deleteAttribute(a);
+              }
+            });
 
-      // MyEventEmitter.emit('spawnLocations', {
-      //   itemLocations,
-      //   healthLocations,
-      //   energyLocations,
-      //   enemyLocations,
-      // });
+            this.allGeoms.push(geomClone);
+            child.castShadow = true;
+            child.receiveShadow = true;
 
-      this.levelLoaded = true;
-      this.mapLoaded[name] = true;
-      callback();
-      MyEventEmitter.emit('levelLoaded');
-      return gltf;
-    });
+            // const rBody = this.physics.createCollider(triMeshFromVerts(geomClone));
+            // this.worldColliders.push(rBody);
+
+            const edges = new THREE.EdgesGeometry(child.geometry, 35);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x000000 }));
+            child.add(line);
+            child.material.dithering = true;
+
+          }
+        });
+        for (const geom of this.allGeoms) {
+          Object.keys(geom.attributes).forEach(a => {
+            if (a.startsWith('color')) {
+              geom.deleteAttribute(a);
+            }
+          })
+        }
+        const mergedGeom = mergeGeometries(this.allGeoms);
+        mergedGeom.computeBoundsTree();
+        this.mergedLevel = new THREE.Mesh(mergedGeom);
+
+        const rBody = this.physics.createCollider(triMeshFromVerts(mergedGeom));
+        this.worldColliders.push(rBody);
+
+        // MyEventEmitter.emit('spawnLocations', {
+        //   itemLocations,
+        //   healthLocations,
+        //   energyLocations,
+        //   enemyLocations,
+        // });
+
+        this.levelLoaded = true;
+        this.mapLoaded[name] = true;
+        MyEventEmitter.emit('levelLoaded');
+        resolve(gltf);
+      }, undefined, reject)
+
+    })
   }
 }
 

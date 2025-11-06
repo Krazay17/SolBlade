@@ -1,4 +1,4 @@
-import Pawn from "../../actors/Pawn";
+import Pawn from "../../actors/CPawn";
 import * as STATES from ".";
 import State from "./State";
 

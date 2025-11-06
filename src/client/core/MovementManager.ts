@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import Pawn from "../actors/Pawn";
+import Pawn from "../actors/CPawn";
 import GroundChecker from "../player/GroundChecker";
 import PawnBody from "./PawnBody";
 

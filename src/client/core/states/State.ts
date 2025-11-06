@@ -1,4 +1,4 @@
-import Pawn from "../../actors/Pawn";
+import Pawn from "../../actors/CPawn";
 import AIMovement from "../AIMovement";
 import StateManager from "./StateManager";
 export default class State {

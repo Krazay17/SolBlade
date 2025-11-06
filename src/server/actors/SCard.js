@@ -9,7 +9,6 @@ export default class SCard extends SActor {
             itemData: data.itemData ?? makeRandomItem()
         })
         this.auth = true;
-        console.log(this.data.itemData)
     }
     update(dt) {
         this.rotY += dt;
@@ -18,13 +17,10 @@ export default class SCard extends SActor {
         this.deActivate()
         io.to(dealer).emit('addCard', this.data.itemData);
     }
-    hit() {
-        this.deActivate();
-    }
     activate() {
         this.data.itemData = makeRandomItem();
         this.pos = randomPos(20, 10);
-        
+
         super.activate();
     }
 }

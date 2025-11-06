@@ -17,4 +17,7 @@ export default class SPower extends SActor {
 
         this.deActivate();
     }
+    hit(){
+        this.deActivate();
+    }
 }

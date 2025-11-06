@@ -1,6 +1,6 @@
-import ClientActor from "./ClientActor";
+import CActor from "./CActor";
 
-export default class Portal extends ClientActor {
+export default class Portal extends CActor {
     init(newWorld, targetPos) {
         this.newWorld = newWorld;
         this.game.actorManager.addActor(this);

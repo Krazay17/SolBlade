@@ -19,6 +19,7 @@ export default class LoadingManager {
                 this.loadingBar(100);
             };
         }
+
     }
     loadingBar(progress: number) {
         if (progress > 99) {

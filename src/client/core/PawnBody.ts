@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier3d-compat"
-import ClientActor from "../actors/ClientActor.js"
+import ClientActor from "../actors/CActor.js"
 import { Vector3 } from "three";
 
 const GROUPS = {

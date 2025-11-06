@@ -19,7 +19,7 @@ export default class WeaponFireball extends Weapon {
                 anim: 'attackSpell',
                 onExit: () => { if (this.onAttack) clearTimeout(this.onAttack) }
             })) {
-            this.onAttack = setTimeout(() => this.shootFireball(1.2, 35, 30), 800);
+            this.onAttack = setTimeout(() => this.shootFireball(1, 30, 30), 800);
             this.actor.animationManager.playAnimation('attackSpell', false);
             this.game.soundPlayer.playPosSound('fireWhoosh', this.actor.position);
             return true;

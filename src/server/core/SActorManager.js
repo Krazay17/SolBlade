@@ -1,15 +1,17 @@
 import { randomUUID } from "crypto";
 import { randomPos } from "@solblade/shared";
-import SPlayer from "../newactors/SPlayer.js";
-import SActor from "../newactors/SActor.js";
-import SPower from "../newactors/SPower.js";
-import SCard from "../newactors/SCard.js";
+import SPlayer from "../actors/SPlayer.js";
+import SActor from "../actors/SActor.js";
+import SPower from "../actors/SPower.js";
+import SCard from "../actors/SCard.js";
+import SEnemy from "../actors/SEnemy.js";
 
 
 const actorRegistry = {
     player: SPlayer,
     power: SPower,
     card: SCard,
+    enemy: SEnemy,
 }
 
 export default class SActorManager {
@@ -129,7 +131,7 @@ export default class SActorManager {
         this.hasSpawnedDefaults = true;
         const item = 4;
         const power = 15;
-        const enemies = 4;
+        const enemies = 25;
         for (let i = 0; i < item; i++) {
             this.createActor('card', { sceneName: 'scene2', pos: randomPos(20, 10), respawntime: 15000 });
         }
@@ -137,20 +139,9 @@ export default class SActorManager {
             const powerType = i % 2 ? 'health' : 'energy';
             this.createActor('power', { sceneName: 'scene2', power: powerType, pos: randomPos(20, 10), respawntime: 15000 });
         }
-        // for (let i = 0; i < enemies; i++) {
-        //     this.createActor('enemy', { enemy: 'julian', sceneName: 'scene3', pos: randomPos(25, 15) });
-        // }
-        // setInterval(() => {
-        //     if (this.actorsOfScene['scene3'].enemies.length > 12) return;
-        //     this.createActor('enemy', { enemy: 'julian', sceneName: 'scene3', pos: randomPos(25, 15) });
-        // }, 2000)
-
-        // for (let i = 0; i < enemies; i++) {
-        //     this.createActor('enemy', { enemy: 'julian', sceneName: 'scene4', pos: randomPos(100, 15) });
-        // }
-        // setInterval(() => {
-        //     if (this.actorsOfScene['scene4'].enemies.length > 12) return;
-        //     this.createActor('enemy', { enemy: 'julian', sceneName: 'scene4', pos: randomPos(100, 15) });
-        // }, 2000)
+        for (let i = 0; i < enemies; i++) {
+            this.createActor('enemy', { enemy: 'julian', sceneName: 'scene3', pos: randomPos(25, 15), respawntime: 5000 });
+            this.createActor('enemy', { enemy: 'julian', sceneName: 'scene4', pos: randomPos(25, 15), respawntime: 5000 });
+        }
     }
 }

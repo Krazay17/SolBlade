@@ -1,10 +1,10 @@
 import AnimationManager from "../core/AnimationManager";
 import MyEventEmitter from "../core/MyEventEmitter";
-import ClientActor from "./ClientActor";
+import CActor from "./CActor";
 import PawnBody from "../core/PawnBody";
 import Health from "../core/Health";
 
-export default class Pawn extends ClientActor {
+export default class CPawn extends CActor {
     constructor(game, data) {
         super(game, data);
         const {

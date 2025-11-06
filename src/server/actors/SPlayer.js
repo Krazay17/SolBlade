@@ -9,9 +9,10 @@ export default class SPlayer extends SActor {
         this.health = new SHealth(this, 100, data.currentHealth);
         this.health.onChange = (v) => this.data.currentHealth = v
         this.health.onDeath = () => this.die();
-        this.lastHit = null;
 
         this.energy = new SEnergy(this, 100);
+        
+        this.lastHit = null;
     }
     destroy() {
         this.actorManager.removeActor(this);

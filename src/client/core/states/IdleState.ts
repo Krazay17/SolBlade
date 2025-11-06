@@ -1,5 +1,5 @@
 import State from "./State";
-import Pawn from "../../actors/Pawn";
+import Pawn from "../../actors/CPawn";
 
 export default class IdleState extends State {
     enter(params?: any) {

@@ -1,10 +1,10 @@
 import ActorManager from "./SActorManager.js";
 
-export default class SrvAIController {
-    constructor(actor, actorManager) {
+export default class SAIController {
+    constructor(game, actor) {
+        this.game = game;
         this.actor = actor;
-        /**@type {ActorManager} */
-        this.actorManager = actorManager;
+        this.actorManager = game.actorManager;
     }
     update(dt) {
         const player = this.findNearestPlayer();
@@ -23,7 +23,7 @@ export default class SrvAIController {
         }
 
         const faceAngle = Math.atan2(dir.x, dir.z);
-        this.actor.rotation = lerpAngle(this.actor.rotation, faceAngle, this.actor.turnSpeed * dt);
+        this.actor.rotY = lerpAngle(this.actor.rotY, faceAngle, this.actor.turnSpeed * dt);
         this.actor.move(dir);
     }
     avoidOtherEnemies() {
@@ -31,7 +31,7 @@ export default class SrvAIController {
         const strength = 1.0;     // how strongly they push away
         const result = { x: 0, z: 0 };
 
-        const worldActors = this.actorManager.actorsOfWorld[this.actor.sceneName];
+        const worldActors = this.actorManager.actorsOfScene[this.actor.sceneName];
         if (!worldActors || !worldActors.enemies) return result;
 
         const myPos = this.actor.position;
@@ -56,7 +56,7 @@ export default class SrvAIController {
     }
 
     findNearestPlayer() {
-        const { players } = this.actorManager.actorsOfWorld[this.actor.data.sceneName]
+        const { players } = this.actorManager.actorsOfScene[this.actor.sceneName]
         if (!players.length) return;
 
         // get this enemy's position

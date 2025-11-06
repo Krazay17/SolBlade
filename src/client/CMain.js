@@ -5,7 +5,6 @@ import './ui/StyleUI.css';
 import { setupDiscordWindow } from "./ui/DiscordStuff";
 import setupChat from "./ui/Chat";
 import Input from "./core/Input";
-import NetManager from "./core/NetManager";
 
 LocalData.load();
 const canvas = document.getElementById('webgl');

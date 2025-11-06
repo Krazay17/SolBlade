@@ -1,6 +1,6 @@
 import HitData from "@solblade/shared/HitData";
 import Weapon from "./Weapon";
-import ClientProjectile from "../../actors/ClientProjectile";
+import ClientProjectile from "../../actors/CProjectile";
 
 export default class WeaponScythe extends Weapon {
     constructor(game, actor, slot) {

@@ -1,6 +1,6 @@
-import Enemy from "./Enemy";
+import CEnemy from "./CEnemy";
 
-export default class EnemyJulian extends Enemy {
+export default class CJulian extends CEnemy {
     constructor(game, data) {
         super(game, {
             ...data,

@@ -1,9 +1,10 @@
-import { Actor, randomPos } from "@solblade/shared";
+import { Actor } from "@solblade/shared";
 import { io } from "../SMain.js";
 import SGame from "../SGame.js";
 
 export default class SActor extends Actor {
     constructor(game, data) {
+        data.name = data.name?? 'Demon'
         super(data);
         /**@type {SGame} */
         this.game = game;
@@ -48,7 +49,6 @@ export default class SActor extends Actor {
     }
     hit(data) {
         if (!this.active) return;
-        this.deActivate();
         io.emit('actorEvent', { id: this.id, event: "applyHit", data });
     }
     respawn(respawnTime) {

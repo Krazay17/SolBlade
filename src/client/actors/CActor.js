@@ -4,7 +4,7 @@ import Game from "../CGame";
 import MyEventEmitter from "../core/MyEventEmitter";
 import RAPIER from "@dimforge/rapier3d-compat";
 
-export default class ClientActor extends Actor {
+export default class CActor extends Actor {
     constructor(game, data = {}) {
         const posArr = data.pos;
         const dirArr = data.dir;
@@ -202,8 +202,5 @@ export default class ClientActor extends Actor {
         if (!this.active) return;
         MyEventEmitter.emit('actorEvent', { id: this.id, event: "hit", data: data.serialize() });
         this.game.soundPlayer.playSound('hit');
-    }
-    applyHit(data) {
-        this.deActivate();
     }
 }

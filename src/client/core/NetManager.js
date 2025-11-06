@@ -255,8 +255,15 @@ function initBindings() {
     socket.on('addCard', data => {
         game.inventory.aquireItem(data);
     });
+    socket.on('questEvent', ({ quest, event, data }) => {
+        quest = game.questManager.hasQuest(quest);
+        if (quest && quest[event]) { quest[event](data) }
+    })
 }
 
+MyEventEmitter.on('questEvent', (data) => {
+    socket.emit('questEvent', data);
+})
 MyEventEmitter.on('actorMulticast', (data) => {
     socket.emit('actorMulticast', data);
 })

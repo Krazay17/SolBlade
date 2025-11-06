@@ -1,14 +1,14 @@
 import { Quaternion, Vector3 } from "three";
-import ClientActor from "../actors/ClientActor";
-import ProjectileFireball from "../actors/ProjectileFireball";
+import ClientActor from "../actors/CActor";
+import ProjectileFireball from "../actors/CFireball";
 import Player from "../player/Player";
 import MyEventEmitter from "./MyEventEmitter";
 import Game from "../CGame";
 import LocalData from "./LocalData";
-import EnemyJulian from "../actors/EnemyJulian";
-import ProjectileScythe from "../actors/ProjectileScythe";
-import Power from "../actors/Power";
-import ClientCard from "../actors/ClientCard";
+import EnemyJulian from "../actors/CJulian";
+import ProjectileScythe from "../actors/CScythe";
+import Power from "../actors/CPower";
+import ClientCard from "../actors/CCard";
 
 const actorRegistry: Record<string, any> = {
     player: Player,
@@ -16,6 +16,7 @@ const actorRegistry: Record<string, any> = {
     projectileScythe: ProjectileScythe,
     power: Power,
     card: ClientCard,
+    julian: EnemyJulian,
 }
 
 export default class ActorManager {

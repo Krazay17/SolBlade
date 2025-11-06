@@ -7,7 +7,7 @@ import CameraFX from '../core/CameraFX';
 import PlayerMovement from './PlayerMovement';
 import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
-import Pawn from '../actors/Pawn';
+import Pawn from '../actors/CPawn';
 import PlayerStateManager from './playerStates/PlayerStateManager';
 import HitData from '../core/HitData';
 import { menuButton } from '../ui/Menu';

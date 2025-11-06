@@ -1,6 +1,6 @@
 import Player from "../player/Player";
 import { MovementStates } from './states/StateManager'
-import Enemy from "../actors/Enemy";
+import Enemy from "../actors/CEnemy";
 import AIMovement from "./AIMovement";
 import { Vector2, Vector3 } from "three";
 import PawnBody from "./PawnBody";

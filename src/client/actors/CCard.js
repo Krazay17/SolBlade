@@ -1,6 +1,6 @@
-import ClientPickup from "./ClientPickup";
+import CPickup from "./CPickup";
 
-export default class ClientCard extends ClientPickup {
+export default class CCard extends CPickup {
     init() {
         this.build();
     }

@@ -1,5 +1,5 @@
 import { Box3, Object3D, Raycaster, Sphere, Vector3 } from "three";
-import Pawn from "../actors/Pawn";
+import Pawn from "../actors/CPawn";
 import Game from "../CGame.js";
 import RAPIER from "@dimforge/rapier3d-compat";
 

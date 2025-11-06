@@ -1,9 +1,9 @@
 import { triMeshFromVerts } from "@solblade/shared";
-import ClientActor from "./ClientActor";
+import CActor from "./CActor";
 import RAPIER from "@dimforge/rapier3d-compat";
 import MyEventEmitter from "../core/MyEventEmitter";
 
-export default class ClientPickup extends ClientActor {
+export default class CPickup extends CActor {
     createBody(radius, geom) {
         if (this.body || this.collider) return;
         this.body = this.game.physicsWorld.createRigidBody(RAPIER.RigidBodyDesc.kinematicPositionBased()
@@ -21,11 +21,6 @@ export default class ClientPickup extends ClientActor {
             this.body
         );
         this.collider.actor = this.id;
-    }
-    hit(data) {
-        super.hit(data)
-
-        this.destroy();
     }
     touch(dealer) {
         if (!this.active) return;

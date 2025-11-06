@@ -1,8 +1,7 @@
 import HitData from "../core/HitData";
-import { spawnParticles } from './ParticleEmitter';
-import ClientProjectile from "./ClientProjectile";
+import CProjectile from "./CProjectile";
 
-export default class ProjectileFireball extends ClientProjectile {
+export default class CFireball extends CProjectile {
     constructor(game, data) {
         super(game, {
             ...data,
