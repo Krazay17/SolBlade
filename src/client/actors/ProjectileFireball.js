@@ -35,6 +35,7 @@ export default class ProjectileFireball extends ClientProjectile {
         }
     }
     onCollide() {
+        super.onCollide()
         this.game.soundPlayer.applyPosSound('fireballImpact', this.position);
         this.active = false;
         this.explode = true;

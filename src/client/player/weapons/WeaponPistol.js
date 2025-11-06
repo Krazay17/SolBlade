@@ -17,7 +17,8 @@ export default class WeaponPistol extends Weapon {
     use() {
         if (super.use() &&
             this.actor.stateManager.setState('attack', {
-                weapon: this, anim: 'gunShoot', duration: 350
+                weapon: this,
+                duration: 350
             })) {
             const { dir, pos, camPos } = this.actor.getShootData();
             this.hitActors.clear();
@@ -27,11 +28,11 @@ export default class WeaponPistol extends Weapon {
             this.meshTracer.shapeTrace(camPos, dir, this.range, 0.1, (/**@type {RAPIER.ColliderShapeCastHit}*/r) => {
                 if (r) {
                     this.game.fxManager.spawnFX(undefined, { pos: r.witness1 });
-                    const target = r.collider.actor;
-                    if (!target) return;
-                    target.hit(new HitData({
+                    const actor = this.game.getActorById(r.collider.actor)
+                    if (!actor) return;
+                    actor.hit(new HitData({
                         dealer: this.actor,
-                        target,
+                        target: actor,
                         impulse: dir.multiplyScalar(2),
                         amount: 15,
                         stun: 50,

@@ -154,6 +154,9 @@ export default class SGame {
             const actor = this.actorManager.getActorById(id);
             if (actor && actor[event]) actor[event](data);
         });
+        socket.on('actorMulticast', (data) => {
+            this.io.emit('actorMulticast', data);
+        });
         socket.on('actorHealthChangeLocal', health => {
             const actor = this.actorManager.getActorById(socket.id);
             if (!actor) return;

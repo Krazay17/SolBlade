@@ -2,6 +2,7 @@ import { Projectile } from "@solblade/shared";
 import { Mesh, MeshBasicMaterial, Object3D, SphereGeometry, Vector3, Quaternion } from "three";
 import Game from "../CGame";
 import HitData from "../core/HitData";
+import MyEventEmitter from "../core/MyEventEmitter";
 
 export default class ClientProjectile extends Projectile {
     constructor(game, data) {
@@ -38,7 +39,7 @@ export default class ClientProjectile extends Projectile {
     }
     get position() { return this.pos };
     get actorManager() { return this.game.actorManager };
-    setId(id){
+    setId(id) {
         this.id = id;
     }
     update(dt, time) {
@@ -60,5 +61,11 @@ export default class ClientProjectile extends Projectile {
             );
         }
         this.graphics.add(mesh);
+    }
+    onCollide() {
+        if (!this.isRemote) {
+            //MyEventEmitter.emit('actorEvent', { id: this.id, event: "onCollide" });
+            MyEventEmitter.emit('actorMulticast', { id: this.id, event: "onCollide" })
+        }
     }
 }

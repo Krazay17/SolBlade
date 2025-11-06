@@ -40,6 +40,9 @@ export default class SActor extends Actor {
         io.emit('actorEvent', { id: this.id, event: 'destroy' });
         if (this.onDeactivate) this.onDeactivate();
     }
+    onCollide() {
+        io.emit('actorEvent', {id:this.id, event: "onCollide"});
+    }
     destroy() {
         this.actorManager.removeActor(this);
     }

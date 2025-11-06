@@ -240,7 +240,10 @@ function initBindings() {
         console.log(event, data);
         const actor = scene.getActorById(id);
         if (actor && actor.active && actor[event]) actor[event](data);
-
+    });
+    socket.on('actorMulticast', ({ id, event, data }) => {
+        const actor = scene.getActorById(id);
+        if (actor && actor.active && actor[event]) actor[event](data);
     });
     socket.on('spawnFX', ({ type, data }) => {
         game.fxManager.spawnFX(type, data, false);
@@ -251,9 +254,12 @@ function initBindings() {
     });
     socket.on('addCard', data => {
         game.inventory.aquireItem(data);
-    })
+    });
 }
 
+MyEventEmitter.on('actorMulticast', (data) => {
+    socket.emit('actorMulticast', data);
+})
 MyEventEmitter.on('playerRotation', (data) => {
     socket.emit('playerRotation', data);
 })
