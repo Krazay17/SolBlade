@@ -36,10 +36,8 @@ export default class ProjectileFireball extends ClientProjectile {
     }
     onCollide() {
         this.game.soundPlayer.applyPosSound('fireballImpact', this.position);
-        spawnParticles(this.position, 55);
         this.active = false;
         this.explode = true;
-
         if (this.isRemote) return;
         const explosionRange = this.radius * 20;
         const enemiesInRange = this.game.actorManager.getActorsInRange(this.owner, this, this.position, explosionRange);
