@@ -12,6 +12,7 @@ export default class Actor {
             active = true,
             lifetime = 0,
             isRemote = false,
+            respawntime = 0,
             tempId = data.tempId ?? crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 10),
         } = data;
         this.data = data;
@@ -32,6 +33,7 @@ export default class Actor {
 
         this.isRemote = isRemote;
         this.lifetime = lifetime;
+        this.respawntime = respawntime;
 
         this.age = 0;
         this.timestamp = performance.now();
@@ -56,6 +58,7 @@ export default class Actor {
             active: this.active,
             isRemote: this.isRemote,
             lifetime: this.lifetime,
+            respawntime: this.respawntime,
 
             age: this.age,
             timestamp: this.timestamp,
@@ -64,6 +67,10 @@ export default class Actor {
     activate() { }
     deActivate() {
         this.active = false;
+
+        if (this.respawntime) {
+            this.respawn(this.respawntime)
+        }
     }
     destroy() {
         this.destroyed = true;

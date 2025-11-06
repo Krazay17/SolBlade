@@ -23,12 +23,8 @@ export default class SCard extends SActor {
     }
     activate() {
         this.data.itemData = makeRandomItem();
-        super.activate()
-    }
-    deActivate() {
         this.pos = randomPos(20, 10);
-        this.respawn(1000)
-
-        super.deActivate();
+        
+        super.activate();
     }
 }

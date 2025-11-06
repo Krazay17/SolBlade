@@ -127,15 +127,15 @@ export default class SActorManager {
     spawnDefaultActors() {
         if (this.hasSpawnedDefaults) return;
         this.hasSpawnedDefaults = true;
-        const item = 5;
+        const item = 4;
         const power = 15;
         const enemies = 4;
         for (let i = 0; i < item; i++) {
-            this.createActor('card', { sceneName: 'scene2', pos: randomPos(20, 10) });
+            this.createActor('card', { sceneName: 'scene2', pos: randomPos(20, 10), respawntime: 15000 });
         }
         for (let i = 0; i < power; i++) {
             const powerType = i % 2 ? 'health' : 'energy';
-            this.createActor('power', { sceneName: 'scene2', power: powerType, pos: randomPos(20, 10) });
+            this.createActor('power', { sceneName: 'scene2', power: powerType, pos: randomPos(20, 10), respawntime: 15000 });
         }
         // for (let i = 0; i < enemies; i++) {
         //     this.createActor('enemy', { enemy: 'julian', sceneName: 'scene3', pos: randomPos(25, 15) });

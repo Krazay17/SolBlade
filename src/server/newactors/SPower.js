@@ -17,9 +17,4 @@ export default class SPower extends SActor {
 
         this.deActivate();
     }
-    deActivate() {
-        super.deActivate();
-
-        this.respawn(20000);
-    }
 }
