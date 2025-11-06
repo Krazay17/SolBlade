@@ -52,7 +52,8 @@ export default class ClientActor extends Actor {
     }
     get actorManager() { return this.game.actorManager };
     get position() {
-        return this._position.copy(this.body?.translation());
+        if (this.body) return this._position.copy(this.body?.translation())
+        else return this.pos;
     }
     set position(pos) {
         this.body?.setTranslation(pos, false);
@@ -105,7 +106,12 @@ export default class ClientActor extends Actor {
     update(dt, time) {
         if (!this.active) return;
         if (this.body) {
-            this.graphics.position.lerp(this.body.translation(), 120 * dt);
+            const bodyPos = this.body.translation();
+            if (this.graphics.position.distanceTo(bodyPos) < 55) {
+                this.graphics.position.lerp(bodyPos, 120 * dt);
+            } else {
+                this.graphics.position.copy(bodyPos);
+            }
             this.graphics.quaternion.slerp(this.rot, 120 * dt);
         }
     }
