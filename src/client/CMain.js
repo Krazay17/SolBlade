@@ -23,4 +23,21 @@ window.addEventListener('beforeunload', () => {
 });
 window.addEventListener('contextmenu', (e) => {
     e.preventDefault();
+
+    e.stopPropagation();
+});
+document.addEventListener('dragstart', (e) => {
+    e.stopPropagation();
+});
+document.addEventListener('dragenter', (e) => {
+    e.stopPropagation();
+});
+document.addEventListener('dragleave', (e) => {
+    e.stopPropagation();
+});
+document.addEventListener('dragover', (e) => {
+    e.stopPropagation();
+});
+document.addEventListener('dragend', (e) => {
+    e.stopPropagation();
 });

@@ -166,9 +166,11 @@ export default class MeshManager {
     async getMesh(name) {
         let mesh = this.meshMap.get(name);
         if (mesh) {
+            console.log('reuseMesh')
             return mesh.clone();
         } else {
             mesh = await this.createMesh(name);
+            console.log('new Mesh')
             return mesh.clone();
         }
     }

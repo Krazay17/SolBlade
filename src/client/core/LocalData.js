@@ -1,4 +1,4 @@
-const CURRENT_VERSION = 0.092;
+const CURRENT_VERSION = 0.093;
 
 export default {
     version: CURRENT_VERSION,

@@ -75,5 +75,6 @@ export default class Actor {
     respawn() { }
     destroy() {
         this.destroyed = true;
+        this.active = false;
     }
 }

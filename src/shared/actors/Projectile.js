@@ -1,6 +1,7 @@
 import { Vector3 } from "three";
 import Actor from "./Actor.js";
 import RAPIER from "@dimforge/rapier3d-compat";
+import { COLLISION_GROUPS } from "../SolConstants.js";
 
 export default class Projectile extends Actor {
     constructor(physics, data = {}) {
@@ -22,6 +23,7 @@ export default class Projectile extends Actor {
         this.speed = speed;
         this.gravity = gravity;
         this.ignoreBody = ignoreBody;
+        this.noCollide = false;
 
         this.tempVec = new Vector3();
         this.veloctiy = this.dir.clone().multiplyScalar(this.speed);
@@ -47,28 +49,53 @@ export default class Projectile extends Actor {
 
         if (!this.body) return;
         if (this.isRemote) return;
+        if (this.noCollide) return;
 
-        const result = this.physics.intersectionWithShape(
+        // const result = this.physics.intersectionWithShape(
+        //     this.pos,
+        //     this.rot,
+        //     this.body,
+        //     undefined,
+        //     undefined,
+        //     undefined,
+        //     this.ignoreBody,
+        // )
+        this.physics.intersectionsWithShape(
             this.pos,
             this.rot,
             this.body,
+            (c) => this.collide(c),
             undefined,
-            undefined,
-            undefined,
-            this.ignoreBody,
+            (COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.WORLD) << 16 | COLLISION_GROUPS.PLAYER,
+            undefined
         )
 
-        if (result) {
-            const target = result.actor;
+        // if (result) {
+        //     const target = result.actor;
+        //     if (target) {
+        //         if (target === this.owner) return;
+        //         if (this.hitCallback) this.hitCallback(target);
+        //         this.onHit(target);
+        //     }
+        //     if (this.collideCallback) this.collideCallback(result);
+        //     this.onCollide(result);
+        // }
+    }
+    collide(c) {
+        console.log('collide');
+        if (c) {
+            const target = c.actor;
             if (target) {
                 if (target === this.owner) return;
-                if (this.hitCallback) this.hitCallback(result);
-                this.onHit(result);
+                if (this.hitCallback) this.hitCallback(target);
+                this.onHit(target);
             }
-            if (this.collideCallback) this.collideCallback(result);
-            this.onCollide(result);
+            if (this.collideCallback) this.collideCallback(c);
+            this.onCollide(c);
         }
     }
-    onCollide(result) { }
+    onCollide(result) {
+        this.noCollide = true;
+    }
     onHit(result) { }
 }

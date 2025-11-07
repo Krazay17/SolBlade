@@ -24,6 +24,7 @@ export default class WeaponScythe extends Weapon {
                 rot, 
                 dir, 
                 owner: this.actor.id,
+                damage: this.damage,
             }, false, true);
 
             this.playAnimation(this.hand, false);

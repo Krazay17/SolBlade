@@ -63,8 +63,9 @@ export default class CProjectile extends Projectile {
         this.graphics.add(mesh);
     }
     onCollide() {
+        if(this.noCollide)return;
+        super.onCollide()
         if (!this.isRemote) {
-            //MyEventEmitter.emit('actorEvent', { id: this.id, event: "onCollide" });
             MyEventEmitter.emit('actorMulticast', { id: this.id, event: "onCollide" })
         }
     }
