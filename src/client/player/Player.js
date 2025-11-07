@@ -110,7 +110,7 @@ export default class Player extends Pawn {
     update(dt, time) {
         if (!this.tick) return;
         super.update(dt, time);
-        // Local Player
+        
         if (!this.isRemote) {
             if (this.energy) this.energy.update(dt);
             this.handleInput(dt, time);

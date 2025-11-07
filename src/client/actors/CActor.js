@@ -108,11 +108,11 @@ export default class CActor extends Actor {
         if (this.body) {
             const bodyPos = this.body.translation();
             if (this.graphics.position.distanceTo(bodyPos) < 55) {
-                this.graphics.position.lerp(bodyPos, 120 * dt);
+                this.graphics.position.lerp(bodyPos, 30 * dt);
             } else {
                 this.graphics.position.copy(bodyPos);
             }
-            this.graphics.quaternion.slerp(this.rot, 120 * dt);
+            this.graphics.quaternion.slerp(this.rot, 30 * dt);
         }
     }
     fixedUpdate(dt) {

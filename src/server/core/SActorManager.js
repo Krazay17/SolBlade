@@ -19,6 +19,7 @@ export default class SActorManager {
         this.game = game;
         this.io = io;
 
+        this.idCounter = 0;
         this._actors = [];
         this.actorsOfScene = {
             'scene0': { players: [], enemies: [], others: [] },
@@ -100,7 +101,8 @@ export default class SActorManager {
 
         const id = type === 'player' && data.id
             ? data.id
-            : randomUUID();
+            : this.idCounter;
+        this.idCounter++;
         const actorClass = actorRegistry[type];
         if (actorClass) {
             actor = new actorClass(this.game, { ...data, type, id });
@@ -131,7 +133,7 @@ export default class SActorManager {
         this.hasSpawnedDefaults = true;
         const item = 4;
         const power = 15;
-        const enemies = 40;
+        const enemies = 100;
         for (let i = 0; i < item; i++) {
             this.createActor('card', { sceneName: 'scene2', pos: randomPos(20, 10), respawntime: 15000 });
         }

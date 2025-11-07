@@ -27,6 +27,15 @@ export default class CPawn extends CActor {
         this.assignMesh(this.skin);
 
         MyEventEmitter.emit("pawnCreated", this);
+
+        switch (this.type) {
+            case 'player':
+                this.interpSpeed = 60;
+                break;
+            default:
+                this.interpSpeed = 20;
+                break;
+        }
     }
     set rotationY(v) { this.graphics.rotation.y = v }
     get rotationY() { return this.graphics.rotation.y };
@@ -36,18 +45,17 @@ export default class CPawn extends CActor {
         if (this.stateManager) this.stateManager.update(dt, time);
         if (this.movement) this.movement.update?.(dt, time);
         if (this.animationManager) this.animationManager.update(dt);
-        if (this.isRemote) {
-            this.graphics.quaternion.slerp(this.rot, 60 * dt);
-        }
-        if (this.pawnBody) this.graphics.position.lerp(this.pawnBody.position, 120 * dt);
+        if (this.isRemote) this.graphics.quaternion.slerp(this.rot, this.interpSpeed * dt);
+        if (this.pawnBody) this.graphics.position.lerp(this.pawnBody.position, this.interpSpeed * dt);
     }
     fixedUpdate(dt, time) {
+        if (!this.active) return;
         if (this.isRemote) {
             if (this.pawnBody) {
                 if (this.pawnBody.position.distanceToSquared(this.pos) > 50) {
                     this.pawnBody.position = this.pos;
                 } else {
-                    this.pawnBody.position = this.pawnBody.position.lerp(this.pos, 60 * dt);
+                    this.pawnBody.position = this.pawnBody.position.lerp(this.pos, this.interpSpeed * dt);
                 }
             }
         } else {

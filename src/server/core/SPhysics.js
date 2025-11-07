@@ -24,7 +24,7 @@ export default class SPhysics {
         this.scene5 = this.makeWorld(scene5Data);
     }
     update(dt) {
-        //this.updateWorld(dt, 'scene1')
+        this.updateWorld(dt, 'scene1')
         this.updateWorld(dt, 'scene2')
         this.updateWorld(dt, 'scene3')
         this.updateWorld(dt, 'scene4')
@@ -75,23 +75,50 @@ export default class SPhysics {
         this[scene].step();
         const { players, enemies, others } = this.game.actorManager.actorsOfScene[scene];
 
-        const enemyPositions = enemies.flatMap(e =>
-            e.active ? [{ id: e.id, pos: e.pos, rot: e.rot }] : []
-        );
-        const otherPositions = others.flatMap(e =>
-            e.active && e.auth ? [{ id: e.id, pos: e.pos, rot: e.rot }] : []
-        );
-
+        const enemyBuffer = arrayBuffer(enemies, 8);
+        const otherBuffer = arrayBuffer(others, 8);
 
         this.timeSinceLastUpdate = (this.timeSinceLastUpdate || 0) + dt;
-        if (this.timeSinceLastUpdate >= 0.01) {
+        if (this.timeSinceLastUpdate >= 0.1) {
             this.timeSinceLastUpdate = 0;
             for (const p of players) {
-                //this.io.to(p.id).emit('updateEnemies', enemyPositions);
-                //this.io.to(p.id).emit('updateActors', otherPositions);
-                this.io.to(p.id).emit('worldUpdate', { enemyPositions, otherPositions });
-
+                this.io.to(p.id).emit('worldUpdate', enemyBuffer.buffer, otherBuffer.buffer);
             }
         }
+
+        // const enemyPositions = enemies.flatMap(e =>
+        //     e.active ? [{ id: e.id, pos: e.pos, rot: e.rot }] : []
+        // );
+        // const otherPositions = others.flatMap(e =>
+        //     e.active && e.auth ? [{ id: e.id, pos: e.pos, rot: e.rot }] : []
+        // );
+
+
+        // this.timeSinceLastUpdate = (this.timeSinceLastUpdate || 0) + dt;
+        // if (this.timeSinceLastUpdate >= 0.1) {
+        //     this.timeSinceLastUpdate = 0;
+        //     for (const p of players) {
+        //         this.io.to(p.id).emit('worldUpdate', { enemyPositions, otherPositions });
+        //     }
+        // }
     }
+
+}
+
+function arrayBuffer(list, length = 8) {
+    const filteredList = list.filter(l => l.active);
+    const count = filteredList.length;
+    const buffer = new Float32Array(count * length)
+    let i = 0;
+    for (const e of filteredList) {
+        buffer[i++] = e.id ?? 0;
+        buffer[i++] = e.pos.x ?? 0;
+        buffer[i++] = e.pos.y ?? 0;
+        buffer[i++] = e.pos.z ?? 0;
+        buffer[i++] = e.rot.x ?? 0;
+        buffer[i++] = e.rot.y ?? 0;
+        buffer[i++] = e.rot.z ?? 0;
+        buffer[i++] = e.rot.w ?? 0;
+    };
+    return buffer;
 }
