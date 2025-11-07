@@ -220,7 +220,6 @@ function initBindings() {
     socket.on('worldUpdate', (enemyBuffer, otherBuffer) => {
         const data = new Float32Array(enemyBuffer);
         const data2 = new Float32Array(otherBuffer);
-        console.log(data[0], data[1], data[2], data[3]);
 
         for (let i = 0; i < data.length; i += 8) {
             const actor = scene.getActorById(data[i]);
@@ -231,13 +230,8 @@ function initBindings() {
         // for (let i = 0; i < data2.length; i += 8) {
         //     const actor = scene.getActorById(data2[i]);
         //     if (!actor) return;
-        //     actor.pos.x = data2[i + 1];
-        //     actor.pos.y = data2[i + 2];
-        //     actor.pos.z = data2[i + 3];
-        //     actor.rot.x = data2[i + 4];
-        //     actor.rot.y = data2[i + 5];
-        //     actor.rot.z = data2[i + 6];
-        //     actor.rot.w = data2[i + 7];
+        //     actor.pos = new Vector3(data[i + 1], data[i + 2], data[i + 3]);
+        //     actor.rot = new Quaternion(data[i + 4], data[i + 5], data[i + 6], data[i + 7])
         // }
     });
     // socket.on('worldUpdate', ({ enemyPositions, otherPositions }) => {

@@ -14,7 +14,7 @@ THREE.Mesh.prototype.raycast = acceleratedRaycast;
 export default class Scene {
   constructor(game, sceneName = 'scene1', data = {}) {
     const {
-      killFloor = -50,
+      killFloor = -30,
     } = data;
     /**@type {Game} */
     this.game = game; // Access camera, renderer, input, etc.
