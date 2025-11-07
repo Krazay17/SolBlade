@@ -12,6 +12,9 @@ export default class SActor extends Actor {
         this._yaw = 0;
         this.auth = false;
 
+        this.lastPos;
+        this.lastRot;
+
         this.init();
     }
     get actorManager() { return this.game.actorManager }

@@ -27,7 +27,7 @@ export default class SPhysics {
         this.updateWorld(dt, 'scene1')
         this.updateWorld(dt, 'scene2')
         this.updateWorld(dt, 'scene3')
-        this.updateWorld(dt, 'scene4')
+        //this.updateWorld(dt, 'scene4')
         //this.updateWorld(dt, 'scene5')
     }
     makeWorld(worldData) {
@@ -75,8 +75,11 @@ export default class SPhysics {
         this[scene].step();
         const { players, enemies, others } = this.game.actorManager.actorsOfScene[scene];
 
-        const enemyBuffer = arrayBuffer(enemies, 8);
-        const otherBuffer = arrayBuffer(others, 8);
+
+
+
+        const enemyBuffer = arrayBuffer(filterMoved(enemies), 8);
+        const otherBuffer = arrayBuffer(filterMoved(others), 8);
 
         this.timeSinceLastUpdate = (this.timeSinceLastUpdate || 0) + dt;
         if (this.timeSinceLastUpdate >= 0.1) {
@@ -85,32 +88,15 @@ export default class SPhysics {
                 this.io.to(p.id).emit('worldUpdate', enemyBuffer.buffer, otherBuffer.buffer);
             }
         }
-
-        // const enemyPositions = enemies.flatMap(e =>
-        //     e.active ? [{ id: e.id, pos: e.pos, rot: e.rot }] : []
-        // );
-        // const otherPositions = others.flatMap(e =>
-        //     e.active && e.auth ? [{ id: e.id, pos: e.pos, rot: e.rot }] : []
-        // );
-
-
-        // this.timeSinceLastUpdate = (this.timeSinceLastUpdate || 0) + dt;
-        // if (this.timeSinceLastUpdate >= 0.1) {
-        //     this.timeSinceLastUpdate = 0;
-        //     for (const p of players) {
-        //         this.io.to(p.id).emit('worldUpdate', { enemyPositions, otherPositions });
-        //     }
-        // }
     }
 
 }
 
 function arrayBuffer(list, length = 8) {
-    const filteredList = list.filter(l => l.active && l.auth);
-    const count = filteredList.length;
+    const count = list.length;
     const buffer = new Float32Array(count * length)
     let i = 0;
-    for (const e of filteredList) {
+    for (const e of list) {
         buffer[i++] = e.id ?? 0;
         buffer[i++] = e.pos.x ?? 0;
         buffer[i++] = e.pos.y ?? 0;
@@ -121,4 +107,42 @@ function arrayBuffer(list, length = 8) {
         buffer[i++] = e.rot.w ?? 0;
     };
     return buffer;
+}
+
+function filterMoved(actors) {
+    return actors.filter(a => {
+        if (!a.active || !a.auth) return false;
+        const moved = (
+            !a.lastPos ||
+            a.pos.x !== a.lastPos[0] ||
+            a.pos.y !== a.lastPos[1] ||
+            a.pos.z !== a.lastPos[2]
+        );
+        const rotated = (
+            !a.lastRot ||
+            a.rot.x !== a.lastRot[0] ||
+            a.rot.y !== a.lastRot[1] ||
+            a.rot.z !== a.lastRot[2] ||
+            a.rot.w !== a.lastRot[3]
+        );
+        if (moved || rotated) {
+            a.lastPos = [a.pos.x, a.pos.y, a.pos.z];
+            a.lastRot = [a.rot.x, a.rot.y, a.rot.z, a.rot.w];
+            return true;
+        }
+        return false;
+    })
+}
+
+function posArray(l, size = 4, lastArray) {
+    const list = l.filter(v => v.active && v.auth);
+    const length = list.length
+    const buffer = new Float32Array(length * size)
+    let i;
+    for (const e of list) {
+        buffer[i++] = e.id;
+        buffer[i++] = e.pos.x;
+        buffer[i++] = e.pos.x;
+        buffer[i++] = e.pos.x;
+    }
 }

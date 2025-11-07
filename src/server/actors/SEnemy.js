@@ -17,6 +17,7 @@ export default class SEnemy extends SActor {
         this.aggroRadius = data.aggroRadius || 250;
         this.turnSpeed = 10;
         this._rotation = 0;
+        this.auth = true;
 
         /**@type {RAPIER.World} */
         this.physics = this.game.physics[this.sceneName];

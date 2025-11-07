@@ -1,5 +1,5 @@
-import { EffectComposer, FilmPass, FXAAShader, GammaCorrectionShader, OutlinePass, RenderPass, ShaderPass, SobelOperatorShader, SSAOPass, UnrealBloomPass } from "three/examples/jsm/Addons.js";
-import { MultiplyBlending, Vector2 } from "three";
+import { EffectComposer, RenderPass,  UnrealBloomPass } from "three/examples/jsm/Addons.js";
+import { Vector2 } from "three";
 
 export default class SolRenderPass {
     constructor(renderer, scene, camera) {
@@ -9,7 +9,6 @@ export default class SolRenderPass {
 
         this.composer = this.createComposer();
         this.renderPass = this.createRenderPass();
-        this.ssaoPass = this.createSSAOPass();
         this.bloomPass = this.createBloomPass();
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
@@ -23,19 +22,12 @@ export default class SolRenderPass {
     createRenderPass() {
         return new RenderPass(this.scene, this.camera);
     }
-    createSSAOPass() {
-        const pass = new SSAOPass(this.scene, this.camera, window.innerWidth, window.innerHeight, 8);
-        pass.minDistance = 0.005;
-        pass.maxDistance = 0.1;
-        return pass;
-    }
     createBloomPass() {
         const pass = new UnrealBloomPass(new Vector2(window.innerWidth, window.innerHeight), .2, .5, 1);
         return pass;
     }
     addPasses() {
         this.composer.addPass(this.renderPass);
-        this.composer.addPass(this.ssaoPass);
         this.composer.addPass(this.bloomPass);
     }
     onWindowResize() {
