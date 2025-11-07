@@ -11,8 +11,6 @@ export default class SActor extends Actor {
         this.onDeactivate = null;
         this._yaw = 0;
         this.auth = false;
-        console.log(this.pos);
-        console.log(this.rot);
 
         this.init();
     }

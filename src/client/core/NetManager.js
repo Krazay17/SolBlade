@@ -227,12 +227,12 @@ function initBindings() {
             actor.pos = new Vector3(data[i + 1], data[i + 2], data[i + 3]);
             actor.rot = new Quaternion(data[i + 4], data[i + 5], data[i + 6], data[i + 7])
         }
-        // for (let i = 0; i < data2.length; i += 8) {
-        //     const actor = scene.getActorById(data2[i]);
-        //     if (!actor) return;
-        //     actor.pos = new Vector3(data[i + 1], data[i + 2], data[i + 3]);
-        //     actor.rot = new Quaternion(data[i + 4], data[i + 5], data[i + 6], data[i + 7])
-        // }
+        for (let i = 0; i < data2.length; i += 8) {
+            const actor = scene.getActorById(data2[i]);
+            if (!actor) return;
+            actor.pos = new Vector3(data2[i + 1], data2[i + 2], data2[i + 3]);
+            actor.rot = new Quaternion(data2[i + 4], data2[i + 5], data2[i + 6], data2[i + 7])
+        }
     });
     // socket.on('worldUpdate', ({ enemyPositions, otherPositions }) => {
     //     for (const a of enemyPositions) {

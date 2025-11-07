@@ -25,7 +25,7 @@ export default class CPickup extends CActor {
     touch(dealer) {
         if (!this.active) return;
         MyEventEmitter.emit('actorEvent', { id: this.id, event: "touch", data: dealer });
-        this.game.soundPlayer.playPosSound(this.data.itemData.pickupSound || 'pickup', this.pos);
+        this.game.soundPlayer.playPosSound(this.data.itemData?.pickupSound || 'pickup', this.pos);
 
         this.destroy()
     }

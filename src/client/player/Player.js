@@ -110,7 +110,7 @@ export default class Player extends Pawn {
     update(dt, time) {
         if (!this.tick) return;
         super.update(dt, time);
-        
+
         if (!this.isRemote) {
             if (this.energy) this.energy.update(dt);
             this.handleInput(dt, time);
@@ -205,13 +205,17 @@ export default class Player extends Pawn {
             undefined,
             this.body
         )
-        let dir;
+        let dir = camDirection;
         if (result) {
-            const hitPos = camPosition.add(camDirection.multiplyScalar(result.timeOfImpact));
-            dir = hitPos.sub(bulletPosition);
-            dir.normalize();
-        } else {
-            dir = camDirection;
+            const hitPos = camPosition.add(camDirection.clone().multiplyScalar(result.timeOfImpact));
+            const tempDir = hitPos.sub(bulletPosition);
+            tempDir.normalize();
+            const dot = tempDir.dot(camDirection);
+            console.log(dot);
+            if (dot > .5) {
+                dir = tempDir;
+                dir.normalize();
+            }
         }
         return {
             pos: bulletPosition,

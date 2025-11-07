@@ -106,7 +106,7 @@ export default class SPhysics {
 }
 
 function arrayBuffer(list, length = 8) {
-    const filteredList = list.filter(l => l.active);
+    const filteredList = list.filter(l => l.active && l.auth);
     const count = filteredList.length;
     const buffer = new Float32Array(count * length)
     let i = 0;
