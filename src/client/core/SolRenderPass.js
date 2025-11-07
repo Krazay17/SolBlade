@@ -1,17 +1,35 @@
-import { EffectComposer, RenderPass,  UnrealBloomPass } from "three/examples/jsm/Addons.js";
+import { EffectComposer, RenderPass, UnrealBloomPass } from "three/examples/jsm/Addons.js";
 import { Vector2 } from "three";
+import { menuButton, menuSlider } from "../ui/Menu";
 
 export default class SolRenderPass {
     constructor(renderer, scene, camera) {
         this.renderer = renderer;
         this.scene = scene;
         this.camera = camera;
+        this.bloomEnabled = true;
 
         this.composer = this.createComposer();
         this.renderPass = this.createRenderPass();
         this.bloomPass = this.createBloomPass();
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
+        menuButton('Bloom', () => {
+            this.bloomEnabled = !this.bloomEnabled;
+            if (!this.bloomEnabled) {
+                const pass = this.composer.passes.find(a => a instanceof UnrealBloomPass);
+                if (pass) {
+                    console.log('removeBloom')
+                    this.composer.removePass(this.bloomPass);
+                }
+            } else {
+                const pass = this.composer.passes.find(a => a instanceof UnrealBloomPass);
+                if (!pass) {
+                console.log('addBloom')
+                    this.composer.addPass(this.bloomPass);
+                }
+            }
+        });
 
         this.addPasses();
     }

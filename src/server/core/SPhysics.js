@@ -27,7 +27,7 @@ export default class SPhysics {
         this.updateWorld(dt, 'scene1')
         this.updateWorld(dt, 'scene2')
         this.updateWorld(dt, 'scene3')
-        //this.updateWorld(dt, 'scene4')
+        this.updateWorld(dt, 'scene4')
         //this.updateWorld(dt, 'scene5')
     }
     makeWorld(worldData) {

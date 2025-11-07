@@ -79,7 +79,7 @@ export default class CGame {
     this.actorManager = new ActorManager(this);
     this.initPlayer();
     this.partyFrame = new PartyFrame();
-    //this.debugData = new DebugData();
+    this.debugData = new DebugData();
     this.lightManager = new LightManager(this);
     this.fxManager = new FXManager(this);
 

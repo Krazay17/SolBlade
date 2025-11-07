@@ -221,7 +221,6 @@ function initBindings() {
     socket.on('worldUpdate', (enemyBuffer, otherBuffer) => {
         const data = new Float32Array(enemyBuffer);
         const data2 = new Float32Array(otherBuffer);
-        console.log(data);
 
         for (let i = 0; i < data.length; i += 8) {
             const actor = scene.getActorById(data[i]);
