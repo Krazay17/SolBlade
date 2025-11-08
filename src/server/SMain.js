@@ -8,7 +8,7 @@ import SVoiceChat from "./core/SVoiceChat.js";
 const SERVER_VERSION = 1.12;
 
 const server = http.createServer();
-const PORT = 80;
+const PORT = 8080;
 const origin = "*";
 
 export const io = new Server(server, {
