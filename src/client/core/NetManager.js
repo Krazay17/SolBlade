@@ -12,8 +12,8 @@ import Scene from "../scenes/Scene";
 
 const serverURL = location.hostname === "localhost"
     ? "http://localhost:80"
-    : "https://nonsubsiding-superexplicit-hye.ngrok-free.dev";
-//: "solbladeserver-production.up.railway.app";
+    //: "https://nonsubsiding-superexplicit-hye.ngrok-free.dev";
+    : "solbladeserver-production.up.railway.app";
 
 const socket = io(serverURL, {
     transports: ["websocket"],

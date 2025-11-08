@@ -133,7 +133,7 @@ export default class SActorManager {
         this.hasSpawnedDefaults = true;
         const item = 4;
         const power = 15;
-        const enemies = 100;
+        const enemies = 50;
         for (let i = 0; i < item; i++) {
             this.createActor('card', { sceneName: 'scene2', pos: randomPos(20, 10), respawntime: 15000 });
         }

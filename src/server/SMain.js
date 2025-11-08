@@ -8,9 +8,8 @@ import SVoiceChat from "./core/SVoiceChat.js";
 const SERVER_VERSION = 1.12;
 
 const server = http.createServer();
-const PORT = Number(process.env.PORT) || 80;
-const isLocal = PORT === 3000 || process.env.NODE_ENV === 'development' || PORT === 80;
-const origin = isLocal ? 'http://localhost:5173' : "https://solblade.online";
+const PORT = 80;
+const origin = "*";
 
 export const io = new Server(server, {
     cors: { origin, methods: ["GET", "POST"] },
@@ -46,14 +45,6 @@ io.on('connection', (socket) => {
         game.userJoin(socket, data)
     });
 });
-
-function serializePlayers() {
-    const data = {}
-    for (const [id, p] of Object.entries(players)) {
-        data[id] = p.serialize();
-    }
-    return data;
-}
 
 server.listen(PORT);
 console.log(`Server is running on port ${PORT}`);
