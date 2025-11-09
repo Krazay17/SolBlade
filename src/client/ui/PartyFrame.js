@@ -10,10 +10,10 @@ export default class PartyFrame {
         document.getElementById('game-data').appendChild(this.container);
 
         MyEventEmitter.on('disconnect', () => {
-            for (const [p, el] of this.players) {
-                this.removePlayer(p)
+            for (const id of Object.keys(this.players)) {
+                this.removePlayer(id)
             }
-            this.players.clear();
+            this.players = {};
         })
 
         MyEventEmitter.on('playerConnected', (player) => {
@@ -22,6 +22,7 @@ export default class PartyFrame {
             this.addPlayer(player);
         });
         MyEventEmitter.on('playerDisconnected', (id) => {
+            console.log(`player disconnected ${id}`);
             this.removePlayer(id);
         });
         MyEventEmitter.on('playerNameUpdate', ({ id, name }) => {
@@ -55,7 +56,7 @@ export default class PartyFrame {
 
 
         this.container.appendChild(playerElement);
-        this.players[player.id] = { player, nameEl };
+        this.players[player.id] = { player, playerElement, nameEl };
     }
 
     removePlayer(id) {

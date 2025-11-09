@@ -9,7 +9,7 @@ const SERVER_VERSION = 1.12;
 
 const server = http.createServer();
 const PORT = 8080;
-const origin = "*";
+const origin = ["https://solblade.online", "http://localhost:5173"];
 
 export const io = new Server(server, {
     cors: { origin, methods: ["GET", "POST"] },
@@ -28,6 +28,7 @@ const voiceChat = new SVoiceChat(io);
 io.on('connection', (socket) => {
     if (socket.bound) return;
     playerSockets[socket.id] = socket;
+    
     socket.bound = true;
     const ip = socket.handshake.address;
     console.log(`New connection from ${ip} with id: ${socket.id}`);
