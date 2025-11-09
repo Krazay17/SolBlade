@@ -83,7 +83,7 @@ function initBindings() {
 
     socket.on('userDisconnected', (id) => {
         if (id === playerId) return;
-        MyEventEmitter.emit('playerDisconnected', netPlayers[id]);
+        MyEventEmitter.emit('playerDisconnected', id);
         delete netPlayers[id];
         const player = scene.getActorById(id);
         if (!player) return;
@@ -158,7 +158,7 @@ function initBindings() {
         const player = scene.actorManager.getActorById(id);
         if (player) {
             player.setName?.(name);
-            MyEventEmitter.emit('playerNameUpdate', ({ player, name }));
+            MyEventEmitter.emit('playerNameUpdate', ({ id, name }));
         }
     });
     socket.on('newScene', (data) => {
@@ -194,7 +194,6 @@ function initBindings() {
             a.active && (a.tempId === tempId || a.id === id)
         );
         if (existingActor) {
-            console.log(id);
             existingActor.setId(id);
             //existingActor.activate(data);
         } else {

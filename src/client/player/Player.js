@@ -211,7 +211,6 @@ export default class Player extends Pawn {
             const tempDir = hitPos.sub(bulletPosition);
             tempDir.normalize();
             const dot = tempDir.dot(camDirection);
-            console.log(dot);
             if (dot > .5) {
                 dir = tempDir;
                 dir.normalize();
@@ -238,7 +237,6 @@ export default class Player extends Pawn {
     }
     addEnergy(amnt) {
         if (this.energy) this.energy.add(amnt);
-        console.log(amnt);
     }
 
     setDimmed(duration) {
@@ -349,7 +347,6 @@ export default class Player extends Pawn {
     setName(newName) {
         this.name = newName;
         this.namePlate?.setName(newName);
-        console.log(this.name);
     }
 
     infoUpdate() {

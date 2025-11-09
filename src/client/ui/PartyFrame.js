@@ -3,7 +3,7 @@ import Game from "../CGame";
 
 export default class PartyFrame {
     constructor() {
-        this.players = new Map();
+        this.players = {};
 
         this.container = document.createElement('div');
         this.container.id = 'party-frame';
@@ -17,16 +17,16 @@ export default class PartyFrame {
         })
 
         MyEventEmitter.on('playerConnected', (player) => {
-            if(this.players.has(player))return;
+            const { id } = player;
+            if (this.players[id]) return;
             this.addPlayer(player);
         });
-        MyEventEmitter.on('playerDisconnected', (player) => {
-            this.removePlayer(player);
+        MyEventEmitter.on('playerDisconnected', (id) => {
+            this.removePlayer(id);
         });
-        MyEventEmitter.on('playerNameUpdate', ({ player, name }) => {
-            const playerElement = this.players.get(player);
-            if (playerElement) {
-                playerElement.innerText = name;
+        MyEventEmitter.on('playerNameUpdate', ({ id, name }) => {
+            if (this.players[id]?.nameEl) {
+                this.players[id].nameEl.innerText = name;
             }
         });
     }
@@ -34,7 +34,9 @@ export default class PartyFrame {
     addPlayer(player) {
         const playerElement = document.createElement('div');
         playerElement.className = 'party-player';
-        playerElement.innerText = player.name;
+        const nameEl = document.createElement('span');
+        nameEl.innerText = player.name;
+        playerElement.appendChild(nameEl);
 
         const healthBar = document.createElement('div');
         healthBar.className = 'party-healthbar';
@@ -53,14 +55,14 @@ export default class PartyFrame {
 
 
         this.container.appendChild(playerElement);
-        this.players.set(player, playerElement);
+        this.players[player.id] = { player, nameEl };
     }
 
-    removePlayer(player) {
-        if (!player) return;
-        const el = this.players.get(player)
+    removePlayer(id) {
+        if (!id) return;
+        const el = this.players[id].playerElement;
         if (!el) return;
         this.container.removeChild(el);
-        this.players.delete(player);
+        delete this.players[id];
     }
 }
