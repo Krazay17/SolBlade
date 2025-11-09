@@ -74,9 +74,7 @@ export default class SPhysics {
         if (!this[scene]) return;
         this[scene].step();
         const { players, enemies, others } = this.game.actorManager.actorsOfScene[scene];
-
-
-
+        if (players.length < 1) return;
 
         const enemyBuffer = arrayBuffer(filterMoved(enemies), 8);
         const otherBuffer = arrayBuffer(filterMoved(others), 8);

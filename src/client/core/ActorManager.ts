@@ -55,10 +55,8 @@ export default class ActorManager {
     }
     spawnLocalPlayer() {
         const pos = LocalData.position;
-        const rot = LocalData.rotation;
         const player = new actorRegistry['player'](this.game, {
             pos,
-            rot,
             sceneName: LocalData.sceneName || 'scene2',
             currentHealth: LocalData.health,
             name: LocalData.name

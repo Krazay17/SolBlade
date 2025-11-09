@@ -10,10 +10,11 @@ import Player from "../player/Player";
 import CGame from "../CGame";
 import Scene from "../scenes/Scene";
 
-const serverURL = location.hostname === "localhost"
-    ? "http://localhost:80"
-    //: "https://nonsubsiding-superexplicit-hye.ngrok-free.dev";
-    : "solbladeserver-production.up.railway.app";
+// const serverURL = location.hostname === "localhost"
+//     ? "http://localhost:8080"
+//     //: "https://nonsubsiding-superexplicit-hye.ngrok-free.dev";
+//     : "solbladeserver-production.up.railway.app";
+const serverURL = "srv.solblade.online";
 
 const socket = io(serverURL, {
     transports: ["websocket"],

@@ -132,8 +132,8 @@ export default class CGame {
     this.questManager.addQuest('playerKill');
   }
   savePlayerState() {
-    LocalData.position = this.player.pos.toArray();
-    LocalData.rotation = this.player.rot.toArray();
+    LocalData.position = this.player.pos;
+    LocalData.rotation = this.player.rot;
     LocalData.sceneName = this.sceneName;
   }
   bindings() {
