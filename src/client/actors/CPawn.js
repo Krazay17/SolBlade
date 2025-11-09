@@ -3,6 +3,8 @@ import MyEventEmitter from "../core/MyEventEmitter";
 import CActor from "./CActor";
 import PawnBody from "../core/PawnBody";
 import Health from "../core/Health";
+import MovementManager from "../core/MovementManager";
+import PlayerMovement from "../player/PlayerMovement";
 
 export default class CPawn extends CActor {
     constructor(game, data) {
@@ -15,6 +17,8 @@ export default class CPawn extends CActor {
         this.radius = radius;
         this.height = height;
         this.skin = skin;
+        /**@type {MovementManager | PlayerMovement} */
+        this.movement;
 
         this.health = new Health(this, data.maxHealth, data.currentHealth)
         this.health.onChange = (v) => this.healthChange(v);

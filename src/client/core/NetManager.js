@@ -12,7 +12,7 @@ import Scene from "../scenes/Scene";
 
 // "solbladeserver-production.up.railway.app";
 const serverURL = location.hostname === "localhost"
-    ? "http://localhost:8080"
+    ? "localhost:8080"
     : "srv.solblade.online";
 
 const socket = io(serverURL, {
@@ -274,9 +274,18 @@ function initBindings() {
     socket.on('questEvent', ({ quest, event, data }) => {
         quest = game.questManager.hasQuest(quest);
         if (quest && quest[event]) { quest[event](data) }
+    });
+    socket.on('meshRotation', ({id, data})=>{
+        if(id === playerId) return;
+        const actor = game.getActorById(id);
+        console.log(data);
+        actor.meshRot = data;
     })
 }
 
+MyEventEmitter.on('meshRotation', data=>{
+    socket.emit('meshRotation', data);
+})
 MyEventEmitter.on('questEvent', (data) => {
     socket.emit('questEvent', data);
 })

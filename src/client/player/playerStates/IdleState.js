@@ -27,6 +27,10 @@ export default class IdleState extends PlayerState {
         this.animationManager?.playAnimation('idle', true);
     }
     update(dt) {
+        if (!this.actor.movement.isGrounded()) {
+            this.manager.setState('fall');
+            return;
+        }
         if (!this.actor.movement.idleMove(dt)) {
             this.body.velocity = { x: 0, y: 0, z: 0 };
             this.body.sleep();
@@ -35,24 +39,14 @@ export default class IdleState extends PlayerState {
             this.manager.setState('run', this.actor.movement.floorTrace());
             return;
         }
-        if (!this.actor.movement.isGrounded()) {
-            this.manager.setState('fall');
-            return;
-        }
-    }
-    exit() {
-        if (netSocket.disconnected) {
-            netSocket.connect();
-        }
-        this.body.wakeUp();
     }
     canEnter() {
         if (!this.actor.movement.isGrounded()) {
-            this.manager.setState('fall');
+            this.stateManager.setState('fall')
             return false;
         }
-        if (!this.actor.movement.getInputDirection().length() === 0) {
-            this.manager.setState('run', this.actor.movement.floorTrace());
+        if(this.actor.getInputDirection().length() !== 0) {
+            this.stateManager.setState('run')
             return false;
         }
         return true;

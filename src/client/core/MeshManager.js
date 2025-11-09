@@ -49,7 +49,7 @@ export default class MeshManager {
     }
     meshInitProperties(meshName) {
         let offset = this.tempVec.set(0, -1, 0);
-        let rotation = Math.PI;
+        let rotation = 0;
         let scale = 1;
         switch (meshName) {
             case 'KnightGirl':

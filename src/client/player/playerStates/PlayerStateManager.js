@@ -40,17 +40,16 @@ export default class PlayerStateManager {
 
     setState(state, enterParams) {
         if ((this.currentStateName === state && !this.activeState?.reEnter) && this.activeState) return false;
-        if (!this.activeState?.canExit(state, enterParams) && state !== 'dead') return false;
+        if (!this.activeState?.canExit(state, enterParams)) return false;
         if (!this.states[state]?.canEnter(state, enterParams)) return false;
 
-        let newState = state;
-        if (this.states[newState]) {
-            this.activeState?.exit(newState);
+        if (this.states[state]) {
+            this.activeState?.exit(state);
             this.lastState = this.currentStateName;
-            this.activeState = this.states[newState];
-            //console.log(`State change: ${this.lastState} -> ${newState}`);
+            this.activeState = this.states[state];
+            //console.log(`State change: ${this.lastState} -> ${state}`);
             this.activeState?.enter(this.lastState, enterParams);
-            this.currentStateName = newState;
+            this.currentStateName = state;
             return true;
         }
     }

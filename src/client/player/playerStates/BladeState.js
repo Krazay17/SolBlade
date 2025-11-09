@@ -1,4 +1,5 @@
-import { Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
+import * as THREE from "three";
 import PlayerState from "./_PlayerState";
 
 export default class BladeState extends PlayerState {
@@ -12,6 +13,8 @@ export default class BladeState extends PlayerState {
         this.lastExit = null;
         this.timer = 0;
         this.tempVector = new Vector3();
+        this.upVec = new Vector3(0, 1, 0);
+        this.zeroQuat = new THREE.Quaternion(0, 0, 0, 1);
     }
     enter(state, neutral) {
         this.lastEnter = performance.now();
@@ -30,9 +33,9 @@ export default class BladeState extends PlayerState {
         }
         if (this.jumping > performance.now()) return this.movement.jumpMove(dt, 6);
         else this.jumping = 0;
-        
+
         this.actor.movement.bladeMove(dt);
-        if (!this.input.actionStates.blade || this.actor.energy <= 0) {
+        if (!this.input.actionStates.blade) {
             this.manager.setState('idle');
             return;
         }
@@ -58,6 +61,7 @@ export default class BladeState extends PlayerState {
         } else {
             this.animationManager.playAnimation('bladeAir', true);
         }
+        this.rotatePlayerToGround();
     }
     exit(state) {
         clearTimeout(this.floorTimer);
@@ -65,8 +69,39 @@ export default class BladeState extends PlayerState {
         this.grounded = false;
         this.lastExit = performance.now();
         this.actor.energy.drainRate = 0;
+        this.actor.meshRot = { x: 0, z: 0 };
     }
     canEnter() {
         return !this.actor.getDimmed()
     }
+    rotatePlayerToGround() {
+        const floor = this.grounded
+            ? this.movement.groundChecker.floorNormal(.1)
+            : this.movement.groundChecker.floorPredict();
+
+
+        if (!floor) {
+            this.actor.meshRot = { x: 0, z: 0 };
+            return;
+        }
+
+        // Normalize floor normal
+        const n = floor.clone().normalize();
+
+        // Rotate floor normal into player's local space
+        const yaw = this.actor.quatY;
+        const invYawQuat = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(0, 1, 0),
+            -yaw
+        );
+        n.applyQuaternion(invYawQuat);
+
+        // Compute tilt based on local-space normal
+        const pitch = Math.asin(n.z);   // forward/back tilt
+        const roll = -Math.asin(n.x);  // side-to-side tilt
+
+        // Store results for use in update()
+        this.actor.meshRot = { x: pitch, z: roll };
+    }
+
 }

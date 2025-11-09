@@ -9,9 +9,6 @@ export default class DeadState extends PlayerState {
             this.actor.unDie();
         }, 2500);
     }
-    update(dt) {
-        // Handle dead-specific logic here
-    }
     exit() {
         this.actor.isDead = false;
     }

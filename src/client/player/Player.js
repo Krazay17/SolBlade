@@ -13,7 +13,7 @@ import HitData from '../core/HitData';
 import { menuButton } from '../ui/Menu';
 import Energy from '../core/Energy';
 import { Ray } from '@dimforge/rapier3d-compat';
-import { COLLISION_GROUPS } from '@solblade/shared';
+import { lerpTo } from '../utils/Utils';
 
 export default class Player extends Pawn {
     constructor(game, data = {}) {
@@ -27,7 +27,8 @@ export default class Player extends Pawn {
         this.parry = false;
         this.dimmed = 0;
         this.crownMesh = null;
-
+        this.meshRotation = new THREE.Quaternion();
+        this._meshRot = { x: 0, z: 0 };
         this.dashCost = 25;
         this.doubleJumpCost = 40;
 
@@ -51,6 +52,15 @@ export default class Player extends Pawn {
         if (this.isRemote) return;
         this.graphics.quaternion.copy(q);
         MyEventEmitter.emit('playerRotation', q);
+    }
+    get meshRot() { return this._meshRot }
+    set meshRot({ x, z }) {
+        if (this.mesh.rotation.x === x &&
+            this.mesh.rotation.z === z
+        ) return;
+        this._meshRot = { x, z };
+        if(this.isRemote)return;
+        MyEventEmitter.emit('meshRotation', { x, z })
     }
     localInit(game) {
         this.tick = false
@@ -117,7 +127,10 @@ export default class Player extends Pawn {
             tryUpdatePosition({ pos: this.position, rot: this.quatY });
             CameraFX.update(dt);
         }
+        this.mesh.rotation.x = lerpTo(this.mesh.rotation.x, this.meshRot.x, 5 * dt)
+        this.mesh.rotation.z = lerpTo(this.mesh.rotation.z, this.meshRot.z, 5 * dt)
     }
+
     async pickupCrown() {
         if (!this.crownMesh) {
             this.crownMesh = await this.game.meshManager.getMesh('crown', 0.4);
@@ -146,7 +159,7 @@ export default class Player extends Pawn {
     async assignMesh(skin) {
         if (await super.assignMesh(skin)) {
             if (this.isRemote) return;
-            //MyEventEmitter.emit('playerStateUpdate', this);
+            MyEventEmitter.emit('playerStateUpdate', this);
         }
     }
     stateUpdate(data) {
@@ -375,8 +388,10 @@ export default class Player extends Pawn {
         data = HitData.deserialize(data, (id) => this.game.getActorById(id));
         /**@type {HitData} */
         const { type, amount, stun, impulse, dim, sound } = data;
-        //this.game.soundPlayer.applyPosSound('playerHit', this.position);
-        this.game.soundPlayer.applyPosSound(sound, this.pos);
+        this.game.soundPlayer.applyPosSound('playerHit', this.position);
+        if (sound) {
+            this.game.soundPlayer.applyPosSound(sound, this.pos);
+        }
         if (this.isRemote) return;
         if (amount !== 0) {
             if (type === 'physical' || type === 'explosion') {

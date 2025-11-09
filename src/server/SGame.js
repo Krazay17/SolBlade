@@ -166,6 +166,9 @@ export default class SGame {
             const actor = this.actorManager.getActorById(socket.id);
             if (!actor) return;
             actor.health.current = health;
+        });
+        socket.on('meshRotation', data=>{
+            socket.broadcast.emit('meshRotation', {id: socket.id, data});
         })
     }
 }

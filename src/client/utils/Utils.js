@@ -37,3 +37,8 @@ export function lerpAngle(a, b, t) {
     while (diff > Math.PI) diff -= Math.PI * 2;
     return a + diff * t;
 }
+
+export function lerpTo(a, b, t) {
+    let diff = b - a;
+    return a + diff * t;
+}

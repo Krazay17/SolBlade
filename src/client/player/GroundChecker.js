@@ -1,8 +1,14 @@
 import * as THREE from "three";
+import CPawn from "../actors/CPawn";
+import CGame from "../CGame";
+import RAPIER from "@dimforge/rapier3d-compat";
+import { COLLISION_GROUPS } from "@solblade/shared";
 
 export default class GroundChecker {
     constructor(game, pawn, rayLength = 1.1, spread = 0.5) {
+        /**@type {CGame} */
         this.game = game;
+        /**@type {CPawn} */
         this.pawn = pawn;
         this.body = pawn.body;
         this.world = this.game.physicsWorld;
@@ -60,7 +66,6 @@ export default class GroundChecker {
     isGrounded(slope = 0.3) {
         return this.floorTrace(slope).grounded;
     }
-
     groundBuffer(slope = 0.3) {
         if (!this.isGrounded(slope)) {
             if (!this.floorTimer) {
@@ -79,7 +84,6 @@ export default class GroundChecker {
             this.grounded = true;
         }
     }
-
     visualDebugTrace() {
         // Use three js to make a visual debug for traces
         const origin = new THREE.Vector3().copy(this.body.position);
@@ -92,5 +96,21 @@ export default class GroundChecker {
 
             requestAnimationFrame(() => this.game.graphicsWorld.remove(line));
         }
+    }
+    floorPredict() {
+        const v = this.pawn.velocity.normalize()
+        const pos = this.pawn.pos;
+        const ray = new RAPIER.Ray(pos, v)
+        const result = this.game.physicsWorld.castRayAndGetNormal(
+            ray,
+            15,
+            true,
+            undefined,
+            COLLISION_GROUPS.WORLD << 16 | COLLISION_GROUPS.PLAYER
+        )
+        if (result) {
+            return new THREE.Vector3(result.normal.x, result.normal.y, result.normal.z);
+        }
+        return;
     }
 }

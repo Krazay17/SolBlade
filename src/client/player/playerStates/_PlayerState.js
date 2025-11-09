@@ -39,16 +39,16 @@ export default class PlayerState {
     }
 
     enter() {
-        this.cdTimer = performance.now() + this.cd;
-        this.exitTimer = performance.now() + this.duration;
+        if (this.cd) this.cdTimer = performance.now() + this.cd;
+        if (this.duration) this.exitTimer = performance.now() + this.duration;
     }
     update(dt) { }
     exit() { }
     canEnter() {
-        return this.cdTimer < performance.now();
+        return this.cdTimer ? this.cdTimer < performance.now() : true;
     }
     canExit() {
-        return this.exitTimer < performance.now();
+        return this.exitTimer ? this.exitTimer < performance.now() : true;
     }
 
     isTryingToMove() {
