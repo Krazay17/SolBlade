@@ -10,6 +10,7 @@ export default class WeaponSword extends Weapon {
             damage: 35,
             range: 2.9,
             cooldown: 1250,
+            meshName: "GreatSword",
             slot
         });
 

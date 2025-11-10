@@ -5,13 +5,14 @@ import Player from '../Player';
 import Game from '../../CGame';
 
 export default class Weapon {
-    constructor(game, actor, data) {
+    constructor(game, actor, data = {}) {
         const {
             name = 'Weapon',
             damage = 1,
             range = 10,
             cooldown = 1000,
-            slot = 0
+            slot = 0,
+            meshName = "GreatSword",
         } = data;
         /**@type {Game} */
         this.game = game;
@@ -22,6 +23,7 @@ export default class Weapon {
         this.range = range;
         this.cooldown = cooldown;
         this.slot = slot
+        this.meshName = meshName;
 
         this.position = new THREE.Vector3();
         this.direction = new THREE.Vector3();
@@ -119,5 +121,16 @@ export default class Weapon {
         setTimeout(() => {
             MyEventEmitter.off('update', loop);
         }, duration);
+    }
+    async equip(slot = '0') {
+        const boneName = slot === '0' ? "handLWeapon": "handRWeapon";
+        const weaponBone = this.actor.mesh.getObjectByName(boneName);
+        this.mesh = await this.game.meshManager.getMesh(this.meshName);
+        weaponBone.add(this.mesh);
+    }
+    unequip() {
+        if(this.mesh) {
+            this.mesh.parent.remove(this.mesh);
+        }
     }
 }

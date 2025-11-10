@@ -59,7 +59,9 @@ export default class ActorManager {
             pos,
             sceneName: LocalData.sceneName || 'scene2',
             currentHealth: LocalData.health,
-            name: LocalData.name
+            name: LocalData.name,
+            leftWeapon: LocalData.weapons.left,
+            rightWeapon: LocalData.weapons.right,
         });
         player.body.sleep();
         this.actors.push(player);

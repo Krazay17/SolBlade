@@ -27,6 +27,13 @@ const itemRegister = {
         weight: 1,
         min: 5,
         max: 15,
+    },
+    blade: {
+        name: 'Blade',
+        imgUrl: 'assets/Blade.png',
+        weight: 1,
+        min: 5,
+        max: 15,
     }
 }
 const itemPool1 = [
@@ -34,6 +41,7 @@ const itemPool1 = [
     itemRegister.sword,
     itemRegister.scythe,
     itemRegister.pistol,
+    itemRegister.blade,
 ]
 export function makeItem(item) {
     return new Item(itemRegister[item]);

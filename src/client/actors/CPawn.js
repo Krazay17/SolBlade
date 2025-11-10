@@ -5,6 +5,7 @@ import PawnBody from "../core/PawnBody";
 import Health from "../core/Health";
 import MovementManager from "../core/MovementManager";
 import PlayerMovement from "../player/PlayerMovement";
+import { Group } from "three";
 
 export default class CPawn extends CActor {
     constructor(game, data) {
@@ -19,6 +20,9 @@ export default class CPawn extends CActor {
         this.skin = skin;
         /**@type {MovementManager | PlayerMovement} */
         this.movement;
+
+        /**@type {Group} */
+        this.mesh = null
 
         this.health = new Health(this, data.maxHealth, data.currentHealth)
         this.health.onChange = (v) => this.healthChange(v);
@@ -80,9 +84,11 @@ export default class CPawn extends CActor {
         this.animationManager = new AnimationManager(this, this.meshBody ?? this.mesh, mesh.animations);
         this.skin = meshName;
         this.data.skin = meshName;
+        this.meshReady();
 
         return true;
     }
+    meshReady() { }
     touched(target) {
         console.log(target);
     }

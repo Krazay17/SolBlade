@@ -7,7 +7,8 @@ export default class WeaponFireball extends Weapon {
             damage: 30,
             range: 100,
             cooldown: 1250,
-            slot
+            slot,
+            meshName: "FireballWeapon",
         });
     }
 

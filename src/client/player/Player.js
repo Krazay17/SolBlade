@@ -31,6 +31,8 @@ export default class Player extends Pawn {
         this._meshRot = { x: 0, z: 0 };
         this.dashCost = 25;
         this.doubleJumpCost = 40;
+        this.leftWeapon = data.leftWeapon ?? "Fireball";
+        this.rightWeapon = data.rightWeapon ?? "Blade";
 
         // Local Player setup
         if (!this.isRemote) {
@@ -59,8 +61,12 @@ export default class Player extends Pawn {
             this.mesh.rotation.z === z
         ) return;
         this._meshRot = { x, z };
-        if(this.isRemote)return;
+        if (this.isRemote) return;
         MyEventEmitter.emit('meshRotation', { x, z })
+    }
+    meshReady() {
+        this.setWeapon('0', this.leftWeapon);
+        this.setWeapon('1', this.rightWeapon);
     }
     localInit(game) {
         this.tick = false
@@ -73,19 +79,6 @@ export default class Player extends Pawn {
         this.movement = new PlayerMovement(this.game, this);
         this.stateManager = new PlayerStateManager(this.game, this);
         this.devMenu = new DevMenu(this, this.movement);
-
-        /**@type {Weapon.Weapon} */
-        this.weapon0 = new Weapon.WeaponFireball(this.game, this, '0');
-        /**@type {Weapon.Weapon} */
-        this.weapon1 = new Weapon.WeaponSword(this.game, this, '1');
-        /**@type {Weapon.Weapon} */
-        this.weapon2 = null;
-        /**@type {Weapon.Weapon} */
-        this.weapon3 = null;
-        /**@type {Weapon.Weapon} */
-        this.weapon4 = null;
-        /**@type {Weapon.Weapon} */
-        this.weapon5 = null;
 
         menuButton('spikeMan', () => {
             this.assignMesh('spikeMan');
@@ -174,7 +167,11 @@ export default class Player extends Pawn {
         }
     }
     setWeapon(slot, weapon) {
-        const weaponName = weapon?.name || null;
+        if (!weapon) {
+            this[`weapon${slot}`] = null;
+            return;
+        }
+        const weaponName = weapon?.name || weapon;
         switch (weaponName) {
             case 'Fireball':
                 weapon = new Weapon.WeaponFireball(this.game, this, slot);
@@ -182,19 +179,26 @@ export default class Player extends Pawn {
             case 'Pistol':
                 weapon = new Weapon.WeaponPistol(this.game, this, slot);
                 break;
-            case 'Sword':
-                weapon = new Weapon.WeaponSword(this.game, this, slot);
+            case 'Blade':
+                weapon = new Weapon.WeaponBlade(this.game, this, slot);
                 break;
             case 'Scythe':
                 weapon = new Weapon.WeaponScythe(this.game, this, slot);
+                break;
+            case 'Sword':
+                weapon = new Weapon.WeaponSword(this.game, this, slot);
                 break;
             default:
                 weapon = null;
                 break;
         }
-        if (!weapon) {
-            this[`weapon${slot}`] = null;
-            return;
+        if (slot < 2) {
+            const prevWeapon = this[`weapon${slot}`]
+            if (prevWeapon) prevWeapon.unequip();
+            weapon.equip(slot);
+            if (!this.isRemote) {
+                MyEventEmitter.emit('weaponSwap', { weaponName, slot });
+            }
         }
         this[`weapon${slot}`] = weapon;
     }

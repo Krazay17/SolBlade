@@ -275,15 +275,23 @@ function initBindings() {
         quest = game.questManager.hasQuest(quest);
         if (quest && quest[event]) { quest[event](data) }
     });
-    socket.on('meshRotation', ({id, data})=>{
-        if(id === playerId) return;
+    socket.on('meshRotation', ({ id, data }) => {
+        if (id === playerId) return;
         const actor = game.getActorById(id);
         console.log(data);
         actor.meshRot = data;
+    });
+    socket.on('weaponSwap', ({ id, data }) => {
+        if (id === playerId) return;
+        const actor = game.getActorById(id);
+        if (actor) actor.setWeapon(data.slot, data.weaponName);
     })
 }
 
-MyEventEmitter.on('meshRotation', data=>{
+MyEventEmitter.on('weaponSwap', data => {
+    socket.emit('weaponSwap', data);
+})
+MyEventEmitter.on('meshRotation', data => {
     socket.emit('meshRotation', data);
 })
 MyEventEmitter.on('questEvent', (data) => {

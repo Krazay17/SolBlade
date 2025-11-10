@@ -8,6 +8,7 @@ export default {
     sceneName: 'scene2',
     position: { x: 0, y: 1, z: 0 },
     rotation: { x: 0, y: 0, z: 0, w: 1 },
+    weapons: { left: "Fireball", right: "Blade" },
     masterVolume: 1,
     musicVolume: 1,
     sfxVolume: 1,

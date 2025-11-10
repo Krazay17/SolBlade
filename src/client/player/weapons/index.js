@@ -1,5 +1,6 @@
 import WeaponPistol from "./WeaponPistol";
-import WeaponSword from "./WeaponSword";
+import WeaponBlade from "./WeaponBlade";
 import WeaponFireball from "./WeaponFireball";
 import WeaponScythe from "./WeaponScythe";
-export { WeaponPistol, WeaponSword, WeaponFireball, WeaponScythe };
+import WeaponSword from "./WeaponSword";
+export { WeaponPistol, WeaponBlade, WeaponFireball, WeaponScythe, WeaponSword };

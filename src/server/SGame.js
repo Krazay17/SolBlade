@@ -170,5 +170,8 @@ export default class SGame {
         socket.on('meshRotation', data=>{
             socket.broadcast.emit('meshRotation', {id: socket.id, data});
         })
+        socket.on('weaponSwap', data=>{
+            socket.broadcast.emit('weaponSwap', {id: socket.id, data});
+        })
     }
 }
