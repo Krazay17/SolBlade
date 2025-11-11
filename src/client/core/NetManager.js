@@ -369,8 +369,9 @@ MyEventEmitter.on('crownGameStart', () => {
 });
 MyEventEmitter.on('iDied', (data) => {
     if (socket.connected) {
-        netSocket.emit('iDied', data?.serialize?.() || { dealer: { name: 'The Void' }, target: Game.getGame().player.id });
+        netSocket.emit('iDied', data?.serialize?.() || { dealer: { name: 'The Void' }, target: playerId });
     }
+
 });
 MyEventEmitter.on('bootPlayer', (targetPlayer) => {
     if (LocalData.name !== 'Krazzay') return;

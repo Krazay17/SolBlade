@@ -25,8 +25,8 @@ export default class SPlayer extends SActor {
             if (dealerActor.parry) io.emit('playerParried', { target: dealer, dealer: this.id })
             return;
         }
-        this.health.subtract(data.amount);
         this.lastHit = data;
+        this.health.subtract(amount);
         io.emit('actorEvent', { id: this.id, event: "applyHit", data });
 
         if (this.lastHitTimer) clearTimeout(this.lastHitTimer);
@@ -39,10 +39,11 @@ export default class SPlayer extends SActor {
         this.isDead = true;
         const targetName = this.name;
         let dealerName = 'The Void';
-        if (this.lastHit && this.lastHit.dealer) { dealerName = this.actorManager.getActorById(this.lastHit.dealer).name; }
-        io.emit('serverMessage', { player: 'Server', message: `${targetName} slain by: ${dealerName}`, color: 'orange' });
         io.emit('playerDied', this.lastHit || { target: this.id });
         this.respawn();
+        
+        if (this.lastHit && this.lastHit.dealer) { dealerName = this.actorManager.getActorById(this.lastHit.dealer).name; }
+        io.emit('serverMessage', { player: 'Server', message: `${targetName} slain by: ${dealerName}`, color: 'orange' });
     }
     respawn() {
         setTimeout(() => {

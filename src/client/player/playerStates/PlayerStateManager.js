@@ -40,8 +40,10 @@ export default class PlayerStateManager {
 
     setState(state, enterParams) {
         if ((this.currentStateName === state && !this.activeState?.reEnter) && this.activeState) return false;
-        if (!this.activeState?.canExit(state, enterParams)) return false;
-        if (!this.states[state]?.canEnter(state, enterParams)) return false;
+        if (state !== 'dead') {
+            if (!this.activeState?.canExit(state, enterParams)) return false;
+            if (!this.states[state]?.canEnter(state, enterParams)) return false;
+        }
 
         if (this.states[state]) {
             this.activeState?.exit(state);

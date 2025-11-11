@@ -103,7 +103,7 @@ export default class SGame {
             socket.broadcast.emit('playerPosition', { id: socket.id, data });
         });
         socket.on('playerRotation', (data) => {
-            //if (this.players[socket.id]) this.players[socket.id].rot = data;
+            if (this.players[socket.id]) this.players[socket.id].rot = data;
             socket.broadcast.emit('playerRotation', { id: socket.id, data });
         });
         socket.on('playAnimation', (data) => {
@@ -112,9 +112,7 @@ export default class SGame {
         });
         socket.on('changeAnimation', (data) => {
             const player = this.players[socket.id];
-            if (player) {
-                socket.broadcast.emit('changeAnimation', { id: socket.id, data });
-            }
+            if (player) socket.broadcast.emit('changeAnimation', { id: socket.id, data });
         });
         socket.on('chatMessageSend', ({ player, message, color }) => {
             socket.broadcast.emit('chatMessageUpdate', { id: socket.id, data: { player, message, color } });
@@ -167,11 +165,11 @@ export default class SGame {
             if (!actor) return;
             actor.health.current = health;
         });
-        socket.on('meshRotation', data=>{
-            socket.broadcast.emit('meshRotation', {id: socket.id, data});
+        socket.on('meshRotation', data => {
+            socket.broadcast.emit('meshRotation', { id: socket.id, data });
         })
-        socket.on('weaponSwap', data=>{
-            socket.broadcast.emit('weaponSwap', {id: socket.id, data});
+        socket.on('weaponSwap', data => {
+            socket.broadcast.emit('weaponSwap', { id: socket.id, data });
         })
     }
 }

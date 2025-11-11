@@ -5,7 +5,7 @@ import repl from 'repl';
 import SGame from "./SGame.js";
 import SVoiceChat from "./core/SVoiceChat.js";
 
-const SERVER_VERSION = 1.13;
+const SERVER_VERSION = 1.14;
 
 const server = http.createServer();
 const PORT = 8080;
