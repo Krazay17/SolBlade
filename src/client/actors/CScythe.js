@@ -7,7 +7,7 @@ export default class CScythe extends CProjectile {
             ...data,
             speed: 15,
             gravity: 0,
-            radius: data.radius ?? 4,
+            radius: data.radius ?? 3,
         });
         this.createMesh("4Scythe");
         this.hitActors = [];

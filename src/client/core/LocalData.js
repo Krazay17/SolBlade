@@ -40,6 +40,7 @@ export default {
             sceneName: this.sceneName,
             position: this.position,
             rotation: this.rotation,
+            weapons: this.weapons,
             masterVolume: this.masterVolume,
             musicVolume: this.musicVolume,
             micVolume: this.micVolume,
@@ -82,6 +83,7 @@ export default {
         this.sceneName = parsed.sceneName ?? this.sceneName;
         this.position = parsed.position ?? this.position;
         this.rotation = parsed.rotation ?? this.rotation;
+        this.weapons = parsed.weapons ?? this.weapons;
         this.masterVolume = parsed.masterVolume ?? this.masterVolume;
         this.musicVolume = parsed.musicVolume ?? this.musicVolume;
         this.sfxVolume = parsed.sfxVolume ?? this.sfxVolume;
@@ -102,6 +104,7 @@ export default {
         this.sceneName = keep.sceneName ?? this.sceneName;
         this.position = keep.position ?? this.position;
         this.rotation = keep.rotation ?? this.rotation;
+        this.weapons = keep.weapons ?? this.weapons;
         this.masterVolume = keep.masterVolume ?? this.masterVolume;
         this.musicVolume = keep.musicVolume ?? this.musicVolume;
         this.sfxVolume = keep.sfxVolume ?? this.sfxVolume;

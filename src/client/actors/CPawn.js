@@ -23,6 +23,7 @@ export default class CPawn extends CActor {
 
         /**@type {Group} */
         this.mesh = null
+        this.onMeshReady = null;
 
         this.health = new Health(this, data.maxHealth, data.currentHealth)
         this.health.onChange = (v) => this.healthChange(v);
@@ -85,6 +86,7 @@ export default class CPawn extends CActor {
         this.skin = meshName;
         this.data.skin = meshName;
         this.meshReady();
+        if (this.onMeshReady) this.onMeshReady();
 
         return true;
     }

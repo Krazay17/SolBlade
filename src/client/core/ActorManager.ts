@@ -54,6 +54,7 @@ export default class ActorManager {
         for (const a of this.actors) { a.fixedUpdate?.(dt, time) };
     }
     spawnLocalPlayer() {
+        console.log(LocalData.weapons.left)
         const pos = LocalData.position;
         const player = new actorRegistry['player'](this.game, {
             pos,

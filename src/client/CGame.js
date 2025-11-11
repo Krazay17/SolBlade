@@ -122,7 +122,7 @@ export default class CGame {
     return this.scene.mergedLevel;
   }
   get time() { return this.lastTime }
-  
+
   initPlayer() {
     this.player = this.actorManager.player;
     this.crosshair = new Crosshair(this.graphicsWorld);
@@ -134,6 +134,8 @@ export default class CGame {
   savePlayerState() {
     LocalData.position = this.player.pos;
     LocalData.rotation = this.player.rot;
+    LocalData.weapons.left = this.player.data.leftWeapon;
+    LocalData.weapons.right = this.player.data.rightWeapon;
     LocalData.sceneName = this.sceneName;
   }
   bindings() {

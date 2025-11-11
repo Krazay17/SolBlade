@@ -82,7 +82,6 @@ export default class Projectile extends Actor {
         // }
     }
     collide(c) {
-        console.log('collide');
         if (c) {
             const target = c.actor;
             if (target) {

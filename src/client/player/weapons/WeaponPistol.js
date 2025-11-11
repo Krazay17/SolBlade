@@ -6,10 +6,11 @@ import RAPIER from '@dimforge/rapier3d-compat';
 export default class WeaponPistol extends Weapon {
     constructor(game, actor, slot = '0') {
         super(game, actor, {
-            weapon: 'Pistol',
+            name: 'Pistol',
             damage: 20,
             range: 50,
             cooldown: 800,
+            meshName: "PistolWeapon",
             slot
         });
         this.meshTracer = new MeshTrace(this.game, this.actor);
@@ -18,12 +19,13 @@ export default class WeaponPistol extends Weapon {
         if (super.use() &&
             this.actor.stateManager.setState('attack', {
                 weapon: this,
-                duration: 350
+                duration: 550
             })) {
             const { dir, pos, camPos } = this.actor.getShootData();
             this.hitActors.clear();
             this.game.soundPlayer.playPosSound('pistolShoot', pos);
-            this.playAnimation(this.hand, false, undefined);
+            const anim = this.slot === "0" ? "AttackPistolLeft" : "AttackPistolRight";
+            this.playAnimation(anim, false);
 
             this.meshTracer.shapeTrace(camPos, dir, this.range, 0.1, (/**@type {RAPIER.ColliderShapeCastHit}*/r) => {
                 if (r) {

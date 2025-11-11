@@ -33,6 +33,12 @@ export default class Player extends Pawn {
         this.doubleJumpCost = 40;
         this.leftWeapon = data.leftWeapon ?? "Fireball";
         this.rightWeapon = data.rightWeapon ?? "Blade";
+        /**@type {THREE.Group} */
+        this.leftWeaponBone = null;
+        /**@type {THREE.Group} */
+        this.rightWeaponBone = null;
+        this.setWeapon("0", this.leftWeapon);
+        this.setWeapon("1", this.rightWeapon)
 
         // Local Player setup
         if (!this.isRemote) {
@@ -65,8 +71,8 @@ export default class Player extends Pawn {
         MyEventEmitter.emit('meshRotation', { x, z })
     }
     meshReady() {
-        this.setWeapon('0', this.leftWeapon);
-        this.setWeapon('1', this.rightWeapon);
+        this.leftWeaponBone = this.mesh.getObjectByName("handLWeapon");
+        this.rightWeaponBone = this.mesh.getObjectByName("handRWeapon");
     }
     localInit(game) {
         this.tick = false
@@ -168,6 +174,7 @@ export default class Player extends Pawn {
     }
     setWeapon(slot, weapon) {
         if (!weapon) {
+            this.setWeaponMesh(slot, weapon);
             this[`weapon${slot}`] = null;
             return;
         }
@@ -192,15 +199,33 @@ export default class Player extends Pawn {
                 weapon = null;
                 break;
         }
-        if (slot < 2) {
-            const prevWeapon = this[`weapon${slot}`]
-            if (prevWeapon) prevWeapon.unequip();
-            weapon.equip(slot);
-            if (!this.isRemote) {
-                MyEventEmitter.emit('weaponSwap', { weaponName, slot });
-            }
-        }
         this[`weapon${slot}`] = weapon;
+
+        if (slot === "0") {
+            this.leftWeapon = weapon;
+            this.data.leftWeapon = weaponName;
+        } else if (slot === "1") {
+            this.rightWeapon = weapon;
+            this.data.rightWeapon = weaponName;
+        }
+        if (this.mesh) {
+            this.setWeaponMesh(slot, weapon);
+        } else {
+            this.onMeshReady = () => {
+                this.onMeshReady = null;
+                this.setWeaponMesh('0', this.leftWeapon);
+                this.setWeaponMesh('1', this.rightWeapon);
+            };
+        }
+    }
+    setWeaponMesh(slot, weapon) {
+        const weaponName = weapon?.name || weapon;
+        if (slot > 1) return;
+        slot === '0' ? this.leftWeaponBone.remove(this.leftWeaponBone.children[0]) : this.rightWeaponBone.remove(this.rightWeaponBone.children[0]);
+        if (weapon) weapon.equip(slot);
+
+        if (this.isRemote) return;
+        MyEventEmitter.emit('weaponSwap', { weaponName, slot });
     }
     dropItem(item) {
         const { pos, dir } = this.getShootData();
@@ -328,26 +353,26 @@ export default class Player extends Pawn {
         return this.tempVector;
     }
 
-    getInputDirection(z = 0) {
-        this.direction.set(0, 0, 0);
+    // getInputDirection(z = 0) {
+    //     this.direction.set(0, 0, 0);
 
-        // Gather input directions
-        if (this.input.keys['KeyW']) this.direction.z -= 1;
-        if (this.input.keys['KeyS']) this.direction.z += 1;
-        if (this.input.keys['KeyA']) this.direction.x -= 1;
-        if (this.input.keys['KeyD']) this.direction.x += 1;
+    //     // Gather input directions
+    //     if (this.input.keys['KeyW']) this.direction.z -= 1;
+    //     if (this.input.keys['KeyS']) this.direction.z += 1;
+    //     if (this.input.keys['KeyA']) this.direction.x -= 1;
+    //     if (this.input.keys['KeyD']) this.direction.x += 1;
 
-        if (this.direction.length() === 0) {
-            this.direction.z = z;
-        }
+    //     if (this.direction.length() === 0) {
+    //         this.direction.z = z;
+    //     }
 
-        const { rotatedX, rotatedZ } = this.rotateInputVector(this.direction);
+    //     const { rotatedX, rotatedZ } = this.rotateInputVector(this.direction);
 
-        // Input direction as a vector
-        this.direction.set(rotatedX, 0, rotatedZ);
-        this.direction.normalize();
-        return this.direction;
-    }
+    //     // Input direction as a vector
+    //     this.direction.set(rotatedX, 0, rotatedZ);
+    //     this.direction.normalize();
+    //     return this.direction;
+    // }
 
     rotateInputVector(dir) {
         // Rotate input direction by controller yaw

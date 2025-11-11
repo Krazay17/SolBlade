@@ -58,9 +58,11 @@ export default class Inventory {
         } else {
             const slots = [...this.itemsUI.getElementsByClassName('inventory-slot')];
             const emptySlots = slots.filter(s => !s.firstChild);
-            if (!emptySlots) return;
-            emptySlots.forEach(s => this.itemsUI.removeChild(s));
-
+            if (emptySlots) {
+                emptySlots.forEach(s => this.itemsUI.removeChild(s));
+            }
+            // const invSlots = this.inventoryUI.getElementsByClassName('inventory-slot');
+            // invSlots.sort((a, b) => a.firstChild.name.charCodeAt(0) < b.firstChild.name.charCodeAt(0))
         }
         this.inventoryUI.style.display = this.active ? 'block' : 'none';
         MyEventEmitter.emit('inventoryToggled', this.active);

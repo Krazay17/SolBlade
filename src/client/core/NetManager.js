@@ -35,6 +35,12 @@ let serverVersion = null;
 
 let voiceChat = new VoiceChat();
 voiceChat.createButton();
+menuButton('Connect', () => {
+    socket.connect();
+});
+menuButton('Disconnect', () => {
+    socket.disconnect();
+});
 
 export function setNetScene(newScene) {
     scene = newScene;
@@ -75,10 +81,6 @@ function initBindings() {
     if (socketBound || !scene) return;
     socketBound = true;
     game = Game.getGame();
-
-    menuButton('disconnect', () => {
-        socket.disconnect();
-    });
 
     socket.on('userDisconnected', (id) => {
         if (id === playerId) return;

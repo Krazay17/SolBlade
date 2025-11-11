@@ -60,7 +60,7 @@ export default class WeaponSword extends Weapon {
             this.hitPauseDiminish = 1;
             this.dashSpeed = Math.max(6, this.actor.velocity.length());
 
-            const anim = this.slot === '0' ? 'attackLeft' : 'attackRight';
+            const anim = this.slot === '0' ? 'AttackSwordLeft' : 'AttackSwordRight';
             this.actor.animationManager.playAnimation(anim, false);
             this.game.soundPlayer.playPosSound('heavySword', this.actor.position);
 
