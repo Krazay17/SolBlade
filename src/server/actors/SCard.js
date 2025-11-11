@@ -8,10 +8,6 @@ export default class SCard extends SActor {
             ...data,
             itemData: data.itemData ?? makeRandomItem()
         })
-        this.auth = true;
-    }
-    update(dt) {
-        this.rotY += dt;
     }
     touch(dealer) {
         this.deActivate()

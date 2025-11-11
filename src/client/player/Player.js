@@ -40,6 +40,8 @@ export default class Player extends Pawn {
         this.setWeapon("0", this.leftWeapon);
         this.setWeapon("1", this.rightWeapon)
 
+        this.upVec = new THREE.Vector3(0,1,0);
+
         // Local Player setup
         if (!this.isRemote) {
             this.localInit()
@@ -51,15 +53,16 @@ export default class Player extends Pawn {
     get quatY() { return this._quatY }
     set quatY(r) {
         this._quatY = r;
-        const yaw = r;
-        const halfYaw = yaw * 0.5;
-        const sin = Math.sin(halfYaw);
-        const cos = Math.cos(halfYaw);
-        const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
-        this.rot = q;
+        // const yaw = r;
+        // const halfYaw = yaw * 0.5;
+        // const sin = Math.sin(halfYaw);
+        // const cos = Math.cos(halfYaw);
+        // const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
+        // this.rot = q;
+        this.rot.setFromAxisAngle(this.upVec, this._quatY);
         if (this.isRemote) return;
-        this.graphics.quaternion.copy(q);
-        MyEventEmitter.emit('playerRotation', q);
+        this.graphics.quaternion.copy(this.rot);
+        MyEventEmitter.emit('playerRotation', this.rot);
     }
     get meshRot() { return this._meshRot }
     set meshRot({ x, z }) {

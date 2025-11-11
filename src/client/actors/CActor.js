@@ -34,6 +34,7 @@ export default class CActor extends Actor {
         this._quatY = this.rot.y;
         this._position = new Vector3();
         this._velocity = new Vector3();
+        this._yaw = 0;
 
         this.graphics = new Object3D();
 
@@ -90,6 +91,11 @@ export default class CActor extends Actor {
         const x = this.body?.linvel().x;
         const y = this.body?.linvel().y;
         this.body?.setLinvel({ x, y, z }, true);
+    }
+    get rotY() { return this._yaw };
+    set rotY(r) {
+        this._yaw = r;
+        this.rot.setFromAxisAngle(new Vector3(0, 1, 0), this._yaw);
     }
     sleep() {
         this.body?.sleep();
