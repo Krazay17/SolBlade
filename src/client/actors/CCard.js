@@ -12,11 +12,10 @@ export default class CCard extends CPickup {
         const tex = await this.makeTexture(mesh);
         const geom = mesh.children[0].geometry;
         this.createBody(null, geom);
-        this.position =this.pos;
     }
     update(dt, time){
         super.update(dt, time);
-        this.rotY += dt
+        //this.rotY += dt
     }
     async makeTexture(mesh) {
         await this.game.meshManager?.getTex(this.data.itemData.name + '.png').then((tex) => {

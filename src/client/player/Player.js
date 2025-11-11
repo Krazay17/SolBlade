@@ -40,7 +40,7 @@ export default class Player extends Pawn {
         this.setWeapon("0", this.leftWeapon);
         this.setWeapon("1", this.rightWeapon)
 
-        this.upVec = new THREE.Vector3(0,1,0);
+        this.upVec = new THREE.Vector3(0, 1, 0);
 
         // Local Player setup
         if (!this.isRemote) {
@@ -53,13 +53,13 @@ export default class Player extends Pawn {
     get quatY() { return this._quatY }
     set quatY(r) {
         this._quatY = r;
-        // const yaw = r;
-        // const halfYaw = yaw * 0.5;
-        // const sin = Math.sin(halfYaw);
-        // const cos = Math.cos(halfYaw);
-        // const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
-        // this.rot = q;
-        this.rot.setFromAxisAngle(this.upVec, this._quatY);
+        const yaw = r;
+        const halfYaw = yaw * 0.5;
+        const sin = Math.sin(halfYaw);
+        const cos = Math.cos(halfYaw);
+        const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
+        this.rot = q;
+        //this.rot.setFromAxisAngle(this.upVec, r);
         if (this.isRemote) return;
         this.graphics.quaternion.copy(this.rot);
         MyEventEmitter.emit('playerRotation', this.rot);
@@ -129,8 +129,8 @@ export default class Player extends Pawn {
             tryUpdatePosition({ pos: this.position, rot: this.quatY });
             CameraFX.update(dt);
         }
-        this.mesh.rotation.x = lerpTo(this.mesh.rotation.x, this.meshRot.x, 5 * dt)
-        this.mesh.rotation.z = lerpTo(this.mesh.rotation.z, this.meshRot.z, 5 * dt)
+        // this.mesh.rotation.x = lerpTo(this.mesh.rotation.x, this.meshRot.x, 5 * dt)
+        // this.mesh.rotation.z = lerpTo(this.mesh.rotation.z, this.meshRot.z, 5 * dt)
     }
 
     async pickupCrown() {

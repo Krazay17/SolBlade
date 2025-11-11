@@ -61,11 +61,16 @@ export default class Inventory {
             if (emptySlots) {
                 emptySlots.forEach(s => this.itemsUI.removeChild(s));
             }
-            // const invSlots = this.inventoryUI.getElementsByClassName('inventory-slot');
-            // invSlots.sort((a, b) => a.firstChild.name.charCodeAt(0) < b.firstChild.name.charCodeAt(0))
+
         }
         this.inventoryUI.style.display = this.active ? 'block' : 'none';
         MyEventEmitter.emit('inventoryToggled', this.active);
+    }
+    sortInventory() {
+        this.inventoryUI.innerHTML = '';
+        const invSlots = this.inventoryUI.getElementsByClassName('inventory-slot');
+
+        invSlots.sort((a, b) => a.firstChild.name.charCodeAt(0) < b.firstChild.name.charCodeAt(0));
     }
     createInventorySlot() {
         const slot = document.createElement('div');

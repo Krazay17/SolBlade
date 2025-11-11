@@ -191,6 +191,7 @@ function initBindings() {
     socket.on('newActor', (data) => {
         const { type, tempId, id, sceneName } = data
         if (id === playerId) return;
+        console.log(id);
         const existingActor = scene.actorManager.actors.find(a =>
             a.active && (a.tempId === tempId || a.id === id)
         );
@@ -280,7 +281,9 @@ function initBindings() {
     socket.on('meshRotation', ({ id, data }) => {
         if (id === playerId) return;
         const actor = game.getActorById(id);
-        actor.meshRot = data;
+        if (actor) {
+            actor.meshRot = data;
+        }
     });
     socket.on('weaponSwap', ({ id, data }) => {
         if (id === playerId) return;
