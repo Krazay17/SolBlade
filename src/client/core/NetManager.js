@@ -280,7 +280,6 @@ function initBindings() {
     socket.on('meshRotation', ({ id, data }) => {
         if (id === playerId) return;
         const actor = game.getActorById(id);
-        console.log(data);
         actor.meshRot = data;
     });
     socket.on('weaponSwap', ({ id, data }) => {

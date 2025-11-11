@@ -23,7 +23,8 @@ export default class BladeState extends PlayerState {
         this.actor.energy.drainRate = 5;
     }
     update(dt) {
-        if (this.input.keys['Space'] && this.grounded && !this.jumping) {
+        this.rotatePlayerToGround();
+        if (this.input.actionStates.jump && this.grounded && !this.jumping) {
             clearTimeout(this.floorTimer);
             this.grounded = false;
             this.movement.jumpStart(4);
@@ -61,7 +62,6 @@ export default class BladeState extends PlayerState {
         } else {
             this.animationManager.playAnimation('bladeAir', true);
         }
-        this.rotatePlayerToGround();
     }
     exit(state) {
         clearTimeout(this.floorTimer);

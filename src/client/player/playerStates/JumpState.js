@@ -4,8 +4,8 @@ export default class JumpState extends PlayerState {
     enter() {
         const anim = this.grounded ? 'jump' : 'frontFlip';
         this.actor.animationManager?.playAnimation(anim, false);
-        this.jumpTimer = performance.now() + 550;
-        this.jumpCD = performance.now() + 550;
+        this.jumpTimer = performance.now() + 520;
+        this.jumpCD = performance.now() + 520;
 
         this.actor.movement.jumpStart(4);
         this.actor.movement.grounded = false;
