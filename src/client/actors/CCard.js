@@ -15,7 +15,7 @@ export default class CCard extends CPickup {
     }
     update(dt, time){
         super.update(dt, time);
-        //this.rotY += dt
+        this.rotY += dt
     }
     async makeTexture(mesh) {
         await this.game.meshManager?.getTex(this.data.itemData.name + '.png').then((tex) => {

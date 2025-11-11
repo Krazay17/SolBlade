@@ -89,7 +89,7 @@ export default class BladeState extends PlayerState {
         const n = floor.clone().normalize();
 
         // Rotate floor normal into player's local space
-        const yaw = this.actor.quatY;
+        const yaw = this.actor.rotY;
         const invYawQuat = new THREE.Quaternion().setFromAxisAngle(
             new THREE.Vector3(0, 1, 0),
             -yaw

@@ -50,19 +50,13 @@ export default class Player extends Pawn {
         }
     }
 
-    get quatY() { return this._quatY }
-    set quatY(r) {
-        this._quatY = r;
-        const yaw = r;
-        const halfYaw = yaw * 0.5;
-        const sin = Math.sin(halfYaw);
-        const cos = Math.cos(halfYaw);
-        const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
-        this.rot = q;
-        //this.rot.setFromAxisAngle(this.upVec, r);
+    get rotY() { return this._yaw };
+    set rotY(r) {
+        this._yaw = r;
+        this.rot.setFromAxisAngle(this.upVec, this._yaw);
         if (this.isRemote) return;
         this.graphics.quaternion.copy(this.rot);
-        MyEventEmitter.emit('playerRotation', this.rot);
+        MyEventEmitter.emit('playerRotation', { x: this.rot.x, y: this.rot.y, z: this.rot.z, w: this.rot.w });
     }
     get meshRot() { return this._meshRot }
     set meshRot({ x, z }) {
@@ -126,11 +120,11 @@ export default class Player extends Pawn {
         if (!this.isRemote) {
             if (this.energy) this.energy.update(dt);
             this.handleInput(dt, time);
-            tryUpdatePosition({ pos: this.position, rot: this.quatY });
+            tryUpdatePosition({ pos: this.position, rot: this.rotY });
             CameraFX.update(dt);
         }
-        // this.mesh.rotation.x = lerpTo(this.mesh.rotation.x, this.meshRot.x, 5 * dt)
-        // this.mesh.rotation.z = lerpTo(this.mesh.rotation.z, this.meshRot.z, 5 * dt)
+        this.mesh.rotation.x = lerpTo(this.mesh.rotation.x, this.meshRot.x, 5 * dt)
+        this.mesh.rotation.z = lerpTo(this.mesh.rotation.z, this.meshRot.z, 5 * dt)
     }
 
     async pickupCrown() {
@@ -295,7 +289,7 @@ export default class Player extends Pawn {
     handleInput(dt, time) {
         if (!this.input) return;
 
-        this.quatY = this.input.yaw;                    // Yaw
+        this.rotY = this.input.yaw;                    // Yaw
         this.cameraArm.rotation.x = this.input.pitch;       // Pitch
 
         const canExitState = this.stateManager.activeState.canExit();
