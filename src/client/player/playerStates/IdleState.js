@@ -8,16 +8,16 @@ export default class IdleState extends PlayerState {
         if (state === 'attack') return this.idle();
         switch (this.pivot(true)) {
             case 'Front':
-                this.animationManager?.playAnimation('runStopFwd', false, () => this.idle()) || this.idle();
+                this.animationManager?.playAnimation('runStopFwd', false, false, () => this.idle()) || this.idle();
                 break;
             case 'Left':
-                this.animationManager?.playAnimation('runStopLeft', false, () => this.idle()) || this.idle();
+                this.animationManager?.playAnimation('runStopLeft', false, false, () => this.idle()) || this.idle();
                 break;
             case 'Right':
-                this.animationManager?.playAnimation('runStopRight', false, () => this.idle()) || this.idle();
+                this.animationManager?.playAnimation('runStopRight', false, false, () => this.idle()) || this.idle();
                 break;
             case 'Back':
-                this.animationManager?.playAnimation('runStopBack', false, () => this.idle()) || this.idle();
+                this.animationManager?.playAnimation('runStopBack', false, false, () => this.idle()) || this.idle();
                 break;
             default:
                 this.idle();
@@ -45,7 +45,7 @@ export default class IdleState extends PlayerState {
             this.stateManager.setState('fall')
             return false;
         }
-        if(this.movement.getInputDirection().length() !== 0) {
+        if (this.movement.getInputDirection().length() !== 0) {
             this.stateManager.setState('run')
             return false;
         }

@@ -29,18 +29,23 @@ export default class WeaponSword extends Weapon {
                 duration: 1300,
                 onExit: () => {
                     this.actor.setParry(false);
+                    if(this.weaponTrailDelay)clearTimeout(this.weaponTrailDelay);
                 }
             })) {
             this.enemyActors = this.game.hostiles;
             this.hitActors.clear();
             this.hitPauseDiminish = 1;
-            this.damageDelay = 415;
+            this.damageDelay = 550;
             this.damageDuration = 450;
             this.hitPauseDiminish = 1;
             this.dashSpeed = Math.max(11, this.actor.velocity.length());
 
-            this.actor.animationManager.playAnimation('spinSlash', false);
+            this.actor.animationManager.playAnimation('AttackSwordSpell', false);
             this.game.soundPlayer.playPosSound('heavySword', this.actor.position);
+            this.weaponTrailDelay = setTimeout(() => {
+                const offset = new Vector3(0, 0, -this.range / 2);
+                this.game.fxManager.spawnFX('attackTrail', { actor: this.actor.id, offset, color: 0xff2222, meshName: "AttackTrail2" }, true);
+            }, this.damageDelay);
 
             return true;
         }
@@ -52,7 +57,7 @@ export default class WeaponSword extends Weapon {
                 duration: 900,
                 onExit: () => {
                     this.actor.setParry(false);
-                    if(this.weaponTrailDelay) clearTimeout(this.weaponTrailDelay);
+                    if (this.weaponTrailDelay) clearTimeout(this.weaponTrailDelay);
                 }
             })) {
             this.enemyActors = this.game.hostiles;

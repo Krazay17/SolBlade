@@ -6,9 +6,10 @@ export default class FXExplosion extends FX {
         this.duration = 200;
         this.ball = new THREE.Mesh(
             new THREE.SphereGeometry(.5),
-            new THREE.MeshBasicMaterial({ color: 'white' })
+            new THREE.MeshBasicMaterial({ color: this.color })
         )
         this.graphics.add(this.ball);
+        this.explosionSize = this.data.explosionSize;
     }
     update(dt, time) {
         super.update(dt, time)

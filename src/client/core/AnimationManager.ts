@@ -33,10 +33,10 @@ export default class AnimationManager {
         this.animations = {};
     }
 
-    playAnimation(name: string, loop: boolean = true, onFinished: any = null, rate = 1) {
+    playAnimation(name: string, loop: boolean = true, force: boolean = false, onFinished: any = null, rate = 1) {
         const clip = this.animations[name];
         if (clip) {
-            if ((name === this.currentAnimation)) return true;
+            if ((name === this.currentAnimation) && !force) return true;
             const action = this.mixer.clipAction(clip);
             action.timeScale = rate;
             action.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, Infinity);

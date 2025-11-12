@@ -3,17 +3,18 @@ import FX from "./FX";
 
 export default class FXAttackTrail extends FX {
     constructor(game, data) {
-        super(game, data);
+        super(game, {
+            ...data,
+            meshName: data.meshName ?? "AttackTrail",
+            color: data.color ?? 0x22ff22,
+            offset: data.offset?? null,
+        });
         this.duration = 300;
         this.actor = this.game.getActorById(data.actor);
-        this.color = data.color ?? 0x22ff22;
-        this.offset = data.offset;
         this.graphics.position.copy(this.actor.pos);
-        this.up = new Vector3(0, 1, 0);
-        // this.graphics.quaternion.setFromUnitVectors(this.up, this.dir);
     }
     async init() {
-        const mesh = await this.game.meshManager.getMesh("AttackTrail");
+        const mesh = await this.game.meshManager.getMesh(this.meshName);
         this.mesh = mesh.children[0];
         this.mesh.position.copy(this.offset);
         this.graphics.add(this.mesh);

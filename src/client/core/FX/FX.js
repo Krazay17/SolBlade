@@ -12,6 +12,10 @@ export default class FX {
         this.graphics.position.copy(this.pos);
         this.game.graphics.add(this.graphics);
         this.active = true;
+        this.upVec = new THREE.Vector3(0, 1, 0);
+        this.meshName = data.meshName ?? "AttackTrail";
+        this.offset = data.offset ?? null;
+        this.color = data.color ?? 'red';
 
         this.duration = data.dur ?? 1000;
         this.timeStamp = this.game.time;
