@@ -48,13 +48,18 @@ export default class CPawn extends CActor {
     }
     set rotationY(v) { this.graphics.rotation.y = v }
     get rotationY() { return this.graphics.rotation.y };
+    get rotation() { return this.rot };
+    set rotation(r) {
+        this.graphics.quaternion.copy(r);
+    };
+
     update(dt, time) {
         if (!this.active || this.destroyed) return;
         if (this.controller) this.controller.update?.(dt);
         if (this.stateManager) this.stateManager.update(dt, time);
         if (this.movement) this.movement.update?.(dt, time);
         if (this.animationManager) this.animationManager.update(dt);
-        if (this.isRemote) this.graphics.quaternion.slerp(this.rot, this.interpSpeed * dt);
+        if (this.isRemote) this.rotation.slerp(this.rot, this.interpSpeed * dt);
         if (this.pawnBody) this.graphics.position.lerp(this.pawnBody.position, this.interpSpeed * dt);
     }
     fixedUpdate(dt, time) {
@@ -69,7 +74,7 @@ export default class CPawn extends CActor {
             }
         } else {
             this.pos = this.pawnBody.position;
-            this.rot = this.camera? this.camera.getWorldQuaternion(new Quaternion()) : this.graphics.quaternion;
+            this.rot = this.camera ? this.camera.getWorldQuaternion(new Quaternion()) : this.graphics.quaternion;
         }
     }
     async assignMesh(meshName) {

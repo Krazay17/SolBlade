@@ -50,7 +50,20 @@ export default class Player extends Pawn {
             this.remoteInit();
         }
     }
+    get rotation() { return this.rot };
+    set rotation(r) {
+        if (this.rot.x === r.x &&
+            this.rot.y === r.y &&
+            this.rot.z === r.z &&
+            this.rot.w === r.w
+        ) return;
 
+        this.graphics.quaternion.setFromAxisAngle(this.upVec, this.yaw);
+        this.rot.copy(r);
+
+        if (this.isRemote) return;
+        MyEventEmitter.emit('playerRotation', { x: this.rot.x, y: this.rot.y, z: this.rot.z, w: this.rot.w, yaw: this.yaw });
+    }
     get rotY() { return this._yaw };
     set rotY(r) {
         this._yaw = r;
@@ -291,8 +304,10 @@ export default class Player extends Pawn {
     handleInput(dt, time) {
         if (!this.input) return;
 
-        this.rotY = this.input.yaw;                    // Yaw
+        this._yaw = this.input.yaw;                    // Yaw
         this.cameraArm.rotation.x = this.input.pitch;       // Pitch
+
+        this.rotation = this.camera.getWorldQuaternion(this.camQuat);
 
         const canExitState = this.stateManager.activeState.canExit();
         if (this.input.actionStates.attackLeft && this.input.pointerLocked) {

@@ -268,7 +268,11 @@ function initBindings() {
     });
     socket.on('playerRotation', ({ id, data }) => {
         const actor = scene.getActorById(id);
-        if (actor) actor.rot.copy(data);
+        const { x, y, z, w, yaw } = data;
+        if (actor) {
+            actor.rotation = new Quaternion(x, y, z, w);
+            actor.yaw = yaw;
+        }
     });
     socket.on('addCard', data => {
         game.inventory.aquireItem(data);

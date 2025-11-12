@@ -98,6 +98,8 @@ export default class CActor extends Actor {
         this._yaw = r;
         this.rot.setFromAxisAngle(this.upVec, this._yaw);
     }
+    get yaw(){return this._yaw}
+    set yaw(v){this._yaw = v};
     sleep() {
         this.body?.sleep();
     }
