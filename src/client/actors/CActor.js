@@ -97,9 +97,6 @@ export default class CActor extends Actor {
     set rotY(r) {
         this._yaw = r;
         this.rot.setFromAxisAngle(this.upVec, this._yaw);
-        if (this.isRemote) return;
-        // this.graphics.quaternion.copy(this.rot);
-        MyEventEmitter.emit('playerRotation', this.rot);
     }
     sleep() {
         this.body?.sleep();

@@ -33,14 +33,13 @@ export default class MeshTrace {
             shape,
             0,
             length,
+            false,
             undefined,
             undefined,
-            undefined,
-            this.actor.body.body,
+            this.actor.body,
         );
 
         if (result) {
-            console.log(result.time_of_impact);
             if (callback) callback(result);
         }
     }

@@ -70,3 +70,17 @@ export function triMeshFromVerts(geometry) {
   colliderDesc.setRestitution(0);
   return colliderDesc;
 }
+
+export function rawTrimeshFromVerts(geometry) {
+  const vertices = new Float32Array(geometry.attributes.position.array);
+  let indices;
+
+  if (geometry.index) {
+    indices = new Uint32Array(geometry.index.array);
+  } else {
+    const count = vertices.length / 3;
+    indices = new Uint32Array(count);
+    for (let i = 0; i < count; i++) indices[i] = i;
+  }
+  return { vertices, indices };
+}

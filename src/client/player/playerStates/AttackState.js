@@ -15,7 +15,7 @@ export default class AttackState extends PlayerState {
         this.onExit = onExit;
     }
     update(dt) {
-        this.movement.airMove(dt);
+        this.movement.smartMove(dt);
         if (this.weapon) this.weapon.update(dt);
 
         if (performance.now() > this.exitTimer) {

@@ -218,11 +218,11 @@ export default class CGame {
 
         this.accumulator -= this.timeStep;
       }
-      this.fxManager?.update(dt, time);
       this.scene?.update?.(dt, time);
       this.actorManager?.update(dt, time);
       this.questManager?.update(dt, time);
       this.debugData?.update(dt, time);
+      this.fxManager?.update(dt, time);
 
       MyEventEmitter.emit('update', dt, time);
       this.solRender.composer.render(dt);

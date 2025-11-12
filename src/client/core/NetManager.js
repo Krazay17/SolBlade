@@ -191,7 +191,6 @@ function initBindings() {
     socket.on('newActor', (data) => {
         const { type, tempId, id, sceneName } = data
         if (id === playerId) return;
-        console.log(id);
         const existingActor = scene.actorManager.actors.find(a =>
             a.active && (a.tempId === tempId || a.id === id)
         );

@@ -41,6 +41,7 @@ export default class Player extends Pawn {
         this.setWeapon("1", this.rightWeapon)
 
         this.upVec = new THREE.Vector3(0, 1, 0);
+        this.camQuat = new THREE.Quaternion();
 
         // Local Player setup
         if (!this.isRemote) {
@@ -232,7 +233,8 @@ export default class Player extends Pawn {
     getAim() {
         const camPosition = this.camera.getWorldPosition(new THREE.Vector3());
         const camDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
-        const rot = this.camera.getWorldQuaternion(new THREE.Quaternion());
+        const rot = this.camera.getWorldQuaternion(this.camQuat);
+        /**@type {THREE.Vector3} */
         const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
         const ray = new Ray(camPosition, camDirection);
         const result = this.game.physicsWorld.castRay(

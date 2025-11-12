@@ -2,14 +2,15 @@ import Weapon from "./Weapon";
 import CameraFX from "../../core/CameraFX";
 import { spawnParticles } from "../../actors/ParticleEmitter";
 import HitData from "../../core/HitData";
+import { Vector3 } from "three";
 
 export default class WeaponBlade extends Weapon {
     constructor(game, actor, slot = 0) {
         super(game, actor, {
             name: 'Blade',
-            damage: 35,
+            damage: 25,
             range: 2.9,
-            cooldown: 1250,
+            cooldown: 900,
             meshName: "BladeWeapon",
             slot
         });
@@ -34,12 +35,13 @@ export default class WeaponBlade extends Weapon {
             this.hitActors.clear();
             this.hitPauseDiminish = 1;
             this.damageDelay = 415;
-            this.damageDuration = 520;
+            this.damageDuration = 450;
             this.hitPauseDiminish = 1;
             this.dashSpeed = Math.max(11, this.actor.velocity.length());
 
             this.actor.animationManager.playAnimation('spinSlash', false);
             this.game.soundPlayer.playPosSound('heavySword', this.actor.position);
+            this.game.fxManager.spawnFX("tornado", { actor: this.actor.id, color: 0x22ff22 });
 
             return true;
         }
@@ -48,21 +50,27 @@ export default class WeaponBlade extends Weapon {
         if (super.use() &&
             this.stateManager.setState('attack', {
                 weapon: this,
-                duration: 550,
+                duration: 500,
                 onExit: () => {
                     this.actor.setParry(false);
+                    if (this.weaponTrailDelay) clearTimeout(this.weaponTrailDelay)
                 }
             })) {
             this.enemyActors = this.game.hostiles;
             this.hitActors.clear();
             this.damageDelay = 250;
-            this.damageDuration = 200;
+            this.damageDuration = 150;
             this.hitPauseDiminish = 1;
             this.dashSpeed = Math.max(6, this.actor.velocity.length());
 
             const anim = this.slot === '0' ? 'attackLeft' : 'attackRight';
             this.actor.animationManager.playAnimation(anim, false);
             this.game.soundPlayer.playPosSound('heavySword', this.actor.position);
+
+            this.weaponTrailDelay = setTimeout(() => {
+                const offset = new Vector3(0, 0, -this.range / 2);
+                this.game.fxManager.spawnFX('attackTrail', { actor: this.actor.id, offset, color: 0x22ff22 }, true);
+            }, this.damageDelay);
 
             return true;
         }
@@ -72,7 +80,7 @@ export default class WeaponBlade extends Weapon {
         const duration = delay + this.damageDuration;
         if (delay < performance.now() && (duration > performance.now())) {
             this.meleeTrace(this.actor.position, this.actor.getCameraDirection(), this.range, 0.5, (target, camDir) => {
-                const knockbackDir = this.tempVector2.copy(camDir).normalize().multiplyScalar(8);
+                const knockbackDir = this.tempVector2.copy(camDir).normalize().multiplyScalar(4);
                 target.hit?.(new HitData({
                     dealer: this.actor,
                     target,

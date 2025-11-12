@@ -2,14 +2,15 @@ import Weapon from "./Weapon";
 import CameraFX from "../../core/CameraFX";
 import { spawnParticles } from "../../actors/ParticleEmitter";
 import HitData from "../../core/HitData";
+import { Vector3 } from "three";
 
 export default class WeaponSword extends Weapon {
     constructor(game, actor, slot = 0) {
         super(game, actor, {
             name: 'Sword',
-            damage: 35,
-            range: 2.9,
-            cooldown: 1250,
+            damage: 40,
+            range: 4,
+            cooldown: 1500,
             meshName: "GreatSword",
             slot
         });
@@ -34,7 +35,7 @@ export default class WeaponSword extends Weapon {
             this.hitActors.clear();
             this.hitPauseDiminish = 1;
             this.damageDelay = 415;
-            this.damageDuration = 520;
+            this.damageDuration = 450;
             this.hitPauseDiminish = 1;
             this.dashSpeed = Math.max(11, this.actor.velocity.length());
 
@@ -48,21 +49,27 @@ export default class WeaponSword extends Weapon {
         if (super.use() &&
             this.stateManager.setState('attack', {
                 weapon: this,
-                duration: 550,
+                duration: 900,
                 onExit: () => {
                     this.actor.setParry(false);
+                    if(this.weaponTrailDelay) clearTimeout(this.weaponTrailDelay);
                 }
             })) {
             this.enemyActors = this.game.hostiles;
             this.hitActors.clear();
-            this.damageDelay = 250;
-            this.damageDuration = 200;
+            this.damageDelay = 400;
+            this.damageDuration = 250;
             this.hitPauseDiminish = 1;
             this.dashSpeed = Math.max(6, this.actor.velocity.length());
 
             const anim = this.slot === '0' ? 'AttackSwordLeft' : 'AttackSwordRight';
             this.actor.animationManager.playAnimation(anim, false);
             this.game.soundPlayer.playPosSound('heavySword', this.actor.position);
+
+            this.weaponTrailDelay = setTimeout(() => {
+                const offset = new Vector3(0, 0, -this.range / 2);
+                this.game.fxManager.spawnFX('attackTrail', { actor: this.actor.id, offset, color: 0xff2222 }, true);
+            }, this.damageDelay);
 
             return true;
         }

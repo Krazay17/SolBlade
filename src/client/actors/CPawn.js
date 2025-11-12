@@ -5,7 +5,7 @@ import PawnBody from "../core/PawnBody";
 import Health from "../core/Health";
 import MovementManager from "../core/MovementManager";
 import PlayerMovement from "../player/PlayerMovement";
-import { Group } from "three";
+import { Group, Quaternion } from "three";
 
 export default class CPawn extends CActor {
     constructor(game, data) {
@@ -69,7 +69,7 @@ export default class CPawn extends CActor {
             }
         } else {
             this.pos = this.pawnBody.position;
-            this.rot = this.graphics.quaternion;
+            this.rot = this.camera? this.camera.getWorldQuaternion(new Quaternion()) : this.graphics.quaternion;
         }
     }
     async assignMesh(meshName) {

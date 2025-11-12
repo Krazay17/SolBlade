@@ -61,6 +61,7 @@ export default class CProjectile extends Projectile {
             );
         }
         this.graphics.add(mesh);
+        return mesh;
     }
     onCollide() {
         if(this.noCollide)return;

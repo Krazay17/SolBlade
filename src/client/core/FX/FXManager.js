@@ -1,9 +1,16 @@
 import FXExplosion from "./FXExplosion";
 import MyEventEmitter from "../MyEventEmitter";
+import FXLine from "./FXLine";
+import { Vector3 } from "three";
+import FXTornado from "./FXTornado";
+import FXAttackTrail from "./FXAttackTrail";
 
 
 const FXRegistry = {
     explosion: FXExplosion,
+    line: FXLine,
+    tornado: FXTornado,
+    attackTrail: FXAttackTrail,
 }
 
 export default class FXManager {
@@ -16,10 +23,26 @@ export default class FXManager {
     }
     spawnFX(type = 'explosion', data, local = true) {
         const obj = FXRegistry[type];
+        if (!obj) return;
+        data = local ? data : this.deserialize(data);
         const fx = new obj(this.game, data);
-
+        if (!fx) return;
         this.activeFX.push(fx);
 
-        if (local) MyEventEmitter.emit('spawnFX', { type, data });
+        if (local) MyEventEmitter.emit('spawnFX', { type, data: this.serialize(data) });
+    }
+    serialize(data) {
+        return {
+            ...data,
+            pos: data.pos && data.pos.toArray ? data.pos.toArray() : data.pos,
+            dir: data.dir && data.dir.toArray ? data.dir.toArray() : data.dir,
+        }
+    }
+    deserialize(data) {
+        return {
+            ...data,
+            pos: Array.isArray(data.pos) ? new Vector3(data.pos[0], data.pos[1], data.pos[2]) : data.pos,
+            dir: Array.isArray(data.dir) ? new Vector3(data.dir[0], data.dir[1], data.dir[2]) : data.dir,
+        }
     }
 }

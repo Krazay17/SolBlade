@@ -7,7 +7,9 @@ export default class FX {
         this.game = game;
         this.data = data;
         this.graphics = new THREE.Object3D();
-        this.graphics.position.copy(data.pos || new THREE.Vector3());
+        this.pos = data.pos ?? new THREE.Vector3();
+        this.dir = data.dir ?? new THREE.Vector3();
+        this.graphics.position.copy(this.pos);
         this.game.graphics.add(this.graphics);
         this.active = true;
 

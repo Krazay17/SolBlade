@@ -150,6 +150,7 @@ export default class MeshManager {
     async createMesh(name) {
         return new Promise((resolve, reject) => {
             this.loader.load(`assets/${name}.glb`, (gltf) => {
+                
                 const mesh = gltf.scene;
                 mesh.traverse((child) => {
                     if (child.isMesh) {
@@ -166,11 +167,9 @@ export default class MeshManager {
     async getMesh(name) {
         let mesh = this.meshMap.get(name);
         if (mesh) {
-            console.log('reuseMesh')
             return mesh.clone();
         } else {
             mesh = await this.createMesh(name);
-            console.log('new Mesh')
             return mesh.clone();
         }
     }
