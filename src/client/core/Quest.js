@@ -20,6 +20,7 @@ export default class Quest {
         this.manager.ui.appendChild(this.ui);
     }
     onEnter() { }
+    get text() { return this.ui.textContent };
     set text(value) {
         this.ui.textContent = `${this.data.title}: ${value}`;
     }
@@ -41,7 +42,6 @@ export default class Quest {
         this[`__${event}Handler`] = method.bind(this);
         MyEventEmitter.on(event, this[`__${event}Handler`]);
     }
-
     unbindEvent(event) {
         MyEventEmitter.off(event, this[`__${event}Handler`]);
     }

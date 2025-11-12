@@ -4,6 +4,7 @@ import FXLine from "./FXLine";
 import { Vector3 } from "three";
 import FXTornado from "./FXTornado";
 import FXAttackTrail from "./FXAttackTrail";
+import FXSwordSpell from "./FXSwordSpell";
 
 
 const FXRegistry = {
@@ -11,6 +12,7 @@ const FXRegistry = {
     line: FXLine,
     tornado: FXTornado,
     attackTrail: FXAttackTrail,
+    swordSpell: FXSwordSpell,
 }
 
 export default class FXManager {

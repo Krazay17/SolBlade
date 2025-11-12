@@ -21,7 +21,6 @@ export default class CActor extends Actor {
         const vel = Array.isArray(velArr)
             ? new Vector3(velArr[0] || 0, velArr[1] || 0, velArr[2] || 0)
             : new Vector3(velArr?.x || 0, velArr?.y || 0, velArr?.z || 0);
-
         const rot = Array.isArray(rotArr)
             ? new Quaternion(rotArr[0] || 0, rotArr[1] || 0, rotArr[2] || 0, rotArr[3] || 1)
             : new Quaternion(rotArr?.x || 0, rotArr?.y || 0, rotArr?.z || 0, rotArr?.w || 1);
@@ -35,7 +34,7 @@ export default class CActor extends Actor {
         this._position = new Vector3();
         this._velocity = new Vector3();
         this._yaw = 0;
-        this.upVec = new Vector3(0,1,0);
+        this.upVec = new Vector3(0, 1, 0);
 
         this.graphics = new Object3D();
 
@@ -98,8 +97,8 @@ export default class CActor extends Actor {
         this._yaw = r;
         this.rot.setFromAxisAngle(this.upVec, this._yaw);
     }
-    get yaw(){return this._yaw}
-    set yaw(v){this._yaw = v};
+    get yaw() { return this._yaw }
+    set yaw(v) { this._yaw = v };
     sleep() {
         this.body?.sleep();
     }

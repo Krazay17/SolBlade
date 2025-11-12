@@ -16,7 +16,7 @@ export default class FX {
         this.meshName = data.meshName ?? "AttackTrail";
         this.offset = data.offset ?? null;
         this.color = data.color ?? 'red';
-
+        this.delta = 0;
         this.duration = data.dur ?? 1000;
         this.timeStamp = this.game.time;
 
@@ -28,7 +28,8 @@ export default class FX {
     }
     update(dt, time) {
         if (!this.active) return;
-        if (time > this.timeStamp + this.duration) {
+        this.delta = Math.min(1, (this.game.time - this.timeStamp) / this.duration)
+        if (this.delta === 1) {
             this.destroy();
         }
     }
