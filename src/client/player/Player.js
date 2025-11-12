@@ -64,14 +64,19 @@ export default class Player extends Pawn {
         if (this.isRemote) return;
         MyEventEmitter.emit('playerRotation', { x: this.rot.x, y: this.rot.y, z: this.rot.z, w: this.rot.w, yaw: this.yaw });
     }
-    get rotY() { return this._yaw };
-    set rotY(r) {
-        this._yaw = r;
-        this.rot.setFromAxisAngle(this.upVec, this._yaw);
-        if (this.isRemote) return;
-        this.graphics.quaternion.copy(this.rot);
-        MyEventEmitter.emit('playerRotation', { x: this.rot.x, y: this.rot.y, z: this.rot.z, w: this.rot.w });
+    get yaw(){return this._yaw}
+    set yaw(v) {
+        this._yaw = v;
+        this.graphics.quaternion.setFromAxisAngle(this.upVec, v);
     }
+    // get rotY() { return this._yaw };
+    // set rotY(r) {
+    //     this._yaw = r;
+    //     this.rot.setFromAxisAngle(this.upVec, this._yaw);
+    //     if (this.isRemote) return;
+    //     this.graphics.quaternion.copy(this.rot);
+    //     MyEventEmitter.emit('playerRotation', { x: this.rot.x, y: this.rot.y, z: this.rot.z, w: this.rot.w });
+    // }
     get meshRot() { return this._meshRot }
     set meshRot({ x, z }) {
         if (this.mesh.rotation.x === x &&
@@ -304,7 +309,7 @@ export default class Player extends Pawn {
     handleInput(dt, time) {
         if (!this.input) return;
 
-        this._yaw = this.input.yaw;                    // Yaw
+        this.yaw = this.input.yaw;                    // Yaw
         this.cameraArm.rotation.x = this.input.pitch;       // Pitch
 
         this.rotation = this.camera.getWorldQuaternion(this.camQuat);
