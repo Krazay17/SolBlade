@@ -84,3 +84,7 @@ export function rawTrimeshFromVerts(geometry) {
   }
   return { vertices, indices };
 }
+
+export function swingMath(d, rev = false) {
+    return rev ? 1 - d * 2 : d * 2 - 1;
+}

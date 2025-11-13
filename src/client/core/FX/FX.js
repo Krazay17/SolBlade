@@ -9,6 +9,7 @@ export default class FX {
         this.graphics = new THREE.Object3D();
         this.pos = data.pos ?? new THREE.Vector3();
         this.dir = data.dir ?? new THREE.Vector3();
+        this.scale = data.scale ?? 1;
         this.graphics.position.copy(this.pos);
         this.game.graphics.add(this.graphics);
         this.active = true;
@@ -23,9 +24,7 @@ export default class FX {
         this.init();
     }
     set position(pos) { this.graphics.position.copy(pos) }
-    init() {
-
-    }
+    init() { }
     update(dt, time) {
         if (!this.active) return;
         this.delta = Math.min(1, (this.game.time - this.timeStamp) / this.duration)

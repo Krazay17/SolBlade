@@ -253,7 +253,7 @@ export default class Player extends Pawn {
         const camDirection = this.camera.getWorldDirection(new THREE.Vector3()).normalize();
         const rot = this.camera.getWorldQuaternion(this.camQuat);
         /**@type {THREE.Vector3} */
-        const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .7, 0));
+        const bulletPosition = this.position.clone().add(new THREE.Vector3(0, .4, 0));
         const ray = new Ray(camPosition, camDirection);
         const result = this.game.physicsWorld.castRay(
             ray,

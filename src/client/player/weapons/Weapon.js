@@ -3,6 +3,8 @@ import MyEventEmitter from '../../core/MyEventEmitter';
 import MeshTrace from '../../core/MeshTrace';
 import Player from '../Player';
 import Game from '../../CGame';
+import RAPIER from '@dimforge/rapier3d-compat';
+import { COLLISION_GROUPS } from '@solblade/shared';
 
 export default class Weapon {
     constructor(game, actor, data = {}) {
@@ -29,14 +31,22 @@ export default class Weapon {
         this.direction = new THREE.Vector3();
         this.tempVector = new THREE.Vector3();
         this.tempVector2 = new THREE.Vector3();
+        this.upVec = new THREE.Vector3(0, 1, 0);
+        this.downVec = new THREE.Vector3(0, -1, 0);
         this.hitActors = new Set();
 
         this.damageDelay = 0;
         this.damageDuration = 0;
         this.isCharging = false;
+        this.isDamaging = false;
+        this.onAttackEnd = null;
+
+        this.ball = new RAPIER.Ball(1);
+        this.capsule = new RAPIER.Capsule(1, 1);
+        this.cube = new RAPIER.Cuboid(1, 1, 1);
 
         if (this.slot > 1) {
-            this.cooldown *= 8;
+            this.cooldown *= 10;
         }
         this.lastUsed = -this.cooldown; // timestamp of last use
     }
@@ -46,7 +56,7 @@ export default class Weapon {
     get movement() { return this.actor.movement }
     get animation() { return this.actor.animationManager }
     get playAnimation() { return this.actor.animationManager.playAnimation.bind(this.actor.animationManager) }
-    get playSound() {return this.game.soundPlayer.playPosSound.bind(this.game.soundPlayer)}
+    get playSound() { return this.game.soundPlayer.playPosSound.bind(this.game.soundPlayer) }
     canSpellUse() {
         return (performance.now() - this.lastUsed) >= this.cooldown;
     }
@@ -75,10 +85,17 @@ export default class Weapon {
         this.stateManager.setState('charge', { onExit: () => this.isCharging = false });
     }
     update(dt) {
+        const now = performance.now()
         const delay = this.lastUsed + this.damageDelay;
-        const duration = delay + this.damageDuration;
-        if (delay < performance.now() && (duration > performance.now())) {
+        const modifiedDuration = this.modifiedDuration ? this.modifiedDuration : this.damageDuration;
+        const duration = delay + modifiedDuration;
+        if (delay < now && (duration > now)) {
+            this.damageDelta = (now - delay) / modifiedDuration;
             this.damageTick(dt);
+            this.isDamaging = true;
+        } else if (this.isDamaging) {
+            this.isDamaging = false;
+            if (this.onAttackEnd) this.onAttackEnd();
         }
     }
     damageTick(dt) { }
@@ -98,38 +115,93 @@ export default class Weapon {
             callback?.(actor, direction);
         }
     }
-    rayLoop(start, dir, length, duration, callback) {
-        let frameCount = 0;
-        let hitActors = new Set();
-        const loop = () => {
-            frameCount++;
-            if (frameCount % 5 !== 0) return;
-
-            const meshTracer = new MeshTrace(this.game);
-            meshTracer.lineTrace(start, dir, length, (hits) => {
-                for (const hit of hits) {
-                    const actor = hit.object.userData.owner;
-                    if (actor && actor !== this.actor) {
-                        hitActors.add(actor, hit);
-                        callback(hit);
-                    }
-                }
-            });
-        }
-        MyEventEmitter.on('update', loop);
-        setTimeout(() => {
-            MyEventEmitter.off('update', loop);
-        }, duration);
-    }
     async equip(slot = '0') {
-        const boneName = slot === '0' ? "handLWeapon": "handRWeapon";
+        const boneName = slot === '0' ? "handLWeapon" : "handRWeapon";
         const weaponBone = this.actor.mesh.getObjectByName(boneName);
         this.mesh = await this.game.meshManager.getMesh(this.meshName);
         weaponBone.add(this.mesh);
     }
     unequip() {
-        if(this.mesh) {
+        if (this.mesh) {
             this.mesh.parent.remove(this.mesh);
         }
     }
+    meleeRayTrace(pos, /**@type {THREE.Vector3}*/dir, range = 1, callback, debug = false) {
+        const newDir = dir.clone();
+
+        const swingDir = newDir.applyAxisAngle(this.upVec, Math.PI / 3 * swingMath(this.damageDelta, this.slot === '0'));
+        const ray = new RAPIER.Ray(pos, swingDir);
+        this.game.physicsWorld.intersectionsWithRay(
+            ray, range, true, callback, undefined,
+            (COLLISION_GROUPS.ENEMY << 16) | COLLISION_GROUPS.PLAYER
+        )
+
+        if (debug) {
+            const end = pos.clone().add(swingDir.multiplyScalar(range));
+            const geom = new THREE.BufferGeometry().setFromPoints([pos, end]);
+            const mat = new THREE.LineBasicMaterial({ color: "red" });
+            const debug = new THREE.Line(geom, mat);
+
+            this.game.graphicsWorld.add(debug);
+            setTimeout(() => {
+                this.game.graphicsWorld.remove(debug);
+            }, 1000);
+        }
+    }
+    ballTrace(pos, radius = 1, callback, debug = false) {
+        this.ball.radius = radius;
+
+        this.game.physicsWorld.intersectionsWithShape(
+            pos, { x: 0, y: 0, z: 0, w: 1 }, this.ball, callback,
+            undefined,
+            (COLLISION_GROUPS.ENEMY << 16) | COLLISION_GROUPS.PLAYER
+        )
+
+        if (debug) {
+            const geom = new THREE.SphereGeometry(radius);
+            const mat = new THREE.MeshBasicMaterial({ color: "red" });
+            const debug = new THREE.Mesh(geom, mat);
+            debug.position.copy(pos);
+
+            this.game.add(debug);
+            setTimeout(() => {
+                this.game.remove(debug);
+            }, 1000);
+        }
+    }
+    cubeTrace(pos, rot, radius, length, callback, debug = false) {
+        this.cube.halfExtents = { x: radius, y: radius, z: length };
+
+        if (rot instanceof THREE.Vector3) {
+            const oldRot = rot;
+            rot = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), oldRot);
+        }
+
+        this.game.physicsWorld.intersectionsWithShape(
+            pos,
+            rot,
+            this.cube,
+            callback,
+            undefined,
+            (COLLISION_GROUPS.ENEMY << 16) | COLLISION_GROUPS.PLAYER
+        );
+
+        if (debug) {
+            const geom = new THREE.BoxGeometry(radius, radius, length);
+            const mat = new THREE.MeshBasicMaterial({ color: "red" });
+            const mesh = new THREE.Mesh(geom, mat);
+
+            mesh.position.copy(pos);
+            mesh.quaternion.copy(rot);
+            this.game.graphics.add(mesh);
+
+            setTimeout(() => {
+                this.game.graphics.remove(mesh);
+            }, 2000);
+        }
+    }
+}
+
+function swingMath(d, rev = false) {
+    return rev ? 1 - d * 2 : d * 2 - 1;
 }

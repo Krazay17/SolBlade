@@ -75,22 +75,23 @@ export default class CActor extends Actor {
         return this.body?.linvel().z
     }
     set velocity(vel) {
+        if (!this.body) return;
         this.body.setLinvel(vel, true);
     }
     set velocityX(x) {
-        const y = this.body?.linvel().y;
-        const z = this.body?.linvel().z;
-        this.body?.setLinvel({ x, y, z }, true);
+        if (!this.body) return;
+        const { y, z } = this.body.linvel();
+        this.body.setLinvel({ x, y, z }, true);
     }
     set velocityY(y) {
-        const x = this.body.linvel().x;
-        const z = this.body.linvel().z;
-        this.body?.setLinvel({ x, y, z }, true);
+        if (!this.body) return;
+        const { x, z } = this.body.linvel();
+        this.body.setLinvel({ x, y, z }, true);
     }
     set velocityZ(z) {
-        const x = this.body?.linvel().x;
-        const y = this.body?.linvel().y;
-        this.body?.setLinvel({ x, y, z }, true);
+        if (!this.body) return;
+        const { x, y } = this.body.linvel();
+        this.body.setLinvel({ x, y, z }, true);
     }
     get rotY() { return this._yaw };
     set rotY(r) {

@@ -2,14 +2,15 @@ import Weapon from './Weapon.js';
 import MeshTrace from '../../core/MeshTrace.js';
 import HitData from '../../core/HitData.js';
 import RAPIER from '@dimforge/rapier3d-compat';
+import { WEAPON_STATS } from '@solblade/shared';
 
 export default class WeaponPistol extends Weapon {
     constructor(game, actor, slot = '0') {
         super(game, actor, {
             name: 'Pistol',
-            damage: 20,
-            range: 50,
-            cooldown: 800,
+            damage: WEAPON_STATS.pistol.damage,
+            range: WEAPON_STATS.pistol.range,
+            cooldown: WEAPON_STATS.pistol.cooldown,
             meshName: "PistolWeapon",
             slot
         });
@@ -59,7 +60,7 @@ export default class WeaponPistol extends Weapon {
         }
     }
     spellUse() {
-        if (super.canSpellUse() &&
+        if (super.spellUse() &&
             this.stateManager.setState('attack', {
                 weapon: this,
                 duration: 1000,

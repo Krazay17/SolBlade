@@ -1,13 +1,14 @@
 import Weapon from "./Weapon";
 import ClientProjectile from "../../actors/CProjectile";
+import { WEAPON_STATS } from "@solblade/shared";
 
 export default class WeaponScythe extends Weapon {
     constructor(game, actor, slot) {
         super(game, actor, {
             name: 'Scythe',
-            damage: 40,
-            range: 3,
-            cooldown: 1800,
+            damage: WEAPON_STATS.scythe.damage,
+            range: WEAPON_STATS.scythe.range,
+            cooldown: WEAPON_STATS.scythe.cooldown,
             meshName: "ScytheWeapon",
             slot
         });

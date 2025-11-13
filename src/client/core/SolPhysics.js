@@ -1,4 +1,5 @@
 import RAPIER, { World } from "@dimforge/rapier3d-compat";
+import { COLLISION_GROUPS } from "@solblade/shared";
 import { Vector3 } from "three";
 
 export default class SolPhysics {
@@ -8,6 +9,8 @@ export default class SolPhysics {
         this.world = new World(this.gravity);
         this.eventQue = new RAPIER.EventQueue(true);
         this.pendingRemoval = [];
+
+        this.meleeCapsule = new RAPIER.Capsule(.5, 1);
     }
     step() {
         this.world.step(this.eventQue);
@@ -79,5 +82,12 @@ export default class SolPhysics {
 
         this.pendingRemoval.length = 0;
     }
-
+    meleeTrace(pos, rot, range = 1, callback = () => { }) {
+        if (this.meleeCapsule.radius !== range) this.meleeCapsule.radius = range;
+        this.world.intersectionsWithShape(
+            pos, rot,
+            this.meleeCapsule, callback,
+            COLLISION_GROUPS.ENEMY << 16 | COLLISION_GROUPS.PLAYER
+        )
+    }
 }

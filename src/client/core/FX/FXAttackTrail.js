@@ -16,6 +16,8 @@ export default class FXAttackTrail extends FX {
     async init() {
         const mesh = await this.game.meshManager.getMesh(this.meshName);
         this.mesh = mesh.children[0];
+        this.mesh.castShadow = false;
+        this.mesh.scale.set(this.scale, this.scale, this.scale);
         this.mesh.position.copy(this.offset);
         this.graphics.add(this.mesh);
 
@@ -28,8 +30,6 @@ export default class FXAttackTrail extends FX {
             map: tex,
             side: DoubleSide,
             transparent: true,
-            blending: AdditiveBlending,
-            depthWrite: false,
             color: this.color,
         });
 

@@ -26,8 +26,6 @@ export default class SEnemy extends SActor {
         this.health.onDeath = () => this.die();
         this.health.onChange = (a) => { this.data.currentHealth = a; };
 
-
-        // only collide with world and player
         const collideGroup = (COLLISION_GROUPS.WORLD | COLLISION_GROUPS.PLAYER) << 16 | COLLISION_GROUPS.ENEMY;
         this.createCapsule(height, radius, collideGroup);
         this.aiController = new SAIController(this.game, this);

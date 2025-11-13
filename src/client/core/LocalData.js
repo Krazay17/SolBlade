@@ -58,7 +58,6 @@ export default {
         if (!data) return;
         const parsed = JSON.parse(data);
         if (parsed.version !== CURRENT_VERSION) {
-            //this.reset();
             console.warn('Version mismatch: ' + parsed.version + ' current: ' + CURRENT_VERSION);
 
             this.reset(

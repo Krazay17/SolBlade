@@ -18,6 +18,7 @@ export default class CScythe extends CProjectile {
             this.mesh = m
             if (!CScythe.body) {
                 const child = m.children[0];
+                child.castShadow = false;
                 const scaleMatrix = new THREE.Matrix4().makeScale(
                     m.scale.x,
                     m.scale.y,

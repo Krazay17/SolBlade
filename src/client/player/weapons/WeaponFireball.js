@@ -1,17 +1,17 @@
+import { WEAPON_STATS } from '@solblade/shared';
 import Weapon from './Weapon';
 
 export default class WeaponFireball extends Weapon {
     constructor(game, actor, slot = 0) {
         super(game, actor, {
             name: 'Fireball',
-            damage: 30,
-            range: 100,
-            cooldown: 1250,
+            damage: WEAPON_STATS.fireball.damage,
+            range: WEAPON_STATS.fireball.range,
+            cooldown: WEAPON_STATS.fireball.cooldown,
             slot,
             meshName: "FireballWeapon",
         });
     }
-
     spellUse() {
         if (super.spellUse() &&
             this.actor.stateManager.setState('attack', {

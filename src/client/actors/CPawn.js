@@ -59,7 +59,7 @@ export default class CPawn extends CActor {
         if (this.stateManager) this.stateManager.update(dt, time);
         if (this.movement) this.movement.update?.(dt, time);
         if (this.animationManager) this.animationManager.update(dt);
-        if (this.isRemote) this.rotation.slerp(this.rot, this.interpSpeed * dt);
+        if (this.isRemote) this.graphics.quaternion.slerp(this.rot, this.interpSpeed * dt);
         if (this.pawnBody) this.graphics.position.lerp(this.pawnBody.position, this.interpSpeed * dt);
     }
     fixedUpdate(dt, time) {

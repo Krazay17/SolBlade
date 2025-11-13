@@ -9,7 +9,7 @@ export default class FXSwordSpell extends FX {
             meshName: data.meshName ?? "GreatSwordFX",
             color: data.color ?? 0x22ff22,
         });
-        this.duration = 1400;
+        this.duration = 1300;
         this.actor = this.game.getActorById(data.actor);
         this.graphics.position.copy(this.actor.pos);
     }
@@ -49,5 +49,5 @@ export default class FXSwordSpell extends FX {
 }
 
 function easinQuad(t) {
-    return t ** 3;
+    return t ** 4;
 }

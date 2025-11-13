@@ -4,3 +4,31 @@ export const COLLISION_GROUPS = {
     ENEMY: 0b0100,
     RAY: 0b1000,
 };
+
+export const WEAPON_STATS = {
+    sword: {
+        damage: 40,
+        range: 3.4,
+        cooldown: 1500
+    },
+    pistol: {
+        damage: 20,
+        range: 50,
+        cooldown: 900,
+    },
+    claw: {
+        damage: 25,
+        range: 2.7,
+        cooldown: 900,
+    },
+    fireball: {
+        damage: 30,
+        range: 1,
+        cooldown: 1250,
+    },
+    scythe: {
+        damage: 33,
+        range: 1,
+        cooldown: 1666,
+    }
+}
