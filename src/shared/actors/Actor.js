@@ -51,9 +51,9 @@ export default class Actor {
             sceneName: this.sceneName,
             tempId: this.tempId,
 
-            pos: this.pos.toArray ? this.pos.toArray() : this.pos,
-            dir: this.dir.toArray ? this.dir.toArray() : this.dir,
-            rot: this.rot.toArray ? this.rot.toArray() : this.rot,
+            pos: this.pos?.toArray ? this.pos.toArray() : this.pos,
+            dir: this.dir?.toArray ? this.dir.toArray() : this.dir,
+            rot: this.rot?.toArray ? this.rot.toArray() : this.rot,
 
             active: this.active,
             isRemote: this.isRemote,

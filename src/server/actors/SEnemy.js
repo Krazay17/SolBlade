@@ -9,6 +9,7 @@ import { randomPos } from "@solblade/shared";
 
 export default class SEnemy extends SActor {
     constructor(game, data = {}) {
+        data.name = data.name ?? 'Demon'
         super(game, data);
 
         const height = data.height || 1;

@@ -5,6 +5,7 @@ import SActor from "../actors/SActor.js";
 import SPower from "../actors/SPower.js";
 import SCard from "../actors/SCard.js";
 import SEnemy from "../actors/SEnemy.js";
+import SCrown from "../actors/SCrown.js";
 
 
 const actorRegistry = {
@@ -12,6 +13,7 @@ const actorRegistry = {
     power: SPower,
     card: SCard,
     enemy: SEnemy,
+    crown: SCrown,
 }
 
 export default class SActorManager {
@@ -126,6 +128,7 @@ export default class SActorManager {
         }
         this.actors.push(actor);
         this.io.emit('newActor', actor.serialize());
+        
         return actor;
     }
     spawnDefaultActors() {

@@ -72,7 +72,7 @@ function joinGame() {
     netPlayers[playerId] = player;
     initBindings();
     socket.emit('joinGame', player.serialize());
-
+    MyEventEmitter.emit('joinGame');
 
     socket.emit('newScene', scene.sceneName);
     if (voiceChat) voiceChat.setScene(scene);
@@ -102,6 +102,7 @@ function initBindings() {
             netPlayers[id] = player
             MyEventEmitter.emit('playerConnected', player);
         }
+        MyEventEmitter.emit('netPlayersCreated');
     });
     socket.on('chatMessageUpdate', ({ id, data }) => {
         if (netPlayers[id]) {
@@ -227,13 +228,13 @@ function initBindings() {
             const actor = scene.getActorById(data[i]);
             if (!actor) return;
             actor.pos = new Vector3(data[i + 1], data[i + 2], data[i + 3]);
-            actor.rot = new Quaternion(data[i + 4], data[i + 5], data[i + 6], data[i + 7])
+            actor.rotation = { x: data[i + 4], y: data[i + 5], z: data[i + 6], w: data[i + 7] }
         }
         for (let i = 0; i < data2.length; i += 8) {
             const actor = scene.getActorById(data2[i]);
             if (!actor) return;
             actor.pos = new Vector3(data2[i + 1], data2[i + 2], data2[i + 3]);
-            actor.rot = new Quaternion(data2[i + 4], data2[i + 5], data2[i + 6], data2[i + 7])
+            actor.rotation = { x: data2[i + 4], y: data2[i + 5], z: data2[i + 6], w: data2[i + 7] }
         }
     });
     // socket.on('worldUpdate', ({ enemyPositions, otherPositions }) => {
@@ -270,7 +271,7 @@ function initBindings() {
         const actor = scene.getActorById(id);
         const { x, y, z, w, yaw } = data;
         if (actor) {
-            actor.rotation = new Quaternion(x, y, z, w);
+            actor.rotation = { x, y, z, w };
             actor.yaw = yaw;
         }
     });

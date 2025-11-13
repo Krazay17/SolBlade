@@ -5,6 +5,14 @@ export default class Scene2 extends Scene {
         super(game, 'scene2', { killFloor: -15 });
     }
     get spawnPos() { return this.getRespawnPoint() }
+    onEnter(callback) {
+        super.onEnter(callback)
+        this.questManager.addQuest('crown');
+    }
+    onExit() {
+        super.onExit();
+        this.questManager.remove('crown');
+    }
     // update(dt, time) {
     //     super.update(dt, time);
     //     if (this.player.isDead) return;

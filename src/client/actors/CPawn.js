@@ -5,7 +5,7 @@ import PawnBody from "../core/PawnBody";
 import Health from "../core/Health";
 import MovementManager from "../core/MovementManager";
 import PlayerMovement from "../player/PlayerMovement";
-import { Group, Quaternion } from "three";
+import { Euler, Group, Quaternion } from "three";
 
 export default class CPawn extends CActor {
     constructor(game, data) {
@@ -24,6 +24,8 @@ export default class CPawn extends CActor {
         /**@type {Group} */
         this.mesh = null
         this.onMeshReady = null;
+        /**@type {Quaternion} */
+        this.targetYaw = new Quaternion().setFromEuler(new Euler(0, yawFromQuat(this.rot), 0, "XYZ"), true);
 
         this.health = new Health(this, data.maxHealth, data.currentHealth)
         this.health.onChange = (v) => this.healthChange(v);
@@ -46,20 +48,27 @@ export default class CPawn extends CActor {
                 break;
         }
     }
-    set rotationY(v) { this.graphics.rotation.y = v }
-    get rotationY() { return this.graphics.rotation.y };
-    get rotation() { return this.rot };
     set rotation(r) {
-        this.graphics.quaternion.copy(r);
-    };
+        if (this.rot.x === r.x &&
+            this.rot.y === r.y &&
+            this.rot.z === r.z &&
+            this.rot.w === r.w
+        ) return;
 
+        this.rot.copy(r);
+        if (this.isRemote) {
+            this.targetYaw = this.rot;
+        }
+    }
     update(dt, time) {
         if (!this.active || this.destroyed) return;
         if (this.controller) this.controller.update?.(dt);
         if (this.stateManager) this.stateManager.update(dt, time);
         if (this.movement) this.movement.update?.(dt, time);
         if (this.animationManager) this.animationManager.update(dt);
-        if (this.isRemote) this.graphics.quaternion.slerp(this.rot, this.interpSpeed * dt);
+        if (this.isRemote) {
+            this.graphics.quaternion.slerp(this.targetYaw, this.interpSpeed * dt);
+        }
         if (this.pawnBody) this.graphics.position.lerp(this.pawnBody.position, this.interpSpeed * dt);
     }
     fixedUpdate(dt, time) {
@@ -74,7 +83,6 @@ export default class CPawn extends CActor {
             }
         } else {
             this.pos = this.pawnBody.position;
-            this.rot = this.camera ? this.camera.getWorldQuaternion(new Quaternion()) : this.graphics.quaternion;
         }
     }
     async assignMesh(meshName) {
@@ -110,4 +118,11 @@ export default class CPawn extends CActor {
         MyEventEmitter.emit('actorEvent', { id: this.id, event: "hit", data: data.serialize() });
         this.game.soundPlayer.playSound('hit');
     }
+}
+
+function yawFromQuat(q) {
+    return Math.atan2(
+        2 * (q.w * q.y + q.x * q.z),
+        1 - 2 * (q.y * q.y + q.x * q.x)
+    );
 }

@@ -93,11 +93,6 @@ export default class CActor extends Actor {
         const { x, y } = this.body.linvel();
         this.body.setLinvel({ x, y, z }, true);
     }
-    get rotY() { return this._yaw };
-    set rotY(r) {
-        this._yaw = r;
-        this.rot.setFromAxisAngle(this.upVec, this._yaw);
-    }
     get yaw() { return this._yaw }
     set yaw(v) { this._yaw = v };
     sleep() {

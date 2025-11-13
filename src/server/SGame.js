@@ -42,7 +42,7 @@ export default class SGame {
         }, 1000 / 60);
     }
     createActor(type, data) {
-        this.actorManager.createActor(type, data)
+        return this.actorManager.createActor(type, data)
     }
     removeActor(actor) {
         this.actorManager.removeActor(actor);
@@ -138,16 +138,8 @@ export default class SGame {
             socket.broadcast.emit('playPosSound', { sceneName: player.sceneName, data });
         });
         socket.on('crownGameEnter', () => {
-            crownQuest.join(socket.id);
-        });
-        socket.on('crownGameLeave', () => {
-            crownQuest.leave(socket.id);
-        });
-        socket.on('crownPickup', () => {
-            crownQuest.pickupCrown(socket.id);
-        });
-        socket.on('dropCrown', (pos) => {
-            crownQuest.dropCrown(socket.id, pos);
+            const quest = this.questManager.getQuest('crown');
+            quest.join(socket);
         });
         socket.on('leaveScene', (scene) => {
             socket.broadcast.emit('leavescene', { id: socket.id, scene });

@@ -50,6 +50,7 @@ export default class Player extends Pawn {
             this.remoteInit();
         }
     }
+
     get rotation() { return this.rot };
     set rotation(r) {
         if (this.rot.x === r.x &&
@@ -58,25 +59,20 @@ export default class Player extends Pawn {
             this.rot.w === r.w
         ) return;
 
-        this.graphics.quaternion.setFromAxisAngle(this.upVec, this.yaw);
         this.rot.copy(r);
-
         if (this.isRemote) return;
         MyEventEmitter.emit('playerRotation', { x: this.rot.x, y: this.rot.y, z: this.rot.z, w: this.rot.w, yaw: this.yaw });
     }
-    get yaw(){return this._yaw}
+    get yaw() { return this._yaw }
     set yaw(v) {
         this._yaw = v;
-        this.graphics.quaternion.setFromAxisAngle(this.upVec, v);
+
+        if (this.isRemote) {
+            this.targetYaw.setFromAxisAngle(this.upVec, v);
+        } else {
+            this.graphics.quaternion.setFromAxisAngle(this.upVec, v);
+        }
     }
-    // get rotY() { return this._yaw };
-    // set rotY(r) {
-    //     this._yaw = r;
-    //     this.rot.setFromAxisAngle(this.upVec, this._yaw);
-    //     if (this.isRemote) return;
-    //     this.graphics.quaternion.copy(this.rot);
-    //     MyEventEmitter.emit('playerRotation', { x: this.rot.x, y: this.rot.y, z: this.rot.z, w: this.rot.w });
-    // }
     get meshRot() { return this._meshRot }
     set meshRot({ x, z }) {
         if (this.mesh.rotation.x === x &&
@@ -371,40 +367,6 @@ export default class Player extends Pawn {
         this.camera.getWorldDirection(this.tempVector);
         return this.tempVector;
     }
-
-    // getInputDirection(z = 0) {
-    //     this.direction.set(0, 0, 0);
-
-    //     // Gather input directions
-    //     if (this.input.keys['KeyW']) this.direction.z -= 1;
-    //     if (this.input.keys['KeyS']) this.direction.z += 1;
-    //     if (this.input.keys['KeyA']) this.direction.x -= 1;
-    //     if (this.input.keys['KeyD']) this.direction.x += 1;
-
-    //     if (this.direction.length() === 0) {
-    //         this.direction.z = z;
-    //     }
-
-    //     const { rotatedX, rotatedZ } = this.rotateInputVector(this.direction);
-
-    //     // Input direction as a vector
-    //     this.direction.set(rotatedX, 0, rotatedZ);
-    //     this.direction.normalize();
-    //     return this.direction;
-    // }
-
-    rotateInputVector(dir) {
-        // Rotate input direction by controller yaw
-        const yaw = this.input.yaw;
-        const cosYaw = Math.cos(yaw);
-        const sinYaw = Math.sin(yaw);
-
-        const rotatedX = dir.x * cosYaw + dir.z * sinYaw;
-        const rotatedZ = -dir.x * sinYaw + dir.z * cosYaw;
-
-        return { rotatedX, rotatedZ };
-    }
-
     setName(newName) {
         this.name = newName;
         this.namePlate?.setName(newName);

@@ -47,8 +47,8 @@ export default class SPlayer extends SActor {
     }
     respawn() {
         setTimeout(() => {
-            this.health.current = this.health.maxHealth;
             this.isDead = false
+            this.health.current = this.health.maxHealth;
             //io.emit('actorEvent', {id:this.id, event: "unDie"});
         }, 2500)
     }

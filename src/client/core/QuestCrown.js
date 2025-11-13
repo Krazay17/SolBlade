@@ -16,7 +16,7 @@ export default class QuestCrown extends Quest {
         this.setNotification('Enter Crown Game', 'quest-blue');
 
         const joinCrownGame = () => {
-            if (netSocket.connected && this.player.id) {
+            if (netSocket.connected) {
                 this.gameOn = true;
                 netSocket.emit('crownGameEnter');
             } else {
@@ -26,6 +26,8 @@ export default class QuestCrown extends Quest {
         joinCrownGame();
 
         // ✅ Bind and store references
+        this.onConnect = () => joinCrownGame();
+        this.onDisconnect = ()=> leaveCrownGame();
         this.onScoreIncrease = (data) => this.updateQuest(data);
         this.onDropCrown = (id) => this.dropCrown(id);
         this.onPickupCrown = (id) => this.pickupCrown(id);
@@ -39,12 +41,13 @@ export default class QuestCrown extends Quest {
         };
         this.onDied = () => {
             const diePos = this.player.position;
-            const finalPos = diePos.y > (this.game.world.data.killFloor + 2) ? diePos : null;
+            const finalPos = diePos.y > (this.game.scene.data.killFloor + 2) ? diePos : null;
             netSocket.emit('dropCrown', finalPos);
         };
         this.onGamePlayers = (data) => {
             this.players = data;
             this.updateQuest();
+            console.log(data);
             for (const [id, p] of Object.entries(this.players)) {
                 if (p.hasCrown) {
                     this.pickupCrown(id);
@@ -56,30 +59,31 @@ export default class QuestCrown extends Quest {
         // ✅ Register events
         MyEventEmitter.on('iDied', this.onDied);
         MyEventEmitter.on('crownGamePlayers', this.onGamePlayers);
+        MyEventEmitter.on('joinGame', this.onConnect);
         netSocket.on('crownScoreIncrease', this.onScoreIncrease);
         netSocket.on('dropCrown', this.onDropCrown);
         netSocket.on('crownPickup', this.onPickupCrown);
         netSocket.on('crownGameEnd', this.onGameEnd);
     }
-
+    leaveCrownGame() {
+        this.game.player.dropCrown();
+    }
     died() {
         const diePos = this.player.position;
-        const finalPos = diePos.y > (this.game.world.data.killFloor + 2) ? diePos : null;
+        const finalPos = diePos.y > (this.game.world.data.killFloor + 2) ? diePos : undefined;
         netSocket.emit('dropCrown', finalPos);
     }
     destroy() {
-        // ✅ Unbind with same references
         super.destroy();
     }
     pickupCrown(id) {
-        console.log(this);
         const player = this.game.getActorById(id);
+        console.log(id, player);
         if (!player) return;
         player.pickupCrown();
         this.setNotification(`${player.name} picked up the crown`)
     }
     dropCrown(id) {
-        console.log('dropCrown')
         const player = this.game.getActorById(id)
         if (!player) return;
         player.dropCrown();
@@ -91,8 +95,10 @@ export default class QuestCrown extends Quest {
         this.setNotification('Exit Crown Game', 'quest-red');
         netSocket.emit('crownGameLeave');
         this.player.dropCrown();
+
         MyEventEmitter.off('iDied', this.onDied);
         MyEventEmitter.off('crownGamePlayers', this.onGamePlayers);
+        MyEventEmitter.off('joinGame', this.onConnect);
         netSocket.off('crownScoreIncrease', this.onScoreIncrease);
         netSocket.off('dropCrown', this.onDropCrown);
         netSocket.off('crownPickup', this.onPickupCrown);
@@ -104,7 +110,12 @@ export default class QuestCrown extends Quest {
         this.game.inventory.addCards(10);
     }
     updateQuest(data) {
-        if (data) this.players[data.id].score = data.score;
+        if (data) {
+
+            const { id, score } = data
+            const player = this.players[id];
+            if (player) player.score = score;
+        }
         let questText = '';
         for (const [id, p] of Object.entries(this.players)) {
             const actor = this.manager.game.actorManager.getActorById(id);
@@ -112,8 +123,5 @@ export default class QuestCrown extends Quest {
             questText += `\n  ${actor.name}: ${p.score}`;
         }
         this.text = questText;
-    }
-    update() {
-        if (this.manager.game.sceneName !== 'world2') this.manager.remove(this)
     }
 }

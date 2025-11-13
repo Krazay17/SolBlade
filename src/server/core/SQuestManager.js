@@ -12,4 +12,7 @@ export default class SQuestManager {
     startCrownQuest() {
         this.quests.push(new SCrownQuest(this.game, this.io));
     }
+    getQuest(name) {
+        return this.quests.find(q=>q.name === name);
+    }
 }

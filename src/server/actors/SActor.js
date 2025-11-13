@@ -4,7 +4,6 @@ import SGame from "../SGame.js";
 
 export default class SActor extends Actor {
     constructor(game, data) {
-        data.name = data.name?? 'Demon'
         super(data);
         /**@type {SGame} */
         this.game = game;

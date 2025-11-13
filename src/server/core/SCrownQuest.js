@@ -1,25 +1,46 @@
+import { Server } from "socket.io";
+import SGame from "../SGame.js";
+
 export default class SCrownQuest {
     constructor(game, io) {
+        /**@type {SGame} */
         this.game = game;
+        /**@type {Server} */
         this.io = io;
 
+        this.name = "crown";
         this.players = {}
         this.started = false;
         this.winningScore = 100;
         this.defaultPos = { x: 0, y: 1, z: 0 };
 
-        //this.init();
+        this.makeCrown();
     }
-    join(id) {
-        this.players[id] = { score: 0, hasCrown: false };
+    join(socket) {
+        console.log('join crown quest', socket.id)
+        this.players[socket.id] = { score: 0, hasCrown: false };
         this.io.emit('crownGamePlayers', this.players);
+        socket.on('crownGameLeave', () => {
+            this.leave(socket);
+        });
+        socket.on('disconnect', () => {
+            this.leave(socket);
+        });
+        socket.on('crownPickup', () => {
+            this.pickupCrown(socket.id);
+        });
+        socket.on('dropCrown', (pos) => {
+            this.dropCrown(socket.id, pos);
+        });
     }
-    leave(id) {
-        this.dropCrown(id, this.defaultPos)
-        delete this.players[id];
-    }
-    init() {
-        this.game.createActor('crown', { pos: this.defaultPos });
+    leave(socket) {
+        socket.removeAllListeners("crownGameLeave");
+        socket.removeAllListeners("disconnect");
+        socket.removeAllListeners("crownPickup");
+        socket.removeAllListeners("dropCrown");
+
+        this.dropCrown(socket.id, this.defaultPos)
+        delete this.players[socket.id];
     }
     start() {
         if (this.started) return;
@@ -55,9 +76,13 @@ export default class SCrownQuest {
         if (player && player.hasCrown) {
             player.hasCrown = false;
             clearInterval(this.crownPointsInterval);
-            pos = pos || this.defaultPos;
-            this.game.createActor('crown', { pos });
             this.io.emit('dropCrown', id);
+            this.makeCrown(pos);
         }
+    }
+    makeCrown(pos) {
+        pos = pos || this.defaultPos;
+        this.crown = this.game.createActor('crown', { pos, sceneName: "scene2" });
+        this.crown.quest = this;
     }
 }

@@ -9,6 +9,7 @@ import CJulian from "../actors/CJulian";
 import CScythe from "../actors/CScythe";
 import CPower from "../actors/CPower";
 import CCard from "../actors/CCard";
+import CCrown from "../actors/CCrown";
 
 const actorRegistry: Record<string, any> = {
     player: Player,
@@ -17,6 +18,7 @@ const actorRegistry: Record<string, any> = {
     power: CPower,
     card: CCard,
     julian: CJulian,
+    crown: CCrown,
 }
 
 export default class ActorManager {
