@@ -16,6 +16,7 @@ export default class QuestCrown extends Quest {
         this.setNotification('Enter Crown Game', 'quest-blue');
 
         const joinCrownGame = () => {
+            if (this.gameOn) return;
             if (netSocket.connected) {
                 this.gameOn = true;
                 netSocket.emit('crownGameEnter');
@@ -27,7 +28,7 @@ export default class QuestCrown extends Quest {
 
         // ✅ Bind and store references
         this.onConnect = () => joinCrownGame();
-        this.onDisconnect = ()=> leaveCrownGame();
+        this.onDisconnect = () => leaveCrownGame();
         this.onScoreIncrease = (data) => this.updateQuest(data);
         this.onDropCrown = (id) => this.dropCrown(id);
         this.onPickupCrown = (id) => this.pickupCrown(id);
