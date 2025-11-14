@@ -31,6 +31,7 @@ let netPlayers = {};
 let player = null;
 let playerId = null;
 let socketBound = false;
+export let joinAckd = false;
 let serverVersion = null;
 
 let voiceChat = new VoiceChat();
@@ -51,9 +52,11 @@ export function setNetScene(newScene) {
 socket.on("connect", () => {
     console.log(`I connected with id: ${socket.id}`);
     playerId = socket.id;
+    joinAckd = false;
     socket.on('disconnect', () => {
         MyEventEmitter.emit('disconnect');
         console.log("disconnected from server");
+        joinAckd = false;
         if (netPlayers[playerId]) delete netPlayers[playerId]
     });
     socket.on('serverVersion', version => {
@@ -72,7 +75,6 @@ function joinGame() {
     netPlayers[playerId] = player;
     initBindings();
     socket.emit('joinGame', player.serialize());
-    MyEventEmitter.emit('joinGame');
 
     socket.emit('newScene', scene.sceneName);
     if (voiceChat) voiceChat.setScene(scene);
@@ -82,6 +84,11 @@ function initBindings() {
     socketBound = true;
     game = Game.getGame();
 
+    socket.on('joinAck', () => {
+        MyEventEmitter.emit('joinAck');
+        joinAckd = true;
+        console.log('joinAck');
+    })
     socket.on('userDisconnected', (id) => {
         if (id === playerId) return;
         MyEventEmitter.emit('playerDisconnected', id);
@@ -237,20 +244,6 @@ function initBindings() {
             actor.rotation = { x: data2[i + 4], y: data2[i + 5], z: data2[i + 6], w: data2[i + 7] }
         }
     });
-    // socket.on('worldUpdate', ({ enemyPositions, otherPositions }) => {
-    //     for (const a of enemyPositions) {
-    //         const actor = scene.getActorById(a.id);
-    //         if (!actor) return;
-    //         actor.pos = convertVector(a.pos);
-    //         actor.rot = convertQuat(a.rot);
-    //     }
-    //     for (const a of otherPositions) {
-    //         const actor = scene.getActorById(a.id);
-    //         if (!actor) return;
-    //         actor.pos = convertVector(a.pos);
-    //         actor.rot = convertQuat(a.rot);
-    //     }
-    // });
     socket.on('actorHealthChange', ({ id, health }) => {
         const actor = scene.getActorById(id);
         if (actor) actor.health.current = health;

@@ -71,6 +71,7 @@ export default class SGame {
         socket.broadcast.emit('playerConnected', player.serialize())
 
         this.bindGameEvents(socket, player);
+        socket.emit('joinAck');
     }
     bindGameEvents(socket, player) {
         socket.on('newScene', (scene) => {

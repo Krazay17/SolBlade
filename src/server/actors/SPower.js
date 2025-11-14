@@ -1,3 +1,4 @@
+import { randomPos } from "@solblade/shared";
 import SActor from "./SActor.js";
 
 export default class SPower extends SActor {
@@ -19,5 +20,9 @@ export default class SPower extends SActor {
     }
     hit(){
         this.deActivate();
+    }
+    activate() {
+        this.pos = randomPos(20, 10);
+        super.activate()
     }
 }
