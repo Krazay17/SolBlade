@@ -39,7 +39,7 @@ export default class CFireball extends CProjectile {
         this.active = false;
         this.explode = true;
         if (this.isRemote) return;
-        const explosionRange = this.radius * 20;
+        const explosionRange = this.radius * 25;
         const enemiesInRange = this.game.actorManager.getActorsInRange(this.owner, this, this.position, explosionRange);
         for (const [enemy, range] of enemiesInRange) {
             const distance = Math.min((1 - ((range - this.radius) / explosionRange)), 1);
@@ -53,6 +53,7 @@ export default class CFireball extends CProjectile {
                 impulse: force,
                 type: 'fire',
                 hitPosition: this.position,
+                stun: 250,
                 dim: 500,
             })
             enemy.hit?.(hitData);

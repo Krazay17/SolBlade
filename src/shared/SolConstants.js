@@ -22,7 +22,7 @@ export const WEAPON_STATS = {
         cooldown: 900,
     },
     fireball: {
-        damage: 30,
+        damage: 16,
         range: 1,
         cooldown: 1250,
     },

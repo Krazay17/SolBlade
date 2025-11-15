@@ -48,9 +48,8 @@ export default class WeaponPistol extends Weapon {
                 actor.hit(new HitData({
                     dealer: this.actor,
                     target: actor,
-                    impulse: dir.multiplyScalar(2),
+                    impulse: dir.multiplyScalar(4),
                     amount: damage,
-                    stun: 50,
                     dim: 500,
                 }))
             }

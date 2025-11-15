@@ -47,7 +47,6 @@ export default class QuestCrown extends Quest {
         this.onGamePlayers = (data) => {
             this.players = data;
             this.updateQuest();
-            console.log(data);
             for (const [id, p] of Object.entries(this.players)) {
                 if (p.hasCrown) {
                     this.pickupCrown(id);
