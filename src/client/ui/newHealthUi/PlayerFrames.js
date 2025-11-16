@@ -45,7 +45,7 @@ export default class PlayerFrames {
         });
         MyEventEmitter.on('playerNewScene', ({ id, sceneName }) => {
             const player = this.players.get(id);
-            player.label = `${player.name} \t ${sceneName}`
+            player.nameEl.innerText = `${player.name} \t ${sceneName || player.sceneName} \t KD: ${player.kills}/${player.deaths}`;
         });
         MyEventEmitter.on('updateEnergy', (newEnergy) => {
             const energy = this.player.energy.current;
@@ -63,7 +63,7 @@ export default class PlayerFrames {
         MyEventEmitter.on('localStatsUpdate', (data) => {
             const player = this.players.get(data.id);
             if (!player) return;
-            player.kills = data.kills?? player.kills;
+            player.kills = data.kills ?? player.kills;
             player.deaths = data.deaths ?? player.deaths;
             player.nameEl.innerText = `${player.name} \t ${player.sceneName} \t KD: ${data.kills || player.kills}/${data.deaths || player.deaths}`;
             console.log(data);
