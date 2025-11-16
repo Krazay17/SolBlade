@@ -10,9 +10,17 @@ export default class LobbyStats {
         this.ui = this.makeUI();
         this.bindings();
     }
-    bindings(){
-        MyEventEmitter.on('playerNameUpdate', ({id, name})=>{
+    bindings() {
+        MyEventEmitter.on('playerNameUpdate', ({ id, name }) => {
             this.updatePlayer(id);
+        })
+        MyEventEmitter.on('playerDisconnected', (id) => {
+            this.removePlayer(id);
+        })
+        MyEventEmitter.on('disconnect', () => {
+            for (const p of this.players.keys()) {
+                this.removePlayer(p)
+            }
         })
     }
     makeUI() {
@@ -26,6 +34,13 @@ export default class LobbyStats {
         container.appendChild(header);
 
         return container;
+    }
+    removePlayer(id) {
+        const player = this.players.get(id);
+        if (player) {
+            this.ui.removeChild(player.el);
+            this.players.delete(id)
+        }
     }
     addPlayer(id, data) {
         const actor = this.game.getActorById(id);
@@ -41,6 +56,7 @@ export default class LobbyStats {
         el.appendChild(label);
 
         this.players.set(id, {
+            el,
             label,
         });
     }

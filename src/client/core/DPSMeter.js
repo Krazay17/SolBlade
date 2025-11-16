@@ -46,6 +46,12 @@ export default class DPSMeter {
             this.removePlayer(id);
         });
         MyEventEmitter.on('resetDps', () => this.reset());
+        MyEventEmitter.on('disconnect', ()=>{
+            for (const p of this.players.keys()) {
+                if(p === this.player.id)continue;
+                this.removePlayer(p);
+            }
+        })
     }
     removePlayer(id) {
         const player = this.players.get(id);
