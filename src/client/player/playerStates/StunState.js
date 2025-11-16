@@ -6,7 +6,7 @@ export default class StunState extends PlayerState {
         this.reEnter = true;
         this.timer = 0;
     }
-    enter(state, { stun = 500, anim } = {}) {
+    enter(state, { stun = 500, anim = "knockback" } = {}) {
         this.timer = performance.now() + stun;
         if (anim) {
             this.actor.animationManager?.playAnimation(anim, false);

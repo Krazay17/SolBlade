@@ -94,7 +94,11 @@ export default class CActor extends Actor {
         this.body.setLinvel({ x, y, z }, true);
     }
     get yaw() { return this._yaw }
-    set yaw(v) { this._yaw = v };
+    set yaw(v) {
+        this._yaw = v
+        this.rot.setFromAxisAngle(this.upVec, v);
+    };
+
     sleep() {
         this.body?.sleep();
     }
@@ -204,7 +208,8 @@ export default class CActor extends Actor {
     }
     hit(data) {
         if (!this.active) return;
-        MyEventEmitter.emit('actorEvent', { id: this.id, event: "hit", data: data.serialize() });
+        MyEventEmitter.emit('actorHit', { id: this.id, data: data.serialize() });
+        //MyEventEmitter.emit('actorEvent', { id: this.id, event: "hit", data: data.serialize() });
         this.game.soundPlayer.playSound('badHit');
     }
 }

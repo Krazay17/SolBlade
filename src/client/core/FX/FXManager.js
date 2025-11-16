@@ -5,6 +5,7 @@ import { Vector3 } from "three";
 import FXTornado from "./FXTornado";
 import FXAttackTrail from "./FXAttackTrail";
 import FXSwordSpell from "./FXSwordSpell";
+import FX from "./FX";
 
 
 const FXRegistry = {
@@ -27,11 +28,14 @@ export default class FXManager {
         const obj = FXRegistry[type];
         if (!obj) return;
         data = local ? data : this.deserialize(data);
+        /**@type {FX} */
         const fx = new obj(this.game, data);
         if (!fx) return;
         this.activeFX.push(fx);
 
         if (local) MyEventEmitter.emit('spawnFX', { type, data: this.serialize(data) });
+
+        return fx;
     }
     serialize(data) {
         return {

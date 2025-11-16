@@ -47,6 +47,7 @@ export default class SActorManager {
     }
     get actors() { return this._actors }
     get enemies() { return this.actors.filter(a => a.type === 'enemy') }
+    get players() { return this.actors.filter(a => a.type === "player") };
 
     update(dt) {
         for (const a of this.actors) { a.update?.(dt) }
@@ -128,7 +129,7 @@ export default class SActorManager {
         }
         this.actors.push(actor);
         this.io.emit('newActor', actor.serialize());
-        
+
         return actor;
     }
     spawnDefaultActors() {

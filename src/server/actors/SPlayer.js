@@ -9,9 +9,13 @@ export default class SPlayer extends SActor {
         this.health = new SHealth(this, 100, data.currentHealth);
         this.health.onChange = (v) => this.data.currentHealth = v
         this.health.onDeath = () => this.die();
+        this.damage = 0;
+        this.totalDamage = 0;
+        this.kills = 0;
+        this.deaths = 0;
 
         this.energy = new SEnergy(this, 100);
-        
+
         this.lastHit = null;
     }
     destroy() {
@@ -27,12 +31,17 @@ export default class SPlayer extends SActor {
         }
         this.lastHit = data;
         this.health.subtract(amount);
-        io.emit('actorEvent', { id: this.id, event: "applyHit", data });
+        io.emit('actorHit', { id: this.id, data });
+        //io.emit('actorEvent', { id: this.id, event: "applyHit", data });
 
         if (this.lastHitTimer) clearTimeout(this.lastHitTimer);
         this.lastHitTimer = setTimeout(() => {
             this.lastHit = null;
         }, 5000);
+
+        if (this.isDead) return 0;
+
+        return amount;
     }
     die(data) {
         if (this.isDead) return;
@@ -40,9 +49,13 @@ export default class SPlayer extends SActor {
         const targetName = this.name;
         let dealerName = 'The Void';
         io.emit('playerDied', this.lastHit || { target: this.id });
+        this.game.lobbyStats.addDeath(this.id);
         this.respawn();
-        
-        if (this.lastHit && this.lastHit.dealer) { dealerName = this.actorManager.getActorById(this.lastHit.dealer).name; }
+
+        if (this.lastHit && this.lastHit.dealer) {
+            dealerName = this.actorManager.getActorById(this.lastHit.dealer).name;
+            this.game.lobbyStats.addKill(this.lastHit.dealer);
+        }
         io.emit('serverMessage', { player: 'Server', message: `${targetName} slain by: ${dealerName}`, color: 'orange' });
     }
     respawn() {

@@ -48,6 +48,7 @@ export default class SCrownQuest {
         for (const [id, p] of Object.entries(this.players)) {
             p.score = 0;
         }
+        this.io.emit('crownGameStart');
         this.io.emit('crownGamePlayers', this.players);
     }
     endGame(id) {

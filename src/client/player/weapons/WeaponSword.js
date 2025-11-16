@@ -32,6 +32,7 @@ export default class WeaponSword extends Weapon {
                 onExit: () => {
                     this.actor.setParry(false);
                     if (this.weaponTrailDelay) clearTimeout(this.weaponTrailDelay);
+                    if (this.swordFX) this.swordFX.destroy();
                 }
             })) {
             this.enemyActors = this.game.hostiles;
@@ -45,7 +46,7 @@ export default class WeaponSword extends Weapon {
             this.actor.animationManager.playAnimation('AttackSwordSpell', false);
             this.game.soundPlayer.playPosSound('heavySword', this.actor.position);
             const offset = new Vector3(0, .5, -this.range);
-            this.game.fxManager.spawnFX('swordSpell', { actor: this.actor.id, offset, color: 0xff2222 }, true);
+            this.swordFX = this.game.fxManager.spawnFX('swordSpell', { actor: this.actor.id, offset, color: 0xff2222 }, true);
 
             this.weaponTrailDelay = setTimeout(() => {
                 this.game.fxManager.spawnFX('attackTrail', { actor: this.actor.id, offset, color: 0xff2222, meshName: "AttackTrail2", scale: 1.5, dur: this.damageDuration }, true);
@@ -190,6 +191,6 @@ export default class WeaponSword extends Weapon {
         const rightVec = dir.clone().cross(this.downVec)
         const swingRot = dir.clone().applyAxisAngle(rightVec, Math.PI / 3 * swingMath(this.damageDelta, false));
 
-        this.cubeTrace(pos, swingRot, .4, this.range, collide);
+        this.cubeTrace(pos, swingRot, .4, this.range * 1.4, collide);
     }
 }

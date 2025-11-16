@@ -115,7 +115,8 @@ export default class CPawn extends CActor {
     }
     hit(data) {
         if (!this.active) return;
-        MyEventEmitter.emit('actorEvent', { id: this.id, event: "hit", data: data.serialize() });
+        MyEventEmitter.emit('actorHit', { id: this.id, data: data.serialize() });
+        //MyEventEmitter.emit('actorEvent', { id: this.id, event: "hit", data: data.serialize() });
         this.game.soundPlayer.playSound('hit');
     }
 }

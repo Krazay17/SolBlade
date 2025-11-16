@@ -25,6 +25,8 @@ import { menuSlider } from './ui/Menu';
 import FXManager from './core/FX/FXManager';
 import SolPhysics from './core/SolPhysics';
 import DebugData from './ui/DebugData';
+import DPSMeter from './core/DPSMeter';
+import LobbyStats from './core/LobbyStats';
 
 await RAPIER.init();
 
@@ -79,6 +81,8 @@ export default class CGame {
     this.actorManager = new ActorManager(this);
     this.initPlayer();
     this.partyFrame = new PartyFrame();
+    this.dpsmeter = new DPSMeter(this);
+    this.lobbyStats = new LobbyStats(this);
     this.debugData = new DebugData();
     this.lightManager = new LightManager(this);
     this.fxManager = new FXManager(this);

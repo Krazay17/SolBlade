@@ -82,6 +82,12 @@ export default class Player extends Pawn {
         if (this.isRemote) return;
         MyEventEmitter.emit('meshRotation', { x, z })
     }
+    setId(id) {
+        super.setId(id);
+        if (!this.isRemote) {
+            MyEventEmitter.emit('playerIdChange', id);
+        }
+    }
     meshReady() {
         this.leftWeaponBone = this.mesh.getObjectByName("handLWeapon");
         this.rightWeaponBone = this.mesh.getObjectByName("handRWeapon");
@@ -121,6 +127,12 @@ export default class Player extends Pawn {
                 this.die('the void');
             }
         });
+
+
+        MyEventEmitter.on('test', () => {
+            console.log('testFunc')
+            this.stateManager.setState('stun');
+        })
     }
     remoteInit() {
         this.namePlate = new NamePlate(this, this.height);

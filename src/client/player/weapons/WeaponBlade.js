@@ -27,9 +27,10 @@ export default class WeaponBlade extends Weapon {
             this.actor.stateManager.setState('attack', {
                 // pass attack state this, so it can tick this for damage
                 weapon: this,
-                duration: 1300,
+                duration: 1200,
                 onExit: () => {
                     this.actor.setParry(false);
+                    if (this.spellFX) this.spellFX.destroy();
                 }
             })) {
             this.enemyActors = this.game.hostiles;
@@ -38,11 +39,11 @@ export default class WeaponBlade extends Weapon {
             this.damageDelay = 415;
             this.damageDuration = 450;
             this.hitPauseDiminish = 1;
-            this.dashSpeed = Math.max(11, this.actor.velocity.length());
+            this.dashSpeed = Math.max(18, this.actor.velocity.length());
 
             this.actor.animationManager.playAnimation('spinSlash', false);
             this.game.soundPlayer.playPosSound('heavySword', this.actor.position);
-            this.game.fxManager.spawnFX("tornado", { actor: this.actor.id, color: 0x22ff22 });
+            this.spellFX = this.game.fxManager.spawnFX("tornado", { actor: this.actor.id, color: 0x22ff22 });
 
             return true;
         }

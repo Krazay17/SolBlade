@@ -44,14 +44,15 @@ export default class SActor extends Actor {
         if (this.onDeactivate) this.onDeactivate();
     }
     onCollide() {
-        io.emit('actorEvent', {id:this.id, event: "onCollide"});
+        io.emit('actorEvent', { id: this.id, event: "onCollide" });
     }
     destroy() {
         this.actorManager.removeActor(this);
     }
     hit(data) {
         if (!this.active) return;
-        io.emit('actorEvent', { id: this.id, event: "applyHit", data });
+        io.emit('actorHit', { id: this.id, data });
+        //io.emit('actorEvent', { id: this.id, event: "applyHit", data });
     }
     respawn(respawnTime) {
         setTimeout(() => {

@@ -1,5 +1,6 @@
 import { sendDiscordMessage } from "./core/DiscordStuff.js";
 import SActorManager from "./core/SActorManager.js";
+import SLobbyStats from "./core/SLobbyStats.js";
 import SPhysics from "./core/SPhysics.js";
 import SQuestManager from "./core/SQuestManager.js";
 
@@ -12,6 +13,7 @@ export default class SGame {
         this.actorManager = new SActorManager(this, io);
         this.physics = new SPhysics(this, io);
         this.questManager = new SQuestManager(this, io);
+        this.lobbyStats = new SLobbyStats(this, io);
         this.questManager.startCrownQuest();
 
         this.init();
@@ -46,6 +48,9 @@ export default class SGame {
     }
     removeActor(actor) {
         this.actorManager.removeActor(actor);
+    }
+    getActorById(id) {
+        return this.actorManager.getActorById(id);
     }
     loop(dt) {
         this.physics.update(dt);
@@ -150,6 +155,16 @@ export default class SGame {
             const actor = this.actorManager.getActorById(id);
             if (actor && actor[event]) actor[event](data);
         });
+        socket.on('actorHit', ({ id, data }) => {
+            const { dealer, target, amount } = data;
+            const actor = this.actorManager.getActorById(target);
+            if (actor && actor.hit) {
+                const damage = actor.hit(data);
+                if (damage) {
+                    this.lobbyStats.addDamage(dealer, amount);
+                }
+            }
+        })
         socket.on('actorMulticast', (data) => {
             this.io.emit('actorMulticast', data);
         });

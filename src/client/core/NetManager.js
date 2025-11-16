@@ -147,6 +147,9 @@ function initBindings() {
     socket.on('fx', (data) => {
         MyEventEmitter.emit('netFx', data);
     });
+    socket.on('crownGameStart', () => {
+        MyEventEmitter.emit('resetDps');
+    })
     socket.on('crownGamePlayers', data => {
         MyEventEmitter.emit('crownGamePlayers', data);
     });
@@ -210,10 +213,12 @@ function initBindings() {
             const newActor = scene.actorManager.spawnActor(type, data, true, false);
         }
     });
-    socket.on('actorHit', (data) => {
-        data = HitData.deserialize(data, (id) => scene.getActorById(id));
-        const { dealer, target } = data;
-        if (target) target.applyHit?.(data);
+    socket.on('actorHit', ({ id, data }) => {
+        const { dealer } = data;
+        const actor = game.getActorById(id);
+        const dealerActor = game.getActorById(dealer);
+        if (!actor) return
+        actor.applyHit?.(data);
     });
     socket.on('playPosSound', ({ sceneName, data }) => {
         if (sceneName !== scene.sceneName) return;
@@ -286,9 +291,15 @@ function initBindings() {
         if (id === playerId) return;
         const actor = game.getActorById(id);
         if (actor) actor.setWeapon(data.slot, data.weaponName);
+    });
+    socket.on('lobbyStats', (data)=>{
+        game.lobbyStats.update(data);
     })
 }
 
+MyEventEmitter.on('actorHit', data => {
+    socket.emit('actorHit', data);
+})
 MyEventEmitter.on('weaponSwap', data => {
     socket.emit('weaponSwap', data);
 })
