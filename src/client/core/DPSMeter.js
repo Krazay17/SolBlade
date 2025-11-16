@@ -70,8 +70,9 @@ export default class DPSMeter {
     }
     reset() {
         for (const d of this.players.values()) {
+            console.log(d);
             d.damage = 0;
-            d.bar.barfill.style.width = "0%";
+            d.el.barfill.style.width = "0%";
         }
         this.allDamage = 0;
         this.render();

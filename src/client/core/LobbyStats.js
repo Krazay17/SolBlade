@@ -61,6 +61,7 @@ export default class LobbyStats {
         });
     }
     update(data) {
+        console.log(data);
         const { id, damage, totalDamage, kills, deaths } = data;
         if (!id) return;
         const actor = this.game.getActorById(id);

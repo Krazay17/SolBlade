@@ -11,7 +11,6 @@ export default class SHealth {
     }
     get current() { return this._current; }
     set current(value) {
-        if(this.actor.isDead)return;
         const clamped = Math.max(0, Math.min(this.maxHealth, value));
         if (clamped === this._current) return;
 

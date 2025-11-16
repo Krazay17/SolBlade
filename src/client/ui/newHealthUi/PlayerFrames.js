@@ -63,7 +63,10 @@ export default class PlayerFrames {
         MyEventEmitter.on('localStatsUpdate', (data) => {
             const player = this.players.get(data.id);
             if (!player) return;
+            player.kills = data.kills?? player.kills;
+            player.deaths = data.deaths ?? player.deaths;
             player.nameEl.innerText = `${player.name} \t ${player.sceneName} \t KD: ${data.kills || player.kills}/${data.deaths || player.deaths}`;
+            console.log(data);
         });
         this.playerUI.root.addEventListener('mousedown', (e) => {
             e.stopPropagation();

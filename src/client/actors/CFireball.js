@@ -53,8 +53,8 @@ export default class CFireball extends CProjectile {
                 impulse: force,
                 type: 'fire',
                 hitPosition: this.position,
-                stun: 250,
-                dim: 500,
+                stun: 400,
+                dim: 800,
             })
             enemy.hit?.(hitData);
         }
