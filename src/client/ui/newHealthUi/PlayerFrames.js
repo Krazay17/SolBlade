@@ -38,6 +38,11 @@ export default class PlayerFrames {
             const player = this.players.get(id);
             player.healthfill.style.width = `${health}%`;
         });
+        MyEventEmitter.on('playerNameUpdate', ({ id, name }) => {
+            const player = this.players.get(id);
+            player.name = name;
+            player.nameEl.innerText = `${name} \t ${player.sceneName} \t KD: ${player.kills}/${player.deaths}`;
+        });
         MyEventEmitter.on('playerNewScene', ({ id, sceneName }) => {
             const player = this.players.get(id);
             player.label = `${player.name} \t ${sceneName}`
@@ -57,18 +62,19 @@ export default class PlayerFrames {
         });
         MyEventEmitter.on('localStatsUpdate', (data) => {
             const player = this.players.get(data.id);
-            console.log(data);
             if (!player) return;
             player.nameEl.innerText = `${player.name} \t ${player.sceneName} \t KD: ${data.kills || player.kills}/${data.deaths || player.deaths}`;
         });
         this.playerUI.root.addEventListener('mousedown', (e) => {
             e.stopPropagation();
             const newName = prompt("Enter your name: ", this.player.name);
-            this.player.name = newName;
-            this.playerUI.nameEl.innerText = newName;
-            LocalData.name = newName;
-            LocalData.save();
-            MyEventEmitter.emit('playerNameChange', newName);
+            if (newName) {
+                this.player.name = newName;
+                this.playerUI.nameEl.innerText = newName;
+                LocalData.name = newName;
+                LocalData.save();
+                MyEventEmitter.emit('playerNameChange', newName);
+            }
         })
     }
     initPlayer() {

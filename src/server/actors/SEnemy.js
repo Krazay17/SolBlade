@@ -63,6 +63,7 @@ export default class SEnemy extends SActor {
             this.stunned = true;
             setTimeout(() => this.stunned = false, 600);
         }
+        return data.amount;
     }
     createCapsule(height, radius, group) {
         /**@type {RAPIER.RigidBody} */
