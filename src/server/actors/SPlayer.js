@@ -18,6 +18,31 @@ export default class SPlayer extends SActor {
 
         this.lastHit = null;
     }
+    serialize() {
+        return {
+            ...this.data,
+            id: this.id,
+            type: this.type,
+            name: this.name,
+            owner: this.owner,
+            sceneName: this.sceneName,
+            tempId: this.tempId,
+
+            pos: this.pos?.toArray ? this.pos.toArray() : this.pos,
+            dir: this.dir?.toArray ? this.dir.toArray() : this.dir,
+            rot: this.rot?.toArray ? this.rot.toArray() : this.rot,
+
+            active: this.active,
+            isRemote: this.isRemote,
+            lifetime: this.lifetime,
+            respawntime: this.respawntime,
+
+            age: this.age,
+            timestamp: this.timestamp,
+            kills: this.kills,
+            deaths: this.deaths,
+        }
+    }
     destroy() {
         this.actorManager.removeActor(this);
     }
@@ -40,22 +65,24 @@ export default class SPlayer extends SActor {
             this.lastHit = null;
         }, 5000);
 
-
         return amount;
     }
-    die(data) {
+    die() {
         if (this.isDead) return;
         this.isDead = true;
         const targetName = this.name;
         let dealerName = 'The Void';
         io.emit('playerDied', this.lastHit || { target: this.id });
         this.game.lobbyStats.addDeath(this.id);
+
         this.respawn();
 
         if (this.lastHit && this.lastHit.dealer) {
             dealerName = this.actorManager.getActorById(this.lastHit.dealer).name;
             this.game.lobbyStats.addKill(this.lastHit.dealer);
+            this.game.lobbyStats.addDamage(this.lastHit.dealer, this.health.current);
         }
+        this.health.subtract(this.health.current);
         io.emit('serverMessage', { player: 'Server', message: `${targetName} slain by: ${dealerName}`, color: 'orange' });
     }
     respawn() {

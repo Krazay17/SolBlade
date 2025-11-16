@@ -32,6 +32,7 @@
     gap: 2px;
     padding: 2px;
     z-index: 1000;
+    transform: translateX(-50%);
 }
 #lobbystats-header{
     position: relative;
@@ -160,7 +161,7 @@
 #debug-section {
     position: absolute;
     top: 0;
-    left: 300px;
+    left: 0;
     background: rgba(105, 20, 20, 0.466);
     color: white;
     padding: 10px;

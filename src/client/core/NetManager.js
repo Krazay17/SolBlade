@@ -177,6 +177,7 @@ function initBindings() {
         const { type, id, sceneName } = data;
         if (id === playerId) return;
         const actor = scene.getActorById(id);
+        MyEventEmitter.emit('playerNewScene', {id, sceneName});
         if (actor && (scene.sceneName !== sceneName)) {
             actor.destroy();
         }

@@ -19,7 +19,7 @@ export default class LobbyStats {
         })
         MyEventEmitter.on('disconnect', () => {
             for (const p of this.players.keys()) {
-                this.removePlayer(p)
+                this.removePlayer(p);
             }
         })
     }
@@ -76,6 +76,7 @@ export default class LobbyStats {
         if (deaths) {
             actor.deaths = deaths;
         }
+        MyEventEmitter.emit('localStatsUpdate', data);
 
         const player = this.players.get(id)
         if (!player) this.addPlayer(id, data);

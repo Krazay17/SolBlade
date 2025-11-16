@@ -25,11 +25,11 @@ export default class DPSMeter {
         MyEventEmitter.on('playerNameUpdate', ({ id, name }) => {
             const player = this.players.get(id);
             player.name = name;
-            this.update();
+            this.render();
         })
         MyEventEmitter.on('playerConnected', (p) => {
             const { id, name } = p;
-            console.log(this.addPlayer(id, name));
+            this.addPlayer(id, name);
         });
         MyEventEmitter.on('playerDidDamage', ({ id, damage }) => {
             const player = this.players.get(id);
@@ -37,7 +37,7 @@ export default class DPSMeter {
             player.damage += damage;
             this.allDamage += damage;
 
-            this.update();
+            this.render();
         });
         MyEventEmitter.on('playerDisconnected', (id) => {
             this.removePlayer(id);
@@ -56,11 +56,10 @@ export default class DPSMeter {
 
         this.players.delete(id);
     }
-    update() {
+    render() {
         const data = [...this.players.values()];
         data.sort((a, b) => b.damage - a.damage);
         for (const d of data) {
-            console.log(d);
             this.ui.appendChild(d.el.root);
             d.el.label.innerText = d.name;
             const fillpercent = d.damage / this.allDamage;
@@ -75,7 +74,7 @@ export default class DPSMeter {
             d.bar.barfill.style.width = "0%";
         }
         this.allDamage = 0;
-        this.update();
+        this.render();
     }
     createUI() {
         const container = document.createElement('div');

@@ -1,0 +1,73 @@
+#frame-player {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    height: fit-content;
+    cursor: grab;
+    gap: 4px;
+    z-index: 1000;
+    border: 2px solid rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.4);
+    transform: translateX(-50%);
+}
+
+#frame-party {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    top: 20%;
+    width: 250px;
+    z-index: 1000;
+    gap: 12px;
+}
+
+.frame-player-label {
+    color: azure;
+    white-space: pre;
+    font-size: large;
+    text-shadow: 1px 1px 1px black;
+    text-align: center;
+}
+
+
+.frame-party-member {
+    position: relative;
+    width: 100%;
+    height: 40px;
+}
+
+.frame-party-label {
+    color: azure;
+    font-size: large;
+    text-shadow: 1px 1px 1px black;
+    text-align: left;
+}
+
+.frame-health {
+    width: 100%;
+    height: 20px;
+    background-color: rgb(90, 0, 0);
+}
+
+.frame-health-fill {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(0, 255, 0);
+    transition: width .2s ease;
+}
+
+.frame-energy {
+    width: 100%;
+    height: 20px;
+    background-color: black;
+}
+
+.frame-energy-fill {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(255, 255, 0);
+    transition: width .2s ease;
+}

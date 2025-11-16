@@ -27,6 +27,7 @@ import SolPhysics from './core/SolPhysics';
 import DebugData from './ui/DebugData';
 import DPSMeter from './core/DPSMeter';
 import LobbyStats from './core/LobbyStats';
+import PlayerFrames from './ui/newHealthUi/PlayerFrames';
 
 await RAPIER.init();
 
@@ -80,7 +81,8 @@ export default class CGame {
 
     this.actorManager = new ActorManager(this);
     this.initPlayer();
-    this.partyFrame = new PartyFrame();
+    this.playerFrames = new PlayerFrames(this, this.player);
+    //this.partyFrame = new PartyFrame();
     this.dpsmeter = new DPSMeter(this);
     this.lobbyStats = new LobbyStats(this);
     this.debugData = new DebugData();
@@ -130,7 +132,7 @@ export default class CGame {
   initPlayer() {
     this.player = this.actorManager.player;
     this.crosshair = new Crosshair(this.graphicsWorld);
-    this.playerInfo = new PlayerInfo(this.player);
+  //  this.playerInfo = new PlayerInfo(this.player);
     this.inventory = new Inventory(this.player);
     this.questManager = new QuestManager(this, this.player);
     this.questManager.addQuest('playerKill');
@@ -237,7 +239,7 @@ export default class CGame {
   worldLight() {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    const dirLight = new THREE.DirectionalLight(0xffeeee, .5);
+    const dirLight = new THREE.DirectionalLight(0xffeeee, .4);
 
     dirLight.position.set(0, 100, 0);
     const target = new THREE.Vector3().addVectors(dirLight.position, new THREE.Vector3(1, -1, 1).normalize())
@@ -267,7 +269,7 @@ export default class CGame {
     dirLight.castShadow = true;
     this.graphicsWorld.add(dirLight);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, .03);
+    const ambientLight = new THREE.AmbientLight(0xffffff, .05);
     this.graphicsWorld.add(ambientLight);
 
     // const rimLight = new THREE.DirectionalLight(0xffffff, 1);
