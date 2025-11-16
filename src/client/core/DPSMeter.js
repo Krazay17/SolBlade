@@ -17,13 +17,10 @@ export default class DPSMeter {
     }
     bindings() {
         MyEventEmitter.on('playerIdChange', (id) => {
-            console.log(this.player);
-            const oldId = this.player.id;
-            const player = this.players.get(oldId);
-
-            this.players.delete(oldId);
-            this.players.set(id, player);
-            this.player.id = id;
+            const data = this.players.get(this.player);
+            this.players.delete(this.player);
+            this.player = id;
+            this.players.set(id, { ...data, id });
         });
         MyEventEmitter.on('playerNameUpdate', ({ id, name }) => {
             const player = this.players.get(id);
@@ -32,7 +29,7 @@ export default class DPSMeter {
         })
         MyEventEmitter.on('playerConnected', (p) => {
             const { id, name } = p;
-            this.addPlayer(id, name);
+            console.log(this.addPlayer(id, name));
         });
         MyEventEmitter.on('playerDidDamage', ({ id, damage }) => {
             const player = this.players.get(id);
@@ -46,16 +43,16 @@ export default class DPSMeter {
             this.removePlayer(id);
         });
         MyEventEmitter.on('resetDps', () => this.reset());
-        MyEventEmitter.on('disconnect', ()=>{
+        MyEventEmitter.on('disconnect', () => {
             for (const p of this.players.keys()) {
-                if(p === this.player.id)continue;
+                if (p === this.player) continue;
                 this.removePlayer(p);
             }
         })
     }
     removePlayer(id) {
         const player = this.players.get(id);
-        this.ui.removeChild(player.bar.bar);
+        this.ui.removeChild(player.el.root);
 
         this.players.delete(id);
     }
@@ -63,12 +60,13 @@ export default class DPSMeter {
         const data = [...this.players.values()];
         data.sort((a, b) => b.damage - a.damage);
         for (const d of data) {
-            this.ui.appendChild(d.bar.bar);
-            d.bar.label.innerText = d.name;
+            console.log(d);
+            this.ui.appendChild(d.el.root);
+            d.el.label.innerText = d.name;
             const fillpercent = d.damage / this.allDamage;
-            d.bar.barfill.offsetWidth;
-            d.bar.barfill.style.width = `${fillpercent * 100}%`;
-            d.bar.number.innerText = Math.floor(d.damage);
+            d.el.barfill.offsetWidth;
+            d.el.barfill.style.width = `${fillpercent * 100}%`;
+            d.el.number.innerText = Math.floor(d.damage);
         }
     }
     reset() {
@@ -97,37 +95,31 @@ export default class DPSMeter {
         return barContainer;
     }
     addPlayer(id, name) {
-        const bar = this.addBar(name);
-        const playerData = {
-            id,
-            name,
-            damage: 0,
-            bar,
-        }
+        const el = this.createRow(name);
+        this.ui.appendChild(el.root);
 
-        this.players.set(id, playerData);
-        return playerData;
+        this.players.set(id, { id, name, damage: 0, el });
+        return id;
     }
-    addBar(name) {
-        const bar = document.createElement('div');
-        bar.classList.add('dps-bar');
-        this.ui.appendChild(bar);
+    createRow(name) {
+        const root = document.createElement('div');
+        root.classList.add('dps-bar');
 
         const barfill = document.createElement('div');
         barfill.classList.add('dps-bar-fill');
-        barfill.style.width = "10%"
-        bar.appendChild(barfill);
+        barfill.style.width = "0%"
+
 
         const label = document.createElement('div');
         label.classList.add("dps-label");
         label.innerText = name;
-        bar.appendChild(label);
 
         const number = document.createElement('div');
         number.classList.add('dps-number');
         number.innerText = "0";
-        bar.appendChild(number);
 
-        return { bar, barfill, label, number };
+        root.append(barfill, label, number);
+
+        return { root, barfill, label, number };
     }
 }

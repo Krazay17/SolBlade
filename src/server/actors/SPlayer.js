@@ -30,16 +30,16 @@ export default class SPlayer extends SActor {
             return;
         }
         this.lastHit = data;
-        this.health.subtract(amount);
         io.emit('actorHit', { id: this.id, data });
+        if (this.isDead) return 0;
         //io.emit('actorEvent', { id: this.id, event: "applyHit", data });
+        this.health.subtract(amount);
 
         if (this.lastHitTimer) clearTimeout(this.lastHitTimer);
         this.lastHitTimer = setTimeout(() => {
             this.lastHit = null;
         }, 5000);
 
-        if (this.isDead) return 0;
 
         return amount;
     }
