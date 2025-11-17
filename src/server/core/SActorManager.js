@@ -6,6 +6,7 @@ import SPower from "../actors/SPower.js";
 import SCard from "../actors/SCard.js";
 import SEnemy from "../actors/SEnemy.js";
 import SCrown from "../actors/SCrown.js";
+import SWizard from "../actors/SWizard.js";
 
 
 const actorRegistry = {
@@ -14,6 +15,7 @@ const actorRegistry = {
     card: SCard,
     enemy: SEnemy,
     crown: SCrown,
+    wizard: SWizard,
 }
 
 export default class SActorManager {
@@ -106,6 +108,7 @@ export default class SActorManager {
             ? data.id
             : this.idCounter;
         this.idCounter++;
+        if (data.enemy) type = data.enemy;
         const actorClass = actorRegistry[type];
         if (actorClass) {
             actor = new actorClass(this.game, { ...data, type, id });
