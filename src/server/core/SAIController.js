@@ -1,15 +1,49 @@
 export default class SAIController {
-    constructor(game, actor) {
+    /**
+     * 
+     * @param {*} game 
+     * @param {*} actor 
+     * @param {{aggroRadius: number, }} data 
+     */
+    constructor(game, actor, data = {}) {
+        const {
+            aggroRadius = 5,
+            speed,
+        } = data
         this.game = game;
         this.actor = actor;
         this.actorManager = game.actorManager;
+
+        this.aggroRadius = aggroRadius;
+        this.speed = speed;
+
+        this.closeRange = null;
+        this.midRange = null;
+        this.farRange = null;
     }
     update(dt) {
+        
         const player = this.findNearestPlayer();
         let dir = { x: 0, y: 0, z: 0 };
         if (player) {
             dir = this.directionToPlayer(player);
-            this.moveToPlayer(dt, dir);
+            const dist = this.moveToPlayer(dt, dir);
+            switch (dist) {
+                case dist < 5:
+                    console.log('closeRange');
+                    if (this.closeRange) this.closeRange()
+                    break;
+                case dist < 10:
+                    console.log('midRange');
+                    if (this.midRange) this.midRange()
+                    break;
+                case dist < 15:
+                    console.log('farRange');
+                    if (this.farRange) this.farRange()
+                    break;
+                default:
+                    console.log('out of range');
+            }
         }
     }
     moveToPlayer(dt, dir) {
@@ -26,6 +60,8 @@ export default class SAIController {
         const faceAngle = Math.atan2(dir.x, dir.z);
         this.actor.rotY = lerpAngle(this.actor.rotY, faceAngle, this.actor.turnSpeed * dt);
         this.actor.move(dir);
+
+        return len;
     }
     avoidOtherEnemies() {
         const avoidRadius = 1.0;  // distance within which enemies start avoiding
