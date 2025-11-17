@@ -52,7 +52,7 @@ export default class LobbyStats {
 
         const label = document.createElement('label');
         label.classList.add('lobbystats-label');
-        label.innerText = `${actor.name} \t ${actor.kills || "0"} \t ${actor.deaths || "0"}`
+        label.innerText = `${actor.name} \t ${actor.kills || "0"} \t ${actor.deaths || "0"}`;
         el.appendChild(label);
 
         this.players.set(id, {
@@ -61,10 +61,10 @@ export default class LobbyStats {
         });
     }
     update(data) {
-        console.log(data);
         const { id, damage, totalDamage, kills, deaths } = data;
         if (!id) return;
         const actor = this.game.getActorById(id);
+        if (!actor) return;
         if (damage) {
             MyEventEmitter.emit('playerDidDamage', { id, damage });
         }

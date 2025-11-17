@@ -1,5 +1,3 @@
-import ActorManager from "./SActorManager.js";
-
 export default class SAIController {
     constructor(game, actor) {
         this.game = game;

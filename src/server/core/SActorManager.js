@@ -137,7 +137,8 @@ export default class SActorManager {
         this.hasSpawnedDefaults = true;
         const item = 4;
         const power = 15;
-        const enemies = 50;
+        const enemies = 0;
+        const wizards = 5;
         for (let i = 0; i < item; i++) {
             this.createActor('card', { sceneName: 'scene2', pos: randomPos(20, 10), respawntime: 15000 });
         }
@@ -148,6 +149,9 @@ export default class SActorManager {
         for (let i = 0; i < enemies; i++) {
             this.createActor('enemy', { enemy: 'julian', sceneName: 'scene3', pos: randomPos(25, 15), respawntime: 25000 });
             this.createActor('enemy', { enemy: 'julian', sceneName: 'scene4', pos: randomPos(25, 15), respawntime: 25000 });
+        }
+        for (let i = 0; i < wizards; i++) {
+            this.createActor('enemy', { enemy: 'wizard', sceneName: "scene3", pos: randomPos(10, 5), respawntime: 5000 });
         }
     }
 }

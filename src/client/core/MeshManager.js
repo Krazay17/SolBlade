@@ -4,14 +4,6 @@ import { SkeletonUtils } from "three/examples/jsm/Addons.js";
 import { MeshBVH, SAH } from 'three-mesh-bvh';
 import MyEventEmitter from "./MyEventEmitter";
 
-const modelRegister = new Map([
-    ['knightGirl', '/assets/KnightGirl.glb'],
-    ['ninjaDude', '/assets/NinjaDude.glb'],
-    ['julian', '/assets/julian.glb'],
-    ['lavaGolem', '/assets/LavaGolem.glb'],
-    ['spikeMan', '/assets/spikeMan.glb'],
-])
-
 export default class MeshManager {
     /**@type {MeshManager} */
     static instance = null;
@@ -24,15 +16,9 @@ export default class MeshManager {
         this.meshMap = new Map();
         this.meshPool = {};
         this.skinCache = {};
-        this.skinMap = new Map();
         this.texMap = new Map();
         this.tempVec = new Vector3();
         this.donePreLoad = false;
-
-        this.skinMap.set('KnightGirl', '/assets/KnightGirl.glb');
-        this.skinMap.set('NinjaDude', '/assets/NinjaDude.glb');
-        this.skinMap.set('julian', '/assets/julian.glb');
-        this.skinMap.set('LavaGolem', '/assets/LavaGolem.glb');
 
         this.preLoad();
     }
@@ -86,7 +72,7 @@ export default class MeshManager {
             return this.skinCache[skinName];
         }
         console.log('load new mesh')
-        const url = modelRegister.get(skinName);
+        const url = `/assets/${skinName}.glb`;
         return new Promise((resolve, reject) => {
             this.loader.load(url, (gltf) => {
                 const model = gltf.scene;
