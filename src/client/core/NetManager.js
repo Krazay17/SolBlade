@@ -296,12 +296,12 @@ function initBindings() {
     socket.on('lobbyStats', (data) => {
         game.lobbyStats.update(data);
     });
-    socket.on('actorStateChange', ({ id, data }) => {
-        const actor = game.getActorById(id);
-        if (!actor) return;
-        console.log(data);
-        actor.animationManager.playAnimation(data, true);
-    });
+    // socket.on('actorStateChange', ({ id, data }) => {
+    //     const actor = game.getActorById(id);
+    //     if (!actor) return;
+    //     console.log(data);
+    //     actor.animationManager.playAnimation(data, true);
+    // });
     socket.on('pawnAnim', ({ id, anim }) => {
         const actor = game.getActorById(id);
         if (!actor) return;

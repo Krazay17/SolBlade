@@ -1,3 +1,5 @@
+import { RigidBody } from "@dimforge/rapier3d-compat";
+
 export default class SAIMovement {
     constructor(game, pawn, data = {}) {
         const {
@@ -6,6 +8,7 @@ export default class SAIMovement {
         } = data;
         this.game = game;
         this.pawn = pawn;
+        /**@type {RigidBody} */
         this.body = pawn.body;
 
         this.speed = speed;
@@ -60,6 +63,9 @@ export default class SAIMovement {
         }
 
         return result;
+    }
+    stop() {
+        this.body.setLinvel({ x: 0, y: 0, z: 0 }, false);
     }
     update(dt) { }
 }

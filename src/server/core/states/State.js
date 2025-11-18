@@ -1,5 +1,6 @@
 import SPawn from "../../actors/SPawn.js";
 import SGame from "../../SGame.js";
+import SASM from "../ability/SAbilityMan.js";
 import SAIMovement from "../SAIMovement.js";
 import SFSM from "./SFSM.js";
 
@@ -32,6 +33,8 @@ export default class State {
     get movement() {
         return this.pawn.movement
     };
+    /**@type {SASM} */
+    get abilities() { return this.pawn.abilities }
     get blackboard() { return this.pawn.controller.blackboard }
     enter(prevState) {
         this.lastEnter = performance.now();

@@ -45,7 +45,7 @@ export default class Player extends Pawn {
 
         // Local Player setup
         if (!this.isRemote) {
-            this.localInit()
+            this.localInit();
         } else {
             this.remoteInit();
         }

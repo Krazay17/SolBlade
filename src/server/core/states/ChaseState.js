@@ -4,7 +4,7 @@ export default class ChaseState extends State {
     constructor(game, pawn, data) {
         super(game, pawn, data);
     }
-    enter(prevState){
+    enter(prevState) {
         super.enter(prevState);
         this.pawn.setAnim('Fwd')
     }
@@ -16,18 +16,8 @@ export default class ChaseState extends State {
             return;
         }
         this.movement.move(dt, dir);
+        
+        this.abilities.doAction(dist);
+    }
 
-        if (dist < 5) {
-            this.rangeAction('close');
-        } else if (dist < 10) {
-            this.rangeAction('med');
-        } else if (dist < 15) {
-            this.rangeAction('far');
-        }
-    }
-    rangeAction(range) {
-        const actions = this.pawn.rangeActions[range];
-        if (!actions) return
-        actions[0].execute?.();
-    }
 }

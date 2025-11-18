@@ -46,7 +46,7 @@ export default class SPawn extends SActor {
         if (this.controller) this.controller.update(dt, time);
         if (this.movement) this.movement.update(dt, time);
         if (this.stateChanged) {
-            this.game.io.emit('actorStateChange', { id: this.id, data: this.fsm.moveState.name });
+            this.game.io.emit('actorStateChange', { id: this.id, data: this.fsm.state.name });
             this.stateChanged = false;
         }
 
@@ -58,6 +58,9 @@ export default class SPawn extends SActor {
 
         this.game.io.emit('actorEvent', { id: this.id, event: 'applyDie', data: this.serialize() });
         this.game.createActor('card', { pos: this.position, sceneName: this.sceneName });
+    }
+    setState(state, params) {
+        this.fsm.setState(state, params);
     }
     hit(data) {
         super.hit(data);
