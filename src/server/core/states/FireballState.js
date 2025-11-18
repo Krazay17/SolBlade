@@ -13,13 +13,14 @@ export default class FireballState extends State {
     }
     enter() {
         super.enter();
-        this.pawn.setAnim('AttackSpell');
+        this.pawn.setAnim('Attack1');
         this.movement.stop();
     }
     update(dt) {
         this.elapsed += dt * 1000;
         this.movement.rise(dt * 5)
         if (this.elapsed > this.delay) {
+            console.log('shoot fireball');
             this.setState('chase');
         }
     }
