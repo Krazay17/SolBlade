@@ -11,7 +11,7 @@ const actionRegistry = {
 export default class SAbilityMan {
     constructor(game, actor, data = {}) {
         const {
-            actions = ['fireball', 'melee']
+            abilities = ['fireball', 'melee']
         } = data;
         /**@type {SGame} */
         this.game = game;
@@ -19,16 +19,14 @@ export default class SAbilityMan {
         this.actor = actor;
         this.data = data;
 
-        this.abilities = {};
-        this.actions = []
-        this.action = null;
+        this.abilities = []
 
-        for (const a of actions) {
-            this.actions.push(new actionRegistry[a]());
+        for (const a of abilities) {
+            this.abilities.push(new actionRegistry[a]());
         }
     }
     doAction(range) {
-        for (const a of this.actions) {
+        for (const a of this.abilities) {
             if (a && a.canUse(range)) {
                 a.start?.(this.actor);
                 return true;

@@ -25,6 +25,7 @@ export default class State {
         this.reEnter = reEnter;
 
         this.lastEnter = 0;
+        this.elapsed = 0;
     }
     /**@type {SFSM} */
     get fsm() { return this.pawn.fsm }
@@ -36,6 +37,9 @@ export default class State {
     /**@type {SASM} */
     get abilities() { return this.pawn.abilities }
     get blackboard() { return this.pawn.controller.blackboard }
+    setState(state, params) {
+        this.pawn.fsm.setState(state, params);
+    }
     enter(prevState) {
         this.lastEnter = performance.now();
     }

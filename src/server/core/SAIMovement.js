@@ -67,6 +67,9 @@ export default class SAIMovement {
     stop() {
         this.body.setLinvel({ x: 0, y: 0, z: 0 }, false);
     }
+    rise(y) {
+        this.body.setLinvel({ x: 0, y, z: 0 }, true);
+    }
     update(dt) { }
 }
 

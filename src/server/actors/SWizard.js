@@ -8,7 +8,7 @@ export default class SWizard extends SPawn {
     constructor(game, data) {
         super(game, data);
         this.fsm = new SFSM(game, this);
-        this.abilities = new SAbilityMan(game, this);
+        this.abilities = new SAbilityMan(game, this, { abilities: ["melee", "fireball"] });
         this.controller = new SAIController(game, this, { aggroRadius: 8 });
         this.movement = new SAIMovement(game, this, { speed: 30 });
     }
