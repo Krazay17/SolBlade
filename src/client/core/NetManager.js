@@ -177,7 +177,7 @@ function initBindings() {
         const { type, id, sceneName } = data;
         if (id === playerId) return;
         const actor = scene.getActorById(id);
-        MyEventEmitter.emit('playerNewScene', {id, sceneName});
+        MyEventEmitter.emit('playerNewScene', { id, sceneName });
         if (actor && (scene.sceneName !== sceneName)) {
             actor.destroy();
         }
@@ -293,8 +293,20 @@ function initBindings() {
         const actor = game.getActorById(id);
         if (actor) actor.setWeapon(data.slot, data.weaponName);
     });
-    socket.on('lobbyStats', (data)=>{
+    socket.on('lobbyStats', (data) => {
         game.lobbyStats.update(data);
+    });
+    socket.on('actorStateChange', ({ id, data }) => {
+        const actor = game.getActorById(id);
+        if (!actor) return;
+        console.log(data);
+        actor.animationManager.playAnimation(data, true);
+    });
+    socket.on('pawnAnim', ({ id, anim }) => {
+        const actor = game.getActorById(id);
+        if (!actor) return;
+        console.log(anim);
+        actor.animationManager.playAnimation(anim, true);
     })
 }
 

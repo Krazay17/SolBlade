@@ -108,8 +108,8 @@ export default class SActorManager {
             ? data.id
             : this.idCounter;
         this.idCounter++;
-        if (data.enemy) type = data.enemy;
-        const actorClass = actorRegistry[type];
+        const subType = data.enemy || type;
+        const actorClass = actorRegistry[subType];
         if (actorClass) {
             actor = new actorClass(this.game, { ...data, type, id });
         } else {

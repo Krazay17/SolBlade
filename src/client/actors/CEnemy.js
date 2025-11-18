@@ -7,8 +7,8 @@ export default class CEnemy extends CPawn {
     stateManager;
     constructor(game, data) {
         super(game, data);
-        this.movement = new AIMovement(this);
-        this.stateManager = new StateManager(this);
+        //this.movement = new AIMovement(this);
+        //this.stateManager = new StateManager(this);
         //this.controller = new AIController(game, this);
         this.namePlate = new NamePlate(this, this.height / 3 + 1);
     }

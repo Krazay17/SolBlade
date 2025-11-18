@@ -131,16 +131,3 @@ function filterMoved(actors) {
         return false;
     })
 }
-
-function posArray(l, size = 4, lastArray) {
-    const list = l.filter(v => v.active && v.auth);
-    const length = list.length
-    const buffer = new Float32Array(length * size)
-    let i;
-    for (const e of list) {
-        buffer[i++] = e.id;
-        buffer[i++] = e.pos.x;
-        buffer[i++] = e.pos.x;
-        buffer[i++] = e.pos.x;
-    }
-}

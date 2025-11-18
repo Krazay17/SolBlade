@@ -2,102 +2,38 @@ export default class SAIController {
     /**
      * 
      * @param {*} game 
-     * @param {*} actor 
-     * @param {{aggroRadius: number, }} data 
+     * @param {*} pawn 
+     * @param {{
+     * aggroRadius: number
+     * }} data 
      */
-    constructor(game, actor, data = {}) {
+    constructor(game, pawn, data = {}) {
         const {
             aggroRadius = 5,
-            speed,
         } = data
         this.game = game;
-        this.actor = actor;
+        this.pawn = pawn;
         this.actorManager = game.actorManager;
 
         this.aggroRadius = aggroRadius;
-        this.speed = speed;
 
-        this.closeRange = null;
-        this.midRange = null;
-        this.farRange = null;
+        this.blackboard = {};
+        this.pawnRangeActions = null;
     }
     update(dt) {
-        
-        const player = this.findNearestPlayer();
+        const { player, dist } = this.findNearestPlayer();
         let dir = { x: 0, y: 0, z: 0 };
         if (player) {
             dir = this.directionToPlayer(player);
-            const dist = this.moveToPlayer(dt, dir);
-            switch (dist) {
-                case dist < 5:
-                    console.log('closeRange');
-                    if (this.closeRange) this.closeRange()
-                    break;
-                case dist < 10:
-                    console.log('midRange');
-                    if (this.midRange) this.midRange()
-                    break;
-                case dist < 15:
-                    console.log('farRange');
-                    if (this.farRange) this.farRange()
-                    break;
-                default:
-                    console.log('out of range');
-            }
-        }
+            this.blackboard = { player, dir, dist };
+        } else this.blackboard = {};
     }
-    moveToPlayer(dt, dir) {
-        const avoid = this.avoidOtherEnemies();
-        dir.x += avoid.x;
-        dir.z += avoid.z;
-
-        const len = Math.sqrt(dir.x * dir.x + dir.z * dir.z);
-        if (len > 0.001) {
-            dir.x /= len;
-            dir.z /= len;
-        }
-
-        const faceAngle = Math.atan2(dir.x, dir.z);
-        this.actor.rotY = lerpAngle(this.actor.rotY, faceAngle, this.actor.turnSpeed * dt);
-        this.actor.move(dir);
-
-        return len;
-    }
-    avoidOtherEnemies() {
-        const avoidRadius = 1.0;  // distance within which enemies start avoiding
-        const strength = 1.0;     // how strongly they push away
-        const result = { x: 0, z: 0 };
-
-        const worldActors = this.actorManager.actorsOfScene[this.actor.sceneName];
-        if (!worldActors || !worldActors.enemies) return result;
-
-        const myPos = this.actor.position;
-
-        for (const other of worldActors.enemies) {
-            if (other === this.actor || !other.active) continue;
-
-            const pos = other.position;
-            const dx = myPos.x - pos.x;
-            const dz = myPos.z - pos.z;
-            const distSq = dx * dx + dz * dz;
-
-            if (distSq > avoidRadius * avoidRadius || distSq < 0.0001) continue;
-
-            const dist = Math.sqrt(distSq);
-            const push = (avoidRadius - dist) / avoidRadius; // how close they are (0-1)
-            result.x += (dx / dist) * push * strength;
-            result.z += (dz / dist) * push * strength;
-        }
-
-        return result;
-    }
-
     findNearestPlayer() {
-        const { players } = this.actorManager.actorsOfScene[this.actor.sceneName]
-        if (!players.length) return;
+        const { players } = this.actorManager.actorsOfScene[this.pawn.sceneName]
+        if (!players.length) return {};
 
         // get this enemy's position
-        const pos = this.actor.position;
+        const pos = this.pawn.position;
 
         // find nearest player
         let nearest = null;
@@ -107,16 +43,16 @@ export default class SAIController {
             const dy = p.pos.y - pos.y;
             const dz = p.pos.z - pos.z;
             const distSq = dx * dx + dy * dy + dz * dz;
-            if (distSq < this.actor.aggroRadius && (distSq < minDistSq)) {
+            if (distSq < this.aggroRadius ** 2 && (distSq < minDistSq)) {
                 minDistSq = distSq;
                 nearest = p;
             }
         }
-        return nearest;
+        return { player: nearest, dist: minDistSq };
     }
     directionToPlayer(player) {
         if (!player) return;
-        const pos = this.actor.position;
+        const pos = this.pawn.position;
         const dir = {
             x: player.pos.x - pos.x,
             y: player.pos.y - pos.y,
@@ -130,10 +66,4 @@ export default class SAIController {
         }
         return dir;
     }
-}
-function lerpAngle(a, b, t) {
-    let diff = b - a;
-    while (diff < -Math.PI) diff += Math.PI * 2;
-    while (diff > Math.PI) diff -= Math.PI * 2;
-    return a + diff * t;
 }
