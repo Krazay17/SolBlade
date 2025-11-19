@@ -2,11 +2,13 @@ import { COLLISION_GROUPS, randomPos } from "@solblade/shared";
 import SHealth from "../core/SHealth.js";
 import SActor from "./SActor.js";
 import RAPIER from "@dimforge/rapier3d-compat";
+import SAIController from "../core/SAIController.js";
 
 export default class SPawn extends SActor {
     constructor(game, data) {
         super(game, data);
         this.fsm = null;
+        /**@type {SAIController} */
         this.controller = null;
         this.movement = null;
 
@@ -24,20 +26,21 @@ export default class SPawn extends SActor {
         this.body = body;
         this.collider = collider;
 
-        this.auth = true;
-        this.stateChanged = false;
+        console.log(this.id, this.type, this.collider.actor);
+
         this.anim = null;
-        this.stunned = false;
     }
     get position() { return this.body.translation() }
     get yaw() { return this._yaw }
     set yaw(v) {
         this._yaw = v;
-        const halfYaw = this._yaw * 0.5;
-        const sin = Math.sin(halfYaw);
-        const cos = Math.cos(halfYaw);
-        const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
-        this.rot = q;
+        const half = v * 0.5;
+        this.rot = {
+            x: this.rot.x || 0,
+            y: Math.sin(half),
+            z: this.rot.z || 0,
+            w: Math.cos(half),
+        };
     }
     update(dt, time) {
         if (!this.active) return;
@@ -45,12 +48,15 @@ export default class SPawn extends SActor {
         if (this.fsm) this.fsm.update(dt);
         if (this.controller) this.controller.update(dt, time);
         if (this.movement) this.movement.update(dt, time);
-        if (this.stateChanged) {
-            this.game.io.emit('actorStateChange', { id: this.id, data: this.fsm.state.name });
-            this.stateChanged = false;
+        if (this.auth) {
+            this.pos = this.body.translation();
+        } else {
+            const posObj =
+                Array.isArray(this.pos)
+                    ? { x: this.pos[0], y: this.pos[1], z: this.pos[2] }
+                    : { x: this.pos.x, y: this.pos.y, z: this.pos.z }
+            this.body.setTranslation(posObj, true);
         }
-
-        this.pos = this.body.translation();
     }
     die() {
         if (!this.active) return;
@@ -61,16 +67,6 @@ export default class SPawn extends SActor {
     }
     setState(state, params) {
         this.fsm.setState(state, params);
-    }
-    hit(data) {
-        super.hit(data);
-        this.health.subtract(data.amount);
-        if (data.impulse) {
-            if (this.body) this.body.setLinvel({ x: data.impulse[0], y: data.impulse[1], z: data.impulse[2] }, true);
-            this.stunned = true;
-            setTimeout(() => this.stunned = false, 600);
-        }
-        return data.amount;
     }
     createCapsule(height, radius, group) {
         /**@type {RAPIER.RigidBody} */

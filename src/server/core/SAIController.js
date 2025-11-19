@@ -9,13 +9,13 @@ export default class SAIController {
      */
     constructor(game, pawn, data = {}) {
         const {
-            aggroRadius = 5,
+            aggroRadius = 20,
         } = data
         this.game = game;
         this.pawn = pawn;
         this.actorManager = game.actorManager;
 
-        this.aggroRadius = aggroRadius;
+        this.aggroRadius = aggroRadius ** 2;
 
         this.blackboard = {};
         this.pawnRangeActions = null;
@@ -43,12 +43,12 @@ export default class SAIController {
             const dy = p.pos.y - pos.y;
             const dz = p.pos.z - pos.z;
             const distSq = dx * dx + dy * dy + dz * dz;
-            if (distSq < this.aggroRadius ** 2 && (distSq < minDistSq)) {
+            if (distSq < this.aggroRadius && (distSq < minDistSq)) {
                 minDistSq = distSq;
                 nearest = p;
             }
         }
-        return { player: nearest, dist: minDistSq };
+        return { player: nearest, dist: Math.sqrt(minDistSq) };
     }
     directionToPlayer(player) {
         if (!player) return;

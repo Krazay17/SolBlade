@@ -17,7 +17,7 @@ export default class ChaseState extends State {
         }
         this.movement.move(dt, dir);
         
-        this.abilities.doAction(dist);
+        this.tryAttack(dist);
     }
 
 }

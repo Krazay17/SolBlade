@@ -7,8 +7,9 @@
     "dev": "nodemon SMain.js"
   },
   "dependencies": {
-    "@solblade/shared": "file:../shared",
     "@dimforge/rapier3d-compat": "^0.19.2",
+    "@solblade/shared": "file:../shared",
+    "gl-matrix": "^3.4.4",
     "socket.io": "^4.8.1"
   }
 }

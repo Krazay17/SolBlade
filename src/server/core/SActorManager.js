@@ -7,6 +7,7 @@ import SCard from "../actors/SCard.js";
 import SEnemy from "../actors/SEnemy.js";
 import SCrown from "../actors/SCrown.js";
 import SWizard from "../actors/SWizard.js";
+import SFireball from "../actors/SFireball.js";
 
 
 const actorRegistry = {
@@ -16,6 +17,7 @@ const actorRegistry = {
     enemy: SEnemy,
     crown: SCrown,
     wizard: SWizard,
+    fireball: SFireball,
 }
 
 export default class SActorManager {
@@ -52,7 +54,10 @@ export default class SActorManager {
     get players() { return this.actors.filter(a => a.type === "player") };
 
     update(dt) {
-        for (const a of this.actors) { a.update?.(dt) }
+        for (const a of this.actors) { 
+            a.fixedUpdate?.(dt);
+            a.update?.(dt);
+         }
     }
     getActorsOfScene(scene) {
         const data = [

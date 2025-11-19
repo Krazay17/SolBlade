@@ -31,6 +31,8 @@ export default class CProjectile extends Projectile {
         this.graphics.quaternion.copy(this.rot);
         this.game.add(this.graphics);
 
+        this.ignoreCol = this.game.player.collider;
+
         this.hitData = new HitData({
             dealer: this.owner,
             amount: this.damage,

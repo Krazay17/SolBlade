@@ -136,7 +136,6 @@ export default class MeshManager {
     async createMesh(name) {
         return new Promise((resolve, reject) => {
             this.loader.load(`assets/${name}.glb`, (gltf) => {
-                
                 const mesh = gltf.scene;
                 mesh.traverse((child) => {
                     if (child.isMesh) {

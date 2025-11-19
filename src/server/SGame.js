@@ -43,6 +43,11 @@ export default class SGame {
             }
         }, 1000 / 60);
     }
+    loop(dt) {
+        this.physics.update(dt);
+        this.actorManager.update(dt);
+        this.questManager.update(dt);
+    }
     createActor(type, data) {
         return this.actorManager.createActor(type, data)
     }
@@ -51,11 +56,6 @@ export default class SGame {
     }
     getActorById(id) {
         return this.actorManager.getActorById(id);
-    }
-    loop(dt) {
-        this.physics.update(dt);
-        this.actorManager.update(dt);
-        this.questManager.update(dt);
     }
     userConnect(socket) {
         this.sockets.set(socket.id, socket);

@@ -1,28 +1,22 @@
 import State from "./State.js";
 
 export default class AttackState extends State {
-    enter(prevState, ability) {
-        super.enter(prevState);
-
+    constructor(game, pawn, data) {
+        super(game, pawn, data);
         const {
-            delay = 500,      // ms until the ability actually fires
-            duration = 1000,  // total duration of the attack state
-            anim = 'Attack',
-        } = ability;
-
-        this.ability = ability;
-        this.delay = delay;
-        this.duration = duration;
-
-        this.elapsed = 0;
-        this.fired = false;
-
-        this.pawn.movement.stop();
-        this.pawn.setAnim?.(anim);
+            anim = "Attack1",
+            range = Infinity,
+        } = data;
+        this.anim = anim;
+        this.range = range;
+    }
+    enter(prevState, params) {
+        super.enter();
+        this.pawn.setAnim?.(this.anim);
     }
 
     update(dt) {
-        this.elapsed += dt * 1000
+        this.elapsed += dt * 1000;
 
         // fire ability after delay
         if (!this.fired && this.elapsed >= this.delay && this.ability) {
@@ -37,8 +31,13 @@ export default class AttackState extends State {
     }
 
     exit(nextState) {
-        // optional cleanup
-        this.ability = null;
-        this.fired = false;
+        this.elapsed = 0;
+    }
+    canEnter(dist) {
+        if (dist) {
+            return super.canEnter() && dist <= this.range;
+        } else {
+            return super.canEnter();
+        }
     }
 }

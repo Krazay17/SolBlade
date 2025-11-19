@@ -1,16 +1,14 @@
 import SEnergy from "../core/SEnergy.js";
 import { io } from "../SMain.js";
 import SHealth from "../core/SHealth.js";
-import SActor from "./SActor.js";
+import SPawn from "./SPawn.js";
 
-export default class SPlayer extends SActor {
+export default class SPlayer extends SPawn {
     constructor(game, data) {
         super(game, data);
-        this.health = new SHealth(this, 100, data.currentHealth);
-        this.health.onChange = (v) => this.data.currentHealth = v
-        this.health.onDeath = () => this.die();
-        this.damage = 0;
-        this.totalDamage = 0;
+        // this.health = new SHealth(this, 100, data.currentHealth);
+        // this.health.onChange = (v) => this.data.currentHealth = v
+        // this.health.onDeath = () => this.die();
         this.kills = 0;
         this.deaths = 0;
 

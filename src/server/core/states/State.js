@@ -24,7 +24,7 @@ export default class State {
         this.duration = duration;
         this.reEnter = reEnter;
 
-        this.lastEnter = 0;
+        this.lastEnter = -(cd + duration);
         this.elapsed = 0;
     }
     /**@type {SFSM} */
@@ -37,10 +37,13 @@ export default class State {
     /**@type {SASM} */
     get abilities() { return this.pawn.abilities }
     get blackboard() { return this.pawn.controller.blackboard }
+    tryAttack(dist) {
+        this.pawn.fsm.tryAttack(dist);
+    }
     setState(state, params) {
         this.pawn.fsm.setState(state, params);
     }
-    enter(prevState) {
+    enter(prev) {
         this.lastEnter = performance.now();
     }
     update(dt) { }

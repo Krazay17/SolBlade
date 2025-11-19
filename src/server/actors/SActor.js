@@ -1,6 +1,8 @@
 import { Actor } from "@solblade/shared";
 import { io } from "../SMain.js";
 import SGame from "../SGame.js";
+import {vec3} from 'gl-matrix';
+
 
 export default class SActor extends Actor {
     constructor(game, data) {
@@ -20,11 +22,13 @@ export default class SActor extends Actor {
     get rotY() { return this._yaw };
     set rotY(r) {
         this._yaw = r;
-        const halfYaw = this._yaw * 0.5;
-        const sin = Math.sin(halfYaw);
-        const cos = Math.cos(halfYaw);
-        const q = { x: this.rot.x, y: sin, z: this.rot.z, w: cos };
-        this.rot = q;
+        const halfYaw = v * 0.5;
+        this.rot = {
+            x: this.rot.x || 0,
+            y: Math.sin(halfYaw),
+            z: this.rot.z || 0,
+            w: Math.cos(halfYaw)
+        };
     }
     update(dt) {
         this.age = performance.now() - this.timestamp;
@@ -40,7 +44,7 @@ export default class SActor extends Actor {
         if (!this.active) return;
         super.deActivate();
         // DEACTIVATE IS DESTROYING ON CLIENT FOR NOW
-        io.emit('actorEvent', { id: this.id, event: 'destroy' });
+        this.game.io.emit('actorEvent', { id: this.id, event: 'destroy' });
         if (this.onDeactivate) this.onDeactivate();
     }
     onCollide() {

@@ -25,14 +25,6 @@ export default class CFireball extends CProjectile {
             }
         }
     }
-    onHit(target) {
-        const actor = this.actorManager.getActorById(target);
-        if (actor) {
-            Object.assign(this.hitData, { target: target, hitPosition: this.pos, dim: 500 });
-
-            actor.hit?.(this.hitData);
-        }
-    }
     onCollide() {
         super.onCollide()
         this.game.soundPlayer.applyPosSound('fireballImpact', this.position);
