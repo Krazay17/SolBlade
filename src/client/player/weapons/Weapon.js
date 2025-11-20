@@ -41,8 +41,6 @@ export default class Weapon {
         this.isDamaging = false;
         this.onAttackEnd = null;
 
-        this.ball = new RAPIER.Ball(1);
-        this.capsule = new RAPIER.Capsule(1, 1);
         this.cube = new RAPIER.Cuboid(1, 1, 1);
 
         if (this.slot > 1) {
@@ -57,17 +55,6 @@ export default class Weapon {
     get animation() { return this.actor.animationManager }
     get playAnimation() { return this.actor.animationManager.playAnimation.bind(this.actor.animationManager) }
     get playSound() { return this.game.soundPlayer.playPosSound.bind(this.game.soundPlayer) }
-    canSpellUse() {
-        return (performance.now() - this.lastUsed) >= this.cooldown;
-    }
-    spellUse() {
-        const now = performance.now()
-        if (this.canSpellUse(now)) {
-            this.lastUsed = now;
-            return true; // Spell used successfully
-        }
-        return false; // Spell is on cooldown
-    }
     canUse() {
         return (performance.now() - this.lastUsed) >= this.cooldown;
     }
@@ -79,6 +66,17 @@ export default class Weapon {
             return true; // Weapon used successfully
         }
         return false; // Weapon is on cooldown
+    }
+    canSpellUse() {
+        return (performance.now() - this.lastUsed) >= this.cooldown;
+    }
+    spellUse() {
+        const now = performance.now()
+        if (this.canSpellUse(now)) {
+            this.lastUsed = now;
+            return true; // Spell used successfully
+        }
+        return false; // Spell is on cooldown
     }
     charge() {
         this.isCharging = true;
@@ -99,22 +97,6 @@ export default class Weapon {
         }
     }
     damageTick(dt) { }
-    meleeTrace(start, direction, length = 5, dot = 0.5, callback) {
-        const actors = this.game.actorManager.hostiles;
-        for (const actor of actors) {
-            const pos = this.tempVector.copy(actor.position);
-            const dist = pos.distanceTo(start);
-            const dir = this.tempVector2.copy(pos).sub(start).normalize();
-
-            if (actor === this.actor) continue;
-            if (this.hitActors.has(actor)) continue;
-            if (dist > length) continue;
-            if (dir.dot(direction) < dot) continue;
-
-            this.hitActors.add(actor);
-            callback?.(actor, direction);
-        }
-    }
     async equip(slot = '0') {
         const boneName = slot === '0' ? "handLWeapon" : "handRWeapon";
         const weaponBone = this.actor.mesh.getObjectByName(boneName);
@@ -124,49 +106,6 @@ export default class Weapon {
     unequip() {
         if (this.mesh) {
             this.mesh.parent.remove(this.mesh);
-        }
-    }
-    meleeRayTrace(pos, /**@type {THREE.Vector3}*/dir, range = 1, callback, debug = false) {
-        const newDir = dir.clone();
-
-        const swingDir = newDir.applyAxisAngle(this.upVec, Math.PI / 3 * swingMath(this.damageDelta, this.slot === '0'));
-        const ray = new RAPIER.Ray(pos, swingDir);
-        this.game.physicsWorld.intersectionsWithRay(
-            ray, range, true, callback, undefined,
-            (COLLISION_GROUPS.ENEMY << 16) | COLLISION_GROUPS.PLAYER
-        )
-
-        if (debug) {
-            const end = pos.clone().add(swingDir.multiplyScalar(range));
-            const geom = new THREE.BufferGeometry().setFromPoints([pos, end]);
-            const mat = new THREE.LineBasicMaterial({ color: "red" });
-            const debug = new THREE.Line(geom, mat);
-
-            this.game.graphicsWorld.add(debug);
-            setTimeout(() => {
-                this.game.graphicsWorld.remove(debug);
-            }, 1000);
-        }
-    }
-    ballTrace(pos, radius = 1, callback, debug = false) {
-        this.ball.radius = radius;
-
-        this.game.physicsWorld.intersectionsWithShape(
-            pos, { x: 0, y: 0, z: 0, w: 1 }, this.ball, callback,
-            undefined,
-            (COLLISION_GROUPS.ENEMY << 16) | COLLISION_GROUPS.PLAYER
-        )
-
-        if (debug) {
-            const geom = new THREE.SphereGeometry(radius);
-            const mat = new THREE.MeshBasicMaterial({ color: "red" });
-            const debug = new THREE.Mesh(geom, mat);
-            debug.position.copy(pos);
-
-            this.game.add(debug);
-            setTimeout(() => {
-                this.game.remove(debug);
-            }, 1000);
         }
     }
     cubeTrace(pos, rot, radius, length, callback, debug = false) {

@@ -26,6 +26,7 @@ import DPSMeter from './core/DPSMeter';
 import LobbyStats from './core/LobbyStats';
 import PlayerFrames from './ui/newHealthUi/PlayerFrames';
 import SolWorld from './core/SolWorld.js';
+import Input from './core/Input';
 
 await RAPIER.init();
 
@@ -39,6 +40,11 @@ const sceneRegistry = {
 
 export default class CGame {
   static instance = null;
+  /**
+   * 
+   * @param {*} canvas 
+   * @param {Input} input 
+   */
   constructor(canvas, input) {
     this.canvas = canvas;
     this.input = input;
@@ -77,8 +83,7 @@ export default class CGame {
     this.camera.add(this.audioListener);
 
 
-    this.solWorld = new SolW
-    
+    this.player = null;
     this.crosshair = new Crosshair(this.graphicsWorld);
     this.inventory = new Inventory(this.player);
     this.playerFrames = new PlayerFrames(this, this.player);
@@ -130,9 +135,6 @@ export default class CGame {
   }
   get time() { return this.lastTime }
 
-  initPlayer() {
-    this.player = this.actorManager.player;
-  }
   savePlayerState() {
     LocalData.position = this.player.pos;
     LocalData.rotation = this.player.rot;

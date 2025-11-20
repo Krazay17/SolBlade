@@ -3,14 +3,11 @@ import LocalData from "./LocalData";
 import MyEventEmitter from "./MyEventEmitter";
 
 export default class Input {
-  constructor(actor, domElement = document.body) {
-    this.actor = actor;
-    this.domElement = domElement;
-    this.gameElement = document.getElementById('webgl');
+  constructor(gameElement) {
+    this.gameElement = gameElement;
 
     this.pointerLocked = false;
     this.sensitivity = 0.0016;
-    this.moveSpeed = 5;
     this.testFunction = () => {
       console.log('Test function called');
     };
@@ -21,7 +18,6 @@ export default class Input {
     this.mice = {};
     this.lockMouse = false;
     this.inputBlocked = false;
-
     this.actions = {
       '0': 'attackLeft',
       '2': 'attackRight',
@@ -42,7 +38,6 @@ export default class Input {
       'Digit3': 'spell3',
       'Digit4': 'spell4',
     };
-
     this.actionStates = {
       'attackLeft': false,
       'attackRIght': false,
@@ -68,13 +63,10 @@ export default class Input {
 
     this.bindings();
     setupKeybindWindow();
-    this.addKeys();
+    addKeys();
   }
-  update(dt) {
-  }
-
   bindings() {
-    this.domElement.addEventListener('keypress', (e) => {
+    document.addEventListener('keypress', (e) => {
       if (this.inputBlocked) return;
       MyEventEmitter.emit('KeyPressed', e.code);
       if (e.code === 'Digit5') {
@@ -83,7 +75,7 @@ export default class Input {
       const action = this.actions[e.code];
       if (action) this.buttonPressed(action);
     });
-    this.domElement.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', (e) => {
       if (this.inputBlocked) return;
       if (!this.actionStates.jump) {
         MyEventEmitter.emit('keyJustDown', e.code);
@@ -92,29 +84,29 @@ export default class Input {
       const action = this.actions[e.code];
       if (action) this.actionStates[action] = true;
     });
-    this.domElement.addEventListener('keyup', (e) => {
+    document.addEventListener('keyup', (e) => {
       if (this.inputBlocked) return;
       this.keys[e.code] = false;
       const action = this.actions[e.code];
       if (action) this.actionStates[action] = false;
     });
-    this.domElement.addEventListener('mousedown', (e) => {
+    document.addEventListener('mousedown', (e) => {
       this.mice[e.button] = true;
       const action = this.actions[e.button];
       if (action) this.actionStates[action] = true;
     });
-    this.domElement.addEventListener('mouseup', (e) => {
+    document.addEventListener('mouseup', (e) => {
       this.mice[e.button] = false;
       const action = this.actions[e.button];
       if (action) this.actionStates[action] = false;
     });
-    this.domElement.addEventListener('click', (e) => {
+    document.addEventListener('click', (e) => {
       if (this.pointerLocked) return;
       if (this.gameElement === e.target) {
         this.gameElement.requestPointerLock();
       }
     });
-    this.domElement.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', (e) => {
       if (document.pointerLockElement !== this.gameElement) return;
 
       if (Math.abs(e.movementX) < 200 && Math.abs(e.movementY) < 200) {
@@ -153,20 +145,19 @@ export default class Input {
     MyEventEmitter.emit(action);
   }
 
-  addKeys() {
-    addButton('KeyUnpressed', 'KeyW', 'Fwd', 1, 2);
-    addButton('KeyUnpressed', 'KeyS', 'Bwd', 2, 2);
-    addButton('KeyUnpressed', 'KeyA', 'Left', 2, 1);
-    addButton('KeyUnpressed', 'KeyD', 'Right', 2, 3);
-    addButton('KeyUnpressed', 'ShiftLeft', 'Blade', 2, 4, '100px', 'Shift');
-    addButton('KeyUnpressed', 'Space', 'Jump', 2, 6, '140px');
-    addButton('KeyUnpressed', 'KeyC', 'Inventory', 1, 7);
-    addButton('KeyUnpressed', 'KeyB', 'Menu', 1, 6);
-    addButton('KeyUnpressed', 'KeyT', 'Home', 1, 5);
-    addButton('KeyUnpressed', 'KeyH', 'Sudoku', 1, 4);
-  };
 }
-
+function addKeys() {
+  addButton('KeyUnpressed', 'KeyW', 'Fwd', 1, 2);
+  addButton('KeyUnpressed', 'KeyS', 'Bwd', 2, 2);
+  addButton('KeyUnpressed', 'KeyA', 'Left', 2, 1);
+  addButton('KeyUnpressed', 'KeyD', 'Right', 2, 3);
+  addButton('KeyUnpressed', 'ShiftLeft', 'Blade', 2, 4, '100px', 'Shift');
+  addButton('KeyUnpressed', 'Space', 'Jump', 2, 6, '140px');
+  addButton('KeyUnpressed', 'KeyC', 'Inventory', 1, 7);
+  addButton('KeyUnpressed', 'KeyB', 'Menu', 1, 6);
+  addButton('KeyUnpressed', 'KeyT', 'Home', 1, 5);
+  addButton('KeyUnpressed', 'KeyH', 'Sudoku', 1, 4);
+};
 function normalizeAngle(a) {
   a = a % (Math.PI * 2);
   if (a > Math.PI) a -= Math.PI * 2;

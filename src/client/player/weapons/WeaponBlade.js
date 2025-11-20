@@ -15,12 +15,8 @@ export default class WeaponBlade extends Weapon {
             meshName: "BladeWeapon",
             slot
         });
-
         this.damageDuration = 0; // duration of the sword trace in milliseconds
         this.dashSpeed = 0;
-    }
-    hitFx(pos) {
-        spawnParticles(pos, 25);
     }
     spellUse() {
         if (super.spellUse() &&

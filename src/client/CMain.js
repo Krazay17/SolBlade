@@ -13,7 +13,7 @@ const input = new Input(canvas);
 setupChat(input);
 const game = new CGame(canvas, input);
 const menu = new Menu(game);
-//const net = new NetManager(game);
+
 
 setupDiscordWindow();
 
@@ -23,7 +23,6 @@ window.addEventListener('beforeunload', () => {
 });
 window.addEventListener('contextmenu', (e) => {
     e.preventDefault();
-
     e.stopPropagation();
 });
 document.addEventListener('dragstart', (e) => {
