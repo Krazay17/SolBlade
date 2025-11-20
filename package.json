@@ -11,6 +11,7 @@
     "dev": "concurrently \"npm run dev-server\" \"vite\"",
     "dev-client": "vite",
     "dev-server": "npm run dev --workspace=src/server",
+    "dev-s": "node src/_new/server/SMain.js",
     "start-server": "npm run start --workspace=src/server",
     "build": "vite build"
   },

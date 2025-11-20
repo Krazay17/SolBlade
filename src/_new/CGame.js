@@ -2,25 +2,18 @@ import RAPIER from "@dimforge/rapier3d-compat";
 import * as THREE from "three";
 import Input from "../client/core/Input";
 import Net from "./Net";
-// import Scene1 from "../client/scenes/Scene1";
-// import Scene2 from "../client/scenes/Scene2";
-// import Scene3 from "../client/scenes/Scene3";
-// import Scene4 from "../client/scenes/Scene4";
-// import Scene5 from "../client/scenes/Scene5";
 import SolPhysics from "../client/core/SolPhysics";
 import SolRenderPass from "../client/core/SolRenderPass";
 import SoundPlayer from "../client/core/SoundPlayer";
 import LocalData from "../client/core/LocalData";
+import Scene from "./core/Scene";
+import { GLTFLoader } from "three/examples/jsm/Addons";
 
 await RAPIER.init();
 
- const sceneRegistry = {
-//     scene1: Scene1,
-//     scene2: Scene2,
-//     scene3: Scene3,
-//     scene4: Scene4,
-//     scene5: Scene5,
- }
+const sceneRegistry = {
+    scene: Scene
+}
 
 export default class CGame {
     /**
@@ -42,9 +35,8 @@ export default class CGame {
         this.lastTime = 0;
         this.accumulator = 0;
 
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.canvas.appendChild(this.renderer.domElement);
 
         this.graphicsWorld = new THREE.Scene();
 
@@ -52,8 +44,12 @@ export default class CGame {
 
         this.loadingManager = new THREE.LoadingManager(() => this.ready = true);
         this.loader = new THREE.Loader(this.loadingManager);
+        this.glbLoader = new GLTFLoader(this.loadingManager);
 
         this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, .8, 3000);
+        this.camera.position.set(0,25,0);
+        this.camera.lookAt(0,0,1);
+        this.graphicsWorld.add(this.camera);
 
         this.solRender = new SolRenderPass(this.renderer, this.graphicsWorld, this.camera);
         this.worldLight();
@@ -76,8 +72,14 @@ export default class CGame {
         });
     }
     start() {
+        this.init();
         this.running = true;
         requestAnimationFrame(this.tick.bind(this));
+    }
+    async init() {
+        this.scene = new sceneRegistry['scene'](this);
+        await this.scene.init();
+        this.ready = true;
     }
     tick(time) {
         const dt = (time - this.lastTime) / 1000;
@@ -93,12 +95,13 @@ export default class CGame {
             // fixed step
             while (this.running && (this.accumulator >= this.timeStep)) {
                 this.physics.step();
-                this.scene?.fixedUpdate(this.timeStep);
+                this.scene?.fixedUpdate?.(this.timeStep);
 
                 this.accumulator -= this.timeStep;
             }
             // quick step
-            this.scene?.update(dt);
+            this.scene?.update?.(dt);
+            console.log('update')
 
             this.solRender.composer.render(dt);
         }

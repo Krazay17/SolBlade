@@ -1,8 +1,8 @@
 import { io } from "socket.io-client"
+import LocalGame from "./LocalGame";
 
 export default class Net {
-    constructor(game) {
-        this.game = game;
+    constructor() {
         this.localServer = null;
         this.remote = false;
         this.ready = false;
@@ -11,7 +11,7 @@ export default class Net {
             ? "localhost:8080"
             : "srv.solblade.online";
 
-        this.init();
+       //this.init();
     }
     async init() {
         try {
@@ -24,7 +24,7 @@ export default class Net {
                 this.socket.timeout(5000).emitWithAck("hello");
             this.remote = true;
         } catch {
-            //this.localServer = new SGame();
+            this.localServer = new LocalGame()
             this.remote = false;
         }
     }
