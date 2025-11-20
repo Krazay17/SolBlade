@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
 import Pawn from "../actors/CPawn";
 import GroundChecker from "../player/GroundChecker";
-import PawnBody from "./PawnBody";
+import PawnBody from "./PawnCapsule";
 
 type MovementValues = {
     [key: string]: MovementState;

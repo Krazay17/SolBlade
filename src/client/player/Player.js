@@ -7,15 +7,15 @@ import CameraFX from '../core/CameraFX';
 import PlayerMovement from './PlayerMovement';
 import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
-import Pawn from '../actors/CPawn';
 import PlayerStateManager from './playerStates/PlayerStateManager';
 import HitData from '../core/HitData';
 import { menuButton } from '../ui/Menu';
 import Energy from '../core/Energy';
 import { Ray } from '@dimforge/rapier3d-compat';
 import { lerpTo } from '../utils/Utils';
+import { Actor } from '@solblade/shared';
 
-export default class Player extends Pawn {
+export default class Player extends Actor {
     constructor(game, data = {}) {
         super(game, {
             ...data,

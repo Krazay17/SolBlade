@@ -4,7 +4,6 @@ import SPlayer from "../actors/SPlayer.js";
 import SActor from "../actors/SActor.js";
 import SPower from "../actors/SPower.js";
 import SCard from "../actors/SCard.js";
-import SEnemy from "../actors/SEnemy.js";
 import SCrown from "../actors/SCrown.js";
 import SWizard from "../actors/SWizard.js";
 import SFireball from "../actors/SFireball.js";
@@ -14,7 +13,6 @@ const actorRegistry = {
     player: SPlayer,
     power: SPower,
     card: SCard,
-    enemy: SEnemy,
     crown: SCrown,
     wizard: SWizard,
     fireball: SFireball,
@@ -42,7 +40,7 @@ export default class SActorManager {
         SActorManager.instance = this;
     }
     static getInstance(io) {
-        if (SActorManager.instance) return SvActorManager.instance;
+        if (SActorManager.instance) return SActorManager.instance;
         else {
             if (!io) throw console.error('Create ActorManager with io first!');
             SActorManager.instance = new SActorManager(io);
@@ -54,10 +52,9 @@ export default class SActorManager {
     get players() { return this.actors.filter(a => a.type === "player") };
 
     update(dt) {
-        for (const a of this.actors) { 
-            a.fixedUpdate?.(dt);
+        for (const a of this.actors) {
             a.update?.(dt);
-         }
+        }
     }
     getActorsOfScene(scene) {
         const data = [
@@ -88,6 +85,21 @@ export default class SActorManager {
             actor.sceneName = scene;
             if (!this.actorsOfScene[actor.sceneName].players.includes(actor)) this.actorsOfScene[actor.sceneName].players.push(actor);
         }
+    }
+    getActorsInRange(owner, actor, pos, range) {
+        let inrange = new Map();
+        const actorsOfScene = this.getActorsOfScene(this.getActorById(owner).sceneName);
+        for (const a of actorsOfScene) {
+            if (!a.active) continue;
+            
+            const dist = a.position.distanceToSquared(pos);
+            if ((dist <= range)) {
+                if (owner && owner === a.id) continue;
+                if (actor && actor === a) continue;
+                inrange.set(a, dist);
+            }
+        }
+        return inrange;
     }
     removeActor(actor) {
         actor = typeof actor === 'string' ? this.getActorById(actor) : actor;

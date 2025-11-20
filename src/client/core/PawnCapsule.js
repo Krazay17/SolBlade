@@ -1,21 +1,9 @@
 import RAPIER from "@dimforge/rapier3d-compat"
-import ClientActor from "../actors/CActor.js"
 import { Vector3 } from "three";
 import { COLLISION_GROUPS } from "@solblade/shared";
 
 export default class PawnBody {
-    world: RAPIER.World;
-    actor: ClientActor;
-    body: RAPIER.RigidBody;
-    collider: RAPIER.Collider;
-    _position: Vector3 = new Vector3();
-    _velocity: Vector3 = new Vector3();
-    collideGroup: any;
-    startPos: Vector3;
-    height: number;
-    radius: number;
-    isRemote: boolean;
-    constructor(world: RAPIER.World, actor: ClientActor, pos: Vector3 = new Vector3(0, 0, 0), height: number = 1, radius: number = 0.5, isRemote = false) {
+    constructor(world, actor, pos = new Vector3(0, 0, 0), height = 1, radius = 0.5, isRemote = false) {
         this.world = world;
         this.actor = actor;
         this.height = height;
@@ -46,30 +34,30 @@ export default class PawnBody {
                 .setRestitution(0),
             this.body
         );
-        (this.collider as any).actor = this.actor.id;
+        this.collider.actor = this.actor.id;
         if (!this.isRemote) this.collider.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
     }
     get position() {
         return this._position.copy(this.body?.translation());
     }
-    set position(pos: Vector3) {
+    set position(pos) {
         this.body.setTranslation(pos, false);
     }
     get rotation() {
         return this.body.rotation();
     }
-    get velocity(): Vector3 {
+    get velocity() {
         return this._velocity.copy(this.body.linvel());
     }
-    set velocity(vel: { x: number, y: number, z: number }) {
+    set velocity(vel) {
         this.body.setLinvel(vel, true);
     }
-    set velocityX(x: number) {
+    set velocityX(x) {
         const y = this.body.linvel().y;
         const z = this.body.linvel().z;
         this.body.setLinvel({ x, y, z }, true);
     }
-    set velocityY(y: number) {
+    set velocityY(y) {
         const x = this.body.linvel().x;
         const z = this.body.linvel().z;
         this.body.setLinvel({ x, y, z }, true);
@@ -77,7 +65,7 @@ export default class PawnBody {
     get velocityY() {
         return this.body.linvel().y
     }
-    set velocityZ(z: number) {
+    set velocityZ(z) {
         const x = this.body.linvel().x;
         const y = this.body.linvel().y;
         this.body.setLinvel({ x, y, z }, true);

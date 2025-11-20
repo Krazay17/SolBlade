@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import RAPIER from '@dimforge/rapier3d-compat';
 import Crosshair from './ui/Crosshair';
-import PlayerInfo from './ui/PlayerUI';
 import MyEventEmitter from './core/MyEventEmitter';
 import LoadingManager from './core/LoadingManager';
 import Scene from './scenes/Scene';
@@ -13,8 +12,6 @@ import Scene5 from './scenes/Scene5';
 import LocalData from './core/LocalData';
 import MeshManager from './core/MeshManager';
 import SolRenderPass from './core/SolRenderPass';
-import ActorManager from './core/ActorManager';
-import PartyFrame from './ui/PartyFrame';
 import QuestManager from './core/QuestManager';
 import { setNetScene } from './core/NetManager';
 import Player from './player/Player';
@@ -28,6 +25,7 @@ import DebugData from './ui/DebugData';
 import DPSMeter from './core/DPSMeter';
 import LobbyStats from './core/LobbyStats';
 import PlayerFrames from './ui/newHealthUi/PlayerFrames';
+import SolWorld from './core/SolWorld.js';
 
 await RAPIER.init();
 
@@ -79,15 +77,18 @@ export default class CGame {
     this.camera.add(this.audioListener);
 
 
-    this.actorManager = new ActorManager(this);
-    this.initPlayer();
+    this.solWorld = new SolW
+    
+    this.crosshair = new Crosshair(this.graphicsWorld);
+    this.inventory = new Inventory(this.player);
     this.playerFrames = new PlayerFrames(this, this.player);
-    //this.partyFrame = new PartyFrame();
     this.dpsmeter = new DPSMeter(this);
     this.lobbyStats = new LobbyStats(this);
     this.debugData = new DebugData();
     this.lightManager = new LightManager(this);
     this.fxManager = new FXManager(this);
+    this.questManager = new QuestManager(this, this.player);
+    this.questManager.addQuest('playerKill');
 
     this.sceneReady = () => {
       this.player.sceneReady();
@@ -131,11 +132,6 @@ export default class CGame {
 
   initPlayer() {
     this.player = this.actorManager.player;
-    this.crosshair = new Crosshair(this.graphicsWorld);
-  //  this.playerInfo = new PlayerInfo(this.player);
-    this.inventory = new Inventory(this.player);
-    this.questManager = new QuestManager(this, this.player);
-    this.questManager.addQuest('playerKill');
   }
   savePlayerState() {
     LocalData.position = this.player.pos;

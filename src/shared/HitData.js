@@ -1,5 +1,5 @@
 import { Vector3 } from "three";
-import Actor from "./actors/Actor.js";
+import Actor from "./Actor.js";
 
 
 export default class HitData {

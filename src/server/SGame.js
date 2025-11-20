@@ -1,16 +1,19 @@
+import { Server } from "socket.io";
 import { sendDiscordMessage } from "./core/DiscordStuff.js";
-import SActorManager from "./core/SActorManager.js";
 import SLobbyStats from "./core/SLobbyStats.js";
 import SPhysics from "./core/SPhysics.js";
 import SQuestManager from "./core/SQuestManager.js";
+import SSolWorld from "./core/SSolWorld.js";
 
 export default class SGame {
     constructor(io) {
+        /**@type {Server} */
         this.io = io;
 
         this.sockets = new Map();
         this.players = {};
-        this.actorManager = new SActorManager(this, io);
+
+        this.solWorld = new SSolWorld(this);
         this.physics = new SPhysics(this, io);
         this.questManager = new SQuestManager(this, io);
         this.lobbyStats = new SLobbyStats(this, io);
