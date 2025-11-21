@@ -1,6 +1,6 @@
 import CGame from "../../CGame";
-import LocalData from "../../core/LocalData";
-import MyEventEmitter from "../../../../_new/core/MyEventEmitter";
+import LocalData from "../../../../client/LocalData";
+import MyEventEmitter from "../../../../core/MyEventEmitter";
 import Player from "../../player/Player";
 import "./StyleFrames.css";
 

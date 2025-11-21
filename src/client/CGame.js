@@ -1,19 +1,17 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import * as THREE from "three";
-import Input from "../client/core/Input";
-import Net from "./Net";
-import SolPhysics from "../client/core/SolPhysics";
-import SolRenderPass from "../client/core/SolRenderPass";
-import SoundPlayer from "../client/core/SoundPlayer";
-import LocalData from "../client/core/LocalData";
-import Scene from "./scenes/Scene";
 import { GLTFLoader } from "three/examples/jsm/Addons";
+import Input from "./Input";
+import Net from "./Net";
+import SolPhysics from "../core/SolPhysics";
+import SolRenderPass from "./SolRenderPass";
+import SoundPlayer from "./SoundPlayer";
+import LocalData from "./LocalData"
+import CSolWorld from "./CSolWorld";
+import LoadingBar from "./LoadingBar";
 
 await RAPIER.init();
 
-const sceneRegistry = {
-    scene: Scene
-}
 
 export default class CGame {
     /**
@@ -29,8 +27,6 @@ export default class CGame {
 
         this.timeStep = 1 / 120;
         this.subStep = 6;
-        this.scene = null;
-        this.ready = false;
         this.running = false;
         this.lastTime = 0;
         this.accumulator = 0;
@@ -42,7 +38,8 @@ export default class CGame {
 
         this.physics = new SolPhysics(this);
 
-        this.loadingManager = new THREE.LoadingManager(() => this.ready = true);
+        this.loadingBar = new LoadingBar();
+        this.loadingManager = new THREE.LoadingManager(this.loadingBar.finish, this.loadingBar.update);
         this.loader = new THREE.Loader(this.loadingManager);
         this.glbLoader = new GLTFLoader(this.loadingManager);
 
@@ -59,6 +56,7 @@ export default class CGame {
         this.camera.add(this.audioListener);
 
         this.player = null;
+        this.solWorld = new CSolWorld(this, "scene2"); //LocalData.sceneName || 
 
         this.bindings();
     }
@@ -84,8 +82,6 @@ export default class CGame {
         requestAnimationFrame(this.tick.bind(this));
     }
     async init() {
-        this.scene = new sceneRegistry['scene'](this);
-        await this.scene.init();
         this.ready = true;
     }
     tick(time) {

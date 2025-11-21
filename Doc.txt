@@ -1,0 +1,14 @@
+CMain(client entry point)
+SMain(server entry point)
+
+GameCore
+-LocalGame(if no server)
+-SGame
+
+CGame(construct client prediction/visuals)
+
+Actor
+Pawn
+-CPawn
+-CPlayer
+

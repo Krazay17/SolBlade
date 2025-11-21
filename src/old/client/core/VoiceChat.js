@@ -1,6 +1,6 @@
 import { menuButton } from "../ui/Menu";
-import LocalData from "./LocalData";
-import MyEventEmitter from "../../../_new/core/MyEventEmitter";
+import LocalData from "../../../client/LocalData";
+import MyEventEmitter from "../../../core/MyEventEmitter";
 import { netSocket } from "./NetManager";
 import * as THREE from "three";
 

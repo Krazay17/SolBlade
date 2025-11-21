@@ -1,5 +1,5 @@
 import RAPIER from '@dimforge/rapier3d-compat';
-import { loadJson } from './LoadJson.js';
+import { loadJson } from '../../../core/utils/LoadJson.js';
 import SGame from '../SGame.js';
 import { COLLISION_GROUPS } from '../../old/shared/index.js';
 

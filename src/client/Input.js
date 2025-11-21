@@ -1,6 +1,6 @@
-import { setupKeybindWindow, addButton } from "../ui/KeyBinds";
+import { setupKeybindWindow, addButton } from "./other/KeyBinds";
 import LocalData from "./LocalData";
-import MyEventEmitter from "../../../_new/core/MyEventEmitter";
+import MyEventEmitter from "../core/MyEventEmitter";
 
 export default class Input {
   constructor(gameElement) {

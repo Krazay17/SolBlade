@@ -1,4 +1,4 @@
-import LocalData from "../core/LocalData";
+import LocalData from "../../../client/LocalData";
 import Game from "../CGame";
 
 export default class DebugData {

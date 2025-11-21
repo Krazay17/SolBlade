@@ -1,5 +1,5 @@
-import LocalData from '../core/LocalData';
-import MyEventEmitter from '../../../_new/core/MyEventEmitter';
+import LocalData from '../../../client/LocalData';
+import MyEventEmitter from '../../../core/MyEventEmitter';
 import './StyleMenu.css';
 
 const menuSection = document.createElement('div');

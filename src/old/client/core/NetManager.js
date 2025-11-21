@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
-import MyEventEmitter from "../../../_new/core/MyEventEmitter";
+import MyEventEmitter from "../../../core/MyEventEmitter";
 import { Quaternion, Vector3 } from "three";
-import LocalData from "./LocalData";
+import LocalData from "../../../client/LocalData";
 import HitData from "./HitData";
 import VoiceChat from './VoiceChat';
 import { menuButton } from "../ui/Menu";

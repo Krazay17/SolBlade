@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import SkyBox from '../core/SkyBox.js';
-import MyEventEmitter from '../../../_new/core/MyEventEmitter.js';
+import MyEventEmitter from '../../../core/MyEventEmitter.js';
 import { acceleratedRaycast, computeBoundsTree, disposeBoundsTree } from 'three-mesh-bvh';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import Game from '../CGame.js';

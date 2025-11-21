@@ -6,14 +6,15 @@ export default class Scene {
      * 
      * @param {CGame} game 
      */
-    constructor(game) {
+    constructor(game, sceneName = "scene3") {
         this.game = game;
         this.glbLoader = game.glbLoader;
+        this.sceneName = sceneName;
     }
     update(dt) { }
     fixedUpdate(dt) { }
     async init() {
-        this.glbLoader.load("/assets/scene3.glb", (data) => {
+        this.glbLoader.load(`/assets/${this.sceneName}.glb`, (data) => {
             const scene = data.scene;
             this.game.graphicsWorld.add(scene);
 

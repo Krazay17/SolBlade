@@ -1,8 +1,8 @@
-import LocalData from "../core/LocalData";
-import MyEventEmitter from "../../../_new/core/MyEventEmitter";
+import LocalData from "../../../client/LocalData";
+import MyEventEmitter from "../../../core/MyEventEmitter";
 import { netSocket } from "../core/NetManager";
-import SoundPlayer, { getSoundPlayer } from "../core/SoundPlayer";
-import { sendDiscordMessage } from "./DiscordStuff";
+import SoundPlayer, { getSoundPlayer } from "../../../client/SoundPlayer";
+import { sendDiscordMessage } from "../../../client/other/DiscordStuff";
 
 const section = document.createElement('div');
 section.id = 'chat-section';

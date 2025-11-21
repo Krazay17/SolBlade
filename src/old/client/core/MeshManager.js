@@ -2,7 +2,7 @@ import { Vector3 } from "three";
 import * as THREE from "three";
 import { SkeletonUtils } from "three/examples/jsm/Addons.js";
 import { MeshBVH, SAH } from 'three-mesh-bvh';
-import MyEventEmitter from "../../../_new/core/MyEventEmitter";
+import MyEventEmitter from "../../../core/MyEventEmitter";
 
 export default class MeshManager {
     /**@type {MeshManager} */

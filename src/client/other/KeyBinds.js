@@ -1,4 +1,4 @@
-import './keyBindsStyle.css';
+import '../css/keyBindsStyle.css';
 
 let kbGrid = null;
 

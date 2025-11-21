@@ -7,7 +7,7 @@ export default class Pawn extends Actor {
      * @param {GameCore} game 
      * @param {*} data 
      */
-    constructor(game, data){
+    constructor(game, data) {
         super(data);
         this.game = game;
         this.isRemote = false;
@@ -17,7 +17,7 @@ export default class Pawn extends Actor {
         this.fsm = null;
         this.abilit = null;
     }
-    step(dt){
-        
+    step(dt) {
+
     }
 }

@@ -1,3 +1,4 @@
+import { SOL_PHYSICS_SETTINGS } from "./SolConstants.js";
 import SolWorld from "./SolWorld.js";
 
 export default class GameCore {
@@ -20,12 +21,12 @@ export default class GameCore {
                 this.tick(timestep);
                 this.accumulator -= timestep;
             }
-        }, 1000 / 60);
+        }, SOL_PHYSICS_SETTINGS.serverTick);
     }
     tick(dt) {
         this.solWorld.step(dt);
     }
     addPlayer(data) {
-        
+
     }
 }

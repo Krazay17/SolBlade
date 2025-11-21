@@ -1,5 +1,5 @@
 import Game from "../CGame";
-import MyEventEmitter from "../../../_new/core/MyEventEmitter";
+import MyEventEmitter from "../../../core/MyEventEmitter";
 import QuestManager from "./QuestManager";
 
 export default class Quest {

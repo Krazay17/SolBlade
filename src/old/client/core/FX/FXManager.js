@@ -1,5 +1,5 @@
 import FXExplosion from "./FXExplosion";
-import MyEventEmitter from "../../../../_new/core/MyEventEmitter";
+import MyEventEmitter from "../../../../core/MyEventEmitter";
 import FXLine from "./FXLine";
 import { Vector3 } from "three";
 import FXTornado from "./FXTornado";

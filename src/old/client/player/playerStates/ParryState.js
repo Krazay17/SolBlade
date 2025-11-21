@@ -1,6 +1,6 @@
 import PlayerState from "./_PlayerState";
 import CameraFX from "../../core/CameraFX";
-import MyEventEmitter from "../../../../_new/core/MyEventEmitter";
+import MyEventEmitter from "../../../../core/MyEventEmitter";
 
 export default class ParryState extends PlayerState {
     enter(state, { pos }) {

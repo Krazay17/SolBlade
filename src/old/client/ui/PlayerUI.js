@@ -1,5 +1,5 @@
-import MyEventEmitter from "../../../_new/core/MyEventEmitter.js";
-import LocalData from "../core/LocalData.js";
+import MyEventEmitter from "../../../core/MyEventEmitter.js";
+import LocalData from "../../../client/LocalData.js";
 import Game from "../CGame.js";
 
 export default class PlayerInfo {

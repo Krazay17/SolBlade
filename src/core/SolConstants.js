@@ -1,3 +1,9 @@
+export const SOL_PHYSICS_SETTINGS = {
+    gravity: 9.81,
+    serverTick: 1000 / 60,
+    substep: 6,
+}
+
 export const COLLISION_GROUPS = {
     WORLD: 0b0001,
     PLAYER: 0b0010,

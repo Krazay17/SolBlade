@@ -1,6 +1,5 @@
 import { EffectComposer, RenderPass, UnrealBloomPass } from "three/examples/jsm/Addons.js";
 import { Vector2 } from "three";
-import { menuButton, menuSlider } from "../ui/Menu";
 
 export default class SolRenderPass {
     constructor(renderer, scene, camera) {
@@ -14,23 +13,24 @@ export default class SolRenderPass {
         this.bloomPass = this.createBloomPass();
 
         window.addEventListener('resize', this.onWindowResize.bind(this));
-        const bloomButton = menuButton('Bloom', () => {
-            this.bloomEnabled = !this.bloomEnabled;
-            if (!this.bloomEnabled) {
-                const pass = this.composer.passes.find(a => a instanceof UnrealBloomPass);
-                if (pass) {
-                    this.composer.removePass(this.bloomPass);
-                    bloomButton.classList.remove('active');
-                }
-            } else {
-                const pass = this.composer.passes.find(a => a instanceof UnrealBloomPass);
-                if (!pass) {
-                    this.composer.addPass(this.bloomPass);
-                    bloomButton.classList.add('active');
-                }
-            }
-        });
-        bloomButton.classList.add('active');
+        
+        // const bloomButton = menuButton('Bloom', () => {
+        //     this.bloomEnabled = !this.bloomEnabled;
+        //     if (!this.bloomEnabled) {
+        //         const pass = this.composer.passes.find(a => a instanceof UnrealBloomPass);
+        //         if (pass) {
+        //             this.composer.removePass(this.bloomPass);
+        //             bloomButton.classList.remove('active');
+        //         }
+        //     } else {
+        //         const pass = this.composer.passes.find(a => a instanceof UnrealBloomPass);
+        //         if (!pass) {
+        //             this.composer.addPass(this.bloomPass);
+        //             bloomButton.classList.add('active');
+        //         }
+        //     }
+        // });
+        // bloomButton.classList.add('active');
 
         this.addPasses();
     }

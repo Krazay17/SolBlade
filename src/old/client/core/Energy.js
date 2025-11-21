@@ -1,5 +1,5 @@
 import Player from "../player/Player";
-import MyEventEmitter from "../../../_new/core/MyEventEmitter";
+import MyEventEmitter from "../../../core/MyEventEmitter";
 
 export default class Energy {
     constructor(owner, maxEnergy = 100, baseRegen = 50) {

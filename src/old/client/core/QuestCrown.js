@@ -1,4 +1,4 @@
-import MyEventEmitter from "../../../_new/core/MyEventEmitter";
+import MyEventEmitter from "../../../core/MyEventEmitter";
 import { joinAckd, netSocket } from "./NetManager";
 import Quest from "./Quest";
 

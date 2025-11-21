@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import LocalData from '../core/LocalData';
-import MyEventEmitter from '../../../_new/core/MyEventEmitter';
+import LocalData from '../../../client/LocalData';
+import MyEventEmitter from '../../../core/MyEventEmitter';
 import * as Weapon from './weapons/index';
 import { tryUpdatePosition } from '../core/NetManager';
 import CameraFX from '../core/CameraFX';

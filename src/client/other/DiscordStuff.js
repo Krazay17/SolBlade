@@ -1,4 +1,4 @@
-import LocalData from "../core/LocalData";
+import LocalData from "../LocalData";
 
 const sec = document.getElementById("discord-section");
 export function setupDiscordWindow() {

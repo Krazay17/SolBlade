@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import LocalData from "./LocalData";
-import MyEventEmitter from "../../../_new/core/MyEventEmitter";
+import MyEventEmitter from "../core/MyEventEmitter";
 
 /**@type {SoundPlayer} */
 export default class SoundPlayer {

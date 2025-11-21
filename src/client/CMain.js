@@ -1,12 +1,12 @@
-import Input from "../client/core/Input.js";
-import LocalData from "../client/core/LocalData.js";
-import { setupDiscordWindow } from "../client/ui/DiscordStuff.js";
-import Menu from "../client/ui/Menu.js";
+import Input from "./Input.js";
+import LocalData from "./LocalData.js";
+//import { setupDiscordWindow } from "./other/DiscordStuff.js";
+//import Menu from "../client/ui/Menu.js";
 import CGame from "./CGame.js";
 import Net from "./Net.js";
 
 LocalData.load();
-setupDiscordWindow();
+//setupDiscordWindow();
 
 const canvas = document.getElementById("webgl");
 const input = new Input(canvas);

@@ -1,4 +1,4 @@
-import LocalData from "../core/LocalData";
+import LocalData from "../../../client/LocalData";
 import { projectOnPlane, clampVector } from "../utils/Utils";
 import RunBoost from "./MomentumBoost";
 import GroundChecker from "./GroundChecker";
