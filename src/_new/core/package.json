@@ -1,0 +1,14 @@
+{
+  "name": "solblade-core",
+  "description": "SolBlade Game Core",
+  "type": "module",
+  "scripts": {
+    "start": "node SMain.js",
+    "dev": "nodemon SMain.js"
+  },
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.19.2",
+    "gl-matrix": "^3.4.4",
+    "socket.io": "^4.8.1"
+  }
+}
