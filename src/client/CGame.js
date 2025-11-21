@@ -1,4 +1,3 @@
-import RAPIER from "@dimforge/rapier3d-compat";
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/Addons";
 import Input from "./Input";
@@ -11,6 +10,7 @@ import GameCore from "../core/GameCore";
 import CSolWorld from "./worlds/CSolWorld";
 import CSolWorld2 from "./worlds/CSolWorld2";
 import { menuButton } from "./ui/MainMenu";
+import CPlayer from "./actors/CPlayer";
 
 const sceneRegistry = {
     scene: CSolWorld,
@@ -32,10 +32,9 @@ export default class CGame extends GameCore {
 
         this.timeStep = 1 / 120;
         this.subStep = 6;
-        this.running = false;
-        this.ready = false;
         this.lastTime = 0;
         this.accumulator = 0;
+        /**@type {CSolWorld} */
         this.solWorld = null;
         this.worldName = "scene2";
 
@@ -61,7 +60,8 @@ export default class CGame extends GameCore {
         this.solRender = new SolRenderPass(this.renderer, this.graphics, this.camera);
         this.worldLight();
 
-        this.player = null;
+        //this.player = new CPlayer(this, { pos: LocalData.position || [0, 15, 0] });
+        this.player = new CPlayer(this, { pos: [0, 15, 0] });
         this.makeWorld(LocalData.worldName || "scene2");
 
         this.bindings();
@@ -93,18 +93,14 @@ export default class CGame extends GameCore {
         this.running = true;
         requestAnimationFrame(this.tick.bind(this));
     }
-    removeWorld() {
-        this.physicsWorld.removeCollider(this.solWorld.worldCollider);
-        this.graphics.remove(this.solWorld.graphics);
-    }
     makeWorld(worldName) {
         const sceneClass = sceneRegistry[worldName];
         if (!sceneClass) return;
-        if (this.solWorld) this.removeWorld();
+        if (this.solWorld) this.solWorld.exit();
         this.ready = false;
-        /**@type {CSolWorld} */
         this.solWorld = new sceneClass(this);
-        this.solWorld.init(() => {
+        this.player.makeBody(this.solWorld.physics);
+        this.solWorld.enter(() => {
             this.ready = true
             this.worldName = worldName;
         });
@@ -116,13 +112,14 @@ export default class CGame extends GameCore {
             this.handleSleep();
         }
         if (this.running && this.ready) {
+            this.player?.tick(dt);
             this.solWorld?.tick(dt);
             this.solRender.composer.render(dt);
         }
         requestAnimationFrame(this.tick.bind(this));
     }
     fixedStep(dt) {
-        this.physicsWorld?.step();
+        this.solWorld?.fixedStep(dt);
     }
     handleSleep() {
         if (this.isFocused) return;
@@ -172,3 +169,4 @@ export default class CGame extends GameCore {
         LocalData.worldName = this.worldName;
     }
 }
+

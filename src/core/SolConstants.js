@@ -1,7 +1,8 @@
 export const SOL_PHYSICS_SETTINGS = {
-    gravity: { x: 0, y: 9.81, z: 0 },
+    gravity: { x: 0, y: -9.81, z: 0 },
     serverTick: 1000 / 60,
-    substep: 6,
+    timeStep: 1 / 60,
+    substeps: 3,
 }
 
 export const COLLISION_GROUPS = {

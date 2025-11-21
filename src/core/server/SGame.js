@@ -9,5 +9,7 @@ export default class SGame extends GameCore {
     constructor(io) {
         super();
         this.io = io;
+        
+        this.solWorlds = [];
     }
 }

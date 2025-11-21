@@ -1,0 +1,15 @@
+
+            // for (const geom of this.allGeoms) {
+            //     Object.keys(geom.attributes).forEach(a => {
+            //         if (a.startsWith('color')) {
+            //             geom.deleteAttribute(a);
+            //         }
+            //     })
+            // }
+            // const mergedGeom = mergeGeometries(this.allGeoms);
+            // const { vertices, indices } = getVerts(mergedGeom);
+            // const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+            // colliderDesc.setFriction(0);
+            // colliderDesc.setRestitution(0);
+
+            // this.worldCollider = this.physics.createCollider(colliderDesc);

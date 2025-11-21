@@ -1,8 +1,8 @@
-import Pawn from "../../core/actors/Pawn";
+import CPawn from "./CPawn";
 
-export default class CPlayer extends Pawn {
-    constructor(game, data){
+export default class CPlayer extends CPawn {
+    constructor(game, data) {
         super(game, data);
-        
+
     }
 }

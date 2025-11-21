@@ -5,10 +5,7 @@ await RAPIER.init();
 
 export default class GameCore {
     constructor() {
-        this.running = true;
-
-        this.physicsWorld = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
-
+        this.running = false;
         this.init();
     }
     init() {

@@ -6,7 +6,7 @@ export default class Actor {
             type = null,
             name = null,
             owner = null,
-            sceneName = 'scene2',
+            worldName = 'scene2',
             pos = [0, 0, 0],
             dir = [0, 0, 0],
             rot = [0, 0, 0, 1],
@@ -20,7 +20,7 @@ export default class Actor {
         this.type = type;
         this.name = name;
         this.owner = owner;
-        this.sceneName = sceneName;
+        this.worldName = worldName;
 
         this.pos = pos;
         this.dir = dir;
@@ -40,11 +40,11 @@ export default class Actor {
             type: this.type,
             name: this.name,
             owner: this.owner,
-            sceneName: this.sceneName,
+            worldName: this.worldName,
 
-            pos: this.pos?.toArray ? this.pos.toArray() : this.pos,
-            dir: this.dir?.toArray ? this.dir.toArray() : this.dir,
-            rot: this.rot?.toArray ? this.rot.toArray() : this.rot,
+            pos: this.pos,
+            dir: this.dir,
+            rot: this.rot,
 
             active: this.active,
             lifetime: this.lifetime,
