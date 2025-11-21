@@ -47,8 +47,8 @@ export default class CGame {
         this.glbLoader = new GLTFLoader(this.loadingManager);
 
         this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, .8, 3000);
-        this.camera.position.set(0,25,0);
-        this.camera.lookAt(0,0,1);
+        this.camera.position.set(0, 25, 0);
+        this.camera.lookAt(0, 0, 1);
         this.graphicsWorld.add(this.camera);
 
         this.solRender = new SolRenderPass(this.renderer, this.graphicsWorld, this.camera);
@@ -95,13 +95,12 @@ export default class CGame {
             // fixed step
             while (this.running && (this.accumulator >= this.timeStep)) {
                 this.physics.step();
-                this.scene?.fixedUpdate?.(this.timeStep);
+                this.scene?.step?.(this.timeStep);
 
                 this.accumulator -= this.timeStep;
             }
             // quick step
-            this.scene?.update?.(dt);
-            console.log('update')
+            this.scene?.tick?.(dt);
 
             this.solRender.composer.render(dt);
         }

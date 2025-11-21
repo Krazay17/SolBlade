@@ -26,10 +26,12 @@ const game = new SGame(io);
 
 
 io.on('connection', (socket) => {
-    if(socket.bound)return;
+    if (socket.bound) return;
     socket.bound = true;
-    
     console.log(socket.id);
+    socket.on("hello", (c) => {
+        c(SERVER_VERSION);
+    })
 })
 
 server.listen(PORT);
@@ -41,7 +43,7 @@ const r = repl.start({
     output: process.stdout,
 })
 
-const test = ()=>{
+const test = () => {
     console.log("Hello!");
 }
 r.context.sharedTest = test;

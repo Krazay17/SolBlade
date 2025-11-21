@@ -9,7 +9,7 @@ export default class Velocity{
         this.world = world;
         this.actors = [];
     }
-    update(dt){
+    step(dt){
         
     }
 }

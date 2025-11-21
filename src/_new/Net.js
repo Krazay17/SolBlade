@@ -6,12 +6,13 @@ export default class Net {
         this.localServer = null;
         this.remote = false;
         this.ready = false;
+        this.serverVersion = null;
 
         this.serverURL = location.hostname === "localhost"
             ? "localhost:8080"
             : "srv.solblade.online";
 
-       //this.init();
+        this.init();
     }
     async init() {
         try {
@@ -20,11 +21,14 @@ export default class Net {
                 reconnection: true,
                 timeout: 5000,
             });
-            const response = await
-                this.socket.timeout(5000).emitWithAck("hello");
+            const result = await this.socket.timeout(2500).emitWithAck("hello");
+            this.serverVersion = result;
             this.remote = true;
-        } catch {
-            this.localServer = new LocalGame()
+
+            console.log(`Connected ID: ${this.socket.id}`, result);
+        } catch (err) {
+            console.log('net init fail', err);
+            this.localServer = new LocalGame();
             this.remote = false;
         }
     }

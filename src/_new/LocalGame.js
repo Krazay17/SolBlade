@@ -1,5 +1,5 @@
-import Game from "./server/Game";
+import GameCore from "./server/GameCore";
 
-export default class LocalGame extends Game {
+export default class LocalGame extends GameCore {
 
 }

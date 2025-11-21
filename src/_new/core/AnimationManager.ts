@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import MyEventEmitter from './MyEventEmitter';
-import Pawn from '../actors/CPawn';
+import MyEventEmitter from '../../client/core/MyEventEmitter';
+import Pawn from '../server/actors/Pawn.js';
 
 export default class AnimationManager {
     pawn: Pawn;
@@ -98,8 +98,7 @@ export default class AnimationManager {
                 this.mixer.timeScale = 1;
             }, duration);
         }
-        if (this.pawn.isRemote) return;
-        MyEventEmitter.emit('changeAnimation', { scale, duration });
+        if (!this.pawn.isRemote) MyEventEmitter.emit('changeAnimation', { scale, duration });
     }
     clearTimeScale() {
         if (this.timeScaleTimer) {

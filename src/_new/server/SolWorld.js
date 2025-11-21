@@ -1,21 +1,23 @@
-import Game from "./Game.js";
-import Velocity from "./systems/Velocity.js";
+import Game from "./GameCore.js";
 
 export default class SolWorld {
     /**
      * 
      * @param {Game} game 
      */
-    constructor(game){
+    constructor(game) {
         this.game = game;
 
-        this.systems = [
-            new Velocity(this),
-        ]
+        this.pos = new Map();
+
+        this.systems = [];
     }
-    update(dt) {
-        for (const s of this.systems){
-            s.update(dt);
+    step(dt) {
+        for (const s of this.systems) {
+            s.step(dt);
         }
+    }
+    addSystem(system) {
+        this.systems.push(system);
     }
 }

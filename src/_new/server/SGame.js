@@ -1,12 +1,13 @@
-import Game from "./Game.js";
+import GameCore from "./GameCore.js";
 import { Server } from "socket.io";
 
-export default class SGame extends Game {
+export default class SGame extends GameCore {
     /**
      * 
      * @param {Server} io 
      */
     constructor(io) {
+        super();
         this.io = io;
     }
 }
