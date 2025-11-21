@@ -1,5 +1,5 @@
 export const SOL_PHYSICS_SETTINGS = {
-    gravity: 9.81,
+    gravity: { x: 0, y: 9.81, z: 0 },
     serverTick: 1000 / 60,
     substep: 6,
 }

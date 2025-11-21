@@ -52,6 +52,7 @@ export default class SolRenderPass {
     onWindowResize() {
         const w = window.innerWidth;
         const h = window.innerHeight;
+        this.renderer.setSize(w, h);
         this.renderPass.setSize(w, h);
         this.composer.setSize(w, h);
     }

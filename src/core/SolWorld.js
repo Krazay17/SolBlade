@@ -1,26 +1,15 @@
-import Game from "./GameCore.js";
+import GameCore from "./GameCore.js";
 
 export default class SolWorld {
     /**
      * 
-     * @param {Game} game 
+     * @param {GameCore} game 
      */
-    constructor(game, sceneName = "scene3") {
+    constructor(game, worldName = "scene2") {
         this.game = game;
-        this.sceneName = sceneName;
-
-        this.pos = new Map();
-        this.systems = [];
-
+        this.worldName = worldName;
 
         this.actors = [];
     }
-    step(dt) {
-        for (const s of this.systems) {
-            s.step(dt);
-        }
-    }
-    addSystem(system) {
-        this.systems.push(system);
-    }
+    fixedStep(dt) { }
 }

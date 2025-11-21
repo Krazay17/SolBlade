@@ -15,7 +15,7 @@ export default class Pawn extends Actor {
         this.controller = null;
         this.movement = null;
         this.fsm = null;
-        this.abilit = null;
+        this.abilities = null;
     }
     step(dt) {
 

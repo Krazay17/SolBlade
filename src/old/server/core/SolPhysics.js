@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import { COLLISION_GROUPS } from "./SolConstants.js";
+import { COLLISION_GROUPS } from "../../../core/SolConstants.js";
 import { Vector3 } from "three";
 
 export default class SolPhysics {

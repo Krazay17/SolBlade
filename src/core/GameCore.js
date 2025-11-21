@@ -1,9 +1,13 @@
+import RAPIER from "@dimforge/rapier3d-compat";
 import { SOL_PHYSICS_SETTINGS } from "./SolConstants.js";
-import SolWorld from "./SolWorld.js";
+
+await RAPIER.init();
 
 export default class GameCore {
     constructor() {
-        this.solWorld = new SolWorld(this);
+        this.running = true;
+
+        this.physicsWorld = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
 
         this.init();
     }
@@ -11,22 +15,22 @@ export default class GameCore {
         this.lastTime = performance.now();
         this.accumulator = 0;
         const timestep = 1 / 60;
+
         this.fixedUpdateTimer = setInterval(() => {
             const now = performance.now();
             const frameTime = Math.min((now - this.lastTime) / 1000, 0.25);
             this.lastTime = now;
 
-            this.accumulator += frameTime;
-            while (this.accumulator >= timestep) {
-                this.tick(timestep);
-                this.accumulator -= timestep;
+            if (this.running) {
+                this.accumulator += frameTime;
+                while (this.accumulator >= timestep) {
+                    this.fixedStep(timestep);
+
+                    this.accumulator -= timestep;
+                }
             }
         }, SOL_PHYSICS_SETTINGS.serverTick);
     }
-    tick(dt) {
-        this.solWorld.step(dt);
-    }
-    addPlayer(data) {
-
-    }
+    fixedStep(dt) { }
+    addPlayer(data) { }
 }

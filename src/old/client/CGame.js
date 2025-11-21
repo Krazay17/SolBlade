@@ -20,7 +20,7 @@ import Inventory from './player/Inventory';
 import SoundPlayer from '../../client/SoundPlayer';
 import { menuSlider } from './ui/Menu';
 import FXManager from './core/FX/FXManager';
-import SolPhysics from '../../core/SolPhysics';
+import SolPhysics from '../server/core/SolPhysics';
 import DebugData from './ui/DebugData';
 import DPSMeter from './core/DPSMeter';
 import LobbyStats from './core/LobbyStats';

@@ -22,10 +22,10 @@
 
 .menu-button-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(10, 1fr);
     flex-direction: row;
-    gap: 20px;
-    margin-top: 10px;
+    gap: 4px;
+    margin-top: 2px;
     left: 0;
 }
 
