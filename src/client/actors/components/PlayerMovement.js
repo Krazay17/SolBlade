@@ -1,23 +1,25 @@
-import LocalData from "../../../client/LocalData";
-import { projectOnPlane, clampVector } from "../utils/Utils";
+import LocalData from "../../LocalData";
+import { projectOnPlane, clampVector } from "../../../core/utils/Utils";
 import RunBoost from "./MomentumBoost";
-import GroundChecker from "./GroundChecker";
 import { Vector3 } from "three";
-import Input from "../core/Input";
+//import Input from "../core/Input";
+import GroundChecker from "./GroundChecker";
+import CGame from "../../CGame";
+import CPlayer from "../CPlayer";
 
 export default class PlayerMovement {
     /**
-     * @param {import('./Player').default} actor
+     * 
+     * @param {CGame} game 
+     * @param {CPlayer} player 
      */
-    constructor(game, actor) {
+    constructor(game, player) {
         this.game = game
-        this.actor = actor;
-        this.body = actor.pawnBody;
-        this.input = actor.input;
+        this.player = player;
 
-        this.momentumBooster = new RunBoost(actor);
-        this.groundChecker = new GroundChecker(this.game, actor);
-        this.grounded = false;
+        this.momentumBooster = new RunBoost(player);
+        this.isGrounded = true;
+        this.groundChecker = new GroundChecker(this.game, this.player);
 
         // Reusable vectors
         this.direction = new Vector3();
@@ -68,7 +70,8 @@ export default class PlayerMovement {
     }
 
     update(dt) {
-        this.momentumBooster.update(dt, this.body.velocity);
+        this.momentumBooster.update(dt, this.player.velocity);
+        this.isGrounded = this.groundChecker.isGrounded();
     }
     jumpBuffer(slope = 0.3) {
         if (!this.isGrounded(slope)) {
@@ -87,13 +90,6 @@ export default class PlayerMovement {
             this.grounded = true;
         }
     }
-
-    isGrounded(slopeLimit = 0.7) {
-        return this.groundChecker.isGrounded(slopeLimit);
-    }
-    floorTrace() {
-        return this.groundChecker.floorTrace();
-    }
     fallStart() {
         clearTimeout(this.floorTimer);
         this.floorTimer = setTimeout(() => {
@@ -109,13 +105,13 @@ export default class PlayerMovement {
 
     idleMove(dt) {
         this.applyFriction(dt, this.values.idle.friction, false);
-        if (this.body.velocity.length() < 1) {
+        if (this.player.velocity.length() < 1) {
             return false;
         }
         return true;
     }
     smartMove(dt) {
-        if (this.isGrounded()) {
+        if (this.groundChecker.isGrounded()) {
             this.groundMove(dt);
         } else {
             this.airMove(dt);
@@ -123,19 +119,19 @@ export default class PlayerMovement {
     }
 
     dashForward(speed = 7, restrictY = true, noY = false) {
-        const forward = this.actor.getShootData().dir;
+        const forward = this.player.getAim().dir;
         if (restrictY) forward.y = Math.min(0, forward.y);
         if (noY) forward.y = 0;
         forward.normalize();
-        this.body.velocity = forward.multiplyScalar(speed);
+        this.player.velocity = forward.multiplyScalar(speed);
     }
 
     hoverFreeze(dt, lateralDampening = .98) {
         const scaledDelta = dt * 120;
-        const x = this.body.velocity.x *= lateralDampening ** scaledDelta;
-        const z = this.body.velocity.z *= lateralDampening ** scaledDelta;
-        const y = this.body.velocity.y < 0 ? this.body.velocity.y *= .9 ** scaledDelta : this.body.velocity.y *= .999 ** scaledDelta;
-        this.body.velocity = { x, y, z };
+        const x = this.player.velocity.x *= lateralDampening ** scaledDelta;
+        const z = this.player.velocity.z *= lateralDampening ** scaledDelta;
+        const y = this.player.velocity.y < 0 ? this.player.velocity.y *= .9 ** scaledDelta : this.player.velocity.y *= .999 ** scaledDelta;
+        this.player.velocity = { x, y, z };
     }
     slowMove(dt, friction = 5, speed = 2, accel = 2) {
         this.applyFriction(dt, friction);
@@ -146,16 +142,15 @@ export default class PlayerMovement {
         const wishdir = this.getInputDirection();
 
         this.applyFriction(dt, friction ?? this.values.attack.friction);
-        this.body.velocity.y *= .9975;
+        this.player.velocity.y *= .9975;
         this.accelerate(wishdir, speed ?? this.values.attack.speed, this.values.attack.accel, dt, this.values.attack.tap);
     }
 
-    groundMove(dt) {
-        this.applyFriction(dt, this.values.ground.friction);
+    groundMove(dt, wishdir) {
 
-        let wishdir = this.getInputDirection();
+        this.applyFriction(dt, this.values.ground.friction);
         let wishspeed = this.values.ground.speed + this.momentumBooster.increaseBoost(dt);
-        if (wishdir.length() === 0) return;
+        if (!wishdir || (wishdir.length() === 0)) return;
         const floorNormal = this.groundChecker.floorNormal();
         if (floorNormal) {
             wishdir = projectOnPlane(wishdir, floorNormal);
@@ -165,17 +160,16 @@ export default class PlayerMovement {
         //this.clampHorizontalSpeed(wishspeed, .02);
     }
 
-    airMove(dt) {
+    airMove(dt, wishdir) {
         this.applyFriction(dt, this.values.air.friction);
 
-        const wishdir = this.getInputDirection();
-        if (wishdir.length() === 0) return;
+        if (!wishdir || (wishdir.length() === 0)) return;
 
         this.accelerate(wishdir, this.values.air.speed, this.values.air.accel, dt, this.values.air.tap);
     }
 
     bladeStart(pwr = 1) {
-        const v = this.tempVec2.copy(this.body.velocity)
+        const v = this.tempVec2.copy(this.player.velocity)
         const vN = this.tempVec3.copy(v.clone())
         vN.normalize();
         const n = this.groundChecker.floorNormal();
@@ -190,7 +184,7 @@ export default class PlayerMovement {
             projectV.normalize();
             projectV.scale(maxBoost, projectV);
         }
-        this.body.velocity.copy(projectV);
+        this.player.velocity.copy(projectV);
     }
 
     bladeMove(dt) {
@@ -214,33 +208,33 @@ export default class PlayerMovement {
     }
     dashStart() {
         this.getInputDirection(-1);
-        this.dashValue = Math.max(this.values.dash.speed, this.body.velocity.length());
+        this.dashValue = Math.max(this.values.dash.speed, this.player.velocity.length());
     }
     dashMove(dt, decay = 10, min = 6) {
         const d = this.tempVector.copy(this.direction)
         this.dashValue = Math.max(min, this.dashValue - decay * dt);
-        this.body.velocity = d.multiplyScalar(this.dashValue);
+        this.player.velocity = d.multiplyScalar(this.dashValue);
     }
     dashStop() {
-        const currentVel = this.body.velocity.clone();
-        this.body.velocity = clampVector(currentVel, 12);
+        const currentVel = this.player.velocity.clone();
+        this.player.velocity = clampVector(currentVel, 12);
     }
 
     jumpStart(addJump = 4, maxJump = 8) {
-        const v = this.body.velocity;
+        const v = this.player.velocity;
         const yv = Math.min(maxJump, Math.max(addJump, v.y + addJump))
-        this.body.velocity = { x: v.x, y: yv, z: v.z };
+        this.player.velocity = { x: v.x, y: yv, z: v.z };
     }
 
     jumpMove(dt, height = 8) {
         this.airMove(dt);
-        const v = this.body.velocity;
+        const v = this.player.velocity;
 
-        this.body.velocity = { x: v.x, y: v.y += height * dt, z: v.z };
+        this.player.velocity = { x: v.x, y: v.y += height * dt, z: v.z };
     }
 
     applyFriction(dt, friction, expo = true) {
-        const v = this.body.velocity;
+        const v = this.player.velocity;
         const speed = v.length();
         if (speed < 0.00001) return;
         const drop = expo ? speed * friction * dt : friction * dt;
@@ -249,12 +243,12 @@ export default class PlayerMovement {
         v.x *= scale;
         v.y *= scale;
         v.z *= scale;
-        this.body.velocity = v;
+        this.player.velocity = v;
     }
     /**@param {Vector3} wishdir */
     accelerate(wishdir, wishspeed, accel, dt, blendFactor = 0.01) {
-        const v = this.body.velocity;
-        const currentVelocity = this.tempVector.copy(this.body.velocity);
+        const v = this.player.velocity;
+        const currentVelocity = this.tempVector.copy(this.player.velocity);
         currentVelocity.y = 0;
 
         const wishDirSpeed = currentVelocity.dot(wishdir);
@@ -263,7 +257,7 @@ export default class PlayerMovement {
         if (addSpeed <= 0) return false;
         const accelSpeed = Math.min(accel * addSpeed * dt, addSpeed);
         v.add(wishdir.multiplyScalar(accelSpeed));
-        this.body.velocity = v;
+        this.player.velocity = v;
 
         if (wishDirSpeed > 0) {
             this.adjustVelocityDirection(wishdir, blendFactor);
@@ -273,7 +267,7 @@ export default class PlayerMovement {
         this.tempVector.copy(wishdir).normalize();
         if (wishdir.length() === 0) return;
 
-        const v = this.body.velocity;
+        const v = this.player.velocity;
         const vy = v.y;
         v.y = 0;
         const speed = Math.hypot(v.x, v.z);
@@ -285,48 +279,45 @@ export default class PlayerMovement {
 
         v.lerp(this.tempVector, blendFactor);
 
-        this.body.velocity = { x: v.x, y: vy, z: v.z };
+        this.player.velocity = { x: v.x, y: vy, z: v.z };
     }
     clampHorizontalSpeed(maxSpeed) {
-        const v = this.body.velocity;
+        const v = this.player.velocity;
         const horizSpeed = Math.hypot(v.x, v.z);
         if (horizSpeed > maxSpeed) {
             const scale = maxSpeed / horizSpeed;
-            this.body.velocity = { x: v.x *= scale, y: v.y, z: v.z *= scale }
+            this.player.velocity = { x: v.x *= scale, y: v.y, z: v.z *= scale }
         }
     }
-    getInputDirection(z = 0) {
-        this.direction.set(0, 0, 0);
+    // getInputDirection(z = 0) {
+    //     this.direction.set(0, 0, 0);
 
-        /**@type {Input} */
-        const input = this.input
+    //     // Gather input directions
+    //     if (input.actionStates.moveForward) this.direction.z -= 1;
+    //     if (input.actionStates.moveBackward) this.direction.z += 1;
+    //     if (input.actionStates.moveLeft) this.direction.x -= 1;
+    //     if (input.actionStates.moveRight) this.direction.x += 1;
 
-        // Gather input directions
-        if (input.actionStates.moveForward) this.direction.z -= 1;
-        if (input.actionStates.moveBackward) this.direction.z += 1;
-        if (input.actionStates.moveLeft) this.direction.x -= 1;
-        if (input.actionStates.moveRight) this.direction.x += 1;
+    //     if (this.direction.length() === 0) {
+    //         this.direction.z = z;
+    //     }
+    //     const { rotatedX, rotatedZ } = this.rotateInputVector(this.direction);
 
-        if (this.direction.length() === 0) {
-            this.direction.z = z;
-        }
-        const { rotatedX, rotatedZ } = this.rotateInputVector(this.direction);
+    //     // Input direction as a vector
+    //     this.direction.set(rotatedX, 0, rotatedZ);
+    //     this.direction.normalize();
+    //     return this.direction;
+    // }
 
-        // Input direction as a vector
-        this.direction.set(rotatedX, 0, rotatedZ);
-        this.direction.normalize();
-        return this.direction;
-    }
+    // rotateInputVector(dir) {
+    //     // Rotate input direction by controller yaw
+    //     const yaw = this.input.yaw;
+    //     const cosYaw = Math.cos(yaw);
+    //     const sinYaw = Math.sin(yaw);
 
-    rotateInputVector(dir) {
-        // Rotate input direction by controller yaw
-        const yaw = this.input.yaw;
-        const cosYaw = Math.cos(yaw);
-        const sinYaw = Math.sin(yaw);
+    //     const rotatedX = dir.x * cosYaw + dir.z * sinYaw;
+    //     const rotatedZ = -dir.x * sinYaw + dir.z * cosYaw;
 
-        const rotatedX = dir.x * cosYaw + dir.z * sinYaw;
-        const rotatedZ = -dir.x * sinYaw + dir.z * cosYaw;
-
-        return { rotatedX, rotatedZ };
-    }
+    //     return { rotatedX, rotatedZ };
+    // }
 }

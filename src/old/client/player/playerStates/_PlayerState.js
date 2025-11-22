@@ -1,10 +1,10 @@
 import { Vector3 } from 'three';
-import PlayerMovement from '../PlayerMovement';
+import PlayerMovement from '../../../../client/actors/components/PlayerMovement';
 import Player from '../Player';
 import PlayerStateManager from './PlayerStateManager';
 import PawnBody from '../../core/PawnCapsule';
 import Game from '../../CGame';
-import { vectorsToLateralDegrees } from '../../utils/Utils';
+import { vectorsToLateralDegrees } from '../../../../core/utils/Utils';
 import Input from '../../core/Input';
 export default class PlayerState {
     constructor(game, manager, actor, options = {}) {

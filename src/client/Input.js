@@ -1,7 +1,8 @@
 import { setupKeybindWindow, addButton } from "./other/KeyBinds";
-import LocalData from "./LocalData";
 import MyEventEmitter from "../core/MyEventEmitter";
 import { Actions } from "./other/Actions";
+import { rotateInputAroundYaw } from "../core/utils/Utils";
+import { Vector3 } from "three";
 
 export default class Input {
   constructor(gameElement) {
@@ -15,11 +16,13 @@ export default class Input {
 
     this.yaw = 0
     this.pitch = 0;
+    this.direction = new Vector3();
     this.keys = {};
     this.mice = {};
+    this.look = null;
     this.lockMouse = false;
     this.inputBlocked = false;
-    this.actions = {
+    this.actionKeys = {
       '0': Actions.ATTACK_LEFT,
       '2': Actions.ATTACK_RIGHT,
       'KeyW': Actions.FWD,
@@ -52,38 +55,35 @@ export default class Input {
     addKeys();
   }
   bindings() {
-    document.addEventListener('keypress', (e) => {
-      if (this.inputBlocked) return;
-      MyEventEmitter.emit('KeyPressed', e.code);
-      if (e.code === 'Digit5') {
-        MyEventEmitter.emit('test');
-      }
-      const action = this.actions[e.code];
-      if (action) this.buttonPressed(action);
-    });
+    // document.addEventListener('keypress', (e) => {
+    //   if (this.inputBlocked) return;
+    //   MyEventEmitter.emit('KeyPressed', e.code);
+    //   if (e.code === 'Digit5') {
+    //     MyEventEmitter.emit('test');
+    //   }
+    //   const action = this.actionKeys[e.code];
+    //   if (action) this.buttonPressed(action);
+    // });
     document.addEventListener('keydown', (e) => {
       if (this.inputBlocked) return;
-      if (!this.actionStates.jump) {
-        MyEventEmitter.emit('keyJustDown', e.code);
-      }
       this.keys[e.code] = true;
-      const action = this.actions[e.code];
+      const action = this.actionKeys[e.code];
       if (action) this.actionStates[action] = true;
     });
     document.addEventListener('keyup', (e) => {
       if (this.inputBlocked) return;
       this.keys[e.code] = false;
-      const action = this.actions[e.code];
+      const action = this.actionKeys[e.code];
       if (action) this.actionStates[action] = false;
     });
     document.addEventListener('mousedown', (e) => {
       this.mice[e.button] = true;
-      const action = this.actions[e.button];
+      const action = this.actionKeys[e.button];
       if (action) this.actionStates[action] = true;
     });
     document.addEventListener('mouseup', (e) => {
       this.mice[e.button] = false;
-      const action = this.actions[e.button];
+      const action = this.actionKeys[e.button];
       if (action) this.actionStates[action] = false;
     });
     document.addEventListener('click', (e) => {
@@ -104,13 +104,13 @@ export default class Input {
           Math.min(Math.PI / 2, this.pitch - e.movementY * this.sensitivity)
         );
       }
-
+      if (this.look) this.look(this.yaw, this.pitch);
     });
 
     window.addEventListener('blur', () => {
       Object.keys(this.keys).forEach(key => {
         this.keys[key] = false;
-        const action = this.actions[key];
+        const action = this.actionKeys[key];
         if (action) this.actionStates[action] = false;
       });
     });
@@ -120,14 +120,23 @@ export default class Input {
         this.actionStates[state] = false;
       }
     })
-
-    window.devMode = () => {
-      LocalData.flags.dev = true;
-    }
   }
-
+  update(dt) { }
   buttonPressed(action) {
     MyEventEmitter.emit(action);
+  }
+  inputDirection() {
+    let x = 0, z = 0;
+    if (this.actionStates[Actions['FWD']]) z -= 1;
+    if (this.actionStates[Actions['BWD']]) z += 1;
+    if (this.actionStates[Actions['LEFT']]) x -= 1;
+    if (this.actionStates[Actions['RIGHT']]) x += 1;
+
+    if (x === 0 && z === 0) return false;
+
+    const { rotatedX, rotatedZ } = rotateInputAroundYaw(x, z, this.yaw);
+    this.direction.set(rotatedX, 0, rotatedZ).normalize();
+    return this.direction;
   }
 
 }

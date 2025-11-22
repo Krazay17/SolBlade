@@ -75,6 +75,7 @@ export default class CGame extends GameCore {
             this.makeWorld('scene');
         })
     }
+    get physics() { return this.solWorld.physics }
     bindings() {
         window.addEventListener('resize', () => {
             const w = window.innerWidth;

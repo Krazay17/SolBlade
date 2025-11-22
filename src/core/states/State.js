@@ -12,9 +12,12 @@ export default class State {
         this.pawn = pawn;
         this.canReEnter = false;
     }
+    get controller() { return this.pawn.controller }
+    get movement() { return this.pawn.movement }
+    setState(state, params) { this.fsm.setState(state, params) }
     enter(lState, params) { }
     exit(nState) { }
     update(dt) { }
-    canEnter() { }
-    canExit() { }
+    canEnter() { return true }
+    canExit() { return true }
 }

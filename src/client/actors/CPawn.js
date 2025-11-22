@@ -32,7 +32,8 @@ export default class CPawn extends Pawn {
         return this._vecPos;
     }
     set vecPos(v) {
-        this._vecPos = v;
+        if (!this._vecPos) this._vecPos = new THREE.Vector3();
+        this._vecPos.copy(v);
         this.pos[0] = v.x;
         this.pos[1] = v.y;
         this.pos[2] = v.z;
@@ -44,7 +45,8 @@ export default class CPawn extends Pawn {
     }
     /**@type {THREE.Quaternion} */
     set quatRot(v) {
-        this._quatRot = v;
+        if (!this._quatRot) this._quatRot = new THREE.Quaternion();
+        this._quatRot.copy(v);
         this.rot[0] = v.x;
         this.rot[1] = v.y;
         this.rot[2] = v.z;
@@ -55,6 +57,15 @@ export default class CPawn extends Pawn {
         this._yaw = v;
         this.quatRot.setFromAxisAngle(this.upVec, v)
         this.body.setRotation(this.quatRot, true);
+    }
+    get velocity() {
+        if (!this._vecVel) this._vecVel = new THREE.Vector3();
+
+        return this._vecVel.copy(this.body.linvel());
+    }
+    set velocity(v) {
+        this._vecVel.copy(v);
+        this.body.setLinvel(this._vecVel, true)
     }
     testCube() {
         const mesh = new THREE.Mesh(
@@ -72,23 +83,22 @@ export default class CPawn extends Pawn {
             if (callback) callback();
         });
     }
-    move(dir) {
-
-    }
-    look(yaw, pitch) {
-        this.yaw = yaw;
-    }
     tick(dt) {
         if (this.controller) this.controller.update(dt);
         if (this.fsm) this.fsm.update(dt);
+        if (this.movement) this.movement.update(dt);
         if (this.animation) this.animation.update(dt);
         if (this.body) {
             if (this.isRemote) {
                 this.graphics.position.lerp(this.body.translation(), dt * 60);
                 this.graphics.quaternion.slerp(this.body.rotation(), dt * 60);
             } else {
-                this.graphics.position.copy(this.body.translation());
-                this.graphics.quaternion.copy(this.body.rotation());
+                const pos = this.body.translation();
+                const rot = this.body.rotation();
+                this.vecPos = pos;
+                this.quatRot = rot;
+                this.graphics.position.copy(pos);
+                this.graphics.quaternion.copy(rot);
             }
         }
     }

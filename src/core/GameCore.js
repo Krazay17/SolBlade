@@ -9,24 +9,11 @@ export default class GameCore {
         this.init();
     }
     init() {
-        this.lastTime = performance.now();
-        this.accumulator = 0;
-        const timestep = 1 / 60;
-
         this.fixedUpdateTimer = setInterval(() => {
-            const now = performance.now();
-            const frameTime = Math.min((now - this.lastTime) / 1000, 0.25);
-            this.lastTime = now;
-
             if (this.running) {
-                this.accumulator += frameTime;
-                while (this.accumulator >= timestep) {
-                    this.fixedStep(timestep);
-
-                    this.accumulator -= timestep;
-                }
+                this.fixedStep();
             }
-        }, SOL_PHYSICS_SETTINGS.serverTick);
+        }, SOL_PHYSICS_SETTINGS.serverTick * 1000);
     }
     fixedStep(dt) { }
     addPlayer(data) { }

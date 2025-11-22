@@ -1,10 +1,7 @@
 import { Vector3 } from 'three'
 
 export default class MomentumBoost {
-    constructor(actor) {
-        this.actor = actor;
-        this.body = actor.body;
-        this.input = actor.input;
+    constructor() {
         this.boostAmount = 0;
         this.lastVelocity = new Vector3();
         this.lastAlignment = 0;

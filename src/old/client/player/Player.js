@@ -4,7 +4,7 @@ import MyEventEmitter from '../../../core/MyEventEmitter';
 import * as Weapon from './weapons/index';
 import { tryUpdatePosition } from '../core/NetManager';
 import CameraFX from '../core/CameraFX';
-import PlayerMovement from './PlayerMovement';
+import PlayerMovement from '../../../client/actors/components/PlayerMovement';
 import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
 import PlayerStateManager from './playerStates/PlayerStateManager';
@@ -12,7 +12,7 @@ import HitData from '../core/HitData';
 import { menuButton } from '../ui/Menu';
 import Energy from '../core/Energy';
 import { Ray } from '@dimforge/rapier3d-compat';
-import { lerpTo } from '../utils/Utils';
+import { lerpTo } from '../../../core/utils/Utils';
 import { Actor } from '../../old/shared';
 
 export default class Player extends Actor {

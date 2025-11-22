@@ -42,3 +42,13 @@ export function lerpTo(a, b, t) {
     let diff = b - a;
     return a + diff * t;
 }
+
+export function rotateInputAroundYaw(x, z, yaw) {
+    const cosYaw = Math.cos(yaw);
+    const sinYaw = Math.sin(yaw);
+
+    const rotatedX = x * cosYaw + z * sinYaw;
+    const rotatedZ = -x * sinYaw + z * cosYaw;
+
+    return { rotatedX, rotatedZ };
+}

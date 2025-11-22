@@ -2,6 +2,7 @@ import RAPIER from "@dimforge/rapier3d-compat";
 import GameCore from "../GameCore.js";
 import Actor from "./Actor.js";
 import { COLLISION_GROUPS } from "../SolConstants.js";
+import Controller from "./components/Controller.js";
 
 export default class Pawn extends Actor {
     /**
@@ -13,10 +14,10 @@ export default class Pawn extends Actor {
         super(data);
         this.game = game;
         this.isRemote = false;
-        this.stateChanged = false;
         this.height = data.height ?? 1;
         this.radius = data.radius ?? 0.5;
 
+        /**@type {Controller} */
         this.controller = null;
         this.movement = null;
         this.fsm = null;

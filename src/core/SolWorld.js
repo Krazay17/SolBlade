@@ -39,8 +39,6 @@ export default class SolWorld {
     }
     fixedStep(dt) {
         if (!this.ready) return;
-        for (let i = 0; i < SOL_PHYSICS_SETTINGS.substeps; i++) {
-            this.physics?.step();
-        }
+        this.physics?.step();
     }
 }

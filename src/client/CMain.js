@@ -29,3 +29,7 @@ window.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     e.stopPropagation();
 });
+
+window.devMode = () => {
+    LocalData.flags.dev = true;
+}

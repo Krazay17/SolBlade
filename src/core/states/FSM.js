@@ -1,6 +1,7 @@
 import Pawn from "../actors/Pawn";
 import GameCore from "../GameCore";
 import DeadState from "./DeadState";
+import FallState from "./FallState";
 import IdleState from "./IdleState";
 import RunState from "./RunState";
 import State from "./State";
@@ -9,6 +10,7 @@ const stateRegistry = {
     idle: IdleState,
     run: RunState,
     dead: DeadState,
+    fall: FallState,
 }
 
 export default class FSM {
