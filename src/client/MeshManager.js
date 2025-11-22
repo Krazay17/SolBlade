@@ -24,6 +24,8 @@ export default class MeshManager {
     }
     async _newMesh(name) {
         let mesh = await this.loader.loadAsync(`assets/${name}.glb`)
+        console.log(mesh);
+        
         this.loadedMesh.set(name, mesh);
         return mesh;
     }

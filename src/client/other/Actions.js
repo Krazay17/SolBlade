@@ -1,0 +1,17 @@
+export const Actions = {
+    FWD: 0,
+    BWD: 1,
+    LEFT:2,
+    RIGHT:3,
+    JUMP: 4,
+    DASH: 5,
+    ATTACK_LEFT: 6,
+    ATTACK_RIGHT: 7,
+    SPELL_1: 8,
+    SPELL_2: 9,
+    SPELL_3: 10,
+    SPELL_4: 11,
+    INVENTORY: 12,
+    HOME: 13,
+    WORLD1: 14,
+}

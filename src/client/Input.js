@@ -1,6 +1,7 @@
 import { setupKeybindWindow, addButton } from "./other/KeyBinds";
 import LocalData from "./LocalData";
 import MyEventEmitter from "../core/MyEventEmitter";
+import { Actions } from "./other/Actions";
 
 export default class Input {
   constructor(gameElement) {
@@ -19,40 +20,25 @@ export default class Input {
     this.lockMouse = false;
     this.inputBlocked = false;
     this.actions = {
-      '0': 'attackLeft',
-      '2': 'attackRight',
-      'KeyW': 'moveForward',
-      'KeyS': 'moveBackward',
-      'KeyA': 'moveLeft',
-      'KeyD': 'moveRight',
-      'KeyE': 'dash',
-      'Space': 'jump',
-      'ShiftLeft': 'blade',
-      'KeyC': 'openInventory',
-      'KeyT': 'scene1',
-      'KeyY': 'scene2',
-      'KeyU': 'scene3',
-      'KeyI': 'scene4',
-      'Digit1': 'spell1',
-      'Digit2': 'spell2',
-      'Digit3': 'spell3',
-      'Digit4': 'spell4',
+      '0': Actions.ATTACK_LEFT,
+      '2': Actions.ATTACK_RIGHT,
+      'KeyW': Actions.FWD,
+      'KeyS': Actions.BWD,
+      'KeyA': Actions.LEFT,
+      'KeyD': Actions.RIGHT,
+      'Space': Actions.JUMP,
+      'ShiftLeft': Actions.DASH,
+      'KeyC': Actions.INVENTORY,
+      'KeyT': Actions.HOME,
+      'Digit1': Actions.SPELL_1,
+      'Digit2': Actions.SPELL_2,
+      'Digit3': Actions.SPELL_3,
+      'Digit4': Actions.SPELL_4,
     };
-    this.actionStates = {
-      'attackLeft': false,
-      'attackRIght': false,
-      'moveForward': false,
-      'moveBackward': false,
-      'moveLeft': false,
-      'moveRight': false,
-      'dash': false,
-      'jump': false,
-      'blade': false,
-      'spell1': false,
-      'spell2': false,
-      'spell3': false,
-      'spell4': false,
-    };
+    this.actionStates = {};
+    for (const key in Actions) {
+      this.actionStates[Actions[key]] = false;
+    }
 
     document.addEventListener('pointerlockchange', () => {
       this.pointerLocked = (document.pointerLockElement === this.gameElement);
@@ -112,7 +98,6 @@ export default class Input {
       if (Math.abs(e.movementX) < 200 && Math.abs(e.movementY) < 200) {
         this.yaw -= e.movementX * this.sensitivity;
         this.yaw = normalizeAngle(this.yaw);
-
 
         this.pitch = Math.max(
           -Math.PI / 2,

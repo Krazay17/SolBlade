@@ -18,10 +18,10 @@ export default class Net {
         try {
             this.socket = io(this.serverURL, {
                 transports: ["websocket"],
-                reconnection: true,
+                reconnection: false,
                 timeout: 5000,
             });
-            const result = await this.socket.timeout(2500).emitWithAck("hello");
+            const result = await this.socket.timeout(5000).emitWithAck("hello");
             this.serverVersion = result;
             this.remote = true;
 

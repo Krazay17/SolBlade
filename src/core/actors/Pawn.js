@@ -13,6 +13,7 @@ export default class Pawn extends Actor {
         super(data);
         this.game = game;
         this.isRemote = false;
+        this.stateChanged = false;
         this.height = data.height ?? 1;
         this.radius = data.radius ?? 0.5;
 
@@ -47,4 +48,7 @@ export default class Pawn extends Actor {
         this.collider = null;
     }
     step(dt) { }
+    stateChanged(state){
+        
+    }
 }

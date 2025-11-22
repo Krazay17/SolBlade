@@ -11,6 +11,7 @@ import CSolWorld from "./worlds/CSolWorld";
 import CSolWorld2 from "./worlds/CSolWorld2";
 import { menuButton } from "./ui/MainMenu";
 import CPlayer from "./actors/CPlayer";
+import MeshManager from "./MeshManager";
 
 const sceneRegistry = {
     scene: CSolWorld,
@@ -45,6 +46,7 @@ export default class CGame extends GameCore {
         this.loadingManager = new THREE.LoadingManager(this.loadingBar.finish, this.loadingBar.update);
         this.loader = new THREE.Loader(this.loadingManager);
         this.glbLoader = new GLTFLoader(this.loadingManager);
+        this.meshManager = new MeshManager(this);
 
         this.graphics = new THREE.Scene();
 
@@ -61,7 +63,7 @@ export default class CGame extends GameCore {
         this.worldLight();
 
         //this.player = new CPlayer(this, { pos: LocalData.position || [0, 15, 0] });
-        this.player = new CPlayer(this, { pos: [0, 15, 0] });
+        this.player = new CPlayer(this, { pos: [0, 18, 0] });
         this.makeWorld(LocalData.worldName || "scene2");
 
         this.bindings();
@@ -101,7 +103,7 @@ export default class CGame extends GameCore {
         this.solWorld = new sceneClass(this);
         this.player.makeBody(this.solWorld.physics);
         this.solWorld.enter(() => {
-            this.ready = true
+            this.ready = true;
             this.worldName = worldName;
         });
     }
