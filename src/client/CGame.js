@@ -6,19 +6,19 @@ import SolRenderPass from "./SolRenderPass";
 import SoundPlayer from "./SoundPlayer";
 import LocalData from "./LocalData"
 import LoadingBar from "./LoadingBar";
-import GameCore from "../core/GameCore";
 import CSolWorld from "./worlds/CSolWorld";
 import CSolWorld2 from "./worlds/CSolWorld2";
 import { menuButton } from "./ui/MainMenu";
 import CPlayer from "./actors/CPlayer";
 import MeshManager from "./MeshManager";
+import { SOL_PHYSICS_SETTINGS } from "../core/SolConstants";
 
 const sceneRegistry = {
-    scene: CSolWorld,
-    scene2: CSolWorld2,
+    world1: CSolWorld,
+    world2: CSolWorld2,
 }
 
-export default class CGame extends GameCore {
+export default class CGame {
     /**
      * 
      * @param {Document} canvas 
@@ -26,18 +26,15 @@ export default class CGame extends GameCore {
      * @param {Net} net 
      */
     constructor(canvas, input, net) {
-        super();
         this.canvas = canvas;
         this.input = input;
         this.net = net;
 
-        this.timeStep = 1 / 120;
-        this.subStep = 6;
         this.lastTime = 0;
         this.accumulator = 0;
         /**@type {CSolWorld} */
         this.solWorld = null;
-        this.worldName = "scene2";
+        this.worldName = "world1";
 
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -64,15 +61,15 @@ export default class CGame extends GameCore {
 
         //this.player = new CPlayer(this, { pos: LocalData.position || [0, 15, 0] });
         this.player = new CPlayer(this, { pos: [0, 18, 0] });
-        this.makeWorld(LocalData.worldName || "scene2");
+        this.makeWorld(LocalData.worldName || "world1");
 
         this.bindings();
 
-        menuButton('level2', () => {
-            this.makeWorld('scene2');
+        menuButton('world1', () => {
+            this.makeWorld('world1');
         })
-        menuButton('level3', () => {
-            this.makeWorld('scene');
+        menuButton('world2', () => {
+            this.makeWorld('world2');
         })
     }
     get physics() { return this.solWorld.physics }
@@ -115,9 +112,19 @@ export default class CGame extends GameCore {
             this.handleSleep();
         }
         if (this.running && this.ready) {
+            this.accumulator += dt;
+            this.accumulator = Math.min(this.accumulator, 0.25);
+            const timestep = SOL_PHYSICS_SETTINGS.timeStep;
+            while (this.accumulator >= timestep) {
+                this.fixedStep(timestep);
+
+                this.accumulator -= timestep;
+            }
+
             this.player?.tick(dt);
             this.solWorld?.tick(dt);
             this.solRender.composer.render(dt);
+
         }
         requestAnimationFrame(this.tick.bind(this));
     }

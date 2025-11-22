@@ -6,7 +6,7 @@ export default class Actor {
             type = null,
             name = null,
             owner = null,
-            worldName = 'scene2',
+            worldName = 'world1',
             pos = [0, 0, 0],
             dir = [0, 0, 0],
             rot = [0, 0, 0, 1],

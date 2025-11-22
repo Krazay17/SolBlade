@@ -9,7 +9,7 @@ export default class CSolWorld extends SolWorld {
      * 
      * @param {CGame} game 
      */
-    constructor(game, name = "scene3") {
+    constructor(game, name = "world1") {
         super(game, name);
         this.game = game;
         this.name = name;

@@ -1,11 +1,11 @@
-const CURRENT_VERSION = 0.094;
+const CURRENT_VERSION = 0.096;
 
 export default {
     version: CURRENT_VERSION,
     name: "Player",
     money: 0,
     health: 100,
-    sceneName: 'scene2',
+    sceneName: 'world1',
     position: [0, 1, 0],
     rotation: [0, 0, 0, 1],
     weapons: { left: "Fireball", right: "Blade" },

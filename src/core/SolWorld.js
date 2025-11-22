@@ -7,7 +7,7 @@ export default class SolWorld {
      * 
      * @param {GameCore} game 
      */
-    constructor(game, name = "scene2") {
+    constructor(game, name = "world1") {
         this.game = game;
         this.name = name;
 
