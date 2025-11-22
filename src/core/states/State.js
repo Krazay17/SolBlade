@@ -10,6 +10,7 @@ export default class State {
     constructor(fsm, pawn) {
         this.fsm = fsm;
         this.pawn = pawn;
+        this.name = "state";
         this.canReEnter = false;
     }
     get controller() { return this.pawn.controller }

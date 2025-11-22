@@ -3,6 +3,7 @@ import GameCore from "../GameCore";
 import DeadState from "./DeadState";
 import FallState from "./FallState";
 import IdleState from "./IdleState";
+import PatrolState from "./PatrolState";
 import RunState from "./RunState";
 import State from "./State";
 
@@ -11,6 +12,7 @@ const stateRegistry = {
     run: RunState,
     dead: DeadState,
     fall: FallState,
+    patrol: PatrolState
 }
 
 export default class FSM {
@@ -30,6 +32,7 @@ export default class FSM {
             dead: new stateRegistry['dead'](this, this.pawn),
         };
         this.state = this.states['idle'];
+        this.stateName = 'idle';
 
         for (const s of states) {
             const sClass = stateRegistry[s];
@@ -40,7 +43,7 @@ export default class FSM {
     get animation() { return this.pawn.animation }
 
     setState(state, params) {
-        const lastState = this.state.name;
+        const lastState = this.stateName;
         if (state === lastState && !this.state.canReEnter) return false
         const newState = this.states[state]
         if (!newState) return;
@@ -53,6 +56,9 @@ export default class FSM {
         this.state.exit(state);
         this.state = newState;
         this.state.enter(lastState, params);
+
+        console.log(`Old state: ${lastState}`, `New state ${state}`);
+        this.stateName = state;
 
         this.pawn.stateChanged(state);
 

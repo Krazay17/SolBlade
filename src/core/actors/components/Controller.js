@@ -1,13 +1,13 @@
-import GameCore from "../../GameCore";
+import SolWorld from "../../SolWorld";
 import Pawn from "../Pawn";
 
 export default class Controller {
     /**
-     * @param {GameCore} game
+     * @param {SolWorld} world
      * @param {Pawn} pawn 
      */
-    constructor(game, pawn) {
-        this.game = game;
+    constructor(world, pawn) {
+        this.world = world
         this.pawn = pawn;
     }
     inputDirection(){}

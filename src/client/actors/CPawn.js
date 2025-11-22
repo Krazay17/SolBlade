@@ -1,23 +1,23 @@
 import * as THREE from "three";
-import CGame from "../CGame";
 import Pawn from "../../core/actors/Pawn";
 import AnimationManager from "./components/AnimationManager";
+import CSolWorld from "../worlds/CSolWorld";
 
 export default class CPawn extends Pawn {
     /**
      * 
-     * @param {CGame} game 
+     * @param {CSolWorld} world 
      * @param {*} data 
      */
-    constructor(game, data) {
-        super(game, data);
-        this.game = game;
+    constructor(world, data) {
+        super(world, data);
+        this.world = world;
 
         this.isRemote = data.isRemote ?? false;
         this.meshName = data.meshName ?? "spikeMan";
 
         this.graphics = new THREE.Group();
-        this.game.graphics.add(this.graphics);
+        this.world.graphics.add(this.graphics);
 
         this.animation = null;
 
@@ -75,7 +75,7 @@ export default class CPawn extends Pawn {
         this.graphics.add(mesh);
     }
     makeMesh(callback) {
-        this.game.meshManager.makeMesh(this.meshName).then(({ animations, scene }) => {
+        this.world.meshManager.makeMesh(this.meshName).then(({ animations, scene }) => {
             this.mesh = scene;
             this.animation = new AnimationManager(this, scene, animations);
             this.mesh.position.set(0, -1, 0)
@@ -84,6 +84,7 @@ export default class CPawn extends Pawn {
         });
     }
     tick(dt) {
+        if(!this.active)return;
         if (this.controller) this.controller.update(dt);
         if (this.fsm) this.fsm.update(dt);
         if (this.movement) this.movement.update(dt);

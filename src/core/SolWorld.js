@@ -1,6 +1,7 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import GameCore from "./GameCore.js";
 import { SOL_PHYSICS_SETTINGS } from "./SolConstants.js";
+import Wizard from "./actors/Wizard.js";
 
 export default class SolWorld {
     /**
@@ -11,16 +12,53 @@ export default class SolWorld {
         this.game = game;
         this.name = name;
 
-        this.ready = false;
+        this.ready = true;
+        this.actorRegistry = {
+            wizard: Wizard,
+
+        }
 
         this.physics = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
         this.physics.timestep = SOL_PHYSICS_SETTINGS.timeStep;
-        this.actors = [];
+        this.actors = {
+            players: [],
+            enemies: [],
+            others: []
+        }
+    }
+    init() {
+        const enemies = 2;
+
+        for (let i = 0; i < enemies; i++) {
+            this.addActor('enemy', { subtype: "wizard", pos: [0, 20, i] });
+        }
+    }
+    addActor(type, data) {
+        let group;
+        switch (type) {
+            case "player":
+                group = this.actors.players;
+                break;
+            case "enemy":
+                group = this.actors.enemies;
+                break;
+            default:
+                group = this.actors.others;
+        }
+        const aClass = this.actorRegistry[data.subtype];
+        if (!aClass) return;
+        const actor = new aClass(this, data);
+        actor.makeBody?.(this.physics);
+        group.push(actor);
     }
     enter(callback) { }
     exit() {
         // remove actors
-        for (const actor of this.actors) {
+        for (const actor of this.actors.enemies) {
+            actor.removeBody(this.physics);
+            actor.destroy?.();
+        }
+        for (const actor of this.actors.players) {
             actor.removeBody(this.physics);
             actor.destroy?.();
         }
@@ -40,5 +78,11 @@ export default class SolWorld {
     fixedStep(dt) {
         if (!this.ready) return;
         this.physics?.step();
+    }
+    tick(dt){
+        if(!this.ready)return;
+        for (const a of this.actors.enemies) {
+            a.tick?.(dt);
+        }
     }
 }

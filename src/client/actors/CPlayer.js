@@ -1,11 +1,17 @@
 import CPawn from "./CPawn";
 import FSM from "../../core/states/FSM";
 import PlayerMovement from "./components/PlayerMovement";
+import CGame from "../CGame";
 
 export default class CPlayer extends CPawn {
+    /**
+     * 
+     * @param {CGame} game 
+     * @param {*} data 
+     */
     constructor(game, data) {
         super(game, data);
-
+        this.game = game;
         this.camera = this.game.camera;
         this.camera.position.set(.333, .666, 1.333);
         this.camera.quaternion.copy(this.quatRot);

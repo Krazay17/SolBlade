@@ -3,6 +3,8 @@ import CGame from "../CGame";
 import { getVerts } from "../../core/utils/VertUtils";
 import SolWorld from "../../core/SolWorld";
 import { Scene } from "three";
+import SkyBox from "./SkyBox";
+import CWizard from "../actors/CWizard";
 
 export default class CSolWorld extends SolWorld {
     /**
@@ -15,12 +17,27 @@ export default class CSolWorld extends SolWorld {
         this.name = name;
         this.glbLoader = game.glbLoader;
 
+        this.actorRegistry = {
+            wizard: CWizard,
+        }
+
         this.worldCollider = null;
         this.allGeoms = [];
         this.graphics = new Scene()
         this.game.graphics.add(this.graphics);
+
+        this.skybox = new SkyBox(game, this);
+
+        this.init();
     }
-    tick(dt) { }
+    get meshManager() { return this.game.meshManager }
+    add(obj) {
+        this.graphics.add(obj);
+    }
+    tick(dt) {
+        this.skybox.update(dt);
+        for (const a of this.actors.enemies) { a.tick(dt); }
+    }
     enter(callback) {
         this.glbLoader.load(`/assets/${this.name}.glb`, (data) => {
             const scene = data.scene;

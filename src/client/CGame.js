@@ -42,6 +42,7 @@ export default class CGame {
         this.loadingBar = new LoadingBar();
         this.loadingManager = new THREE.LoadingManager(this.loadingBar.finish, this.loadingBar.update);
         this.loader = new THREE.Loader(this.loadingManager);
+        this.textureLoader = new THREE.TextureLoader(this.loadingManager);
         this.glbLoader = new GLTFLoader(this.loadingManager);
         this.meshManager = new MeshManager(this);
 

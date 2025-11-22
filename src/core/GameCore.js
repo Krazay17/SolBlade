@@ -6,12 +6,17 @@ await RAPIER.init();
 
 export default class GameCore {
     constructor() {
-        this.running = false;
+        this.running = true;
         // this.solWorlds = [
         //     new SolWorld(this, "world1"),
         //     new SolWorld(this, "world2")
         // ];
-
+        this.solWorlds = {
+            world1: new SolWorld(this, 'world1'),
+            world2: new SolWorld(this, 'world2')
+        }
+        this.solWorlds.world1.init()
+        this.solWorlds.world2.init()
         this.init();
     }
     init() {
@@ -21,6 +26,11 @@ export default class GameCore {
             }
         }, SOL_PHYSICS_SETTINGS.serverTick * 1000);
     }
-    fixedStep(dt) { }
+    fixedStep(dt) {
+        this.solWorlds.world1.tick(dt);
+        this.solWorlds.world1.fixedStep(dt);
+        this.solWorlds.world2.tick(dt);
+        this.solWorlds.world2.fixedStep(dt);
+    }
     addPlayer(data) { }
 }

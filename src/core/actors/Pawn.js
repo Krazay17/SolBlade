@@ -1,18 +1,19 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import GameCore from "../GameCore.js";
 import Actor from "./Actor.js";
 import { COLLISION_GROUPS } from "../SolConstants.js";
 import Controller from "./components/Controller.js";
+import { Vect3 } from "../utils/SolMath.js";
+import SolWorld from "../SolWorld.js";
 
 export default class Pawn extends Actor {
     /**
      * 
-     * @param {GameCore} game 
+     * @param {SolWorld} world 
      * @param {*} data 
      */
-    constructor(game, data = {}) {
+    constructor(world, data = {}) {
         super(data);
-        this.game = game;
+        this.world = world;
         this.isRemote = false;
         this.height = data.height ?? 1;
         this.radius = data.radius ?? 0.5;
@@ -24,6 +25,24 @@ export default class Pawn extends Actor {
         this.abilities = null;
         this.body = null;
         this.collider = null;
+    }
+    get velocity() {
+        if (!this.body) return;
+        if (!this._vecVel) this._vecVel = new Vect3();
+
+        return this._vecVel.copy(this.body.linvel());
+    }
+    set velocity(v) {
+        if (!this.body) return;
+        if (!this._vecVel) this._vecVel = new Vect3();
+        this._vecVel.copy(v);
+        this.body.setLinvel(this._vecVel, true)
+    }
+    get vecDir() {
+        if (!this.body) return;
+        if (!this._vecDir) this._vecDir = new Vect3();
+
+        return this._vecDir.setFromRotArray(this.rot);
     }
     /**@param {RAPIER.World} world */
     makeBody(world, height = this.height, radius = this.radius) {
@@ -48,8 +67,24 @@ export default class Pawn extends Actor {
         this.body = null;
         this.collider = null;
     }
-    step(dt) { }
-    stateChanged(state){
-        
+    tick(dt) {
+        if (!this.active) return;
+        if (this.controller) this.controller.update(dt);
+        if (this.movement) this.movement.update(dt);
+        if (this.fsm) this.fsm.update(dt);
+        if (this.animation) this.animation.update(dt);
+        if (this.body) {
+            if (this.isRemote) {
+                this.graphics.position.lerp(this.body.translation(), dt * 60);
+                this.graphics.quaternion.slerp(this.body.rotation(), dt * 60);
+            } else {
+                const pos = this.body.translation();
+                const rot = this.body.rotation();
+                this.vecPos = pos;
+                this.quatRot = rot;
+            }
+        }
     }
+    step(dt) {    }
+    stateChanged(state) {    }
 }

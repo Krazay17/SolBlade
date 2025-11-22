@@ -13,10 +13,11 @@ export default class MeshManager {
         this.loadedMesh = new Map();
     }
     async makeMesh(name) {
+        let mesh = {};
         const loadedMesh = this.loadedMesh.get(name);
-        let mesh;
         if (loadedMesh) {
-            mesh = SkeletonUtils.clone(loadedMesh);
+            mesh.scene = SkeletonUtils.clone(loadedMesh.scene);
+            mesh.animations = loadedMesh.animations;
         } else {
             mesh = await this._newMesh(name);
         }
@@ -24,8 +25,7 @@ export default class MeshManager {
     }
     async _newMesh(name) {
         let mesh = await this.loader.loadAsync(`assets/${name}.glb`)
-        console.log(mesh);
-        
+
         this.loadedMesh.set(name, mesh);
         return mesh;
     }

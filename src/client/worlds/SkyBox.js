@@ -1,30 +1,44 @@
 import * as THREE from 'three';
+import CGame from '../CGame';
+import CSolWorld from './CSolWorld';
 
 export default class SkyBox extends THREE.Object3D {
-    constructor(scene) {
+    /**
+     * 
+     * @param {CGame} game 
+     * @param {CSolWorld} world 
+     */
+    constructor(game, world) {
         super();
-        this.scene = scene;
-        this.active = true;
-        this.textureLoader = scene.loadingManager.textureLoader;
-        this.sky = this.createSky();
-        this.rotatingFilter1 = this.createRotatingFilter('assets/SkyFilter.webp', 1950);
-        this.rotatingFilter2 = this.createRotatingFilter('assets/SkyFilter2.webp', 1900);
+        this.game = game;
+        this.world = world;
 
-        this.scene.add(this);
+        this.loader = game.textureLoader;
+
+        this.active = false;
+
+        this.world.add(this);
+        this.init();
+    }
+    async init() {
+        this.sky = await this.createSky();
+        this.rotatingFilter1 = await this.createRotatingFilter('assets/SkyFilter.webp', 1950);
+        this.rotatingFilter2 = await this.createRotatingFilter('assets/SkyFilter2.webp', 1900);
+        this.active = true;
     }
     destroy() {
         this.active = false;
-        this.scene.remove(this);
-        this.textureLoader = null;
+        this.world.remove(this);
+        this.loader = null;
         this.sky = null;
         this.rotatingFilter1 = null;
         this.rotatingFilter2 = null;
-        this.scene = null;
+        this.world = null;
     }
 
-    createSky() {
+    async createSky() {
         const geometry = new THREE.SphereGeometry(2000);
-        const myTexture = this.textureLoader.load('assets/RedSky0.webp');
+        const myTexture = await this.loader.loadAsync('assets/RedSky0.webp');
         const myMaterial = new THREE.MeshBasicMaterial({
             map: myTexture,
             side: THREE.BackSide,
@@ -35,9 +49,9 @@ export default class SkyBox extends THREE.Object3D {
         return skyBox;
     }
 
-    createRotatingFilter(texturePath = 'assets/SkyFilter.webp', size = 1100) {
+    async createRotatingFilter(texturePath = 'assets/SkyFilter.webp', size = 1100) {
         const geometry = new THREE.SphereGeometry(size);
-        const texture = this.textureLoader.load(texturePath);
+        const texture = await this.loader.loadAsync(texturePath)
         const material = new THREE.MeshBasicMaterial({
             map: texture,
             side: THREE.BackSide,
@@ -51,11 +65,11 @@ export default class SkyBox extends THREE.Object3D {
     }
 
     update() {
-        if(!this.active)return;
+        if (!this.active) return;
         if (this.rotatingFilter1) {
             this.rotatingFilter1.rotation.y += 0.0001;
         }
-        if(this.rotatingFilter2) {
+        if (this.rotatingFilter2) {
             this.rotatingFilter2.rotation.y -= 0.0001;
         }
     }
