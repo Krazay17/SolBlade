@@ -1,10 +1,10 @@
-import LocalData from "../../LocalData";
-import { projectOnPlane, clampVector } from "../../../core/utils/Utils";
+import LocalData from "../../core/LocalData";
+import { projectOnPlane, clampVector } from "../../../common/utils/Utils";
 import RunBoost from "./MomentumBoost";
 import { Vector3 } from "three";
 //import Input from "../core/Input";
 import GroundChecker from "./GroundChecker";
-import CGame from "../../CGame";
+import CGame from "../../core/CGame";
 import CPlayer from "../CPlayer";
 
 export default class PlayerMovement {
@@ -18,7 +18,7 @@ export default class PlayerMovement {
         this.player = player;
 
         this.momentumBooster = new RunBoost(player);
-        this.isGrounded = true;
+        //this.isGrounded = true;
         this.groundChecker = new GroundChecker(this.game, this.player);
 
         // Reusable vectors
@@ -68,10 +68,9 @@ export default class PlayerMovement {
             LocalData.save();
         });
     }
-
+    get isGrounded(){return this.groundChecker.isGrounded()}
     update(dt) {
         this.momentumBooster.update(dt, this.player.velocity);
-        this.isGrounded = this.groundChecker.isGrounded();
     }
     jumpBuffer(slope = 0.3) {
         if (!this.isGrounded(slope)) {

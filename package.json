@@ -5,7 +5,7 @@
   "workspaces": [
     "src/client",
     "src/server",
-    "src/shared"
+    "src/common"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev-server\" \"vite\"",

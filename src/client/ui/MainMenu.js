@@ -1,6 +1,6 @@
 import "../css/StyleMenu.css";
 
-import Input from "../Input";
+import Input from "../core/Input";
 
 export default class MainMenu {
     /**

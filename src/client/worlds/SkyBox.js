@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import CGame from '../CGame';
+import CGame from '../../../client/core/CGame';
 import CSolWorld from './CSolWorld';
 
 export default class SkyBox extends THREE.Object3D {

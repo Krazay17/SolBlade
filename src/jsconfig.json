@@ -3,7 +3,7 @@
     "baseUrl": "./src",
     "paths": {
       "@solblade/shared/*": [
-        "old/shared/*"
+        "zold/shared/*"
       ]
     }
   }

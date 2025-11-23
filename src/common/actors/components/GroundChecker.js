@@ -1,20 +1,20 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import CGame from "../../core/CGame";
-import CPawn from "../CPawn";
-import { Vector3 } from "three";
+import Pawn from "../Pawn";
+import { Vect3 } from "../../../../common/utils/SolMath";
+import SolWorld from "../../SolWorld";
 
 export default class GroundChecker {
     /**
      * 
-     * @param {CGame} game 
-     * @param {CPawn} pawn 
+     * @param {SolWorld} world
+     * @param {Pawn} pawn 
      */
-    constructor(game, pawn) {
-        this.game = game;
+    constructor(world, pawn) {
+        this.world = world;
         this.pawn = pawn;
 
-        this.downVec = new Vector3(0, -1, 0);
-        this.tempVec = new Vector3();
+        this.downVec = { x: 0, y: -1, z: 0 };
+        this.tempVec = new Vect3();
         this.ball = new RAPIER.Ball(this.pawn.radius);
 
     }
@@ -37,7 +37,7 @@ export default class GroundChecker {
             this.downVec,
             this.ball,
             0,
-            1.5,
+            1.2,
             true,
             undefined,
             undefined,

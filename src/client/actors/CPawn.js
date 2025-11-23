@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import Pawn from "../../core/actors/Pawn";
 import AnimationManager from "./components/AnimationManager";
-import CSolWorld from "../worlds/CSolWorld";
+import CSolWorld from "../../xotherOld/client/worlds/CSolWorld";
 
 export default class CPawn extends Pawn {
     /**

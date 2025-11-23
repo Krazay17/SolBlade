@@ -1,10 +1,10 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import CGame from "../CGame";
-import { getVerts } from "../../core/utils/VertUtils";
+import CGame from "../../../client/core/CGame";
+import { getVerts } from "../../../common/utils/VertUtils";
 import SolWorld from "../../core/SolWorld";
 import { Scene } from "three";
 import SkyBox from "./SkyBox";
-import CWizard from "../actors/CWizard";
+import CWizard from "../../../client/actors/CWizard";
 
 export default class CSolWorld extends SolWorld {
     /**
@@ -27,8 +27,6 @@ export default class CSolWorld extends SolWorld {
         this.game.graphics.add(this.graphics);
 
         this.skybox = new SkyBox(game, this);
-
-        this.init();
     }
     get meshManager() { return this.game.meshManager }
     add(obj) {
@@ -39,6 +37,7 @@ export default class CSolWorld extends SolWorld {
         for (const a of this.actors.enemies) { a.tick(dt); }
     }
     enter(callback) {
+        super.enter();
         this.glbLoader.load(`/assets/${this.name}.glb`, (data) => {
             const scene = data.scene;
             this.graphics.add(scene);
