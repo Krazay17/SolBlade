@@ -1,7 +1,9 @@
 # Node modules
 node_modules/
+src/node_modules/
 client/node_modules/
 server/node_modules/
+common/node_modules/
 tools/node_modules/
 
 # Vite build output

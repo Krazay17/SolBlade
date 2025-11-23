@@ -1,7 +1,7 @@
 import Input from "./Input.js";
 import LocalData from "./LocalData.js";
 //import { setupDiscordWindow } from "./other/DiscordStuff.js";
-import CGame from "./CGame.js";
+import CGame from "./GameClient.js";
 import NetManager from "../managers/NetManager.js";
 import MainMenu from "../ui/MainMenu.js";
 

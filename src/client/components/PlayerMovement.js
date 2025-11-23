@@ -1,10 +1,9 @@
 import LocalData from "../../core/LocalData";
-import { projectOnPlane, clampVector } from "../../../common/utils/Utils";
+import { projectOnPlane, clampVector } from "../../common/utils/Utils.js";
 import RunBoost from "./MomentumBoost";
 import { Vector3 } from "three";
-//import Input from "../core/Input";
 import GroundChecker from "./GroundChecker";
-import CGame from "../../core/CGame";
+import CGame from "../../core/GameClient";
 import CPlayer from "../CPlayer";
 
 export default class PlayerMovement {

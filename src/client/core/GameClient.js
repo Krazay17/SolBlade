@@ -1,24 +1,22 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/Addons";
-import Input from "./Input";
+import { SOL_PHYSICS_SETTINGS } from "../../common/config/SolConstants";
+import CPlayer from "../actors/CPlayer";
+import SoundPlayer from "../audio/SoundPlayer";
+import MeshManager from "../managers/MeshManager";
 import Net from "../managers/NetManager";
 import SolRenderPass from "../rendering/SolRenderPass";
-import SoundPlayer from "../../xotherOld/client/SoundPlayer";
-import LocalData from "./LocalData"
 import LoadingBar from "../ui/LoadingBar";
-import CSolWorld from "../../xotherOld/client/worlds/CSolWorld";
-import CSolWorld2 from "../../xotherOld/client/worlds/CSolWorld2";
 import { menuButton } from "../ui/MainMenu";
-import CPlayer from "../actors/CPlayer";
-import MeshManager from "../managers/MeshManager";
-import { SOL_PHYSICS_SETTINGS } from "../../common/config/SolConstants";
+import Input from "./Input";
+import LocalData from "./LocalData";
 
 const sceneRegistry = {
     world1: CSolWorld,
     world2: CSolWorld2,
 }
 
-export default class CGame {
+export default class GameClient {
     /**
      * 
      * @param {Document} canvas 
@@ -125,7 +123,6 @@ export default class CGame {
             this.player?.tick(dt);
             this.solWorld?.tick(dt);
             this.solRender.composer.render(dt);
-
         }
         requestAnimationFrame(this.tick.bind(this));
     }

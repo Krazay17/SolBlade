@@ -1,5 +1,5 @@
 import { io } from "socket.io-client"
-import LocalGame from "./LocalGame";
+import GameServer from "../../server/core/GameServer";
 
 export default class NetManager {
     constructor() {
@@ -28,7 +28,7 @@ export default class NetManager {
             console.log(`Connected ID: ${this.socket.id}`, result);
         } catch (err) {
             console.log('net init fail', err);
-            this.localServer = new LocalGame(this);
+            this.localServer = new GameServer(this);
             this.remote = false;
         }
     }

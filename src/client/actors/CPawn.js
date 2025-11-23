@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import Pawn from "../../core/actors/Pawn";
-import AnimationManager from "./components/AnimationManager";
-import CSolWorld from "../../xotherOld/client/worlds/CSolWorld";
+import Pawn from "@actors/Pawn";
+import AnimationManager from "../components/AnimationManager";
+import CSolWorld from "../worlds/CSolWorld"
 
 export default class CPawn extends Pawn {
     /**
@@ -84,7 +84,7 @@ export default class CPawn extends Pawn {
         });
     }
     tick(dt) {
-        if(!this.active)return;
+        if (!this.active) return;
         if (this.controller) this.controller.update(dt);
         if (this.fsm) this.fsm.update(dt);
         if (this.movement) this.movement.update(dt);

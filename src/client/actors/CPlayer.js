@@ -1,12 +1,12 @@
 import CPawn from "./CPawn";
 import FSM from "../../common/states/FSM";
-import PlayerMovement from "./components/PlayerMovement";
-import CGame from "../core/CGame";
+import PlayerMovement from "../components/PlayerMovement"
+import GameClient from "../core/GameClient";
 
 export default class CPlayer extends CPawn {
     /**
      * 
-     * @param {CGame} game 
+     * @param {GameClient} game 
      * @param {*} data 
      */
     constructor(game, data) {

@@ -4,7 +4,7 @@ import { getVerts } from "../../../common/utils/VertUtils";
 import SolWorld from "../../core/SolWorld";
 import { Scene } from "three";
 import SkyBox from "./SkyBox";
-import CWizard from "../../../client/actors/CWizard";
+import CWizard from "../actors/CWizard";
 
 export default class CSolWorld extends SolWorld {
     /**

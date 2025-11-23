@@ -1,8 +1,7 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import GameCore from "../../common/core/GameCore.js";
+import GameCore from "./GameCore.js"
 import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
-import Wizard from "./actors/Wizard.js";
-import MyEventEmitter from "./MyEventEmitter.js";
+import ActorManager from "../managers/ActorManager.js";
 
 export default class SolWorld {
     /**
@@ -14,10 +13,8 @@ export default class SolWorld {
         this.name = name;
 
         this.ready = true;
-        this.actorRegistry = {
-            wizard: Wizard,
 
-        }
+        this.actorManager = new ActorManager(this);
 
         this.physics = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
         this.physics.timestep = SOL_PHYSICS_SETTINGS.timeStep;

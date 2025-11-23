@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
-import SolWorld from "../../xotherOld/core/SolWorld.js";
+import SolWorld from "./SolWorld.js";
 
 await RAPIER.init();
 
@@ -33,7 +33,7 @@ export default class GameCore {
         this.solWorlds.world2.tick(dt);
         this.solWorlds.world2.fixedStep(dt);
     }
-    addPlayer(data) { }
+    addPlayer() { }
     updateActors() {
 
     }

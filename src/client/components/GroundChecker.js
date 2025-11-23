@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import CGame from "../../core/CGame";
+import CGame from "../../core/GameClient";
 import CPawn from "../CPawn";
 import { Vector3 } from "three";
 

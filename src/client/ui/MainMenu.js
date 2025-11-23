@@ -7,6 +7,8 @@ export default class MainMenu {
      * 
      * @param {Input} input 
      */
+    static ui = null;
+    static buttonGrid = null;
     constructor(input) {
         this.input = input;
 
@@ -14,6 +16,12 @@ export default class MainMenu {
         this.ui = this.init();
         MainMenu.ui = this.ui;
         this.toggle();
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.toggle();
+            }
+        })
     }
     init() {
         const root = document.createElement('div');
@@ -47,7 +55,7 @@ export function menuButton(text = 'Button', callback = () => { }) {
     MainMenu.buttonGrid.appendChild(button);
     return button;
 }
-export function menuSlider(text = 'Slider', min = 0, max = 1, step = 0.1, callback = () => { }) {
+export function menuSlider(text = 'Slider', min = '0', max = '1', step = '0.1', callback = (v) => { }) {
     const slider = document.createElement('input');
     slider.classList.add('menu-slider');
     slider.addEventListener('mousedown', (e) => {
@@ -61,7 +69,9 @@ export function menuSlider(text = 'Slider', min = 0, max = 1, step = 0.1, callba
     const label = document.createElement('p');
     label.innerText = text;
     slider.addEventListener('input', (e) => {
-        const value = e.target.value;
+        const target = /** @type {HTMLInputElement} */ (e.currentTarget);
+        const value = target.value;
+        if (!value) return;
         label.innerText = `${text}: ${value}`;
         callback(value);
     });

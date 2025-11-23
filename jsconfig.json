@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "checkJs": true,
+        "allowJs": true,
+        "strict": false,
+        "baseUrl": "./src",
+        "paths": {
+            "@common/*": [
+                "common/*"
+            ],
+            "@actors/*": [
+                "common/actors/*"
+            ],
+            "@components/*": [
+                "components/*"
+            ]
+        }
+    },
+    "include": [
+        "src"
+    ]
+}

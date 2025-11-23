@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import MyEventEmitter from '../../../common/core/MyEventEmitter.js';
-import Pawn from '../../../core/actors/Pawn.js';
+import MyEventEmitter from '../../common/core/MyEventEmitter.js';
+import Pawn from "../../common/actors/Pawn.js"
 
 export default class AnimationManager {
     pawn: Pawn;
