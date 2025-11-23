@@ -18,9 +18,11 @@ export default class Pawn extends Actor {
         this.height = data.height ?? 1;
         this.radius = data.radius ?? 0.5;
 
+        this.graphics = null;
         /**@type {Controller} */
         this.controller = null;
         this.movement = null;
+        this.animation = null;
         this.fsm = null;
         this.abilities = null;
         this.body = null;
@@ -32,6 +34,7 @@ export default class Pawn extends Actor {
 
         return this._vecVel.copy(this.body.linvel());
     }
+    /**@param {Object} v */
     set velocity(v) {
         if (!this.body) return;
         if (!this._vecVel) this._vecVel = new Vect3();
@@ -48,18 +51,19 @@ export default class Pawn extends Actor {
     makeBody(world, height = this.height, radius = this.radius) {
         const collideGroup = this.isRemote
             ? COLLISION_GROUPS.PLAYER << 16 | COLLISION_GROUPS.ENEMY
-            : COLLISION_GROUPS.ENEMY << 16 | COLLISION_GROUPS.PLAYER
+            : COLLISION_GROUPS.ENEMY << 16 | COLLISION_GROUPS.PLAYER;
         const bDesc = RAPIER.RigidBodyDesc.dynamic();
         bDesc.setTranslation(this.pos[0], this.pos[1], this.pos[2]);
         bDesc.lockRotations();
         bDesc.setLinearDamping(0);
         bDesc.setAngularDamping(0);
-        this.body = world.createRigidBody(bDesc)
         const cDesc = RAPIER.ColliderDesc.capsule(height, radius);
+        cDesc.setCollisionGroups(collideGroup);
+        cDesc.setFriction(0);
+        cDesc.setRestitution(0);
+
+        this.body = world.createRigidBody(bDesc)
         this.collider = world.createCollider(cDesc, this.body);
-        this.collider.setCollisionGroups(collideGroup);
-        this.collider.setFriction(0);
-        this.collider.setRestitution(0);
     }
     /**@param {RAPIER.World} world */
     removeBody(world) {
@@ -85,6 +89,6 @@ export default class Pawn extends Actor {
             }
         }
     }
-    step(dt) {    }
-    stateChanged(state) {    }
+    step(dt) { }
+    stateChanged(state) { }
 }

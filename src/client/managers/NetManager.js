@@ -4,15 +4,22 @@ import GameServer from "../../server/core/GameServer";
 export default class NetManager {
     constructor() {
         this.localServer = null;
-        this.remote = false;
-        this.ready = false;
         this.serverVersion = null;
-
+        this.remote = false;
         this.serverURL = location.hostname === "localhost"
             ? "localhost:8080"
             : "srv.solblade.online";
 
-        this.init();
+            this.eventHandlers = {
+                playerJoined: (data)=>{
+                    console.log("player joined", data);
+                },
+                stateUpdate: (data)=>{
+                    console.log("state update", data);
+                }
+            }
+
+        this.ready = this.init();
     }
     async init() {
         try {
@@ -29,7 +36,6 @@ export default class NetManager {
         } catch (err) {
             console.log('net init fail', err);
             this.localServer = new GameServer(this);
-            this.remote = false;
         }
     }
     emit(event, data) {
@@ -40,5 +46,11 @@ export default class NetManager {
     on(event, callback) {
         if (this.remote) this.socket.on(event, callback);
         else this.localServer?.registerEvent?.(event, callback);
+    }
+
+    bindEvents(){
+        for (const [event, handler] of Object.entries(this.eventHandlers)){
+            this.on(event, handler);
+        }
     }
 }

@@ -14,9 +14,9 @@ export default defineConfig({
 	plugins: [wasm(), topLevelAwait()],
 	resolve: {
 		alias: {
+			"@client": path.resolve(__dirname, "src/client"),
 			"@common": path.resolve(__dirname, "src/common"),
-			"@actors": path.resolve(__dirname, "src/common/actors"),
-			"@components": path.resolve(__dirname, "src/components")
+			"@server": path.resolve(__dirname, "src/server")
 		}
 	}
 });

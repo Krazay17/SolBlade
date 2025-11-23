@@ -2,7 +2,7 @@ import LocalData from "../../client/core/LocalData";
 import CGame from "./CGame";
 import Menu from "./ui/Menu";
 import './ui/StyleUI.css';
-import { setupDiscordWindow } from "../../client/other/DiscordStuff";
+import { setupDiscordWindow } from "../../client/ui/DiscordStuff";
 import setupChat from "./ui/Chat";
 import Input from "./core/Input";
 

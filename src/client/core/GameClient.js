@@ -8,8 +8,10 @@ import Net from "../managers/NetManager";
 import SolRenderPass from "../rendering/SolRenderPass";
 import LoadingBar from "../ui/LoadingBar";
 import { menuButton } from "../ui/MainMenu";
-import Input from "./Input";
+import Input from "../input/UserInput";
 import LocalData from "./LocalData";
+import CSolWorld from "client/worlds/CSolWorld";
+import CSolWorld2 from "client/worlds/CSolWorld2";
 
 const sceneRegistry = {
     world1: CSolWorld,
@@ -19,7 +21,7 @@ const sceneRegistry = {
 export default class GameClient {
     /**
      * 
-     * @param {Document} canvas 
+     * @param {HTMLElement} canvas 
      * @param {Input} input 
      * @param {Net} net 
      */
@@ -87,7 +89,7 @@ export default class GameClient {
             this.isFocused = false;
         });
     }
-    start() {
+    async start() {
         this.makeWorld();
         this.running = true;
         requestAnimationFrame(this.tick.bind(this));

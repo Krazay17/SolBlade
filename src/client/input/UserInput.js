@@ -1,10 +1,10 @@
-import { setupKeybindWindow, addButton } from "../other/KeyBinds";
+import { setupKeybindWindow, addButton } from "./KeyBinds";
 import MyEventEmitter from "../../common/core/MyEventEmitter";
-import { Actions } from "../other/Actions";
+import { Actions } from "./Actions";
 import { rotateInputAroundYaw } from "../../common/utils/Utils";
 import { Vector3 } from "three";
 
-export default class Input {
+export default class UserInput {
   constructor(gameElement) {
     this.gameElement = gameElement;
 

@@ -2,7 +2,7 @@ import LocalData from "../../../client/core/LocalData";
 import MyEventEmitter from "../../../common/core/MyEventEmitter";
 import { netSocket } from "../core/NetManager";
 import SoundPlayer, { getSoundPlayer } from "../../../xotherOld/client/SoundPlayer";
-import { sendDiscordMessage } from "../../../client/other/DiscordStuff";
+import { sendDiscordMessage } from "../../../client/ui/DiscordStuff";
 
 const section = document.createElement('div');
 section.id = 'chat-section';

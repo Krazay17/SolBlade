@@ -1,34 +1,34 @@
-import Input from "./Input.js";
+import UserInput from "../input/UserInput.js";
 import LocalData from "./LocalData.js";
 //import { setupDiscordWindow } from "./other/DiscordStuff.js";
 import CGame from "./GameClient.js";
 import NetManager from "../managers/NetManager.js";
 import MainMenu from "../ui/MainMenu.js";
 
-LocalData.load();
-//setupDiscordWindow();
+async function boot() {
 
-const canvas = document.getElementById("webgl");
-const input = new Input(canvas);
-const menu = new MainMenu(input);
-const net = new NetManager();
-const game = new CGame(canvas, input, net);
+    LocalData.load();
+    //setupDiscordWindow();
 
-// bind global menu toggle
-// input.onKeyDown("Escape", () => {
-//     menu.toggle();
-// });
+    const canvas = document.getElementById("webgl");
+    const userInput = new UserInput(canvas);
+    const menu = new MainMenu(userInput);
+    const net = new NetManager();
+    await net.ready;
+    net.bindEvents();
 
-game.start();
+    const game = new CGame(canvas, userInput, net);
+    await game.start();
 
-window.addEventListener('beforeunload', () => {
-    //game.savePlayerState();
-    LocalData.save();
-});
-window.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-});
+    window.addEventListener('beforeunload', () => {
+        //game.savePlayerState();
+        LocalData.save();
+    });
+    window.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+}
+boot();
 
 window.devMode = () => {
     LocalData.flags.dev = true;

@@ -11,11 +11,11 @@
             "@common/*": [
                 "common/*"
             ],
-            "@actors/*": [
-                "common/actors/*"
+            "@client/*": [
+                "client/*"
             ],
-            "@components/*": [
-                "components/*"
+            "@server/*": [
+                "server/*"
             ]
         }
     },
