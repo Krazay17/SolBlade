@@ -4,7 +4,7 @@ import { SOL_PHYSICS_SETTINGS } from "../../common/config/SolConstants";
 import CPlayer from "../actors/CPlayer";
 import SoundPlayer from "../audio/SoundPlayer";
 import MeshManager from "../managers/MeshManager";
-import Net from "../managers/NetManager";
+import Net from "../net/CNetManager";
 import SolRenderPass from "../rendering/SolRenderPass";
 import LoadingBar from "../ui/LoadingBar";
 import { menuButton } from "../ui/MainMenu";

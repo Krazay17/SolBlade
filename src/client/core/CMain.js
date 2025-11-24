@@ -1,9 +1,10 @@
 import UserInput from "../input/UserInput.js";
 import LocalData from "./LocalData.js";
 //import { setupDiscordWindow } from "./other/DiscordStuff.js";
-import CGame from "./GameClient.js";
-import NetManager from "../managers/NetManager.js";
+//import CGame from "./GameClient.js";
+import CNetManager from "../net/CNetManager.js";
 import MainMenu from "../ui/MainMenu.js";
+//import NetEvents from "../net/NetEvents.js";
 
 async function boot() {
 
@@ -13,12 +14,13 @@ async function boot() {
     const canvas = document.getElementById("webgl");
     const userInput = new UserInput(canvas);
     const menu = new MainMenu(userInput);
-    const net = new NetManager();
+    const net = new CNetManager();
     await net.ready;
-    net.bindEvents();
-
-    const game = new CGame(canvas, userInput, net);
-    await game.start();
+    //const game = new CGame(canvas, userInput, net);
+    // const netEvents = new NetEvents(game, net);
+    // netEvents.bindEvents();
+    //await game.start();
+    net.transport.emit('playerJoined');
 
     window.addEventListener('beforeunload', () => {
         //game.savePlayerState();

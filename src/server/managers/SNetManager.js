@@ -27,9 +27,7 @@ export default class SNetManager {
             socket.on("hello", (c) => {
                 c(SERVER_VERSION);
             });
-            socket.on('joinGame', (data) => {
-                game.addPlayer(data);
-            })
+
         })
 
         server.listen(PORT);
@@ -46,5 +44,6 @@ export default class SNetManager {
         }
         r.context.sharedTest = test;
     }
+    on(event, handler) { }
 }
 

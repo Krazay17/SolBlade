@@ -1,7 +1,7 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import CGame from "../../../client/core/CGame";
-import { getVerts } from "../../../common/utils/VertUtils";
-import SolWorld from "../../core/SolWorld";
+import CGame from "zold/client/CGame";
+import { getVerts } from "@common/utils/VertUtils";
+import SolWorld from "@common/core/SolWorld";
 import { Scene } from "three";
 import SkyBox from "./SkyBox";
 import CWizard from "../actors/CWizard";
