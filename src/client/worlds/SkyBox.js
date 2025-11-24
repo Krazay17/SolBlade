@@ -64,7 +64,7 @@ export default class SkyBox extends THREE.Object3D {
         return rotatingFilter;
     }
 
-    update() {
+    update(dt) {
         if (!this.active) return;
         if (this.rotatingFilter1) {
             this.rotatingFilter1.rotation.y += 0.0001;

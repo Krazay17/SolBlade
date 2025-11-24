@@ -1,4 +1,4 @@
-import FSM from "../states/FSM";
+import FSM from "./states/FSM";
 import AIController from "./components/AIController";
 import AIMovement from "./components/AIMovement";
 import Pawn from "./Pawn";

@@ -1,4 +1,5 @@
-import SolWorld from "../../SolWorld";
+
+import SolWorld from "@common/core/SolWorld";
 import Pawn from "../Pawn";
 
 export default class Controller {
@@ -10,5 +11,6 @@ export default class Controller {
         this.world = world
         this.pawn = pawn;
     }
-    inputDirection(){}
+    inputDirection() { }
+    update(dt) { }
 }

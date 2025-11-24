@@ -1,20 +1,19 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import CGame from "zold/client/CGame";
 import { getVerts } from "@common/utils/VertUtils";
 import SolWorld from "@common/core/SolWorld";
-import { Scene } from "three";
+import { Mesh, Scene } from "three";
 import SkyBox from "./SkyBox";
 import CWizard from "../actors/CWizard";
+import GameClient from "@client/core/GameClient";
 
 export default class CSolWorld extends SolWorld {
     /**
      * 
-     * @param {CGame} game 
+     * @param {GameClient} game 
      */
     constructor(game, name = "world1") {
-        super(game, name);
+        super(name);
         this.game = game;
-        this.name = name;
         this.glbLoader = game.glbLoader;
 
         this.actorRegistry = {
@@ -34,7 +33,7 @@ export default class CSolWorld extends SolWorld {
     }
     tick(dt) {
         this.skybox.update(dt);
-        for (const a of this.actors.enemies) { a.tick(dt); }
+        for (const a of this.actorManager.allActors) { a.tick(dt); }
     }
     enter(callback) {
         super.enter();
@@ -43,7 +42,7 @@ export default class CSolWorld extends SolWorld {
             this.graphics.add(scene);
 
             scene.traverse((child) => {
-                if (child.isMesh) {
+                if (child instanceof Mesh) {
                     this.allGeoms.push(child.geometry.clone());
                     const { vertices, indices } = getVerts(child.geometry);
                     const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
@@ -55,5 +54,16 @@ export default class CSolWorld extends SolWorld {
             this.ready = true;
             if (callback) callback();
         });
+    }
+    exit() {
+        super.exit();
+        // remove graphics
+        if (this.graphics) {
+            this.game.graphics.remove(this.graphics);
+            this.graphics.traverse(obj => {
+                if (obj.geometry) obj.geometry.dispose();
+                if (obj.material) obj.material.dispose();
+            });
+        }
     }
 }
