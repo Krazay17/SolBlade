@@ -18,9 +18,9 @@ export default class CNetManager {
             this.socket = io(this.serverURL, {
                 transports: ["websocket"],
                 reconnection: false,
-                timeout: 1000,
+                timeout: 1,
             });
-            const result = await this.socket.timeout(1000).emitWithAck("hello");
+            const result = await this.socket.timeout(1).emitWithAck("hello");
             this.serverVersion = result;
             this.transport = this.socket;
             this.remote = true;

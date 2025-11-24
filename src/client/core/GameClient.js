@@ -3,12 +3,12 @@ import { GLTFLoader } from "three/examples/jsm/Addons";
 import { SOL_PHYSICS_SETTINGS } from "../../common/config/SolConstants";
 import CPlayer from "../actors/CPlayer";
 import SoundPlayer from "../audio/SoundPlayer";
+import Input from "../input/UserInput";
 import MeshManager from "../managers/MeshManager";
 import Net from "../net/CNetManager";
 import SolRenderPass from "../rendering/SolRenderPass";
 import LoadingBar from "../ui/LoadingBar";
 import { menuButton } from "../ui/MainMenu";
-import Input from "../input/UserInput";
 import LocalData from "./LocalData";
 
 const sceneRegistry = {
@@ -26,6 +26,7 @@ export default class GameClient {
         this.input = input;
         this.net = net;
 
+        this.ready = true;
         this.lastTime = 0;
         this.accumulator = 0;
         this.solWorld = null;

@@ -1,12 +1,12 @@
 import CPawn from "./CPawn";
 
 export default class CWizard extends CPawn {
-    constructor(game, data){
-        super(game, {
+    constructor(world, data){
+        super(world, {
             ...data,
             meshName: "Wizard",
         });
 
-        console.log('WIZARD', this, this.pos);
+        console.log('WIZARD', this);
     }
 }

@@ -1,4 +1,5 @@
 import RAPIER from "@dimforge/rapier3d-compat";
+import * as THREE from "three";
 import Actor from "./Actor.js";
 import { COLLISION_GROUPS } from "../config/SolConstants.js";
 import Controller from "./components/Controller.js";
@@ -18,6 +19,8 @@ export default class Pawn extends Actor {
         this.height = data.height ?? 1;
         this.radius = data.radius ?? 0.5;
 
+        this.upVec = new THREE.Vector3(0,1,0);
+
         this.graphics = null;
         /**@type {Controller} */
         this.controller = null;
@@ -28,17 +31,46 @@ export default class Pawn extends Actor {
         this.body = null;
         this.collider = null;
     }
+    get vecPos() {
+        if (!this._vecPos) this._vecPos = new THREE.Vector3();
+        return this._vecPos;
+    }
+    set vecPos(v) {
+        if (!this._vecPos) this._vecPos = new THREE.Vector3();
+        this._vecPos.copy(v);
+        this.pos[0] = v.x;
+        this.pos[1] = v.y;
+        this.pos[2] = v.z;
+    }
+    /**@type {THREE.Quaternion} */
+    get quatRot() {
+        if (!this._quatRot) this._quatRot = new THREE.Quaternion();
+        return this._quatRot;
+    }
+    /**@type {THREE.Quaternion} */
+    set quatRot(v) {
+        if (!this._quatRot) this._quatRot = new THREE.Quaternion();
+        this._quatRot.copy(v);
+        this.rot[0] = v.x;
+        this.rot[1] = v.y;
+        this.rot[2] = v.z;
+        this.rot[3] = v.w;
+    }
+    get yaw() { return this._yaw }
+    set yaw(v) {
+        this._yaw = v;
+        this.quatRot.setFromAxisAngle(this.upVec, v)
+        if(!this.body)return;
+        this.body.setRotation(this.quatRot, true);
+    }
     get velocity() {
-        if (!this.body) return;
-        if (!this._vecVel) this._vecVel = new Vect3();
+        if (!this._vecVel) this._vecVel = new THREE.Vector3();
 
         return this._vecVel.copy(this.body.linvel());
     }
-    /**@param {Object} v */
     set velocity(v) {
-        if (!this.body) return;
-        if (!this._vecVel) this._vecVel = new Vect3();
         this._vecVel.copy(v);
+        if(!this.body)return;
         this.body.setLinvel(this._vecVel, true)
     }
     get vecDir() {
@@ -84,7 +116,9 @@ export default class Pawn extends Actor {
             } else {
                 const pos = this.body.translation();
                 const rot = this.body.rotation();
+                //@ts-ignore
                 this.vecPos = pos;
+                //@ts-ignore
                 this.quatRot = rot;
             }
         }

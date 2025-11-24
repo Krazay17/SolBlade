@@ -12,7 +12,6 @@ export default class SolWorld {
         this.physics = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
         this.physics.timestep = SOL_PHYSICS_SETTINGS.timeStep;
     }
-
     enter(callback) {
         const enemies = 2;
         for (let i = 0; i < enemies; i++) {

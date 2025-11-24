@@ -2,7 +2,9 @@ import Controller from "./Controller";
 
 export default class AIController extends Controller {
     constructor(world, pawn, data = {}) {
-        super(world, pawn);
+        super();
+        this.world = world;
+        this.pawn = pawn;
         const {
             aggroRadius = 20
         } = data;

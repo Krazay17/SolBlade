@@ -3,7 +3,6 @@ import { getVerts } from "@common/utils/VertUtils";
 import SolWorld from "@common/core/SolWorld";
 import { Mesh, Scene } from "three";
 import SkyBox from "./SkyBox";
-import CWizard from "../actors/CWizard";
 import GameClient from "@client/core/GameClient";
 
 export default class CSolWorld extends SolWorld {
@@ -17,7 +16,6 @@ export default class CSolWorld extends SolWorld {
         this.glbLoader = game.glbLoader;
 
         this.actorRegistry = {
-            wizard: CWizard,
         }
 
         this.worldCollider = null;
@@ -25,20 +23,24 @@ export default class CSolWorld extends SolWorld {
         this.graphics = new Scene()
         this.game.graphics.add(this.graphics);
 
-        this.skybox = new SkyBox(game, this);
+        this.skybox = new SkyBox(this, this.game.textureLoader);
     }
     get meshManager() { return this.game.meshManager }
     add(obj) {
         this.graphics.add(obj);
     }
+    remove(obj) {
+        this.graphics.remove(obj);
+    }
     tick(dt) {
-        this.skybox.update(dt);
         for (const a of this.actorManager.allActors) { a.tick(dt); }
+        this.skybox.update(dt);
     }
     enter(callback) {
         super.enter();
         this.glbLoader.load(`/assets/${this.name}.glb`, (data) => {
             const scene = data.scene;
+            //@ts-ignore
             this.graphics.add(scene);
 
             scene.traverse((child) => {
@@ -61,7 +63,9 @@ export default class CSolWorld extends SolWorld {
         if (this.graphics) {
             this.game.graphics.remove(this.graphics);
             this.graphics.traverse(obj => {
+                //@ts-ignore
                 if (obj.geometry) obj.geometry.dispose();
+                //@ts-ignore
                 if (obj.material) obj.material.dispose();
             });
         }

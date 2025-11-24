@@ -1,19 +1,15 @@
 import * as THREE from 'three';
-import CGame from '../../../client/core/CGame';
 import CSolWorld from './CSolWorld';
 
 export default class SkyBox extends THREE.Object3D {
     /**
-     * 
-     * @param {CGame} game 
      * @param {CSolWorld} world 
+     * @param {THREE.TextureLoader} textureLoader
      */
-    constructor(game, world) {
+    constructor(world, textureLoader) {
         super();
-        this.game = game;
         this.world = world;
-
-        this.loader = game.textureLoader;
+        this.loader = textureLoader;
 
         this.active = false;
 

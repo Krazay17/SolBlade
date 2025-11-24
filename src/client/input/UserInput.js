@@ -3,9 +3,11 @@ import MyEventEmitter from "../../common/core/MyEventEmitter";
 import { Actions } from "./Actions";
 import { rotateInputAroundYaw } from "../../common/utils/Utils";
 import { Vector3 } from "three";
+import Controller from "@common/actors/components/Controller";
 
-export default class UserInput {
+export default class UserInput extends Controller {
   constructor(gameElement) {
+    super();
     this.gameElement = gameElement;
 
     this.pointerLocked = false;

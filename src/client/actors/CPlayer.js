@@ -15,7 +15,6 @@ export default class CPlayer extends CPawn {
             name: "player",
             type: 'player',
         });
-        this.game = game;
         this.camera = this.game.camera;
         this.camera.position.set(.333, .666, 1.333);
         this.camera.quaternion.copy(this.quatRot);
@@ -23,15 +22,22 @@ export default class CPlayer extends CPawn {
 
         this.controller = this.game.input;
         this.controller.look = (y, p) => this.look(y, p);
-        this.movement = new PlayerMovement(game, this);
-        this.fsm = new FSM(this.game, this, [
+        //this.movement = new PlayerMovement(game, this);
+        this.fsm = new FSM(this, [
             "run", "fall"
         ]);
+    }
+    init(){
+        this.game.graphics.add(this.graphics);
+        console.log('player init');
     }
     look(yaw, pitch) {
         this.yaw = yaw;
         this.camera.rotation.x = pitch;
     }
-    getAim() { }
-    
+    getAim() { 
+        const dir = null
+        return {dir};
+    }
+
 }

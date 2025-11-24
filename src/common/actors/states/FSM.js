@@ -1,11 +1,9 @@
-import Pawn from "../actors/Pawn";
-import GameCore from "../core/GameCore";
+import Pawn from "../Pawn";
 import DeadState from "./DeadState";
 import FallState from "./FallState";
 import IdleState from "./IdleState";
 import PatrolState from "./PatrolState";
 import RunState from "./RunState";
-import State from "./State";
 
 const stateRegistry = {
     idle: IdleState,
@@ -18,13 +16,11 @@ const stateRegistry = {
 export default class FSM {
     /**
      * 
-     * @param {GameCore} game 
      * @param {Pawn} pawn 
      * @param {String[]} states 
      * @returns 
      */
-    constructor(game, pawn, states = []) {
-        this.game = game;
+    constructor(pawn, states = []) {
         this.pawn = pawn;
 
         this.states = {
