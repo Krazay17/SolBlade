@@ -13,6 +13,7 @@ export default class SNetEvents {
         this.eventHandlers = {
             [NETPROTO.PLAYER_JOINED]: (data) => this.playerJoined(data),
             [NETPROTO.STATE_UPDATE]: (data) => this.stateUpdate(data),
+            [NETPROTO.SPAWN_ACTOR]: (data)=> this.spawnActor(data),
         }
         this.bindEvents();
     }
@@ -27,5 +28,9 @@ export default class SNetEvents {
     }
     stateUpdate(data) {
         console.log('state update', data);
+    }
+    spawnActor(data){
+        this.game.worldManager.worlds[data.worldName].actorManager.addActor(data.type, data);
+        this.transport.emit(NETPROTO.SPAWN_ACTOR, data);
     }
 }

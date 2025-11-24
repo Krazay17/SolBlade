@@ -10,7 +10,6 @@ export default class GameServer {
         this.worldManager = new WorldManager(this);
 
         this.running = true;
-        this.init();
     }
     init() {
         const dt = SOL_PHYSICS_SETTINGS.serverTick * 1000;
@@ -21,7 +20,6 @@ export default class GameServer {
         }, dt);
     }
     step(dt) {
-        console.log('game step')
         if (this.worldManager) this.worldManager.step(dt);
     }
 }

@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import http from "http";
 import repl from 'repl';
 import GameServer from "./GameServer.js";
+import RAPIER from "@dimforge/rapier3d-compat";
 
 const SERVER_VERSION = 1.14;
 const server = http.createServer();
@@ -25,8 +26,12 @@ const serverTransport = {
         this.io.emit(event, data);
     }
 }
-
-const game = new GameServer(serverTransport);
+async function init() {
+    await RAPIER.init();
+    const game = new GameServer(serverTransport);
+    game.init();
+}
+init();
 
 let playerSockets = {};
 io.on('connection', (socket) => {

@@ -123,6 +123,7 @@ export default class GameClient {
         requestAnimationFrame(this.tick.bind(this));
     }
     step(dt) {
+        if(this.net.localServer) this.net.localServer.step(dt);
         this.solWorld?.step(dt);
     }
     handleSleep() {

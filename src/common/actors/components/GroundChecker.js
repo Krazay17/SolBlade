@@ -1,7 +1,7 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import Pawn from "../Pawn";
-import { Vect3 } from "../../../../common/utils/SolMath";
-import SolWorld from "../../SolWorld";
+import SolWorld from "@common/core/SolWorld";
+import { Vector3 } from "three";
 
 export default class GroundChecker {
     /**
@@ -13,8 +13,8 @@ export default class GroundChecker {
         this.world = world;
         this.pawn = pawn;
 
+        this.tempVec = new Vector3();
         this.downVec = { x: 0, y: -1, z: 0 };
-        this.tempVec = new Vect3();
         this.ball = new RAPIER.Ball(this.pawn.radius);
 
     }
@@ -31,7 +31,7 @@ export default class GroundChecker {
         return this.tempVec;
     }
     getFloor() {
-        const result = this.game.physics.castShape(
+        const result = this.world.physics.castShape(
             this.pawn.vecPos,
             { x: 0, y: 0, z: 0, w: 1 },
             this.downVec,

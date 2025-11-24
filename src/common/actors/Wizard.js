@@ -11,7 +11,7 @@ export default class Wizard extends Pawn {
         });
         this.controller = new AIController(world, this);
         this.movement = new AIMovement(world, this);
-        this.fsm = new FSM(this.world, this, [
+        this.fsm = new FSM(this, [
             "patrol"
         ])
     }

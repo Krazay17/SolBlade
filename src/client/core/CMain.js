@@ -5,10 +5,12 @@ import MainMenu from "../ui/MainMenu.js";
 import { NETPROTO } from "@common/net/NetProtocols.js";
 import NetEvents from "../net/NetEvents.js";
 import GameClient from "./GameClient.js";
+import RAPIER from "@dimforge/rapier3d-compat";
 
 async function boot() {
 
     LocalData.load();
+    await RAPIER.init();
 
     const canvas = document.getElementById("webgl");
     const userInput = new UserInput(canvas);
@@ -17,7 +19,6 @@ async function boot() {
     await net.ready;
     const game = new GameClient(canvas, userInput, net);
     const netEvents = new NetEvents(game, net);
-    netEvents.bindEvents();
     await game.start();
     net.transport.emit(NETPROTO.PLAYER_JOINED, { name: "playername" });
 
