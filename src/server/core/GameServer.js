@@ -13,11 +13,12 @@ export default class GameServer {
         this.init();
     }
     init() {
+        const dt = SOL_PHYSICS_SETTINGS.serverTick * 1000;
         this.fixedUpdateTimer = setInterval(() => {
             if (this.running) {
-                this.step();
+                this.step(dt);
             }
-        }, SOL_PHYSICS_SETTINGS.serverTick * 1000);
+        }, dt);
     }
     step(dt) {
         console.log('game step')

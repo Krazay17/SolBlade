@@ -1,4 +1,5 @@
 import GameServer from "@server/core/GameServer";
+import { NETPROTO } from "@common/net/NetProtocols";
 
 export default class SNetEvents {
     /**
@@ -10,14 +11,9 @@ export default class SNetEvents {
         this.transport = transport;
 
         this.eventHandlers = {
-            playerJoined: (data) => {
-                console.log("player joined", data);
-            },
-            stateUpdate: (data) => {
-                console.log("state update", data);
-            }
+            [NETPROTO.PLAYER_JOINED]: (data) => this.playerJoined(data),
+            [NETPROTO.STATE_UPDATE]: (data) => this.stateUpdate(data),
         }
-
         this.bindEvents();
     }
     bindEvents() {
@@ -25,5 +21,11 @@ export default class SNetEvents {
             this.transport.on(event, handler);
         }
     }
-
+    playerJoined(data) {
+        console.log('player joined', data);
+        console.log(this.game.worldManager.worlds.world1)
+    }
+    stateUpdate(data) {
+        console.log('state update', data);
+    }
 }

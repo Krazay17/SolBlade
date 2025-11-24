@@ -8,8 +8,8 @@ export default class CNetManager {
         this.transport = null;
         this.remote = false;
         this.serverURL = location.hostname === "localhost"
-            ? "localhost:8080"
-            : "srv.solblade.online";
+            ? "https://localhost:8080"
+            : "https://srv.solblade.online";
 
         this.ready = this.init();
     }

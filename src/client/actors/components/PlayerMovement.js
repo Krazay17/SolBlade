@@ -16,7 +16,7 @@ export default class PlayerMovement {
         this.game = game
         this.player = player;
 
-        this.momentumBooster = new RunBoost(player);
+        this.momentumBooster = new RunBoost();
         //this.isGrounded = true;
         this.groundChecker = new GroundChecker(this.game, this.player);
 
@@ -67,7 +67,7 @@ export default class PlayerMovement {
             LocalData.save();
         });
     }
-    get isGrounded(){return this.groundChecker.isGrounded()}
+    get isGrounded() { return this.groundChecker.isGrounded() }
     update(dt) {
         this.momentumBooster.update(dt, this.player.velocity);
     }

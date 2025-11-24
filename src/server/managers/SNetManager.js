@@ -44,6 +44,18 @@ export default class SNetManager {
         }
         r.context.sharedTest = test;
     }
-    on(event, handler) { }
+}
+
+class ServerTransport {
+    constructor(io) {
+        this.io = io;
+        this.handlers = {};
+    }
+    on(event, handler) {
+        this.handlers[event] = handler;
+    }
+    emit(event, data) {
+        this.io.emit(event, data);
+    }
 }
 

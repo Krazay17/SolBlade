@@ -20,7 +20,7 @@ export default class FSM {
      * 
      * @param {GameCore} game 
      * @param {Pawn} pawn 
-     * @param {State} states 
+     * @param {String[]} states 
      * @returns 
      */
     constructor(game, pawn, states = []) {
@@ -57,7 +57,7 @@ export default class FSM {
         this.state = newState;
         this.state.enter(lastState, params);
 
-        console.log(`Pawn name: ${this.pawn.name}`,`Old state: ${lastState}`, `New state ${state}`);
+        console.log(`Pawn name: ${this.pawn.name}`, `Old state: ${lastState}`, `New state ${state}`);
         this.stateName = state;
 
         this.pawn.stateChanged(state);

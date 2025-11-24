@@ -1,7 +1,7 @@
 import CPawn from "./CPawn";
-import FSM from "../../common/states/FSM";
-import PlayerMovement from "../components/PlayerMovement"
 import GameClient from "../core/GameClient";
+import PlayerMovement from "./components/PlayerMovement";
+import FSM from "@common/actors/states/FSM";
 
 export default class CPlayer extends CPawn {
     /**

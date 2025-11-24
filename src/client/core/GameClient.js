@@ -10,12 +10,8 @@ import LoadingBar from "../ui/LoadingBar";
 import { menuButton } from "../ui/MainMenu";
 import Input from "../input/UserInput";
 import LocalData from "./LocalData";
-import CSolWorld from "client/worlds/CSolWorld";
-import CSolWorld2 from "client/worlds/CSolWorld2";
 
 const sceneRegistry = {
-    world1: CSolWorld,
-    world2: CSolWorld2,
 }
 
 export default class GameClient {
@@ -32,7 +28,6 @@ export default class GameClient {
 
         this.lastTime = 0;
         this.accumulator = 0;
-        /**@type {CSolWorld} */
         this.solWorld = null;
         this.worldName = "world1";
 
@@ -60,7 +55,6 @@ export default class GameClient {
         this.solRender = new SolRenderPass(this.renderer, this.graphics, this.camera);
         this.worldLight();
 
-        //this.player = new CPlayer(this, { pos: LocalData.position || [0, 15, 0] });
         this.player = new CPlayer(this, { pos: [0, 18, 0] });
         this.makeWorld(LocalData.worldName || "world1");
 
@@ -100,7 +94,6 @@ export default class GameClient {
         if (this.solWorld) this.solWorld.exit();
         this.ready = false;
         this.solWorld = new sceneClass(this);
-        this.player.makeBody(this.solWorld.physics);
         this.solWorld.enter(() => {
             this.ready = true;
             this.worldName = worldName;
@@ -117,7 +110,7 @@ export default class GameClient {
             this.accumulator = Math.min(this.accumulator, 0.25);
             const timestep = SOL_PHYSICS_SETTINGS.timeStep;
             while (this.accumulator >= timestep) {
-                this.fixedStep(timestep);
+                this.step(timestep);
 
                 this.accumulator -= timestep;
             }
@@ -128,8 +121,8 @@ export default class GameClient {
         }
         requestAnimationFrame(this.tick.bind(this));
     }
-    fixedStep(dt) {
-        this.solWorld?.fixedStep(dt);
+    step(dt) {
+        this.solWorld?.step(dt);
     }
     handleSleep() {
         if (this.isFocused) return;

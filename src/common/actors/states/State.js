@@ -1,4 +1,4 @@
-import Pawn from "../actors/Pawn";
+import Pawn from "@common/actors/Pawn.js"
 import FSM from "./FSM";
 
 export default class State {
@@ -16,9 +16,9 @@ export default class State {
     get controller() { return this.pawn.controller }
     get movement() { return this.pawn.movement }
     setState(state, params) { this.fsm.setState(state, params) }
-    enter(lState, params) { }
-    exit(nState) { }
+    enter(state, params) { }
+    exit(state) { }
     update(dt) { }
-    canEnter() { return true }
-    canExit() { return true }
+    canEnter(state) { return true }
+    canExit(state) { return true }
 }
