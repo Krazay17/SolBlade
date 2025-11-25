@@ -13,7 +13,7 @@ export default class PlayerMovement {
      * @param {CPlayer} player 
      */
     constructor(game, player) {
-        this.game = game
+        this.game = game;
         this.player = player;
 
         this.momentumBooster = new RunBoost();

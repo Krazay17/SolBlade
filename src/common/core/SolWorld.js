@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
-import ActorManager from "../managers/ActorManager.js";
+import ActorManager from "./ActorManager.js";
 
 export default class SolWorld {
     constructor(name = "world1") {
@@ -19,7 +19,7 @@ export default class SolWorld {
     enter(callback) {
         const enemies = 2;
         for (let i = 0; i < enemies; i++) {
-            this.actorManager.addActor('enemy', { subtype: "wizard", pos: [0, 20, i] });
+            this.actorManager.newActor('enemy', { subtype: "wizard", pos: [0, 20, i] });
         }
     }
     exit() {

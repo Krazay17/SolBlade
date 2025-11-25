@@ -10,9 +10,13 @@ import SolRenderPass from "../rendering/SolRenderPass";
 import LoadingBar from "../ui/LoadingBar";
 import { menuButton } from "../ui/MainMenu";
 import LocalData from "./LocalData";
-import WorldManager from "../managers/WorldManager";
+import CSolWorld1 from "../worlds/CSolWorld1";
+import CSolWorld2 from "../worlds/CSolWorld2";
+import CSolWorld from "../worlds/CSolWorld";
 
-const sceneRegistry = {
+const worldRegistry = {
+    world1: CSolWorld1,
+    world2: CSolWorld2,
 }
 
 export default class GameClient {
@@ -27,9 +31,10 @@ export default class GameClient {
         this.input = input;
         this.net = net;
 
-        this.ready = true;
+        this.ready = false;
         this.lastTime = 0;
         this.accumulator = 0;
+        /**@type {CSolWorld} */
         this.solWorld = null;
         this.worldName = "world1";
 
@@ -57,11 +62,17 @@ export default class GameClient {
         this.worldLight();
 
         this.player = new CPlayer(this, { pos: [0, 18, 0] });
-        this.worldManager = new WorldManager(this, LocalData.worldName || "world1");
+        this.newWorld(LocalData.worldName || "world1");
 
         this.bindings();
-
     }
+    addActor(actor) {
+        this.solWorld.actorManager.addActor(actor);
+    }
+    newActor(actor) {
+        this.solWorld.actorManager.newActor(actor);
+    }
+    get physics() { return this.solWorld.physics };
     bindings() {
         window.addEventListener('resize', () => {
             const w = window.innerWidth;
@@ -76,10 +87,25 @@ export default class GameClient {
         window.addEventListener('blur', () => {
             this.isFocused = false;
         });
+        menuButton('world1', () => {
+            this.newWorld('world1');
+        })
+        menuButton('world2', () => {
+            this.newWorld('world2');
+        })
     }
     async start() {
         this.running = true;
         requestAnimationFrame(this.tick.bind(this));
+    }
+    newWorld(name) {
+        const worldClass = worldRegistry[name];
+        if (!worldClass) return;
+        this.solWorld = new worldClass(this);
+        this.solWorld.enter(() => {
+            this.ready = true;
+            this.addActor(this.player);
+        });
     }
     tick(time) {
         const dt = (time - this.lastTime) / 1000;
@@ -105,7 +131,7 @@ export default class GameClient {
     }
     step(dt) {
         if (this.net.localServer) this.net.localServer.step(dt);
-        if (this.worldManager) this.worldManager.step(dt);
+        if (this.solWorld) this.solWorld.step(dt);
     }
     handleSleep() {
         if (this.isFocused) return;

@@ -1,5 +1,5 @@
 import GameServer from "@solblade/server/core/GameServer.js";
-import { NETPROTO } from "@solblade/common/net/NetProtocols.js";
+import { NETPROTO } from "@solblade/common/core/NetProtocols.js";
 
 export default class SNetEvents {
     /**

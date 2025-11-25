@@ -17,9 +17,8 @@ export default class CPawn extends Pawn {
         this.meshName = data.meshName ?? "spikeMan";
 
         this.graphics = new THREE.Group();
-
+        this.graphics.position.set(this.pos[0], this.pos[1], this.pos[2]);
         this.animation = null;
-
         this.upVec = new THREE.Vector3(0, 1, 0);
 
         //this.testCube();

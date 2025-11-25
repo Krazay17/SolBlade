@@ -1,5 +1,5 @@
 import GameClient from "@solblade/client/core/GameClient";
-import { NETPROTO } from "@solblade/common/net/NetProtocols";
+import { NETPROTO } from "@solblade/common/core/NetProtocols";
 
 export default class ClientEvents {
     /**

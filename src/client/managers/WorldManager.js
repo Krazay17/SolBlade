@@ -1,3 +1,4 @@
+import ActorManager from "@solblade/common/core/ActorManager";
 import GameClient from "../core/GameClient";
 import { menuButton } from "../ui/MainMenu";
 import CSolWorld1 from "../worlds/CSolWorld1";

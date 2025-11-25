@@ -2,7 +2,7 @@ import UserInput from "../input/UserInput.js";
 import LocalData from "./LocalData.js";
 import CNetManager from "../net/CNetManager.js";
 import MainMenu from "../ui/MainMenu.js";
-import { NETPROTO } from "@solblade/common/net/NetProtocols.js";
+import { NETPROTO } from "@solblade/common/core/NetProtocols.js";
 import GameClient from "./GameClient.js";
 import RAPIER from "@dimforge/rapier3d-compat";
 import ClientEvents from "../net/ClientEvents.js";
