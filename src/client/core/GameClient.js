@@ -10,6 +10,7 @@ import SolRenderPass from "../rendering/SolRenderPass";
 import LoadingBar from "../ui/LoadingBar";
 import { menuButton } from "../ui/MainMenu";
 import LocalData from "./LocalData";
+import WorldManager from "../managers/WorldManager";
 
 const sceneRegistry = {
 }
@@ -45,7 +46,6 @@ export default class GameClient {
         this.graphics = new THREE.Scene();
 
         this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, .8, 3000);
-        this.camera.position.set(0, 25, 0);
         this.camera.lookAt(0, 0, 1);
         this.graphics.add(this.camera);
 
@@ -57,18 +57,11 @@ export default class GameClient {
         this.worldLight();
 
         this.player = new CPlayer(this, { pos: [0, 18, 0] });
-        this.makeWorld(LocalData.worldName || "world1");
+        this.worldManager = new WorldManager(this, LocalData.worldName || "world1");
 
         this.bindings();
 
-        menuButton('world1', () => {
-            this.makeWorld('world1');
-        })
-        menuButton('world2', () => {
-            this.makeWorld('world2');
-        })
     }
-    get physics() { return this.solWorld.physics }
     bindings() {
         window.addEventListener('resize', () => {
             const w = window.innerWidth;
@@ -85,20 +78,8 @@ export default class GameClient {
         });
     }
     async start() {
-        this.makeWorld();
         this.running = true;
         requestAnimationFrame(this.tick.bind(this));
-    }
-    makeWorld(worldName) {
-        const sceneClass = sceneRegistry[worldName];
-        if (!sceneClass) return;
-        if (this.solWorld) this.solWorld.exit();
-        this.ready = false;
-        this.solWorld = new sceneClass(this);
-        this.solWorld.enter(() => {
-            this.ready = true;
-            this.worldName = worldName;
-        });
     }
     tick(time) {
         const dt = (time - this.lastTime) / 1000;
@@ -123,8 +104,8 @@ export default class GameClient {
         requestAnimationFrame(this.tick.bind(this));
     }
     step(dt) {
-        if(this.net.localServer) this.net.localServer.step(dt);
-        this.solWorld?.step(dt);
+        if (this.net.localServer) this.net.localServer.step(dt);
+        if (this.worldManager) this.worldManager.step(dt);
     }
     handleSleep() {
         if (this.isFocused) return;

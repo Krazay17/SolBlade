@@ -1,7 +1,7 @@
 import CPawn from "./CPawn";
 import GameClient from "../core/GameClient";
 import PlayerMovement from "./components/PlayerMovement";
-import FSM from "@common/actors/states/FSM";
+import FSM from "@solblade/common/actors/states/FSM";
 
 export default class CPlayer extends CPawn {
     /**
@@ -14,6 +14,7 @@ export default class CPlayer extends CPawn {
             ...data,
             name: "player",
             type: 'player',
+            isLocal: true,
         });
         this.camera = this.game.camera;
         this.camera.position.set(.333, .666, 1.333);

@@ -1,9 +1,9 @@
 import { Vector3 } from "three";
 import LocalData from "../../core/LocalData";
-import { projectOnPlane, clampVector } from "@common/utils/Utils";
+import { projectOnPlane, clampVector } from "@solblade/common/utils/Utils";
 import RunBoost from "./MomentumBoost";
 import GroundChecker from "./GroundChecker";
-import GameClient from "@client/core/GameClient";
+import GameClient from "@solblade/client/core/GameClient";
 import CPlayer from "../CPlayer";
 
 export default class PlayerMovement {

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import LocalData from "../core/LocalData";
-import MyEventEmitter from "@common/core/MyEventEmitter"
+import MyEventEmitter from "@solblade/common/core/MyEventEmitter"
 
 /**@type {SoundPlayer} */
 export default class SoundPlayer {

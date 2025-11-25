@@ -1,4 +1,4 @@
-import Pawn from "@common/actors/Pawn.js"
+import Pawn from "@solblade/common/actors/Pawn.js"
 import FSM from "./FSM";
 
 export default class State {

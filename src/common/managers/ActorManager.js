@@ -1,18 +1,21 @@
-import SolWorld from "../core/SolWorld";
+import SolWorld from "../core/SolWorld.js";
 
 export default class ActorManager {
     /**
      * 
      * @param {SolWorld} world 
      */
-    constructor(world) {
+    constructor(world, actorRegistry, client = false) {
         this.world = world;
+        this.actorRegistry = actorRegistry;
+
         this.actors = {
             players: [],
             enemies: [],
             others: []
         }
-        this.actorRegistry = null;
+
+        this.onAddActor = null;
     }
     get allActors() {
         const all = [];
@@ -35,10 +38,12 @@ export default class ActorManager {
             default:
                 group = this.actors.others;
         }
-        const aClass = this.actorRegistry[data.subtype];
+        const aClass = this.actorRegistry[data.subtype].class;
         if (!aClass) return;
         const actor = new aClass(this, data);
+        if (this.onAddActor) this.onAddActor(actor);
         actor.makeBody?.(this.world.physics);
         group.push(actor);
+
     }
 }

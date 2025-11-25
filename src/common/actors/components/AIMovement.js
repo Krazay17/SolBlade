@@ -1,4 +1,4 @@
-import SolWorld from "@common/core/SolWorld";
+import SolWorld from "@solblade/common/core/SolWorld";
 import Pawn from "../Pawn";
 import GroundChecker from "./GroundChecker";
 

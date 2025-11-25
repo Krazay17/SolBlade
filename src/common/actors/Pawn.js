@@ -4,7 +4,7 @@ import Actor from "./Actor.js";
 import { COLLISION_GROUPS } from "../config/SolConstants.js";
 import Controller from "./components/Controller.js";
 import { Vect3 } from "../utils/SolMath.js"
-import SolWorld from "@common/core/SolWorld.js";
+import SolWorld from "@solblade/common/core/SolWorld.js";
 
 export default class Pawn extends Actor {
     /**

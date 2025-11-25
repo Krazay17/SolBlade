@@ -1,7 +1,7 @@
-import GameClient from "@client/core/GameClient";
-import { NETPROTO } from "@common/net/NetProtocols";
+import GameClient from "@solblade/client/core/GameClient";
+import { NETPROTO } from "@solblade/common/net/NetProtocols";
 
-export default class NetEvents {
+export default class ClientEvents {
     /**
      * 
      * @param {GameClient} game 
@@ -22,7 +22,7 @@ export default class NetEvents {
         }
     }
     playerJoined(data) {
-        console.log('player joined', data);
+        console.log('local call: player joined', data);
     }
     stateUpdate(data) {
         console.log("state update", data)

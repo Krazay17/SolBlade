@@ -2,10 +2,10 @@ import UserInput from "../input/UserInput.js";
 import LocalData from "./LocalData.js";
 import CNetManager from "../net/CNetManager.js";
 import MainMenu from "../ui/MainMenu.js";
-import { NETPROTO } from "@common/net/NetProtocols.js";
-import NetEvents from "../net/NetEvents.js";
+import { NETPROTO } from "@solblade/common/net/NetProtocols.js";
 import GameClient from "./GameClient.js";
 import RAPIER from "@dimforge/rapier3d-compat";
+import ClientEvents from "../net/ClientEvents.js";
 
 async function boot() {
 
@@ -18,7 +18,7 @@ async function boot() {
     const net = new CNetManager();
     await net.ready;
     const game = new GameClient(canvas, userInput, net);
-    const netEvents = new NetEvents(game, net);
+    const clientEvents = new ClientEvents(game, net.transport);
     await game.start();
     net.transport.emit(NETPROTO.PLAYER_JOINED, { name: "playername" });
 

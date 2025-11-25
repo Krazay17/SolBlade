@@ -1,7 +1,7 @@
 import * as THREE from "three";
-import Pawn from "@common/actors/Pawn";
+import Pawn from "@solblade/common/actors/Pawn";
 import AnimationManager from "./components/AnimationManager";
-import GameClient from "@client/core/GameClient";
+import GameClient from "@solblade/client/core/GameClient";
 
 export default class CPawn extends Pawn {
     /**

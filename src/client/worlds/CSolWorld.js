@@ -1,9 +1,10 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import { getVerts } from "@common/utils/VertUtils";
-import SolWorld from "@common/core/SolWorld";
+import { getVerts } from "@solblade/common/utils/VertUtils";
+import SolWorld from "@solblade/common/core/SolWorld";
 import { Mesh, Scene } from "three";
 import SkyBox from "./SkyBox";
-import GameClient from "@client/core/GameClient";
+import GameClient from "@solblade/client/core/GameClient";
+import { actorRegistry } from "./ClientActors";
 
 export default class CSolWorld extends SolWorld {
     /**
@@ -15,15 +16,14 @@ export default class CSolWorld extends SolWorld {
         this.game = game;
         this.glbLoader = game.glbLoader;
 
-        this.actorRegistry = {
-        }
-
         this.worldCollider = null;
         this.allGeoms = [];
         this.graphics = new Scene()
         this.game.graphics.add(this.graphics);
 
         this.skybox = new SkyBox(this, this.game.textureLoader);
+
+        super.init(actorRegistry, true);
     }
     get meshManager() { return this.game.meshManager }
     add(obj) {
@@ -37,7 +37,6 @@ export default class CSolWorld extends SolWorld {
         this.skybox.update(dt);
     }
     enter(callback) {
-        super.enter();
         this.glbLoader.load(`/assets/${this.name}.glb`, (data) => {
             const scene = data.scene;
             //@ts-ignore

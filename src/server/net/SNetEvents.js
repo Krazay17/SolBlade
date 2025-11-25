@@ -1,5 +1,5 @@
-import GameServer from "@server/core/GameServer";
-import { NETPROTO } from "@common/net/NetProtocols";
+import GameServer from "@solblade/server/core/GameServer.js";
+import { NETPROTO } from "@solblade/common/net/NetProtocols.js";
 
 export default class SNetEvents {
     /**
@@ -13,7 +13,7 @@ export default class SNetEvents {
         this.eventHandlers = {
             [NETPROTO.PLAYER_JOINED]: (data) => this.playerJoined(data),
             [NETPROTO.STATE_UPDATE]: (data) => this.stateUpdate(data),
-            [NETPROTO.SPAWN_ACTOR]: (data)=> this.spawnActor(data),
+            [NETPROTO.SPAWN_ACTOR]: (data) => this.spawnActor(data),
         }
         this.bindEvents();
     }
@@ -25,11 +25,12 @@ export default class SNetEvents {
     playerJoined(data) {
         console.log('player joined', data);
         console.log(this.game.worldManager.worlds.world1)
+        this.transport.emit(NETPROTO.PLAYER_JOINED, data);
     }
     stateUpdate(data) {
         console.log('state update', data);
     }
-    spawnActor(data){
+    spawnActor(data) {
         this.game.worldManager.worlds[data.worldName].actorManager.addActor(data.type, data);
         this.transport.emit(NETPROTO.SPAWN_ACTOR, data);
     }

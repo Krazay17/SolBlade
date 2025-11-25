@@ -14,9 +14,9 @@ export default defineConfig({
 	plugins: [wasm(), topLevelAwait()],
 	resolve: {
 		alias: {
-			"@client": path.resolve(__dirname, "src/client"),
-			"@common": path.resolve(__dirname, "src/common"),
-			"@server": path.resolve(__dirname, "src/server")
+			"@solblade/client": path.resolve(__dirname, "src/client"),
+			"@solblade/common": path.resolve(__dirname, "src/common"),
+			"@solblade/server": path.resolve(__dirname, "src/server")
 		}
 	}
 });

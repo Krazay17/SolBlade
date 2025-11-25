@@ -1,6 +1,6 @@
-import { SOL_PHYSICS_SETTINGS } from "@common/config/SolConstants.js";
+import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js"
 import WorldManager from "../managers/WorldManager.js";
-import SNetEvents from "@server/net/SNetEvents.js";
+import SNetEvents from "@solblade/server/net/SNetEvents.js";
 
 export default class GameServer {
     constructor(transport) {

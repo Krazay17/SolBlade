@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import MyEventEmitter from '@common/core/MyEventEmitter.js';
-import Pawn from '@common/actors/Pawn';
+import MyEventEmitter from '@solblade/common/core/MyEventEmitter.js';
+import Pawn from '@solblade/common/actors/Pawn';
 
 export default class AnimationManager {
     pawn: Pawn;

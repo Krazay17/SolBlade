@@ -7,10 +7,14 @@ export default class SolWorld {
         this.name = name;
         this.ready = true;
 
-        this.actorManager = new ActorManager(this);
-
         this.physics = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
         this.physics.timestep = SOL_PHYSICS_SETTINGS.timeStep;
+
+        /**@type {ActorManager} */
+        this.actorManager = null;
+    }
+    init(actorRegistry, client = false) {
+        this.actorManager = new ActorManager(this, actorRegistry, client);
     }
     enter(callback) {
         const enemies = 2;

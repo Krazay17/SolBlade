@@ -9,13 +9,13 @@
         "strict": false,
         "baseUrl": "./src",
         "paths": {
-            "@common/*": [
+            "@solblade/common/*": [
                 "common/*"
             ],
-            "@client/*": [
+            "@solblade/client/*": [
                 "client/*"
             ],
-            "@server/*": [
+            "@solblade/server/*": [
                 "server/*"
             ]
         }

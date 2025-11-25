@@ -20,4 +20,4 @@ server/build/
 npm-debug.log*
 
 # Environment files
-.env
+*.env

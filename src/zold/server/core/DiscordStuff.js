@@ -1,5 +1,7 @@
+import 'dotenv/config';
+
 export async function sendDiscordMessage(message) {
-    const webhookURL = "https://discord.com/api/webhooks/1406792582197149699/xlWk4jLxvCzyILXd1E0OxcneZVhYz6Rjp8Z48A0EGtvl3rKusWT2lxCdvphSPohRqACL";
+    const webhookURL = process.env.DISCORD_WEBHOOK;
 
     const messageToSend = message;
     const playerName = "Server";

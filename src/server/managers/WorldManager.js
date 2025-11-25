@@ -1,4 +1,4 @@
-import SolWorld from "@common/core/SolWorld";
+import SolWorld from "@solblade/common/core/SolWorld.js";
 
 export default class WorldManager {
     constructor(game) {
@@ -8,6 +8,12 @@ export default class WorldManager {
         this.worlds = {
             world1: new SolWorld('world1'),
             world2: new SolWorld('world2'),
+        }
+        this.init()
+    }
+    init() {
+        for (const world of Object.values(this.worlds)) {
+            world.init();
         }
     }
     step(dt) {

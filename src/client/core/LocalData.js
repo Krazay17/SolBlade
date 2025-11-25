@@ -5,7 +5,7 @@ export default {
     name: "Player",
     money: 0,
     health: 100,
-    sceneName: 'world1',
+    worldName: 'world1',
     position: [0, 1, 0],
     rotation: [0, 0, 0, 1],
     weapons: { left: "Fireball", right: "Blade" },
@@ -37,7 +37,7 @@ export default {
             money: this.money,
             health: this.health,
             scene: this.scene,
-            sceneName: this.sceneName,
+            worldName: this.worldName,
             position: this.position,
             rotation: this.rotation,
             weapons: this.weapons,
@@ -79,7 +79,7 @@ export default {
         this.money = parsed.money ?? this.money;
         this.health = parsed.health ?? this.health;
         this.scene = parsed.scene ?? this.scene;
-        this.sceneName = parsed.sceneName ?? this.sceneName;
+        this.worldName = parsed.worldName ?? this.worldName;
         this.position = parsed.position ?? this.position;
         this.rotation = parsed.rotation ?? this.rotation;
         this.weapons = parsed.weapons ?? this.weapons;
@@ -100,7 +100,7 @@ export default {
         this.money = keep.money ?? this.money;
         this.health = keep.health ?? this.health;
         this.scene = keep.scene ?? this.scene;
-        this.sceneName = keep.sceneName ?? this.sceneName;
+        this.worldName = keep.worldName ?? this.worldName;
         this.position = keep.position ?? this.position;
         this.rotation = keep.rotation ?? this.rotation;
         this.weapons = keep.weapons ?? this.weapons;

@@ -3,6 +3,9 @@ import http from "http";
 import repl from 'repl';
 import GameServer from "./GameServer.js";
 import RAPIER from "@dimforge/rapier3d-compat";
+import 'dotenv/config';
+
+console.log(process.env.DISCORD_WEBHOOK);
 
 const SERVER_VERSION = 1.14;
 const server = http.createServer();

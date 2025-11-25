@@ -1,6 +1,6 @@
 {
     "type": "module",
-    "name": "server",
+    "name": "@solblade/server",
     "scripts": {
         "start": "node ./core/SMain.js",
         "dev": "nodemon ./core/SMain.js"
@@ -8,6 +8,9 @@
     "dependencies": {
         "@dimforge/rapier3d-compat": "^0.19.2",
         "socket.io": "^4.8.1",
-        "three": "^0.179.1"
+        "three": "^0.179.1",
+        "@solblade/common": "file: ../common",
+        "@solblade/server": "file: ./",
+        "@solblade/client": "file: ../client"
     }
 }
