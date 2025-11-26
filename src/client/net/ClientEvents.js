@@ -12,7 +12,7 @@ export default class ClientEvents {
         this.bindWorldEvents();
         this.bindNetEvents();
     }
-    bindWorldEvents(){
+    bindWorldEvents() {
 
     }
     bindNetEvents() {
@@ -30,13 +30,23 @@ export default class ClientEvents {
     stateUpdate(data) {
         console.log("state update", data);
     }
-    spawnActor(actor){
-        const existingActor = this.game.solWorld.actorManager.getActorById(actor.id);
-        if(existingActor) {
+    spawnActor(actor) {
+        const am = this.game.solWorld.actorManager;
+        const existingActor = am.getActorById(actor.id);
+        if (existingActor) {
             existingActor.activate();
+        } else {
+            am.newActor(actor.type, actor, true);
         }
     }
-    worldUpdate(data){
-
+    worldUpdate(data) {
+        const am = this.game.solWorld.actorManager
+        const view = new Float32Array(data);
+        for (let i = 0; i < view.length; i += 8) {
+            const actor = am.getActorById(view[i]);
+            if (!actor || !actor.isRemote) continue;
+            actor.pos = [view[i + 1], view[i + 2], view[i + 3]];
+            actor.rot = [view[i + 4], view[i + 5], view[i + 6], view[i + 7]];
+        }
     }
 }

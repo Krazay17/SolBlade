@@ -24,6 +24,9 @@ export default class ServerEvents {
                     pos: actor.pos,
                 })
             }
+            w.onStep = (buffer) => {
+                this.transport.emit(NETPROTO.WORLD_UPDATE, buffer);
+            }
         }
     }
     bindNetEvents() {
@@ -38,14 +41,13 @@ export default class ServerEvents {
     }
     playerJoined(data) {
         console.log('player joined', data);
-        console.log(this.game.worldManager.worlds.world1)
         this.transport.emit(NETPROTO.PLAYER_JOINED, data);
     }
     stateUpdate(data) {
         console.log('state update', data);
     }
     spawnActor(data) {
-        this.game.worldManager.worlds[data.worldName].actorManager.addActor(data.type, data);
-        this.transport.emit(NETPROTO.SPAWN_ACTOR, data);
+        this.game.worldManager.worlds[data.worldName].actorManager.newActor(data.type, data);
+        this.transport.emit(NETPROTO.SPAWN_ACTOR, data.serialize());
     }
 }

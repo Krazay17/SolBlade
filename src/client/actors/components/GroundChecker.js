@@ -15,7 +15,7 @@ export default class GroundChecker {
 
         this.downVec = new Vector3(0, -1, 0);
         this.tempVec = new Vector3();
-        this.ball = new RAPIER.Ball(this.pawn.radius);
+        this.ball = new RAPIER.Ball(this.pawn.radius * 0.9);
 
     }
     isGrounded(slope = -0.7) {

@@ -9,7 +9,6 @@ export default class CPawn extends Pawn {
     constructor(world, data) {
         super(world, data);
 
-        this.isRemote = data.isRemote ?? false;
         this.meshName = data.meshName ?? "spikeMan";
 
         this.graphics = new THREE.Group();
@@ -28,7 +27,7 @@ export default class CPawn extends Pawn {
         )
         this.graphics.add(mesh);
     }
-    activate(){
+    activate() {
         console.log(`Activate pawn: ${this.id}`);
     }
     makeMesh(callback) {
@@ -45,11 +44,14 @@ export default class CPawn extends Pawn {
     tick(dt) {
         if (!this.active) return;
         super.tick(dt);
+
         if (this.body) {
             if (this.isRemote) {
-                this.graphics.position.lerp(this.body.translation(), dt * 60);
+                this.body.setTranslation(this.vecPos, true);
+                this.body.setRotation(this.quatRot, true);
+                this.graphics.position.lerp(this.vecPos, dt * 60);
                 //@ts-ignore
-                this.graphics.quaternion.slerp(this.body.rotation(), dt * 60);
+                this.graphics.quaternion.slerp(this.quatRot, dt * 60);
             } else {
                 const pos = this.body.translation();
                 const rot = this.body.rotation();

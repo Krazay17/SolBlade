@@ -16,7 +16,7 @@ export default class CPlayer extends CPawn {
             ...data,
             name: "player",
             type: 'player',
-            isLocal: true,
+            isRemote: false,
         });
         this.game = game;
         this.cameraArm = new Group();

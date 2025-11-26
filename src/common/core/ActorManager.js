@@ -18,6 +18,7 @@ export default class ActorManager {
         }
 
         this.onNewActor = (/**@type {Actor} */ actor) => { };
+        this.onStep = null;
     }
     get allActors() {
         const all = [];
@@ -32,6 +33,7 @@ export default class ActorManager {
         for (const a of this.allActors) {
             a.tick(dt);
         }
+
     }
     getActorById(id) {
         for (const a of this.allActors) {
@@ -74,6 +76,6 @@ export default class ActorManager {
         actor.makeBody?.(this.world.physics);
         group.push(actor);
 
-        console.log(actor);
+        console.log(this.actors);
     }
 }

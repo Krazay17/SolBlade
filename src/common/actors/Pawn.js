@@ -12,7 +12,6 @@ export default class Pawn extends Actor {
     constructor(world, data = {}) {
         super(data);
         this.world = world;
-        this.isRemote = false;
         this.height = data.height ?? 1;
         this.radius = data.radius ?? 0.5;
 
@@ -29,7 +28,7 @@ export default class Pawn extends Actor {
     }
     get vecPos() {
         if (!this._vecPos) this._vecPos = new THREE.Vector3();
-        return this._vecPos;
+        return this._vecPos.fromArray(this.pos);
     }
     set vecPos(v) {
         if (!this._vecPos) this._vecPos = new THREE.Vector3();
@@ -41,7 +40,7 @@ export default class Pawn extends Actor {
     /**@type {THREE.Quaternion} */
     get quatRot() {
         if (!this._quatRot) this._quatRot = new THREE.Quaternion();
-        return this._quatRot;
+        return this._quatRot.fromArray(this.rot);
     }
     /**@type {THREE.Quaternion} */
     set quatRot(v) {
@@ -55,7 +54,7 @@ export default class Pawn extends Actor {
     get yaw() { return this._yaw }
     set yaw(v) {
         this._yaw = v;
-        this.quatRot.setFromAxisAngle(this.upVec, v)
+        this.quatRot = this.quatRot.setFromAxisAngle(this.upVec, v)
 
         if (!this.body) return;
         this.body.setRotation(this.quatRot, true);
@@ -71,7 +70,7 @@ export default class Pawn extends Actor {
         this._vecVel.copy(v);
 
         if (!this.body) return;
-        this.body.setLinvel(this._vecVel, true)
+        this.body.setLinvel(this._vecVel, true);
     }
     get vecDir() {
         if (!this._vecDir) this._vecDir = new Vect3();
@@ -109,14 +108,6 @@ export default class Pawn extends Actor {
         if (this.body) {
             if (this.fsm) this.fsm.update(dt);
             if (this.movement) this.movement.update(dt);
-            if (!this.isRemote) {
-                const pos = this.body.translation();
-                const rot = this.body.rotation();
-                //@ts-ignore
-                this.vecPos = pos;
-                //@ts-ignore
-                this.quatRot = rot;
-            }
         }
     }
     step(dt) { }
