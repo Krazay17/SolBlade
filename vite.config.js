@@ -11,7 +11,10 @@ export default defineConfig({
 		outDir: 'dist',        // Output folder for deployment
 		emptyOutDir: true
 	},
-	plugins: [wasm(), topLevelAwait()],
+	plugins: [
+		wasm(),
+		topLevelAwait()
+	],
 	resolve: {
 		alias: {
 			"@solblade/client": path.resolve(__dirname, "src/client"),

@@ -11,7 +11,7 @@ import Scene4 from './scenes/Scene4';
 import Scene5 from './scenes/Scene5';
 import LocalData from '../../client/core/LocalData';
 import MeshManager from './core/MeshManager';
-import SolRenderPass from '../../client/rendering/SolRenderPass';
+import SolRenderPass from '../../client/rendering/SolGraphics';
 import QuestManager from './core/QuestManager';
 import { setNetScene } from './core/NetManager';
 import Player from './player/Player';

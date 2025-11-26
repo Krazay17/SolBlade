@@ -11,8 +11,11 @@ export default class WorldManager {
             world1: new SolWorld('world1', this.loader),
             world2: new SolWorld('world2', this.loader),
         }
+
+    }
+    async start() {
         for (const world of Object.values(this.worlds)) {
-            world.enter();
+            await world.enter();
         }
     }
     step(dt) {

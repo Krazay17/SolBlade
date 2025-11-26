@@ -27,16 +27,15 @@ export default class SolWorld {
         this.onStep = null;
 
     }
-    async enter(callback) {
+    async enter() {
         await this.loadWorldData();
 
         //test enemy spawn before I use glb locations
-        const enemies = 1;
-        for (let i = 0; i < enemies; i++) {
-            this.actorManager.newActor('enemy', { subtype: "wizard", pos: [0, 20, i] });
-        }
+        // const enemies = 1;
+        // for (let i = 0; i < enemies; i++) {
+        //     this.actorManager.newActor('enemy', { subtype: "wizard", pos: [0, 20, i] });
+        // }
         this.ready = true;
-        if (callback) callback();
     }
     async loadWorldData() {
         //make physics from glb file

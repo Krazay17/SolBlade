@@ -5,20 +5,20 @@ import CPlayer from "../actors/CPlayer";
 import SoundPlayer from "../audio/SoundPlayer";
 import Input from "../input/UserInput";
 import MeshManager from "../managers/MeshManager";
-import Net from "../net/CNetManager";
-import SolRenderPass from "../rendering/SolRenderPass";
+import { SolGraphics } from "../rendering/SolGraphics";
 import LoadingBar from "../ui/LoadingBar";
 import { menuButton } from "../ui/MainMenu";
 import { worldRegistry } from "./CRegistry";
 import LocalData from "./LocalData";
 import CSolWorld from "../worlds/CSolWorld";
+import { NetworkManager } from "./NetworkManager";
 
 export default class GameClient {
     /**
      * 
      * @param {HTMLElement} canvas 
      * @param {Input} input 
-     * @param {Net} net 
+     * @param {NetworkManager} net;
      */
     constructor(canvas, input, net) {
         this.canvas = canvas;
@@ -30,10 +30,6 @@ export default class GameClient {
         this.accumulator = 0;
         /**@type {CSolWorld} */
         this.solWorld = null;
-        this.worldName = "world1";
-
-        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
 
         this.loadingBar = new LoadingBar();
         this.loadingManager = new THREE.LoadingManager(this.loadingBar.finish, this.loadingBar.update);
@@ -42,38 +38,36 @@ export default class GameClient {
         this.glbLoader = new GLTFLoader(this.loadingManager);
         this.meshManager = new MeshManager(this);
 
-        this.graphics = new THREE.Scene();
-
-        this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, .8, 3000);
-        this.camera.lookAt(0, 0, 1);
-        this.graphics.add(this.camera);
-
+        this.graphics = new SolGraphics(this.canvas);
+        this.camera = this.graphics.camera;
         this.audioListener = new THREE.AudioListener();
-        this.soundPlayer = new SoundPlayer(this, this.audioListener);
         this.camera.add(this.audioListener);
+        this.soundPlayer = new SoundPlayer(this, this.audioListener);
 
-        this.solRender = new SolRenderPass(this.renderer, this.graphics, this.camera);
-        this.worldLight();
-
-        this.newWorld(LocalData.worldName || "world1");
         this.player = new CPlayer(this, { pos: [0, 18, 0] });
 
         this.bindings();
+        this.serverUpdates();
     }
+    get physics() { return this.solWorld.physics };
     addActor(actor) {
         this.solWorld.actorManager.addActor(actor);
     }
     newActor(actor) {
         this.solWorld.actorManager.newActor(actor);
     }
-    get physics() { return this.solWorld.physics };
-    bindings() {
-        window.addEventListener('resize', () => {
-            const w = window.innerWidth;
-            const h = window.innerHeight;
-            this.camera.aspect = w / h;
-            this.camera.updateProjectionMatrix();
+    serverUpdates() {
+        this.net.on("gameStateUpdate", (state) => {
+            console.log(`Recieved game state update: ${state}`);
         })
+        this.net.on('playerShotFired', (data) => {
+            console.log(`Player shot fired: ${data}`);
+        })
+        this.net.on('newActor', (data) => {
+            console.log(`New Actor: ${data}`);
+        })
+    }
+    bindings() {
         window.addEventListener('focus', () => {
             this.isFocused = true;
             this.running = true;
@@ -89,95 +83,52 @@ export default class GameClient {
         })
     }
     async start() {
+        await this.newWorld(LocalData.worldName || "world1");
         this.running = true;
-        requestAnimationFrame(this.tick.bind(this));
+        requestAnimationFrame(this.loop.bind(this));
     }
-    newWorld(name) {
+    async newWorld(name) {
         const worldClass = worldRegistry[name];
         if (!worldClass) return;
         if (this.solWorld) this.solWorld.exit();
         this.solWorld = new worldClass(this);
-        this.solWorld.enter(() => {
-            this.ready = true;
-            this.addActor(this.player);
-        });
+        await this.solWorld.enter();
+        this.addActor(this.player);
+        this.ready = true;
     }
-    tick(time) {
+    loop(time) {
         const dt = (time - this.lastTime) / 1000;
         this.lastTime = time;
-        if (dt > 1) {
-            this.handleSleep();
-        }
+        if (dt > 1) this.handleSleep();
         if (this.running && this.ready) {
             this.accumulator += dt;
             this.accumulator = Math.min(this.accumulator, 0.25);
             const timestep = SOL_PHYSICS_SETTINGS.timeStep;
             while (this.accumulator >= timestep) {
                 this.step(timestep);
-
                 this.accumulator -= timestep;
             }
-
-            //this.player?.tick(dt);
-            if (this.solWorld) {
-                this.solWorld.step(dt);
-                this.solWorld?.tick(dt);
-            }
-
-            this.solRender.composer.render(dt);
+            this.tick(dt);
+            this.graphics.render(dt);
         }
-        requestAnimationFrame(this.tick.bind(this));
+        requestAnimationFrame(this.loop.bind(this));
+    }
+    tick(dt) {
+        if (this.solWorld) this.solWorld.tick(dt);
     }
     step(dt) {
-        if (this.net.localServer) this.net.localServer.step(dt);
-        //if (this.solWorld) this.solWorld.step(dt);
+        if (this.solWorld) this.solWorld.step(dt);
     }
     handleSleep() {
         if (this.isFocused) return;
         this.running = false;
-    }
-    worldLight() {
-        this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        const dirLight = new THREE.DirectionalLight(0xffeeee, .4);
-
-        dirLight.position.set(0, 100, 0);
-        const target = new THREE.Vector3().addVectors(dirLight.position, new THREE.Vector3(1, -1, 1).normalize())
-        dirLight.lookAt(target);
-
-        dirLight.shadow.camera.left = -100;
-        dirLight.shadow.camera.right = 100;
-        dirLight.shadow.camera.top = 100;
-        dirLight.shadow.camera.bottom = -100;
-        dirLight.shadow.camera.near = 1;
-        dirLight.shadow.camera.far = 200;
-
-        // menuSlider('Shadow Quality', 1, 10, 1, (value) => {
-        //     dirLight.shadow.mapSize.width = 1024 * value;
-        //     dirLight.shadow.mapSize.height = 1024 * value;
-        //     if (dirLight.shadow.map) {
-        //         dirLight.shadow.map.dispose();
-        //         dirLight.shadow.map = null;
-        //     }
-        //     dirLight.shadow.needsUpdate = true;
-        // })
-        dirLight.shadow.mapSize.width = 1024 * 4;
-        dirLight.shadow.mapSize.height = 1024 * 4;
-        dirLight.shadow.bias = -0.0001;
-        dirLight.shadow.normalBias = 0.02;
-
-        dirLight.castShadow = true;
-        this.graphics.add(dirLight);
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, .05);
-        this.graphics.add(ambientLight);
     }
     savePlayerState() {
         LocalData.position = this.player.pos;
         LocalData.rotation = this.player.rot;
         LocalData.weapons.left = this.player.data.leftWeapon;
         LocalData.weapons.right = this.player.data.rightWeapon;
-        LocalData.worldName = this.worldName;
+        LocalData.worldName = this.solWorld.name;
     }
 }
 

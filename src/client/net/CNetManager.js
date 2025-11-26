@@ -1,5 +1,5 @@
 import { io } from "socket.io-client"
-import GameServer from "@solblade/server/core/GameServer";
+import GameServer from "@solblade/common/core/GameLogic";
 
 export default class CNetManager {
     constructor() {

@@ -1,16 +1,23 @@
 import { Server } from "socket.io";
 import http from "http";
 import repl from 'repl';
-import GameServer from "./GameServer.js";
+import GameLogic from "@solblade/common/core/GameLogic";
 import RAPIER from "@dimforge/rapier3d-compat";
 import 'dotenv/config';
 
-console.log(process.env.DISCORD_WEBHOOK);
 
 const SERVER_VERSION = 1.14;
 const server = http.createServer();
 const PORT = 8080;
 const origin = ["https://solblade.online", "http://localhost:5173"];
+let playerSockets = {};
+
+async function init() {
+    await RAPIER.init();
+    const game = new GameLogic();
+    await game.start();
+}
+init();
 
 const io = new Server(server, {
     cors: { origin, methods: ["GET", "POST"] },
@@ -19,24 +26,7 @@ const io = new Server(server, {
     pingTimeout: 10000,
     cleanupEmptyChildNamespaces: true,
 });
-const serverTransport = {
-    io,
-    handlers: {},
-    on(event, handler) {
-        this.handlers[event] = handler;
-    },
-    emit(event, data) {
-        this.io.emit(event, data);
-    }
-}
-async function init() {
-    await RAPIER.init();
-    const game = new GameServer(serverTransport);
-    game.init();
-}
-init();
 
-let playerSockets = {};
 io.on('connection', (socket) => {
     if (socket.bound) return;
     socket.bound = true;
