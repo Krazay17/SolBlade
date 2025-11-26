@@ -14,4 +14,5 @@ export const Actions = {
     INVENTORY: 13,
     HOME: 14,
     WORLD1: 15,
+    DEVFLY: 16,
 }

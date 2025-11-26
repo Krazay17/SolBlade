@@ -4,6 +4,7 @@ export default class Actor {
             id = '1',
             tempId = data.tempId ?? crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 10),
             type = null,
+            subtype = null,
             name = "actor",
             owner = null,
             worldName = 'world1',
@@ -18,6 +19,7 @@ export default class Actor {
         this.id = id;
         this.tempId = tempId;
         this.type = type;
+        this.subtype = subtype;
         this.name = name;
         this.owner = owner;
         this.worldName = worldName;
@@ -38,6 +40,7 @@ export default class Actor {
             id: this.id,
             tempId: this.tempId,
             type: this.type,
+            subtype: this.subtype,
             name: this.name,
             owner: this.owner,
             worldName: this.worldName,

@@ -1,3 +1,4 @@
+import Actor from "../actors/Actor.js";
 import SolWorld from "./SolWorld.js";
 
 export default class ActorManager {
@@ -5,9 +6,10 @@ export default class ActorManager {
      * 
      * @param {SolWorld} world 
      */
-    constructor(world, actorRegistry, client = false) {
+    constructor(world, actorRegistry) {
         this.world = world;
         this.actorRegistry = actorRegistry;
+        this.nextId = 1;
 
         this.actors = {
             players: [],
@@ -15,7 +17,7 @@ export default class ActorManager {
             others: []
         }
 
-        this.onNewActor = null;
+        this.onNewActor = (/**@type {Actor} */ actor) => { };
     }
     get allActors() {
         const all = [];
@@ -26,7 +28,17 @@ export default class ActorManager {
         }
         return all;
     }
-    addActor(actor) {
+    tick(dt) {
+        for (const a of this.allActors) {
+            a.tick(dt);
+        }
+    }
+    getActorById(id) {
+        for (const a of this.allActors) {
+            if (a.id === id) return a;
+        }
+    }
+    addActor(actor, isRemote = false, replicate = false) {
         let group;
         switch (actor.type) {
             case "player":
@@ -41,7 +53,7 @@ export default class ActorManager {
         actor.makeBody?.(this.world.physics);
         group.push(actor);
     }
-    newActor(type, data) {
+    newActor(type, data, isRemote = false, replicate = false) {
         let group;
         switch (type) {
             case "player":
@@ -55,10 +67,13 @@ export default class ActorManager {
         }
         const aClass = this.actorRegistry[data.subtype].class;
         if (!aClass) return;
-        const actor = new aClass(this, data);
+        const actor = new aClass(this.world, data);
+        this.nextId++;
+        actor.id = this.nextId;
         if (this.onNewActor) this.onNewActor(actor);
         actor.makeBody?.(this.world.physics);
         group.push(actor);
 
+        console.log(actor);
     }
 }

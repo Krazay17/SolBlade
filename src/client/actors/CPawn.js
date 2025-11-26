@@ -1,17 +1,13 @@
 import * as THREE from "three";
 import Pawn from "@solblade/common/actors/Pawn";
 import AnimationManager from "./components/AnimationManager";
-import GameClient from "@solblade/client/core/GameClient";
 
 export default class CPawn extends Pawn {
     /**
-     * 
-     * @param {GameClient} game
      * @param {*} data 
      */
-    constructor(game, data) {
-        super(game.solWorld, data);
-        this.game = game;
+    constructor(world, data) {
+        super(world, data);
 
         this.isRemote = data.isRemote ?? false;
         this.meshName = data.meshName ?? "spikeMan";
@@ -20,14 +16,10 @@ export default class CPawn extends Pawn {
         this.graphics.position.set(this.pos[0], this.pos[1], this.pos[2]);
         this.animation = null;
         this.upVec = new THREE.Vector3(0, 1, 0);
-
-        //this.testCube();
-        this.makeMesh();
-        
-        this.init();
     }
     init() {
-        this.game.solWorld.graphics.add(this.graphics);
+        //@ts-ignore
+        this.world.graphics.add(this.graphics);
     }
     testCube() {
         const mesh = new THREE.Mesh(
@@ -36,8 +28,11 @@ export default class CPawn extends Pawn {
         )
         this.graphics.add(mesh);
     }
+    activate(){
+        console.log(`Activate pawn: ${this.id}`);
+    }
     makeMesh(callback) {
-        this.game.meshManager.makeMesh(this.meshName).then(({ animations, scene }) => {
+        this.world.meshManager.makeMesh(this.meshName).then(({ animations, scene }) => {
             this.mesh = scene;
             //@ts-ignore
             this.animation = new AnimationManager(this, scene, animations);

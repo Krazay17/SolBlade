@@ -1,6 +1,14 @@
+import SolWorld from "@solblade/common/core/SolWorld";
 import Controller from "./Controller";
+import Pawn from "../Pawn";
 
 export default class AIController extends Controller {
+    /**
+     * 
+     * @param {SolWorld} world 
+     * @param {Pawn} pawn 
+     * @param {*} data 
+     */
     constructor(world, pawn, data = {}) {
         super();
         this.world = world;
@@ -22,11 +30,11 @@ export default class AIController extends Controller {
         return this.blackboard.dir;
     }
     findNearestPlayer() {
-        const { players } = this.world.actors;
+        const players = this.world.actorManager.actors.players;
         if (!players.length) return {};
 
         // get this enemy's position
-        const pos = this.pawn.position;
+        const pos = this.pawn.vecPos
 
         // find nearest player
         let nearest = null;

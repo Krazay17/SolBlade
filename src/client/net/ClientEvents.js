@@ -9,22 +9,34 @@ export default class ClientEvents {
     constructor(game, transport) {
         this.game = game;
         this.transport = transport;
-
-        this.eventHandlers = {
-            [NETPROTO.PLAYER_JOINED]: (data) => this.playerJoined(data),
-            [NETPROTO.STATE_UPDATE]: (data) => this.stateUpdate(data)
-        }
-        this.bindEvents();
+        this.bindWorldEvents();
+        this.bindNetEvents();
     }
-    bindEvents() {
-        for (const [event, handler] of Object.entries(this.eventHandlers)) {
-            this.transport.on(event, handler);
+    bindWorldEvents(){
+
+    }
+    bindNetEvents() {
+        for (const event of Object.values(NETPROTO)) {
+            if (typeof this[event] === "function") {
+                this.transport.on(event, (data) => this[event](data))
+            } else {
+                console.warn(`[Client Events] No handler method ${event}`);
+            }
         }
     }
     playerJoined(data) {
         console.log('local call: player joined', data);
     }
     stateUpdate(data) {
-        console.log("state update", data)
+        console.log("state update", data);
+    }
+    spawnActor(actor){
+        const existingActor = this.game.solWorld.actorManager.getActorById(actor.id);
+        if(existingActor) {
+            existingActor.activate();
+        }
+    }
+    worldUpdate(data){
+
     }
 }

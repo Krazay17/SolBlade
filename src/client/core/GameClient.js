@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/Addons";
+import { GLTFLoader } from "three/examples/jsm/Addons.js";
 import { SOL_PHYSICS_SETTINGS } from "../../common/config/SolConstants";
 import CPlayer from "../actors/CPlayer";
 import SoundPlayer from "../audio/SoundPlayer";
@@ -9,15 +9,9 @@ import Net from "../net/CNetManager";
 import SolRenderPass from "../rendering/SolRenderPass";
 import LoadingBar from "../ui/LoadingBar";
 import { menuButton } from "../ui/MainMenu";
+import { worldRegistry } from "./CRegistry";
 import LocalData from "./LocalData";
-import CSolWorld1 from "../worlds/CSolWorld1";
-import CSolWorld2 from "../worlds/CSolWorld2";
 import CSolWorld from "../worlds/CSolWorld";
-
-const worldRegistry = {
-    world1: CSolWorld1,
-    world2: CSolWorld2,
-}
 
 export default class GameClient {
     /**
@@ -61,8 +55,8 @@ export default class GameClient {
         this.solRender = new SolRenderPass(this.renderer, this.graphics, this.camera);
         this.worldLight();
 
-        this.player = new CPlayer(this, { pos: [0, 18, 0] });
         this.newWorld(LocalData.worldName || "world1");
+        this.player = new CPlayer(this, { pos: [0, 18, 0] });
 
         this.bindings();
     }
@@ -101,6 +95,7 @@ export default class GameClient {
     newWorld(name) {
         const worldClass = worldRegistry[name];
         if (!worldClass) return;
+        if (this.solWorld) this.solWorld.exit();
         this.solWorld = new worldClass(this);
         this.solWorld.enter(() => {
             this.ready = true;
@@ -123,15 +118,19 @@ export default class GameClient {
                 this.accumulator -= timestep;
             }
 
-            this.player?.tick(dt);
-            this.solWorld?.tick(dt);
+            //this.player?.tick(dt);
+            if (this.solWorld) {
+                this.solWorld.step(dt);
+                this.solWorld?.tick(dt);
+            }
+
             this.solRender.composer.render(dt);
         }
         requestAnimationFrame(this.tick.bind(this));
     }
     step(dt) {
         if (this.net.localServer) this.net.localServer.step(dt);
-        if (this.solWorld) this.solWorld.step(dt);
+        //if (this.solWorld) this.solWorld.step(dt);
     }
     handleSleep() {
         if (this.isFocused) return;

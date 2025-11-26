@@ -4,12 +4,9 @@ import Actor from "./Actor.js";
 import { COLLISION_GROUPS } from "../config/SolConstants.js";
 import Controller from "./components/Controller.js";
 import { Vect3 } from "../utils/SolMath.js"
-import SolWorld from "@solblade/common/core/SolWorld.js";
 
 export default class Pawn extends Actor {
     /**
-     * 
-     * @param {SolWorld} world 
      * @param {*} data 
      */
     constructor(world, data = {}) {
@@ -19,9 +16,8 @@ export default class Pawn extends Actor {
         this.height = data.height ?? 1;
         this.radius = data.radius ?? 0.5;
 
-        this.upVec = new THREE.Vector3(0,1,0);
+        this.upVec = new THREE.Vector3(0, 1, 0);
 
-        this.graphics = null;
         /**@type {Controller} */
         this.controller = null;
         this.movement = null;
@@ -60,21 +56,24 @@ export default class Pawn extends Actor {
     set yaw(v) {
         this._yaw = v;
         this.quatRot.setFromAxisAngle(this.upVec, v)
-        if(!this.body)return;
+
+        if (!this.body) return;
         this.body.setRotation(this.quatRot, true);
     }
     get velocity() {
         if (!this._vecVel) this._vecVel = new THREE.Vector3();
 
+        if (!this.body) return;
         return this._vecVel.copy(this.body.linvel());
     }
     set velocity(v) {
+        if (!this._vecVel) this._vecVel = new THREE.Vector3();
         this._vecVel.copy(v);
-        if(!this.body)return;
+
+        if (!this.body) return;
         this.body.setLinvel(this._vecVel, true)
     }
     get vecDir() {
-        if (!this.body) return;
         if (!this._vecDir) this._vecDir = new Vect3();
 
         return this._vecDir.setFromRotArray(this.rot);
@@ -106,14 +105,11 @@ export default class Pawn extends Actor {
     tick(dt) {
         if (!this.active) return;
         if (this.controller) this.controller.update(dt);
-        if (this.movement) this.movement.update(dt);
-        if (this.fsm) this.fsm.update(dt);
         if (this.animation) this.animation.update(dt);
         if (this.body) {
-            if (this.isRemote) {
-                this.graphics.position.lerp(this.body.translation(), dt * 60);
-                this.graphics.quaternion.slerp(this.body.rotation(), dt * 60);
-            } else {
+            if (this.fsm) this.fsm.update(dt);
+            if (this.movement) this.movement.update(dt);
+            if (!this.isRemote) {
                 const pos = this.body.translation();
                 const rot = this.body.rotation();
                 //@ts-ignore

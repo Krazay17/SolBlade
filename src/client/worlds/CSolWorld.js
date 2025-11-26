@@ -1,10 +1,10 @@
+import SolWorld from "@solblade/common/core/SolWorld";
 import RAPIER from "@dimforge/rapier3d-compat";
 import { getVerts } from "@solblade/common/utils/VertUtils";
-import SolWorld from "@solblade/common/core/SolWorld";
 import { Mesh, Scene } from "three";
 import SkyBox from "./SkyBox";
 import GameClient from "@solblade/client/core/GameClient";
-import { actorRegistry } from "./ClientActors";
+import { clientActors } from "@solblade/client/core/CRegistry";
 
 export default class CSolWorld extends SolWorld {
     /**
@@ -12,9 +12,9 @@ export default class CSolWorld extends SolWorld {
      * @param {GameClient} game 
      */
     constructor(game, name = "world1") {
-        super(name);
+        //@ts-ignore
+        super(name, game.glbLoader, clientActors);
         this.game = game;
-        this.glbLoader = game.glbLoader;
 
         this.worldCollider = null;
         this.allGeoms = [];
@@ -22,10 +22,22 @@ export default class CSolWorld extends SolWorld {
         this.game.graphics.add(this.graphics);
 
         this.skybox = new SkyBox(this, this.game.textureLoader);
-
-        super.init(actorRegistry, true);
     }
     get meshManager() { return this.game.meshManager }
+    async loadWorldData() {
+        const data = await this.glbLoader.loadAsync(`/assets/${this.name}.glb`)
+        this.graphics.add(data.scene);
+        data.scene.traverse((child) => {
+            if (child instanceof Mesh) {
+                this.allGeoms.push(child.geometry.clone());
+                const { vertices, indices } = getVerts(child.geometry);
+                const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
+                colliderDesc.setFriction(0);
+                colliderDesc.setRestitution(0);
+                this.physics.createCollider(colliderDesc);
+            }
+        });
+    }
     add(obj) {
         this.graphics.add(obj);
     }
@@ -35,26 +47,6 @@ export default class CSolWorld extends SolWorld {
     tick(dt) {
         for (const a of this.actorManager.allActors) { a.tick(dt); }
         this.skybox.update(dt);
-    }
-    enter(callback) {
-        this.glbLoader.load(`/assets/${this.name}.glb`, (data) => {
-            const scene = data.scene;
-            //@ts-ignore
-            this.graphics.add(scene);
-
-            scene.traverse((child) => {
-                if (child instanceof Mesh) {
-                    this.allGeoms.push(child.geometry.clone());
-                    const { vertices, indices } = getVerts(child.geometry);
-                    const colliderDesc = RAPIER.ColliderDesc.trimesh(vertices, indices);
-                    colliderDesc.setFriction(0);
-                    colliderDesc.setRestitution(0);
-                    this.physics.createCollider(colliderDesc);
-                }
-            });
-            this.ready = true;
-            if (callback) callback();
-        });
     }
     exit() {
         super.exit();

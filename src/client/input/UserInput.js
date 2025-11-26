@@ -39,11 +39,13 @@ export default class UserInput extends Controller {
       'Digit2': Actions.SPELL_2,
       'Digit3': Actions.SPELL_3,
       'Digit4': Actions.SPELL_4,
+      'KeyF': Actions.DEVFLY,
     };
     this.actionStates = {};
     for (const key in Actions) {
       this.actionStates[Actions[key]] = false;
     }
+    console.log(this.actionStates)
 
     document.addEventListener('pointerlockchange', () => {
       this.pointerLocked = (document.pointerLockElement === this.gameElement);

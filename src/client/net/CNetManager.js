@@ -31,6 +31,7 @@ export default class CNetManager {
             const client = new ClientTransport();
             const server = new LocalServerTransport(client)
             this.localServer = new GameServer(server);
+            
 
             this.transport = client;
         }
