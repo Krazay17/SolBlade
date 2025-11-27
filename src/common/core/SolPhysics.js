@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import SolWorld from "./SolWorld";
-import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants";
+import SolWorld from "./SolWorld.js";
+import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
 
 export default class SolPhysics {
     /**

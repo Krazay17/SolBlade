@@ -1,7 +1,7 @@
-import FSM from "./states/FSM";
-import AIController from "./components/AIController";
-import AIMovement from "./components/AIMovement";
-import Pawn from "./Pawn";
+import FSM from "./states/FSM.js";
+import AIController from "./components/AIController.js";
+import AIMovement from "./components/AIMovement.js";
+import Pawn from "./Pawn.js";
 
 export default class Wizard extends Pawn {
     constructor(world, data) {

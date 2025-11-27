@@ -1,5 +1,5 @@
 import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js"
-import WorldManager from "../../server/core/WorldManager.js";
+import WorldManager from "./WorldManager.js";
 
 export class GameLogic {
     constructor(broadcaster) {
@@ -24,6 +24,15 @@ export class GameLogic {
             mode: 'Local',
             serverTicks: this.tickCounter
         })
+    }
+    addPlayer(id){
+
+    }
+    removePlayer(id){
+
+    }
+    handleClientInput(id, event, data){
+
     }
     handlePlayerShoot(data) {
         this.broadcast('playerShotFired', { id: "player", target: data.target });

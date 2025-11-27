@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
-import { LocalServer } from "./LocalServer";
-import { RemoteServer } from "./RemoteClientAdapter";
+import { LocalServer } from "./LocalServer.js";
+import { RemoteServer } from "./RemoteClientAdapter.js";
 
 export class NetworkManager {
     constructor(url) {
@@ -16,7 +16,7 @@ export class NetworkManager {
      */
   async connect() {
     try {
-      console.log("Attempting to connect to Remote Server...");
+      console.log(`Attempting connection to ${this.url}`);
       
       // 1. Get the raw connected Socket.IO instance
       const rawSocket = await this._tryRemoteConnection();
@@ -47,7 +47,7 @@ export class NetworkManager {
             // Initialize socket with strict timeout options
             const tempSocket = io(this.url, {
                 reconnection: false, // Fail immediately if initial connect fails
-                timeout: 2000,       // 2 second timeout
+                timeout: 1000,       // 2 second timeout
                 autoConnect: true
             });
 

@@ -1,4 +1,4 @@
-import State from "./State";
+import State from "./State.js";
 
 export default class FallState extends State {
     update(dt) {

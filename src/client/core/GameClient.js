@@ -44,7 +44,7 @@ export default class GameClient {
         this.camera.add(this.audioListener);
         this.soundPlayer = new SoundPlayer(this, this.audioListener);
 
-        this.player = new CPlayer(this, { pos: [0, 18, 0] });
+        //this.player = new CPlayer(this, { pos: [0, 18, 0] });
 
         this.bindings();
         this.serverUpdates();
@@ -58,7 +58,7 @@ export default class GameClient {
     }
     serverUpdates() {
         this.net.on("gameStateUpdate", (state) => {
-            console.log(`Recieved game state update: ${state}`);
+            console.log(`Recieved game state update: ${state.serverTicks}`);
         })
         this.net.on('playerShotFired', (data) => {
             console.log(`Player shot fired: ${data}`);
@@ -93,7 +93,7 @@ export default class GameClient {
         if (this.solWorld) this.solWorld.exit();
         this.solWorld = new worldClass(this);
         await this.solWorld.enter();
-        this.addActor(this.player);
+        //this.addActor(this.player);
         this.ready = true;
     }
     loop(time) {
@@ -123,12 +123,12 @@ export default class GameClient {
         if (this.isFocused) return;
         this.running = false;
     }
-    savePlayerState() {
-        LocalData.position = this.player.pos;
-        LocalData.rotation = this.player.rot;
-        LocalData.weapons.left = this.player.data.leftWeapon;
-        LocalData.weapons.right = this.player.data.rightWeapon;
-        LocalData.worldName = this.solWorld.name;
-    }
+    // savePlayerState() {
+    //     LocalData.position = this.player.pos;
+    //     LocalData.rotation = this.player.rot;
+    //     LocalData.weapons.left = this.player.data.leftWeapon;
+    //     LocalData.weapons.right = this.player.data.rightWeapon;
+    //     LocalData.worldName = this.solWorld.name;
+    // }
 }
 

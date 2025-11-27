@@ -1,10 +1,9 @@
-import GameServer from "@solblade/common/core/GameLogic.js";
+
 import { NETPROTO } from "@solblade/common/core/NetProtocols.js";
 
 export default class ServerEvents {
     /**
      * 
-     * @param {GameServer} game 
      */
     constructor(game) {
         this.game = game;

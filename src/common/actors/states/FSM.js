@@ -1,9 +1,9 @@
-import Pawn from "../Pawn";
-import DeadState from "./DeadState";
-import FallState from "./FallState";
-import IdleState from "./IdleState";
-import PatrolState from "./PatrolState";
-import RunState from "./RunState";
+import Pawn from "../Pawn.js";
+import DeadState from "./DeadState.js";
+import FallState from "./FallState.js";
+import IdleState from "./IdleState.js";
+import PatrolState from "./PatrolState.js";
+import RunState from "./RunState.js";
 
 const stateRegistry = {
     idle: IdleState,

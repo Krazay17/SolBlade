@@ -6,8 +6,8 @@ import GameClient from "./GameClient.js";
 import RAPIER from "@dimforge/rapier3d-compat";
 
 const url = location.hostname === "localhost"
-    ? "https://localhost:8080"
-    : "https://srv.solblade.online";
+    ? "ws://localhost:8080"
+    : "wss://srv.solblade.online";
 async function boot() {
 
     LocalData.load();

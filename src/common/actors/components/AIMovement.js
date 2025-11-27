@@ -1,6 +1,6 @@
-import SolWorld from "@solblade/common/core/SolWorld";
-import Pawn from "../Pawn";
-import GroundChecker from "./GroundChecker";
+import SolWorld from "@solblade/common/core/SolWorld.js";
+import Pawn from "../Pawn.js";
+import GroundChecker from "./GroundChecker.js";
 
 export default class AIMovement {
     /**

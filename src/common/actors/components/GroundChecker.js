@@ -1,6 +1,6 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import Pawn from "../Pawn";
-import SolWorld from "@solblade/common/core/SolWorld";
+import Pawn from "../Pawn.js";
+import SolWorld from "@solblade/common/core/SolWorld.js";
 import { Vector3 } from "three";
 
 export default class GroundChecker {

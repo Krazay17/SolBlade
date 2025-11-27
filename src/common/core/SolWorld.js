@@ -40,6 +40,7 @@ export default class SolWorld {
     async loadWorldData() {
         //make physics from glb file
         const data = await this.glbLoader.loadAsync(`/assets/${this.name}.glb`);
+        if (!data) return;
         data.scene.traverse((child) => {
             if (child instanceof Mesh) {
                 this.allGeoms.push(child.geometry.clone());
@@ -62,7 +63,6 @@ export default class SolWorld {
     step(dt) {
         if (!this.ready) return;
         this.physics?.step();
-        console.log(this.actorManager.allActors[1])
 
         this.timeSinceLastUpdate = (this.timeSinceLastUpdate || 0) + dt;
         if (this.timeSinceLastUpdate >= 0.1) {

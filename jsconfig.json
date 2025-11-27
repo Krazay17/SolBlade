@@ -2,8 +2,8 @@
     "compilerOptions": {
         "types": [],
         "target": "ESNext",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
         "checkJs": true,
         "allowJs": true,
         "strict": false,

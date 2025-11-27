@@ -1,6 +1,6 @@
-import SolWorld from "@solblade/common/core/SolWorld";
-import Controller from "./Controller";
-import Pawn from "../Pawn";
+import SolWorld from "@solblade/common/core/SolWorld.js";
+import Controller from "./Controller.js";
+import Pawn from "../Pawn.js";
 
 export default class AIController extends Controller {
     /**
