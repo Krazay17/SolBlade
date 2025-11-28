@@ -22,6 +22,7 @@ export class SolGraphics {
         window.addEventListener('resize', this.onWindowResize.bind(this));
 
         this.addPasses();
+        this.worldLight();
     }
     add(obj){
         this.scene.add(obj);

@@ -1,4 +1,4 @@
-import { GameLogic } from "@solblade/common/core/GameLogic";
+import { GameLogic } from "@solblade/common/core/GameLogic.js";
 
 /**
  * LocalServer.js

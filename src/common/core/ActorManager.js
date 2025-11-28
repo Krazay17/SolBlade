@@ -1,4 +1,5 @@
 import Actor from "../actors/Actor.js";
+import { serverActors } from "./Registry.js";
 import SolWorld from "./SolWorld.js";
 
 export default class ActorManager {
@@ -6,9 +7,9 @@ export default class ActorManager {
      * 
      * @param {SolWorld} world 
      */
-    constructor(world, actorRegistry) {
+    constructor(world, registry = serverActors) {
         this.world = world;
-        this.actorRegistry = actorRegistry;
+        this.registry = registry;
         this.nextId = 1;
 
         this.actors = {
@@ -67,7 +68,7 @@ export default class ActorManager {
             default:
                 group = this.actors.others;
         }
-        const aClass = this.actorRegistry[data.subtype].class;
+        const aClass = this.registry[data.subtype].class;
         if (!aClass) return;
         const actor = new aClass(this.world, data);
         this.nextId++;

@@ -1,9 +1,9 @@
-import CPawn from "./CPawn";
-import GameClient from "../core/GameClient";
-import PlayerMovement from "./components/PlayerMovement";
-import FSM from "@solblade/common/actors/states/FSM";
+import CPawn from "./CPawn.js";
+import GameClient from "../core/GameClient.js";
+import PlayerMovement from "./components/PlayerMovement.js";
+import FSM from "@solblade/common/actors/states/FSM.js";
 import { Group, Vector3 } from "three";
-import { Actions } from "../input/Actions";
+import { Actions } from "../input/Actions.js";
 
 export default class CPlayer extends CPawn {
     /**
@@ -12,7 +12,7 @@ export default class CPlayer extends CPawn {
      * @param {*} data 
      */
     constructor(game, data) {
-        super(game.solWorld, {
+        super(game.world, {
             ...data,
             name: "player",
             type: 'player',
@@ -34,11 +34,12 @@ export default class CPlayer extends CPawn {
         ]);
 
         this.tempVec = new Vector3();
-        this.init();
-        this.makeMesh();
     }
     init() {
         this.game.graphics.add(this.graphics);
+    }
+    setWorld(world) {
+        this.world = world;
     }
     look(yaw, pitch) {
         this.yaw = yaw;

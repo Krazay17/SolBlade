@@ -1,10 +1,11 @@
-import SolWorld from "@solblade/common/core/SolWorld";
+import SolWorld from "@solblade/common/core/SolWorld.js";
 import RAPIER from "@dimforge/rapier3d-compat";
-import { getVerts } from "@solblade/common/utils/VertUtils";
+import { getVerts } from "@solblade/common/utils/VertUtils.js";
 import { Mesh, Scene } from "three";
-import SkyBox from "./SkyBox";
-import GameClient from "@solblade/client/core/GameClient";
-import { clientActors } from "@solblade/client/core/CRegistry";
+import SkyBox from "./SkyBox.js";
+import GameClient from "@solblade/client/core/GameClient.js";
+import { clientActors } from "@solblade/client/core/CRegistry.js";
+import { CActorManager } from "../managers/CActorManager.js";
 
 export default class CSolWorld extends SolWorld {
     /**
@@ -13,19 +14,21 @@ export default class CSolWorld extends SolWorld {
      */
     constructor(game, name = "world1") {
         //@ts-ignore
-        super(name, game.glbLoader, clientActors);
+        super(name, clientActors);
         this.game = game;
+        this.loader = game.glbLoader;
 
-        this.worldCollider = null;
-        this.allGeoms = [];
         this.graphics = new Scene()
         this.game.graphics.add(this.graphics);
 
         this.skybox = new SkyBox(this, this.game.textureLoader);
     }
+    init(){
+        this.actorManager = new CActorManager(this);
+    }
     get meshManager() { return this.game.meshManager }
     async loadWorldData() {
-        const data = await this.glbLoader.loadAsync(`/assets/${this.name}.glb`)
+        const data = await this.loader.loadAsync(`/assets/${this.name}.glb`)
         this.graphics.add(data.scene);
         data.scene.traverse((child) => {
             if (child instanceof Mesh) {

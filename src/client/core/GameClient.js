@@ -1,17 +1,18 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
-import { SOL_PHYSICS_SETTINGS } from "../../common/config/SolConstants";
-import CPlayer from "../actors/CPlayer";
-import SoundPlayer from "../audio/SoundPlayer";
-import Input from "../input/UserInput";
-import MeshManager from "../managers/MeshManager";
-import { SolGraphics } from "../rendering/SolGraphics";
-import LoadingBar from "../ui/LoadingBar";
-import { menuButton } from "../ui/MainMenu";
-import { worldRegistry } from "./CRegistry";
-import LocalData from "./LocalData";
-import CSolWorld from "../worlds/CSolWorld";
-import { NetworkManager } from "./NetworkManager";
+import { SOL_PHYSICS_SETTINGS } from "../../common/config/SolConstants.js";
+import CPlayer from "../actors/CPlayer.js";
+import SoundPlayer from "../audio/SoundPlayer.js";
+import Input from "../input/UserInput.js";
+import MeshManager from "../managers/MeshManager.js";
+import { SolGraphics } from "../rendering/SolGraphics.js";
+import LoadingBar from "../ui/LoadingBar.js";
+import { menuButton } from "../ui/MainMenu.js";
+import { worldRegistry } from "./CRegistry.js";
+import LocalData from "./LocalData.js";
+import CSolWorld from "../worlds/CSolWorld.js";
+import { NetworkManager } from "./NetworkManager.js";
+import ClientEvents from "./ClientEvents.js";
 
 export default class GameClient {
     /**
@@ -29,7 +30,7 @@ export default class GameClient {
         this.lastTime = 0;
         this.accumulator = 0;
         /**@type {CSolWorld} */
-        this.solWorld = null;
+        this.world = null;
 
         this.loadingBar = new LoadingBar();
         this.loadingManager = new THREE.LoadingManager(this.loadingBar.finish, this.loadingBar.update);
@@ -44,28 +45,19 @@ export default class GameClient {
         this.camera.add(this.audioListener);
         this.soundPlayer = new SoundPlayer(this, this.audioListener);
 
-        //this.player = new CPlayer(this, { pos: [0, 18, 0] });
+        this.player = new CPlayer(this, { pos: [0, 18, 0] });
+        this.player.makeMesh(this.meshManager);
+        this.graphics.add(this.player.graphics);
 
+        this.netEvents = new ClientEvents(this, this.net);
         this.bindings();
-        this.serverUpdates();
     }
-    get physics() { return this.solWorld.physics };
+    get physics() { return this.world.physics };
     addActor(actor) {
-        this.solWorld.actorManager.addActor(actor);
+        this.world.actorManager.addActor(actor);
     }
     newActor(actor) {
-        this.solWorld.actorManager.newActor(actor);
-    }
-    serverUpdates() {
-        this.net.on("gameStateUpdate", (state) => {
-            console.log(`Recieved game state update: ${state.serverTicks}`);
-        })
-        this.net.on('playerShotFired', (data) => {
-            console.log(`Player shot fired: ${data}`);
-        })
-        this.net.on('newActor', (data) => {
-            console.log(`New Actor: ${data}`);
-        })
+        this.world.actorManager.newActor(actor);
     }
     bindings() {
         window.addEventListener('focus', () => {
@@ -83,17 +75,18 @@ export default class GameClient {
         })
     }
     async start() {
-        await this.newWorld(LocalData.worldName || "world1");
+        await this.newWorld("world1");
         this.running = true;
         requestAnimationFrame(this.loop.bind(this));
     }
     async newWorld(name) {
         const worldClass = worldRegistry[name];
         if (!worldClass) return;
-        if (this.solWorld) this.solWorld.exit();
-        this.solWorld = new worldClass(this);
-        await this.solWorld.enter();
-        //this.addActor(this.player);
+        if (this.world) this.world.exit();
+        this.world = new worldClass(this);
+        await this.world.enter();
+        this.player.setWorld(this.world);
+        this.addActor(this.player);
         this.ready = true;
     }
     loop(time) {
@@ -114,10 +107,10 @@ export default class GameClient {
         requestAnimationFrame(this.loop.bind(this));
     }
     tick(dt) {
-        if (this.solWorld) this.solWorld.tick(dt);
+        if (this.world) this.world.tick(dt);
     }
     step(dt) {
-        if (this.solWorld) this.solWorld.step(dt);
+        if (this.world) this.world.step(dt);
     }
     handleSleep() {
         if (this.isFocused) return;
@@ -128,7 +121,7 @@ export default class GameClient {
     //     LocalData.rotation = this.player.rot;
     //     LocalData.weapons.left = this.player.data.leftWeapon;
     //     LocalData.weapons.right = this.player.data.rightWeapon;
-    //     LocalData.worldName = this.solWorld.name;
+    //     LocalData.worldName = this.world.name;
     // }
 }
 

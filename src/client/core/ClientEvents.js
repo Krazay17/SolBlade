@@ -1,24 +1,22 @@
-import GameClient from "@solblade/client/core/GameClient";
-import { NETPROTO } from "@solblade/common/core/NetProtocols";
+import GameClient from "@solblade/client/core/GameClient.js";
+import { NETPROTO } from "@solblade/common/core/NetProtocols.js";
+import { NetworkManager } from "./NetworkManager.js";
 
 export default class ClientEvents {
     /**
      * 
      * @param {GameClient} game 
+     * @param {NetworkManager} net
      */
-    constructor(game, transport) {
+    constructor(game, net) {
         this.game = game;
-        this.transport = transport;
-        this.bindWorldEvents();
-        this.bindNetEvents();
+        this.net = net;
+        this.bindEvents();
     }
-    bindWorldEvents() {
-
-    }
-    bindNetEvents() {
+    bindEvents() {
         for (const event of Object.values(NETPROTO)) {
             if (typeof this[event] === "function") {
-                this.transport.on(event, (data) => this[event](data))
+                this.net.on(event, (data) => this[event](data))
             } else {
                 console.warn(`[Client Events] No handler method ${event}`);
             }

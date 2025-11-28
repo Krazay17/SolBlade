@@ -1,4 +1,13 @@
 {
     "type":"module",
-    "name":"@solblade/common"
+    "name":"@solblade/common",
+    
+    "dependencies": {
+        "@dimforge/rapier3d-compat": "^0.19.2",
+        "socket.io": "^4.8.1",
+        "three": "^0.179.1",
+        "@solblade/common": "file: ./",
+        "@solblade/server": "file: ../server",
+        "@solblade/client": "file: ../client"
+    }
 }

@@ -1,5 +1,5 @@
-import CSolWorld1 from "../worlds/CSolWorld1"
-import CSolWorld2 from "../worlds/CSolWorld2";
+import CSolWorld1 from "../worlds/CSolWorld1.js"
+import CSolWorld2 from "../worlds/CSolWorld2.js";
 import CPlayer from "../actors/CPlayer.js";
 import CWizard from "../actors/CWizard.js";
 

@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import Pawn from "@solblade/common/actors/Pawn";
-import AnimationManager from "./components/AnimationManager";
+import Pawn from "@solblade/common/actors/Pawn.js";
+import AnimationManager from "./components/AnimationManager.js";
 
 export default class CPawn extends Pawn {
     /**
@@ -30,8 +30,8 @@ export default class CPawn extends Pawn {
     activate() {
         console.log(`Activate pawn: ${this.id}`);
     }
-    makeMesh(callback) {
-        this.world.meshManager.makeMesh(this.meshName).then(({ animations, scene }) => {
+    makeMesh(meshManager = this.world.meshManager, callback) {
+        meshManager.makeMesh(this.meshName).then(({ animations, scene }) => {
             this.mesh = scene;
             //@ts-ignore
             this.animation = new AnimationManager(this, scene, animations);
