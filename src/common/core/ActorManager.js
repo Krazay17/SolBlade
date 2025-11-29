@@ -1,5 +1,3 @@
-import Actor from "../actors/Actor.js";
-import { serverActors } from "./Registry.js";
 import SolWorld from "./SolWorld.js";
 
 export default class ActorManager {
@@ -7,9 +5,9 @@ export default class ActorManager {
      * 
      * @param {SolWorld} world 
      */
-    constructor(world, registry = serverActors) {
+    constructor(world) {
         this.world = world;
-        this.registry = registry;
+        this.registry = null;
         this.nextId = 1;
 
         this.actors = {
@@ -17,8 +15,6 @@ export default class ActorManager {
             enemies: [],
             others: []
         }
-
-        this.onNewActor = (/**@type {Actor} */ actor) => { };
         this.onStep = null;
     }
     get allActors() {
@@ -73,10 +69,10 @@ export default class ActorManager {
         const actor = new aClass(this.world, data);
         this.nextId++;
         actor.id = this.nextId;
-        if (this.onNewActor) this.onNewActor(actor);
         actor.makeBody?.(this.world.physics);
         group.push(actor);
 
-        console.log(this.actors);
+        this.onNewActor(actor);
     }
+    onNewActor(actor) { }
 }

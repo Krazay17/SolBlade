@@ -1,14 +1,16 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { COLLISION_GROUPS, SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
 import ActorManager from "./ActorManager.js";
+import { GameLogic } from "./GameLogic.js";
 
 export default class SolWorld {
     /**
-     * 
      * @param {String} name 
      */
     constructor(name = "world1") {
         this.name = name;
+
+        this.actorManager = null;
 
         this.ready = true;
         this.allGeoms = [];
@@ -16,32 +18,25 @@ export default class SolWorld {
         this.physics.timestep = SOL_PHYSICS_SETTINGS.timeStep;
 
         this.onStep = null;
-        this.init();
-    }
-    init(){
-        this.actorManager = new ActorManager(this);
     }
     async enter() {
         await this.loadWorldData();
 
-        //test enemy spawn before I use glb locations
-        const enemies = 1;
-        for (let i = 0; i < enemies; i++) {
-            this.actorManager.newActor('enemy', { subtype: "wizard", pos: [0, 20, i] });
-        }
         this.ready = true;
     }
     async loadWorldData() {
+        let file = null;
         try {
             const path = await import('path');
 
-            const file = path.resolve(`/common/worlds/${this.name}.json`);
-            this.colliderFromJson(file, this.physics);
+            file = path.resolve(`/common/worlds/${this.name}.json`);
         }
         catch (error) {
             console.warn('Cannot retrieve', this.name, error);
-            return null;
+            file = `/common/worlds/${this.name}.json`;
         }
+        if (!file) return;
+        this.colliderFromJson(file, this.physics);
     }
     colliderFromJson(data, phys) {
         for (const obj of data) {
@@ -80,8 +75,10 @@ export default class SolWorld {
     }
     exit() {
         // remove actors
-        for (const a of this.actorManager.allActors) {
-            a.removeBody(this.physics);
+        if (this.actorManager) {
+            for (const a of this.actorManager.allActors) {
+                a.removeBody(this.physics);
+            }
         }
         // free physics
         this.physics.free();
@@ -89,58 +86,8 @@ export default class SolWorld {
     step(dt) {
         if (!this.ready) return;
         this.physics?.step();
-
-        this.timeSinceLastUpdate = (this.timeSinceLastUpdate || 0) + dt;
-        if (this.timeSinceLastUpdate >= 0.1) {
-            this.timeSinceLastUpdate = 0;
-
-            const actorArray = arrayBuffer(filterMoved(this.actorManager.allActors))
-            if (this.onStep) this.onStep(actorArray.buffer);
-        }
     }
     tick(dt) {
-        this.actorManager.tick(dt);
+        if (this.actorManager) this.actorManager.tick(dt);
     }
-}
-
-function arrayBuffer(list, length = 8) {
-    const count = list.length;
-    const buffer = new Float32Array(count * length)
-    let i = 0;
-    for (const e of list) {
-        buffer[i++] = e.id ?? 0;
-        buffer[i++] = e.pos[0] ?? 0;
-        buffer[i++] = e.pos[1] ?? 0;
-        buffer[i++] = e.pos[2] ?? 0;
-        buffer[i++] = e.rot[0] ?? 0;
-        buffer[i++] = e.rot[1] ?? 0;
-        buffer[i++] = e.rot[2] ?? 0;
-        buffer[i++] = e.rot[3] ?? 0;
-    };
-    return buffer;
-}
-
-function filterMoved(actors) {
-    return actors.filter(a => {
-        if (!a.active) return false;
-        const moved = (
-            !a.lastPos ||
-            a.pos[0] !== a.lastPos[0] ||
-            a.pos[1] !== a.lastPos[1] ||
-            a.pos[2] !== a.lastPos[2]
-        );
-        const rotated = (
-            !a.lastRot ||
-            a.rot[0] !== a.lastRot[0] ||
-            a.rot[1] !== a.lastRot[1] ||
-            a.rot[2] !== a.lastRot[2] ||
-            a.rot[3] !== a.lastRot[3]
-        );
-        if (moved || rotated) {
-            a.lastPos = [a.pos[0], a.pos[1], a.pos[2]];
-            a.lastRot = [a.rot[0], a.rot[1], a.rot[2], a.rot[3]];
-            return true;
-        }
-        return false;
-    })
 }

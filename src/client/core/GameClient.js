@@ -13,6 +13,7 @@ import LocalData from "./LocalData.js";
 import CSolWorld from "../worlds/CSolWorld.js";
 import { NetworkManager } from "./NetworkManager.js";
 import ClientEvents from "./ClientEvents.js";
+import { NETPROTO } from "@solblade/common/core/NetProtocols.js";
 
 export default class GameClient {
     /**
@@ -26,6 +27,7 @@ export default class GameClient {
         this.input = input;
         this.net = net;
 
+        this.isFocused = true;
         this.ready = false;
         this.lastTime = 0;
         this.accumulator = 0;
@@ -37,7 +39,7 @@ export default class GameClient {
         this.loader = new THREE.Loader(this.loadingManager);
         this.textureLoader = new THREE.TextureLoader(this.loadingManager);
         this.glbLoader = new GLTFLoader(this.loadingManager);
-        this.meshManager = new MeshManager(this);
+        this.meshManager = new MeshManager(this, this.glbLoader);
 
         this.graphics = new SolGraphics(this.canvas);
         this.camera = this.graphics.camera;
@@ -87,6 +89,7 @@ export default class GameClient {
         await this.world.enter();
         this.player.setWorld(this.world);
         this.addActor(this.player);
+        this.net.send(NETPROTO.WORLD_ENTER, name);
         this.ready = true;
     }
     loop(time) {

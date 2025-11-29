@@ -6,9 +6,9 @@ export default class MeshManager {
      * 
      * @param {CGame} game 
      */
-    constructor(game) {
+    constructor(game, glbLoader) {
         this.game = game;
-        this.loader = this.game.glbLoader;
+        this.loader = glbLoader;
 
         this.loadedMesh = new Map();
     }

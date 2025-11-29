@@ -44,5 +44,5 @@ class EventEmitter {
 }
 
 // Export a singleton instance if you want a global emitter
-export const MyEventEmitter = new EventEmitter();
+const MyEventEmitter = new EventEmitter();
 export default MyEventEmitter;

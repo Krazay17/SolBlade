@@ -18,8 +18,8 @@ async function boot() {
     const menu = new MainMenu(userInput);
     const net = new NetworkManager(url);
     const game = new GameClient(canvas, userInput, net);
-    await net.connect();
     await game.start();
+    await net.connect();
 
     window.addEventListener('beforeunload', () => {
         //game.savePlayerState();

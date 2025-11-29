@@ -14,6 +14,6 @@ export default class Wizard extends Pawn {
         this.fsm = new FSM(this, [
             "patrol"
         ])
-        console.log("SERVER WIZARD");
+        console.log(this);
     }
 }

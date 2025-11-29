@@ -32,6 +32,10 @@ const broadcast = (event, data) => {
         console.error("Socket.IO server (io) is not yet initialized for broadcasting.");
     }
 };
+const iofwd = {
+    on: (event, handler) => io.on(event, handler),
+    emit: (event, data) => io.emit(event, data),
+}
 
 async function init() {
     await RAPIER.init();

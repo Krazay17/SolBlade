@@ -108,6 +108,10 @@ export default class Pawn extends Actor {
         if (this.body) {
             if (this.fsm) this.fsm.update(dt);
             if (this.movement) this.movement.update(dt);
+            //@ts-ignore
+            this.vecPos = this.body.translation();
+            //@ts-ignore
+            this.quatRot = this.body.rotation();
         }
     }
     step(dt) { }

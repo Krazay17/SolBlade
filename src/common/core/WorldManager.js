@@ -1,13 +1,13 @@
-import SolWorld from "@solblade/common/core/SolWorld.js";
+import { SSolWorld } from "@solblade/server/core/SSolWorld.js";
 
 export default class WorldManager {
     constructor(game) {
         this.game = game;
 
-        /**@type {Record<String, SolWorld>} */
+        /**@type {Record<String, SSolWorld>} */
         this.worlds = {
-            world1: new SolWorld('world1'),
-            world2: new SolWorld('world2'),
+            world1: new SSolWorld(this.game, "world1"),
+            world2: new SSolWorld(this.game, "world2"),
         }
 
     }

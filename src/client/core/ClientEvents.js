@@ -29,7 +29,7 @@ export default class ClientEvents {
         console.log("state update", data);
     }
     spawnActor(actor) {
-        const am = this.game.solWorld.actorManager;
+        const am = this.game.world.actorManager;
         const existingActor = am.getActorById(actor.id);
         if (existingActor) {
             existingActor.activate();
@@ -38,7 +38,7 @@ export default class ClientEvents {
         }
     }
     worldUpdate(data) {
-        const am = this.game.solWorld.actorManager
+        const am = this.game.world.actorManager
         const view = new Float32Array(data);
         for (let i = 0; i < view.length; i += 8) {
             const actor = am.getActorById(view[i]);

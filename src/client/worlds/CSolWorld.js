@@ -4,7 +4,6 @@ import { getVerts } from "@solblade/common/utils/VertUtils.js";
 import { Mesh, Scene } from "three";
 import SkyBox from "./SkyBox.js";
 import GameClient from "@solblade/client/core/GameClient.js";
-import { clientActors } from "@solblade/client/core/CRegistry.js";
 import { CActorManager } from "../managers/CActorManager.js";
 
 export default class CSolWorld extends SolWorld {
@@ -14,17 +13,17 @@ export default class CSolWorld extends SolWorld {
      */
     constructor(game, name = "world1") {
         //@ts-ignore
-        super(name, clientActors);
-        this.game = game;
+        super(name);
         this.loader = game.glbLoader;
+        this.game = game;
 
         this.graphics = new Scene()
         this.game.graphics.add(this.graphics);
 
+        this.actorManager = new CActorManager(game, this);
         this.skybox = new SkyBox(this, this.game.textureLoader);
     }
-    init(){
-        this.actorManager = new CActorManager(this);
+    init() {
     }
     get meshManager() { return this.game.meshManager }
     async loadWorldData() {
