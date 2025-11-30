@@ -1,14 +1,19 @@
-import Actor from "../actors/Actor.js";
+import { GameState } from "./GameState.js";
 import { Graphics } from "./Graphics.js";
-import { World } from "./World.js";
 
 export class CGame {
-    constructor() {
+    constructor(scene, camera, input) {
+        this.scene = scene;
+        this.camera = camera;
+        this.input = input;
+        this.gameState = new GameState();
+        this.graphics = new Graphics(this.gameState);
+        
+    }
+    tick(dt) {
+        console.log('tick');
+    }
+    step(dt) {
 
-        this.world = new World();
-        this.graphics = new Graphics(this.world);
-        this.physics = 
-
-        this.world.addActor('1', new Actor({name: "player"}));
     }
 }

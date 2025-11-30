@@ -45,7 +45,6 @@ export default class UserInput extends Controller {
     for (const key in Actions) {
       this.actionStates[Actions[key]] = false;
     }
-    console.log(this.actionStates)
 
     document.addEventListener('pointerlockchange', () => {
       this.pointerLocked = (document.pointerLockElement === this.gameElement);
@@ -73,6 +72,9 @@ export default class UserInput extends Controller {
       this.keys[e.code] = true;
       const action = this.actionKeys[e.code];
       if (action) this.actionStates[action] = true;
+      if (e.code === 'Digit5') {
+        MyEventEmitter.emit('test');
+      }
     });
     document.addEventListener('keyup', (e) => {
       if (this.inputBlocked) return;
