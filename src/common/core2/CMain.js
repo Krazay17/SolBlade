@@ -29,37 +29,25 @@ class App {
     canvas = document.getElementById("webgl");
 
     constructor() {
-        console.log("CMain initialized: Setting up application environment.");
-
-        // 1. Setup Environment
-        this.setupEnvironment();
-
-        // 2. Setup Event Listeners
-        this.setupBindings();
-
-        // 3. Start Initialization (Async)
-        this.init();
-    }
-
-    // --- Setup Methods ---
-    setupEnvironment() {
-        // Initialize THREE.js essentials
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 1000);
         this.scene.add(this.camera);
+
+        this.input = new UserInput(this.canvas);
+        this.game = new CGame(this.scene, this.camera, this.input);
+        this.net = new CNet(this.url, this.game);
+
+        this.setupBindings();
+
+        this.start();
     }
 
-    // --- Initialization (Async) ---
-    async init() {
-        // Instantiate core logic classes
-        this.input = new UserInput(this.canvas);
-        this.game = new CGame(this.scene, this.camera, this.input); // Pass input to game
-        this.net = new CNet(this.url);
-
-        // Start the main loop after everything is initialized
-        this.loop();
+    async start() {
+        await this.net.start();
+        await this.game.start();
+        requestAnimationFrame(this.loop.bind(this));
     }
 
     // --- Core Game Loop (Fixed Time Step) ---
@@ -70,8 +58,13 @@ class App {
         this.accumulator = Math.min(this.accumulator + dt, 0.25);
         if (dt > 1) this.handleSleep();
         if (this.running) {
+            const userCommand = this.game.getUserCommand();
+            if (userCommand) {
+                this.net.sendUserCommand(userCommand);
+            }
             // Fixed time step update (for physics/state management)
             while (this.accumulator >= this.timeStep) {
+                if (this.net.localServer) this.net.localServer.step(this.timeStep);
                 if (this.game) this.game.step(this.timeStep);
                 this.accumulator -= this.timeStep;
             }

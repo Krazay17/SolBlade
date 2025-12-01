@@ -8,12 +8,20 @@ export class CGame {
         this.input = input;
         this.gameState = new GameState();
         this.graphics = new Graphics(this.gameState);
-        
+
+    }
+    async start() {
+
     }
     tick(dt) {
-        console.log('tick');
     }
     step(dt) {
 
+    }
+    getUserCommand() {
+        return null;
+    }
+    worldSnapshot(data) {
+        console.log(data);
     }
 }
