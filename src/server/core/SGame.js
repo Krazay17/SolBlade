@@ -2,7 +2,15 @@ import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js"
 import { NETPROTO } from "@solblade/common/core/NetProtocols.js"
 import { SWorld } from "./SWorld.js"
 
+/**
+ * @typedef {import("socket.io").Server} ServerIO
+ * @typedef {import("@solblade/common/core/CNet.js").LocalServerIO} LocalServerIO
+ */
+
 export class SGame {
+    /**
+     * @param {ServerIO | LocalServerIO} io 
+     */
     constructor(io) {
         this.io = io;
 
@@ -54,7 +62,7 @@ export class SGame {
             if (update) {
                 const { players, state } = update;
                 players.forEach(p => {
-                    this.io.to(p, NETPROTO.SERVER.WORLD_SNAP, state);
+                    this.io.to(p).emit(NETPROTO.SERVER.WORLD_SNAP, state);
                 })
             }
         }

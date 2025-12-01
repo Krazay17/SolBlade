@@ -11,6 +11,9 @@ export class Physics {
 
         this.world = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
     }
+    remove(){
+        this.world.free();
+    }
     step(dt) {
         this.world.step();
     }
@@ -24,7 +27,6 @@ export class Physics {
             worldData = worldModule.default;
         }
         if (!worldData) return;
-        console.log(worldData);
         const { vertices, indices } = colliderFromJson(worldData);
         const desc = RAPIER.ColliderDesc.trimesh(vertices, indices);
         desc.setCollisionGroups(COLLISION_GROUPS.ENEMY << 16 | COLLISION_GROUPS.WORLD);

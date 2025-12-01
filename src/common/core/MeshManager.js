@@ -1,15 +1,8 @@
 import { SkeletonUtils } from "three/examples/jsm/Addons";
-import CGame from "../../client/core/GameClient";
 
 export default class MeshManager {
-    /**
-     * 
-     * @param {CGame} game 
-     */
-    constructor(game, glbLoader) {
-        this.game = game;
+    constructor(glbLoader) {
         this.loader = glbLoader;
-
         this.loadedMesh = new Map();
     }
     async makeMesh(name) {

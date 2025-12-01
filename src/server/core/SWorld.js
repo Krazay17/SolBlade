@@ -1,19 +1,9 @@
-import { GameState } from "@solblade/common/good/GameState.js"
-import { Physics } from "@solblade/common/good/Physics.js"
+import SolWorld from "@solblade/common/core/SolWorld.js";
 
-export class SWorld {
-    /**
-     * 
-     * @param {String} name 
-     */
-    constructor(name) {
-        this.name = name;
-
-        this.gameState = new GameState();
-        this.physics = new Physics(this.gameState);
-    }
+export class SWorld extends SolWorld{
     async start() {
         await this.physics.makeWorld(this.name);
+        this.gameState
     }
     addPlayer(id, data) {
         this.gameState.players.set(id, data);

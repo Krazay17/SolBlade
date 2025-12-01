@@ -11,7 +11,7 @@ export default class SkyBox extends THREE.Object3D {
 
         this.active = false;
 
-        this.world.add(this);
+        this.world.graphics.add(this);
         this.init();
     }
     async init() {
@@ -22,7 +22,7 @@ export default class SkyBox extends THREE.Object3D {
     }
     destroy() {
         this.active = false;
-        this.world.remove(this);
+        this.world.graphics.remove(this);
         this.loader = null;
         this.sky = null;
         this.rotatingFilter1 = null;
@@ -58,7 +58,7 @@ export default class SkyBox extends THREE.Object3D {
         return rotatingFilter;
     }
 
-    update(dt) {
+    tick(dt) {
         if (!this.active) return;
         if (this.rotatingFilter1) {
             this.rotatingFilter1.rotation.y += 0.0001;

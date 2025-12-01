@@ -3,6 +3,7 @@ import { CGame } from "./CGame.js";
 import { CNet } from "./CNet.js";
 import UserInput from "@solblade/client/input/UserInput.js";
 import { SolRender } from "./SolRender.js";
+import { SolLoading } from "./SolLoading.js";
 
 
 class App {
@@ -27,9 +28,10 @@ class App {
 
     constructor() {
         this.canvas = document.getElementById("webgl");
+        this.loader = new SolLoading();
         this.renderer = new SolRender(this.canvas);
         this.input = new UserInput(this.canvas);
-        this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input);
+        this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader);
         this.net = new CNet(this.url, this.game);
 
         this.setupBindings();

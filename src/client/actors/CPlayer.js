@@ -1,5 +1,4 @@
 import CPawn from "./CPawn.js";
-import GameClient from "../core/GameClient.js";
 import PlayerMovement from "./components/PlayerMovement.js";
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { Group, Vector3 } from "three";
@@ -8,7 +7,6 @@ import { Actions } from "../input/Actions.js";
 export default class CPlayer extends CPawn {
     /**
      * 
-     * @param {GameClient} game 
      * @param {*} data 
      */
     constructor(game, data) {
@@ -28,15 +26,17 @@ export default class CPlayer extends CPawn {
 
         this.controller = this.game.input;
         this.controller.look = (y, p) => this.look(y, p);
-        this.movement = new PlayerMovement(game, this);
+        this.movement = new PlayerMovement(this);
         this.fsm = new FSM(this, [
             "run", "fall"
         ]);
 
         this.tempVec = new Vector3();
     }
-    init() {
-        this.game.graphics.add(this.graphics);
+    init(world) {
+        this.world = world;
+        this.game.scene.add(this.graphics);
+        this.makeBody(this.world.physics.world);
     }
     setWorld(world) {
         this.world = world;

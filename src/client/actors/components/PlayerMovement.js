@@ -1,24 +1,20 @@
 import { Vector3 } from "three";
-import LocalData from "../../core/LocalData";
-import { projectOnPlane, clampVector } from "@solblade/common/utils/Utils";
-import RunBoost from "./MomentumBoost";
-import GroundChecker from "./GroundChecker";
-import GameClient from "@solblade/client/core/GameClient";
-import CPlayer from "../CPlayer";
+import { projectOnPlane, clampVector } from "@solblade/common/utils/Utils.js";
+import RunBoost from "./MomentumBoost.js";
+import GroundChecker from "./GroundChecker.js";
+import CPlayer from "../CPlayer.js";
 
 export default class PlayerMovement {
     /**
      * 
-     * @param {GameClient} game 
      * @param {CPlayer} player 
      */
-    constructor(game, player) {
-        this.game = game;
+    constructor(player) {
         this.player = player;
 
         this.momentumBooster = new RunBoost();
         //this.isGrounded = true;
-        this.groundChecker = new GroundChecker(this.game, this.player);
+        this.groundChecker = new GroundChecker(this.player);
 
         // Reusable vectors
         this.direction = new Vector3();
@@ -58,14 +54,7 @@ export default class PlayerMovement {
                 speed: 10
             }
         }
-
-        const savedValues = LocalData.movementValues;
-        this.values = savedValues ?? this.defaultValues
-
-        window.addEventListener('beforeunload', () => {
-            LocalData.movementValues = this.values;
-            LocalData.save();
-        });
+        this.values = this.defaultValues;
     }
     get isGrounded() { return this.groundChecker.isGrounded() }
     update(dt) {

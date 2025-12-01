@@ -13,4 +13,7 @@ export class GameState {
         this.actors.set(id, actor);
         this.events.emit("addActor", id, actor);
     }
+    newActor(type){
+        
+    }
 }

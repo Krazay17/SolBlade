@@ -1,9 +1,9 @@
-import { setupKeybindWindow, addButton } from "../ui/KeyUI";
-import MyEventEmitter from "../../common/core/MyEventEmitter";
-import { Actions } from "./Actions";
-import { rotateInputAroundYaw } from "../../common/utils/Utils";
+import { setupKeybindWindow, addButton } from "../ui/KeyUI.js";
+import MyEventEmitter from "@solblade/common/core/GlobalEventEmitter.js"
+import { Actions } from "./Actions.js";
+import { rotateInputAroundYaw } from "../../common/utils/Utils.js";
 import { Vector3 } from "three";
-import Controller from "@solblade/common/actors/components/Controller";
+import Controller from "@solblade/common/actors/components/Controller.js";
 
 export default class UserInput extends Controller {
   constructor(gameElement) {

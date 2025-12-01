@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 import { CGame } from "./CGame.js";
-import { NETPROTO } from "../core/NetProtocols.js";
+import { NETPROTO } from "./NetProtocols.js";
 
 export class CNet {
     /**
@@ -60,7 +60,7 @@ export class CNet {
         }
     }
     worldSnap(data) {
-        console.log(data);
+        //console.log(data);
     }
 }
 class LocalClientIO {
@@ -80,7 +80,7 @@ class LocalClientIO {
         console.log(`Client receive ${event}`);
     }
 }
-class LocalServerIO {
+export class LocalServerIO {
     /**
      * @param {LocalClientIO}client
      */
@@ -100,9 +100,11 @@ class LocalServerIO {
         if (h) h(data);
         console.log(`Server receive ${event}`);
     }
-    to(id, event, data) {
-        if (this.client) {
-            this.client.receive(event, data);
+    to(id) {
+        return {
+            emit: (event, data)=>{
+                this.client.receive(event, data);
+            }
         }
     }
 }

@@ -1,16 +1,13 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import CGame from "../../core/GameClient";
-import CPawn from "../CPawn";
+import CPawn from "../CPawn.js";
 import { Vector3 } from "three";
 
 export default class GroundChecker {
     /**
      * 
-     * @param {CGame} game 
      * @param {CPawn} pawn 
      */
-    constructor(game, pawn) {
-        this.game = game;
+    constructor(pawn) {
         this.pawn = pawn;
 
         this.downVec = new Vector3(0, -1, 0);
@@ -31,7 +28,8 @@ export default class GroundChecker {
         return this.tempVec;
     }
     getFloor() {
-        const result = this.game.physics.castShape(
+        if (!this.pawn.world?.physics?.world) return;
+        const result = this.pawn.world.physics.world.castShape(
             this.pawn.vecPos,
             { x: 0, y: 0, z: 0, w: 1 },
             this.downVec,
