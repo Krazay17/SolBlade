@@ -1,4 +1,4 @@
-import { setupKeybindWindow, addButton } from "./KeyBinds";
+import { setupKeybindWindow, addButton } from "../ui/KeyUI";
 import MyEventEmitter from "../../common/core/MyEventEmitter";
 import { Actions } from "./Actions";
 import { rotateInputAroundYaw } from "../../common/utils/Utils";

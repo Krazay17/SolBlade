@@ -3,7 +3,7 @@
         "types": [],
         "target": "ESNext",
         "module": "esnext",
-        "moduleResolution": "bundler",
+        "moduleResolution": "node16",
         "checkJs": true,
         "allowJs": true,
         "strict": false,

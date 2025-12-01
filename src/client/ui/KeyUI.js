@@ -6,7 +6,7 @@ export function setupKeybindWindow() {
     kbGrid = document.createElement('div');
     kbGrid.className = 'kb-grid';
     document.body.appendChild(kbGrid);
-    
+
     // addButton('KeyUnpressed', 'KeyF', 'Int', 1, 1);
     // addButton('KeyUnpressed', 'KeyF', 'Int', 1, 2);
 }
@@ -16,8 +16,8 @@ export function addButton(imgSrc, key, action = 'Interact', row = 1, col = 1, wi
     button.className = 'kb-button';
     button.style.width = wid;
 
-    button.style.gridRow = row;
-    button.style.gridColumn = col;
+    button.style.gridRow = String(row)
+    button.style.gridColumn = String(col);
 
     const img = document.createElement('img');
     img.className = 'kb-image';

@@ -2,7 +2,7 @@ import SolWorld from "@solblade/common/core/SolWorld.js";
 import RAPIER from "@dimforge/rapier3d-compat";
 import { getVerts } from "@solblade/common/utils/VertUtils.js";
 import { Mesh, Scene } from "three";
-import SkyBox from "./SkyBox.js";
+import SkyBox from "../../common/good/SkyBox.js";
 import GameClient from "@solblade/client/core/GameClient.js";
 import { CActorManager } from "../managers/CActorManager.js";
 

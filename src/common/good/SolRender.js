@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { EffectComposer, RenderPass, UnrealBloomPass } from "three/examples/jsm/Addons.js";
 
-export class SolGraphics {
+export class SolRender {
     constructor(canvas, camera) {
         this.canvas = canvas
         this.camera = camera;

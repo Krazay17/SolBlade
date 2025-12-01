@@ -1,7 +1,7 @@
 import UserInput from "../input/UserInput.js";
 import LocalData from "./LocalData.js";
 import { NetworkManager } from "./NetworkManager.js";
-import MainMenu from "../ui/MainMenu.js";
+import MainMenu from "../../common/good/MainMenu.js";
 import GameClient from "./GameClient.js";
 import RAPIER from "@dimforge/rapier3d-compat";
 

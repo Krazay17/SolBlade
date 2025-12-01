@@ -1,6 +1,6 @@
-import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants";
-import { NETPROTO } from "../core/NetProtocols";
-import { GameState } from "./GameState";
+import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js"
+import { NETPROTO } from "@solblade/common/core/NetProtocols.js"
+import { SWorld } from "./SWorld.js"
 
 export class SGame {
     constructor(io) {
@@ -9,19 +9,22 @@ export class SGame {
         this.lastTime = 0;
         this.accumulator = 0;
         this.timeStep = SOL_PHYSICS_SETTINGS.timeStep;
-
         this.tickcounter = 0;
 
         this.worlds = {
-            world1: new GameState()
+            world1: new SWorld("world1"),
+            world2: new SWorld("world2")
         }
     }
     async start(loop = true) {
         this.bindEvents();
+        for (const world of Object.values(this.worlds)) {
+            world.start();
+        }
         if (loop) this.loop();
     }
     bindEvents() {
-        for (const p of Object.values(NETPROTO.SERVER)) {
+        for (const p of Object.values(NETPROTO.CLIENT)) {
             const f = this[p];
             if (typeof f === "function") {
                 this.io.on(p, f.bind(this));
@@ -30,7 +33,7 @@ export class SGame {
             }
         }
     }
-    playerJoined(data) {
+    joinGame(data) {
         const { id, worldName } = data;
         this.worlds[worldName].addPlayer(id, data);
     }
@@ -38,16 +41,22 @@ export class SGame {
         const now = performance.now();
         const dt = (now - this.lastTime) / 1000;
         this.lastTime = now;
-        this.accumulator += dt;
+        this.accumulator = Math.min(this.accumulator + dt, 0.25);
         while (this.accumulator >= this.timeStep) {
             this.step(this.timeStep);
             this.accumulator -= this.timeStep;
         }
-
         setImmediate(() => this.loop());
     }
     step(dt) {
-        this.tickcounter++;
-        this.io.emit(NETPROTO.SERVER.WORLD_UPDATE, this.tickcounter);
+        for (const world of Object.values(this.worlds)) {
+            const update = world.step(dt);
+            if (update) {
+                const { players, state } = update;
+                players.forEach(p => {
+                    this.io.to(p, NETPROTO.SERVER.WORLD_SNAP, state);
+                })
+            }
+        }
     }
 }

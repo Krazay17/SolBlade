@@ -1,6 +1,5 @@
 import "../css/StyleMenu.css";
-
-import Input from "../input/UserInput";
+import Input from "@solblade/client/input/UserInput.js"
 
 export default class MainMenu {
     /**

@@ -1,5 +1,5 @@
 import { SkeletonUtils } from "three/examples/jsm/Addons";
-import CGame from "../core/GameClient";
+import CGame from "../../client/core/GameClient";
 
 export default class MeshManager {
     /**

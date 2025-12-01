@@ -1,9 +1,7 @@
 import * as THREE from 'three';
-import CSolWorld from './CSolWorld';
 
 export default class SkyBox extends THREE.Object3D {
     /**
-     * @param {CSolWorld} world 
      * @param {THREE.TextureLoader} textureLoader
      */
     constructor(world, textureLoader) {

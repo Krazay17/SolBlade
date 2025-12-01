@@ -1,16 +1,13 @@
-// Client/CMain.js
+import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
+import { CGame } from "./CGame.js";
+import { CNet } from "./CNet.js";
+import UserInput from "@solblade/client/input/UserInput.js";
+import { SolRender } from "./SolRender.js";
 
-import * as THREE from "three";
-import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants";
-import { CGame } from "./CGame";
-import { CNet } from "./CNet";
-import UserInput from "@solblade/client/input/UserInput";
 
 class App {
     // --- Application State Properties (Using Class Fields) ---
     renderer;
-    scene;
-    camera;
     input;
     game;
     net;
@@ -29,14 +26,10 @@ class App {
     canvas = document.getElementById("webgl");
 
     constructor() {
-        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 1000);
-        this.scene.add(this.camera);
-
+        this.canvas = document.getElementById("webgl");
+        this.renderer = new SolRender(this.canvas);
         this.input = new UserInput(this.canvas);
-        this.game = new CGame(this.scene, this.camera, this.input);
+        this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input);
         this.net = new CNet(this.url, this.game);
 
         this.setupBindings();
@@ -68,12 +61,10 @@ class App {
                 if (this.game) this.game.step(this.timeStep);
                 this.accumulator -= this.timeStep;
             }
-
             // Variable time step update (for rendering/interpolation)
             if (this.game) this.game.tick(dt);
-
             // Render
-            if (this.renderer) this.renderer.render(this.scene, this.camera);
+            if (this.renderer) this.renderer.render();
         }
         requestAnimationFrame(this.loop);
     }
@@ -91,19 +82,6 @@ class App {
         window.addEventListener("blur", () => {
             this.focused = false;
         });
-        window.addEventListener("resize", this.handleResize);
-    }
-
-    handleResize = () => {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        if (this.camera) {
-            this.camera.aspect = w / h;
-            this.camera.updateProjectionMatrix();
-        }
-        if (this.renderer) {
-            this.renderer.setSize(w, h);
-        }
     }
 }
 new App();

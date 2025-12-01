@@ -1,13 +1,10 @@
 
 export const NETPROTO = {
     CLIENT: {
-        WORLD_UPDATE: "worldSnapshot",
+        JOIN_GAME: "joinGame",
     },
     SERVER: {
-        PLAYER_JOINED: "playerJoined",
-        STATE_UPDATE: "stateUpdate",
+        WORLD_SNAP: "worldSnap",
         SPAWN_ACTOR: "spawnActor",
-        WORLD_UPDATE: "worldSnapshot",
-        WORLD_ENTER: "worldEnter",
     }
 }

@@ -1,7 +1,6 @@
 import { io } from "socket.io-client";
-import { SGame } from "./SGame";
-import { CGame } from "./CGame";
-import { NETPROTO } from "../core/NetProtocols";
+import { CGame } from "./CGame.js";
+import { NETPROTO } from "../core/NetProtocols.js";
 
 export class CNet {
     /**
@@ -24,14 +23,15 @@ export class CNet {
             const client = new LocalClientIO()
             const server = new LocalServerIO(client);
             this.socket = client;
+            const { SGame } = await import("@solblade/server/core/SGame.js");
             this.localServer = new SGame(server);
             await this.localServer.start(false);
         }
         this.bindings();
+        this.socket.emit(NETPROTO.CLIENT.JOIN_GAME, this.game.player);
     }
     sendUserCommand(userCommand) {
         if (this.socket) {
-
             this.socket.emit("userCommand", userCommand);
         }
     }
@@ -52,12 +52,15 @@ export class CNet {
         });
     }
     bindings() {
-        for (const p of Object.values(NETPROTO.CLIENT)) {
-            const h = this.game[p];
+        for (const p of Object.values(NETPROTO.SERVER)) {
+            const h = this[p];
             if (typeof h === "function") {
-                this.socket.on(p, h.bind(this.game));
+                this.socket.on(p, h.bind(this));
             } else console.warn(`No function ${p}`);
         }
+    }
+    worldSnap(data) {
+        console.log(data);
     }
 }
 class LocalClientIO {
@@ -69,11 +72,12 @@ class LocalClientIO {
         this.handlers[event] = handler;
     }
     emit(event, data) {
-        this.server.recieve(event, data);
+        this.server.receive(event, data);
     }
     receive(event, data) {
         const h = this.handlers[event];
         if (h) h(data);
+        console.log(`Client receive ${event}`);
     }
 }
 class LocalServerIO {
@@ -94,5 +98,11 @@ class LocalServerIO {
     receive(event, data) {
         const h = this.handlers[event];
         if (h) h(data);
+        console.log(`Server receive ${event}`);
+    }
+    to(id, event, data) {
+        if (this.client) {
+            this.client.receive(event, data);
+        }
     }
 }
