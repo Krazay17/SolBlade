@@ -4,10 +4,11 @@ import { CNet } from "./CNet.js";
 import UserInput from "@solblade/client/input/UserInput.js";
 import { SolRender } from "./SolRender.js";
 import { SolLoading } from "./SolLoading.js";
+import RAPIER from "@dimforge/rapier3d-compat";
 
 
+await RAPIER.init();
 class App {
-    // --- Application State Properties (Using Class Fields) ---
     renderer;
     input;
     game;
@@ -27,12 +28,11 @@ class App {
     canvas = document.getElementById("webgl");
 
     constructor() {
-        this.canvas = document.getElementById("webgl");
         this.loader = new SolLoading();
         this.renderer = new SolRender(this.canvas);
         this.input = new UserInput(this.canvas);
-        this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader);
-        this.net = new CNet(this.url, this.game);
+        this.net = new CNet(this.url);
+        this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader, this.net.socket);
 
         this.setupBindings();
 
@@ -42,6 +42,7 @@ class App {
     async start() {
         await this.net.start();
         await this.game.start();
+        this.game.netBinds(this.net.socket);
         requestAnimationFrame(this.loop.bind(this));
     }
 

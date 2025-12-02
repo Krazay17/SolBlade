@@ -3,6 +3,7 @@ import { worldRegistry } from "./ClientRegistry.js";
 import { CWorld } from "./CWorld.js";
 import { SolLoading } from "./SolLoading.js";
 import solSave from "./SolSave.js";
+import { NETPROTO } from "./NetProtocols.js";
 
 export class CGame {
     /**@type {CWorld} */
@@ -14,23 +15,32 @@ export class CGame {
      * @param {*} input 
      * @param {SolLoading} loader 
      */
-    constructor(scene, camera, input, loader) {
+    constructor(scene, camera, input, loader, socket) {
         this.scene = scene;
         this.camera = camera;
         this.input = input;
         this.loader = loader;
+        this.socket = socket;
 
         this.player = new CPlayer(this);
         this.player.pos = [0, 15, 0];
-        console.log(this.player.pos);
 
         this.start();
     }
     async start() {
         await this.newWorld(solSave.worldName);
     }
+    netBinds(socket) {
+        this.socket = socket;
+        for (const p of Object.values(NETPROTO.SERVER)) {
+            const h = this[p];
+            if (typeof h === "function") {
+                this.socket.on(p, h.bind(this));
+            } else console.warn(`No function ${p}`);
+        }
+    }
     async newWorld(name) {
-        const world = worldRegistry[name]
+        const world = worldRegistry[name];
         if (!world) return
         if (this.world) this.world.exit();
         this.world = new world(this.scene, this.loader);
@@ -46,5 +56,8 @@ export class CGame {
     }
     getUserCommand() {
         return null;
+    }
+    worldSnap(data) {
+        console.log(data);
     }
 }

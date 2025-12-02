@@ -2,8 +2,6 @@ import RAPIER from "@dimforge/rapier3d-compat";
 import { GameState } from "./GameState.js";
 import { COLLISION_GROUPS, SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
 
-await RAPIER.init();
-
 export class Physics {
     /**@param {GameState} gameState */
     constructor(gameState) {
@@ -11,7 +9,7 @@ export class Physics {
 
         this.world = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
     }
-    remove(){
+    remove() {
         this.world.free();
     }
     step(dt) {
@@ -29,9 +27,9 @@ export class Physics {
         if (!worldData) return;
         const { vertices, indices } = colliderFromJson(worldData);
         const desc = RAPIER.ColliderDesc.trimesh(vertices, indices);
-        desc.setCollisionGroups(COLLISION_GROUPS.ENEMY << 16 | COLLISION_GROUPS.WORLD);
+        desc.setCollisionGroups(COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.PLAYER << 16 | COLLISION_GROUPS.WORLD);
 
-        this.world.createCollider(desc)
+        this.world.createCollider(desc);
     }
 
 }

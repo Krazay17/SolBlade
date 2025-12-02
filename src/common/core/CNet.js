@@ -1,16 +1,12 @@
 import { io } from "socket.io-client";
-import { CGame } from "./CGame.js";
-import { NETPROTO } from "./NetProtocols.js";
 
 export class CNet {
     /**
      * 
      * @param {String} url 
-     * @param {CGame} game 
      */
-    constructor(url, game) {
+    constructor(url) {
         this.url = url;
-        this.game = game;
 
         this.socket = null;
         this.localServer = null;
@@ -27,8 +23,6 @@ export class CNet {
             this.localServer = new SGame(server);
             await this.localServer.start(false);
         }
-        this.bindings();
-        this.socket.emit(NETPROTO.CLIENT.JOIN_GAME, this.game.player);
     }
     sendUserCommand(userCommand) {
         if (this.socket) {
@@ -50,17 +44,6 @@ export class CNet {
                 reject(err);
             });
         });
-    }
-    bindings() {
-        for (const p of Object.values(NETPROTO.SERVER)) {
-            const h = this[p];
-            if (typeof h === "function") {
-                this.socket.on(p, h.bind(this));
-            } else console.warn(`No function ${p}`);
-        }
-    }
-    worldSnap(data) {
-        //console.log(data);
     }
 }
 class LocalClientIO {
@@ -102,7 +85,7 @@ export class LocalServerIO {
     }
     to(id) {
         return {
-            emit: (event, data)=>{
+            emit: (event, data) => {
                 this.client.receive(event, data);
             }
         }

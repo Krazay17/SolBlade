@@ -30,9 +30,6 @@ export class CWorld extends SolWorld {
         const map = await this.loader.glLoader.loadAsync(`assets/${this.name}.glb`);
         if (!map) return;
         this.graphics.add(map.scene);
-        map.scene.traverse(child => {
-
-        })
     }
     tick(dt){
         this.skyBox.tick(dt);
@@ -41,5 +38,8 @@ export class CWorld extends SolWorld {
         this.globalScene.remove(this.graphics.scene);
         this.graphics.remove();
         this.physics.remove();
+    }
+    step(dt){
+        this.physics.step(dt);
     }
 }

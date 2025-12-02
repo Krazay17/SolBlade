@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
         "types": [],
-        "target": "ESNext",
+        "target": "esnext",
         "module": "esnext",
-        "moduleResolution": "node16",
+        "moduleResolution": "bundler",
         "checkJs": true,
         "allowJs": true,
         "strict": false,
