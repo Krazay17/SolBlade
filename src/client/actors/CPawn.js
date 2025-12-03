@@ -31,10 +31,10 @@ export default class CPawn extends Pawn {
         console.log(`Activate pawn: ${this.id}`);
     }
     makeMesh(meshManager, callback) {
-        meshManager.makeMesh(this.meshName).then(({ animations, scene }) => {
-            this.mesh = scene;
+        meshManager.makeMesh(this.meshName).then(({ mesh, animations }) => {
+            this.mesh = mesh;
             //@ts-ignore
-            this.animation = new AnimationManager(this, scene, animations);
+            this.animation = new AnimationManager(this, mesh, animations);
             this.mesh.position.set(0, -1, 0)
             //@ts-ignore
             this.graphics.add(this.mesh);

@@ -3,10 +3,11 @@ import PlayerMovement from "./components/PlayerMovement.js";
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { Group, Vector3 } from "three";
 import { Actions } from "../input/Actions.js";
+import { CGame } from "@solblade/common/core/CGame.js";
 
 export default class CPlayer extends CPawn {
     /**
-     * 
+     * @param {CGame}game
      * @param {*} data 
      */
     constructor(game, data) {
@@ -33,13 +34,13 @@ export default class CPlayer extends CPawn {
 
         this.tempVec = new Vector3();
     }
-    init(world) {
-        this.world = world;
+    init() {
         this.game.scene.add(this.graphics);
-        this.makeBody(this.world.physics.world);
+        this.makeMesh(this.game.loader.meshManager);
     }
     setWorld(world) {
         this.world = world;
+        this.makeBody(this.world.physics.world);
     }
     look(yaw, pitch) {
         this.yaw = yaw;

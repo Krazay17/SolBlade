@@ -37,7 +37,6 @@ export class Graphics {
         }
     }
     makeMesh(id, meshName) {
-        console.log(meshName);
         this.loader.meshManager.makeMesh(meshName).then(({ mesh, animations }) => {
             //@ts-ignore
             this.actors.set(id, { mesh, animation: new Animations(mesh, animations) })

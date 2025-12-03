@@ -1,18 +1,25 @@
 import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
 import { CGame } from "./CGame.js";
-import { CNet } from "./CNet.js";
 import UserInput from "@solblade/client/input/UserInput.js";
 import { SolRender } from "./SolRender.js";
 import { SolLoading } from "./SolLoading.js";
 import RAPIER from "@dimforge/rapier3d-compat";
-
+import { io, WebSocket } from "socket.io-client";
+import { LocalTransport } from "../net/LocalTransport.js";
+import { LocalServerTransport } from "../net/LocalServerTransport.js";
+/**
+ * @typedef {import("@solblade/server/core/SGame.js").SGame}localServer
+ */
 await RAPIER.init();
 
 class App {
     renderer;
     input;
     game;
-    net;
+    /**@type {WebSocket | LocalTransport} */
+    socket;
+    /**@type {localServer} */
+    localServer;
 
     // Time Management
     timeStep = SOL_PHYSICS_SETTINGS.timeStep;
@@ -31,7 +38,6 @@ class App {
         this.loader = new SolLoading();
         this.renderer = new SolRender(this.canvas);
         this.input = new UserInput(this.canvas);
-        this.net = new CNet(this.url);
         this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader);
 
         this.setupBindings();
@@ -40,9 +46,20 @@ class App {
     }
 
     async start() {
-        await this.net.start();
+        try {
+            this.socket = await this._tryConnect();
+        } catch {
+            if (this.socket) this.socket.close();
+            const serverSocket = new LocalServerTransport();
+            this.socket = new LocalTransport(serverSocket);
+            serverSocket.client = this.socket;
+
+            const { SGame } = await import("@solblade/server/core/SGame.js");
+            this.localServer = new SGame(serverSocket);
+            await this.localServer.start(false);
+        }
         await this.game.start();
-        this.game.netBinds(this.net.socket);
+        this.game.netBinds(this.socket);
         requestAnimationFrame(this.loop.bind(this));
     }
 
@@ -54,13 +71,9 @@ class App {
         this.accumulator = Math.min(this.accumulator + dt, 0.25);
         if (dt > 1) this.handleSleep();
         if (this.running) {
-            const userCommand = this.game.getUserCommand();
-            if (userCommand) {
-                this.net.sendUserCommand(userCommand);
-            }
             // Fixed time step update (for physics/state management)
             while (this.accumulator >= this.timeStep) {
-                if (this.net.localServer) this.net.localServer.step(this.timeStep);
+                if (this.localServer) this.localServer.step(this.timeStep);
                 if (this.game) this.game.step(this.timeStep);
                 this.accumulator -= this.timeStep;
             }
@@ -70,6 +83,22 @@ class App {
             if (this.renderer) this.renderer.render();
         }
         requestAnimationFrame(this.loop);
+    }
+    _tryConnect() {
+        return new Promise((resolve, reject) => {
+            const tempSocket = io(this.url, {
+                transports: ["websocket"],
+                reconnection: false,
+                timeout: 100,
+            });
+
+            tempSocket.on("connect", () => {
+                resolve(tempSocket);
+            });
+            tempSocket.on("connect_error", (err) => {
+                reject(err);
+            });
+        });
     }
 
     handleSleep() {

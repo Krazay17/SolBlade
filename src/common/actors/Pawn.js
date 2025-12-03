@@ -82,7 +82,7 @@ export default class Pawn extends Actor {
     /**@param {RAPIER.World} world */
     makeBody(world, height = this.height, radius = this.radius) {
         const collideGroup = this.isRemote
-            ? COLLISION_GROUPS.PLAYER << 16 | COLLISION_GROUPS.ENEMY
+            ? COLLISION_GROUPS.WORLD | COLLISION_GROUPS.PLAYER << 16 | COLLISION_GROUPS.ENEMY
             : COLLISION_GROUPS.ENEMY << 16 | COLLISION_GROUPS.PLAYER;
         const bDesc = RAPIER.RigidBodyDesc.dynamic();
         bDesc.setTranslation(this.pos[0], this.pos[1], this.pos[2]);

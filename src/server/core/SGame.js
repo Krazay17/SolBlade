@@ -1,6 +1,7 @@
 import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js"
-import { NETPROTO } from "@solblade/common/core/NetProtocol.js"
+import { NET } from "@solblade/common/core/NetProtocol.js"
 import { SWorld } from "./SWorld.js"
+import { LocalServerTransport } from "@solblade/common/net/LocalServerTransport.js";
 
 /**
  * @typedef {import("socket.io").Server} ServerIO
@@ -9,7 +10,7 @@ import { SWorld } from "./SWorld.js"
 
 export class SGame {
     /**
-     * @param {ServerIO | LocalServerIO} io 
+     * @param {ServerIO | LocalServerIO | LocalServerTransport} io 
      */
     constructor(io) {
         this.io = io;
@@ -32,18 +33,22 @@ export class SGame {
         if (loop) this.loop();
     }
     bindEvents() {
-        for (const p of Object.values(NETPROTO.CLIENT)) {
+        for (const p of Object.values(NET.CLIENT)) {
             const f = this[p];
             if (typeof f === "function") {
-                this.io.on(p, f.bind(this));
+                if (this.io) this.io.on(p, f.bind(this));
             } else {
                 console.warn(`No function ${p}`);
             }
         }
     }
-    joinGame(data) {
+    join(data) {
         const { id, worldName } = data;
         this.worlds[worldName].addPlayer(id, data);
+    }
+    serverTest(cb) {
+        //if (cb) cb(NET.SERVER.TEST);
+        this.io.emit(NET.SERVER.TEST);
     }
     loop() {
         const now = performance.now();
@@ -62,7 +67,7 @@ export class SGame {
             if (update) {
                 const { players, state } = update;
                 players.forEach(p => {
-                    this.io.to(p).emit(NETPROTO.SERVER.WORLD_SNAP, state);
+                    this.io.to(p).emit(NET.SERVER.SNAP, state);
                 })
             }
         }

@@ -11,7 +11,7 @@ export default class SkyBox extends THREE.Object3D {
 
         this.active = false;
 
-        this.world.graphics.add(this);
+        this.world.add(this);
         this.init();
     }
     async init() {

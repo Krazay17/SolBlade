@@ -3,7 +3,7 @@ import MyEventEmitter from '@solblade/common/core/GlobalEventEmitter.js';
 import Pawn from '@solblade/common/actors/Pawn.js';
 
 export default class AnimationManager {
-    pawn: Pawn;
+    pawn: any;
     mixer: THREE.AnimationMixer;
     animations: { [key: string]: THREE.AnimationClip };
     currentAction: THREE.AnimationAction | null = null;
@@ -14,7 +14,7 @@ export default class AnimationManager {
     setAnimState = this.playAnimation;
     hitFreeze = this.changeTimeScale;
 
-    constructor(pawn: Pawn, model: THREE.Object3D, animations: THREE.AnimationClip[]) {
+    constructor(pawn: any, model: THREE.Object3D, animations: THREE.AnimationClip[]) {
         this.pawn = pawn;
         this.mixer = new THREE.AnimationMixer(model);
         this.animations = {};

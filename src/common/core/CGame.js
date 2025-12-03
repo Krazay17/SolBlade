@@ -3,7 +3,9 @@ import { worldRegistry } from "./ClientRegistry.js";
 import { CWorld } from "./CWorld.js";
 import { SolLoading } from "./SolLoading.js";
 import solSave from "./SolSave.js";
-import { NETPROTO } from "./NetProtocol.js";
+import { NET } from "./NetProtocol.js";
+import UserInput from "@solblade/client/input/UserInput.js";
+import { Actions } from "@solblade/client/input/Actions.js";
 
 export class CGame {
     /**@type {CWorld} */
@@ -14,7 +16,7 @@ export class CGame {
      * 
      * @param {*} scene 
      * @param {*} camera 
-     * @param {*} input 
+     * @param {UserInput} input 
      * @param {SolLoading} loader 
      */
     constructor(scene, camera, input, loader) {
@@ -24,7 +26,13 @@ export class CGame {
         this.loader = loader;
 
         this.player = new CPlayer(this);
+        this.player.init();
         this.player.pos = [0, 55, 0];
+
+        window.addEventListener('keydown', () => {
+            console.time("test");
+            this.socket.emit(NET.CLIENT.TEST);
+        })
 
         this.start();
     }
@@ -32,17 +40,17 @@ export class CGame {
         await this.newWorld(solSave.worldName);
     }
     getActorById(id) {
-        this.world.gameState.actors.get(id);
+        this.world.actors.get(id);
     }
     netBinds(socket) {
         this.socket = socket;
-        for (const p of Object.values(NETPROTO.SERVER)) {
+        for (const p of Object.values(NET.SERVER)) {
             const h = this[p];
             if (typeof h === "function") {
                 this.socket.on(p, h.bind(this));
             } else console.warn(`No function ${p}`);
         }
-        this.socket.emit(NETPROTO.CLIENT.JOIN_GAME, this.player.serialize());
+        this.socket.emit(NET.CLIENT.JOIN, this.player.serialize());
     }
     async newWorld(name) {
         const world = worldRegistry[name];
@@ -50,14 +58,18 @@ export class CGame {
         if (this.world) this.world.exit();
         this.world = new world(this.scene, this.loader);
         await this.world.start();
-        this.player.init(this.world);
+        this.player.setWorld(this.world);
+        this.world.localPlayer = this.player;
     }
-    spawnActor(data){
+    spawnActor(data) {
         console.log(data)
     }
     tick(dt) {
         this.world.tick(dt);
         this.player.tick(dt);
+    }
+    clientTest() {
+        console.timeEnd("test");
     }
     step(dt) {
         this.world.step(dt);
@@ -65,7 +77,10 @@ export class CGame {
     getUserCommand() {
         return null;
     }
-    worldSnap(data) {
-        this.world.gameState.updateState(data);
+    snap(data) {
+        this.world.updateState(data);
+    }
+    welcome(data) {
+        console.log(data);
     }
 }
