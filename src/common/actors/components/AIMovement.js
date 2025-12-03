@@ -26,6 +26,6 @@ export default class AIMovement {
         this.pawn.velocity = dir;
     }
     airMove(dt, dir) {
-        this.pawn.velocity = dir;
+        this.pawn.latVel = dir;
     }
 }

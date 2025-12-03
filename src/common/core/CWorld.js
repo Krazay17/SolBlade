@@ -1,5 +1,4 @@
 import { Scene } from "three";
-import { Graphics } from "./Graphics.js";
 import { SolLoading } from "./SolLoading.js";
 import SolWorld from "./SolWorld.js";
 import SkyBox from "./SkyBox.js";
@@ -20,10 +19,10 @@ export class CWorld extends SolWorld {
         this.globalScene = globalScene;
         this.loader = loader;
 
-
         this.scene = new Scene();
         globalScene.add(this.scene);
-        this.skyBox = new SkyBox(this, loader.textureLoader);
+        this.skyBox = new SkyBox(loader.textureLoader);
+        this.add(this.skyBox);
 
         this.actorMesh = new Map();
     }
@@ -37,7 +36,7 @@ export class CWorld extends SolWorld {
     async makeMap() {
         const map = await this.loader.glLoader.loadAsync(`assets/${this.name}.glb`);
         if (!map) return;
-        this.scene.add(map.scene);
+        this.add(map.scene);
     }
     /**@param {CActor}actor */
     async onNewActor(actor) {
@@ -48,9 +47,10 @@ export class CWorld extends SolWorld {
         //@ts-ignore
         actor.animation = new AnimationManager(actor, mesh, animations);
         //@ts-ignore
-        this.scene.add(mesh);
+        actor.graphics.add(mesh);
+        this.add(actor.graphics);
     }
-    newActor(data) {
+    async newActor(data) {
         const { id, } = data;
         const actor = new CActor(data);
         this.actors.set(id, actor);
@@ -58,8 +58,8 @@ export class CWorld extends SolWorld {
     }
     tick(dt) {
         this.skyBox.tick(dt);
-        this.actors.forEach((v) => {
-            v.tick?.(dt);
+        this.actors.forEach((a) => {
+            a.tick?.(dt);
         })
     }
     exit() {
@@ -67,8 +67,5 @@ export class CWorld extends SolWorld {
     }
     step(dt) {
         this.physics.step(dt);
-    }
-    updateState(data) {
-        super.updateState(data);
     }
 }

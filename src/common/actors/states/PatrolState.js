@@ -8,7 +8,7 @@ export default class PatrolState extends State {
     update(dt) {
         this.accumulator += dt;
 
-        this.movement.groundMove(dt, this.pawn.vecDir);
+        this.movement.smartMove(dt, this.pawn.vecDir);
 
         if(this.accumulator > 5000) {
             this.reverse = -1;

@@ -13,23 +13,19 @@ export class Physics {
     }
     async makeWorld(name) {
         let worldData;
-        try {
-            const { loadJson } = await import("@solblade/common/utils/LoadJson.js");
-            worldData = await loadJson(`../worlds/${name}.json`)
-        } catch {
-            const worldModule = await import(`../worlds/${name}.json`);
-            worldData = worldModule.default;
-        }
+        //     const { loadJson } = await import("@solblade/common/utils/LoadJson.js");
+        //     worldData = await loadJson(`../worlds/${name}.json`)
+        const worldModule = await import(`../worlds/${name}.json`);
+        worldData = worldModule.default;
         if (!worldData) return;
         const colliders = colliderFromJson(worldData);
         for (const { vertices, indices } of colliders) {
             const desc = RAPIER.ColliderDesc.trimesh(vertices, indices);
-            desc.setCollisionGroups(COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.PLAYER << 16 | COLLISION_GROUPS.WORLD);
+            desc.setCollisionGroups(COLLISION_GROUPS.WORLD << 16 | (COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.PLAYER));
 
             this.world.createCollider(desc);
         }
     }
-
 }
 function colliderFromJson(data) {
     const colliders = [];

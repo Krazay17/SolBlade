@@ -68,7 +68,8 @@ class App {
     loop = (time) => {
         const dt = (time - this.lastTime) / 1000;
         this.lastTime = time;
-        this.accumulator = Math.min(this.accumulator + dt, 0.25);
+        this.accumulator += dt;
+        if (this.accumulator > 0.25) this.accumulator = 0.25;
         if (dt > 1) this.handleSleep();
         if (this.running) {
             // Fixed time step update (for physics/state management)
@@ -77,10 +78,9 @@ class App {
                 if (this.game) this.game.step(this.timeStep);
                 this.accumulator -= this.timeStep;
             }
-            // Variable time step update (for rendering/interpolation)
+            if (this.localServer) this.localServer.tick(dt);
             if (this.game) this.game.tick(dt);
-            // Render
-            if (this.renderer) this.renderer.render();
+            if (this.renderer) this.renderer.render(dt);
         }
         requestAnimationFrame(this.loop);
     }

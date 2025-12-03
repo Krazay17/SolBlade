@@ -55,9 +55,10 @@ export default class Actor {
             owner: this.owner,
             worldName: this.worldName,
 
-            pos: this.pos,
+
+            pos: this.body ? [this.body.translation().x, this.body.translation().y, this.body.translation().z] : this.pos,
             dir: this.dir,
-            rot: this.rot,
+            rot: this.body ? [this.body.rotation().x, this.body.rotation().y, this.body.rotation().z, this.body.rotation().w] : this.rot,
 
             active: this.active,
             isRemote: this.isRemote,
@@ -66,10 +67,11 @@ export default class Actor {
             timestamp: this.timestamp,
         }
     }
+    tick(dt){}
     makeBody(world, height = this.height, radius = this.radius) {
         const collideGroup = this.isRemote
-            ? COLLISION_GROUPS.WORLD | COLLISION_GROUPS.PLAYER << 16 | COLLISION_GROUPS.ENEMY
-            : COLLISION_GROUPS.ENEMY << 16 | COLLISION_GROUPS.PLAYER;
+            ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD)
+            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY);
         const bDesc = RAPIER.RigidBodyDesc.dynamic();
         bDesc.setTranslation(this.pos[0], this.pos[1], this.pos[2]);
         bDesc.lockRotations();

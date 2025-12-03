@@ -31,7 +31,7 @@ export default class GroundChecker {
         return this.tempVec;
     }
     getFloor() {
-        const result = this.world.physics.castShape(
+        const result = this.world.physics.world.castShape(
             this.pawn.vecPos,
             { x: 0, y: 0, z: 0, w: 1 },
             this.downVec,

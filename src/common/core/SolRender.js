@@ -2,27 +2,27 @@ import * as THREE from "three";
 import { EffectComposer, RenderPass, UnrealBloomPass } from "three/examples/jsm/Addons.js";
 
 export class SolRender {
-    constructor(canvas, camera) {
+    constructor(canvas) {
         this.canvas = canvas
-        this.camera = camera;
+        
+        this.bloomEnabled = true;
 
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.bloomEnabled = true;
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, .8, 3000);
         this.camera.lookAt(0, 0, 1);
         this.scene.add(this.camera);
-
+        
         this.composer = this.createComposer();
         this.renderPass = this.createRenderPass();
         this.bloomPass = this.createBloomPass();
-
+        
         window.addEventListener('resize', this.onWindowResize.bind(this));
-
-        this.addPasses();
+        
         this.worldLight();
+        this.addPasses();
     }
     add(obj){
         this.scene.add(obj);

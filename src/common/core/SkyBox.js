@@ -4,30 +4,25 @@ export default class SkyBox extends THREE.Object3D {
     /**
      * @param {THREE.TextureLoader} textureLoader
      */
-    constructor(world, textureLoader) {
+    constructor(textureLoader) {
         super();
-        this.world = world;
         this.loader = textureLoader;
 
         this.active = false;
-
-        this.world.add(this);
         this.init();
     }
     async init() {
         this.sky = await this.createSky();
-        this.rotatingFilter1 = await this.createRotatingFilter('assets/SkyFilter.webp', 1950);
-        this.rotatingFilter2 = await this.createRotatingFilter('assets/SkyFilter2.webp', 1900);
+        this.rotatingFilter1 = await this.createRotatingFilter('assets/SkyFilter.webp', 1900);
+        this.rotatingFilter2 = await this.createRotatingFilter('assets/SkyFilter2.webp', 1800);
         this.active = true;
     }
     destroy() {
         this.active = false;
-        this.world.graphics.remove(this);
         this.loader = null;
         this.sky = null;
         this.rotatingFilter1 = null;
         this.rotatingFilter2 = null;
-        this.world = null;
     }
 
     async createSky() {
@@ -60,11 +55,11 @@ export default class SkyBox extends THREE.Object3D {
 
     tick(dt) {
         if (!this.active) return;
-        if (this.rotatingFilter1) {
-            this.rotatingFilter1.rotation.y += 0.0001;
-        }
-        if (this.rotatingFilter2) {
-            this.rotatingFilter2.rotation.y -= 0.0001;
-        }
+        // if (this.rotatingFilter1) {
+        //     this.rotatingFilter1.rotation.y += dt*.01;
+        // }
+        // if (this.rotatingFilter2) {
+        //     this.rotatingFilter2.rotation.y -= dt;
+        // }
     }
 }

@@ -30,8 +30,9 @@ export default class AIController extends Controller {
         return this.blackboard.dir;
     }
     findNearestPlayer() {
-        const players = this.world.actorManager.actors.players;
-        if (!players.length) return {};
+        const players = this.world.players
+        if (!players) return {};
+
 
         // get this enemy's position
         const pos = this.pawn.vecPos
@@ -40,7 +41,7 @@ export default class AIController extends Controller {
         let nearest = null;
         let minDistSq = Infinity;
         let targetDir = null;
-        for (const p of players) {
+        for (const [id, p] of players) {
             const dx = p.pos.x - pos.x;
             const dy = p.pos.y - pos.y;
             const dz = p.pos.z - pos.z;

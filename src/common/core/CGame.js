@@ -29,7 +29,8 @@ export class CGame {
         this.player.init();
         this.player.pos = [0, 55, 0];
 
-        window.addEventListener('keydown', () => {
+        window.addEventListener('keydown', (e) => {
+            if(e.code !== "KeyE")return;
             console.time("test");
             this.socket.emit(NET.CLIENT.TEST);
         })
@@ -61,11 +62,8 @@ export class CGame {
         this.player.setWorld(this.world);
         this.world.localPlayer = this.player;
     }
-    spawnActor(data) {
-        console.log(data)
-    }
     tick(dt) {
-        this.world.tick(dt);
+        if(this.world)this.world.tick(dt);
         this.player.tick(dt);
     }
     clientTest() {
@@ -73,9 +71,6 @@ export class CGame {
     }
     step(dt) {
         this.world.step(dt);
-    }
-    getUserCommand() {
-        return null;
     }
     snap(data) {
         this.world.updateState(data);

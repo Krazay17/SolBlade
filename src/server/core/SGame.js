@@ -22,7 +22,7 @@ export class SGame {
 
         this.worlds = {
             world1: new SWorld("world1"),
-            world2: new SWorld("world2")
+            //world2: new SWorld("world2")
         }
     }
     async start(loop = true) {
@@ -45,6 +45,7 @@ export class SGame {
     join(data) {
         const { id, worldName } = data;
         this.worlds[worldName].addPlayer(id, data);
+        this.io.emit(NET.SERVER.WELCOME, "welcome!");
     }
     serverTest(cb) {
         //if (cb) cb(NET.SERVER.TEST);
@@ -57,9 +58,15 @@ export class SGame {
         this.accumulator = Math.min(this.accumulator + dt, 0.25);
         while (this.accumulator >= this.timeStep) {
             this.step(this.timeStep);
+            this.tick(this.timeStep);
             this.accumulator -= this.timeStep;
         }
         setImmediate(() => this.loop());
+    }
+    tick(dt) {
+        for (const world of Object.values(this.worlds)) {
+            world.tick(dt);
+        }
     }
     step(dt) {
         for (const world of Object.values(this.worlds)) {

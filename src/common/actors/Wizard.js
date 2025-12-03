@@ -1,7 +1,7 @@
+import Pawn from "./Pawn.js";
 import FSM from "./states/FSM.js";
 import AIController from "./components/AIController.js";
 import AIMovement from "./components/AIMovement.js";
-import Pawn from "./Pawn.js";
 
 export default class Wizard extends Pawn {
     constructor(world, data) {
@@ -14,6 +14,5 @@ export default class Wizard extends Pawn {
         this.fsm = new FSM(this, [
             "patrol"
         ])
-        console.log(this);
     }
 }

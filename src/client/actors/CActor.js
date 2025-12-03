@@ -6,6 +6,7 @@ import AnimationManager from "./components/AnimationManager";
 export class CActor extends Actor {
     constructor(data) {
         super(data);
+        this.graphics = new THREE.Scene();
         /**@type {RAPIER.RigidBody} */
         this.body = null;
         /**@type {THREE.Object3D} */
@@ -14,8 +15,8 @@ export class CActor extends Actor {
         this.animation = null;
     }
     tick(dt) {
-        if (this.mesh) {
-            this.mesh.position.set(this.pos[0], this.pos[1], this.pos[2]);
+        if (this.graphics) {
+            this.graphics.position.set(this.pos[0], this.pos[1], this.pos[2]);
         }
     }
 }
