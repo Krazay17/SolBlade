@@ -53,10 +53,11 @@ export function rotateInputAroundYaw(x, z, yaw) {
     return { rotatedX, rotatedZ };
 }
 
-export function arrayBuffer(list, length = 8) {
+export function arrayBuffer(list, length = 8, id = 0) {
     const count = list.length;
-    const buffer = new Float32Array(count * length)
-    let i = 0;
+    const buffer = new Float32Array(count * length + 1);
+    buffer[0] = id;
+    let i = 1;
     for (const e of list) {
         buffer[i++] = e.id ?? 0;
         buffer[i++] = e.pos[0] ?? 0;
@@ -66,6 +67,9 @@ export function arrayBuffer(list, length = 8) {
         buffer[i++] = e.rot[1] ?? 0;
         buffer[i++] = e.rot[2] ?? 0;
         buffer[i++] = e.rot[3] ?? 0;
+        buffer[i++] = e.typeIndex ?? 0;
+        buffer[i++] = e.meshIndex ?? 0;
+        buffer[i++] = e.animIndex ?? 0;
     };
     return buffer;
 }

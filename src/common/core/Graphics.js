@@ -1,12 +1,30 @@
 import * as THREE from "three";
 import { GameState } from "./GameState.js";
+import { SolLoading } from "./SolLoading.js";
+import { Animations } from "./Animations.js";
 
 export class Graphics {
-    /**@param {GameState} gameState */
-    constructor(gameState) {
+    /**
+     * @param {GameState} gameState 
+     * @param {SolLoading} loader
+     */
+    constructor(gameState, loader) {
         this.gameState = gameState;
+        this.loader = loader;
+
+        this.actors = new Map();
         this.scene = new THREE.Scene();
-        this.gameState.events.on("addActor", this.makeMesh);
+        this.gameState.events.on("addActor", (a) => console.log(a));
+        this.gameState.events.on("newActor", (a) => this.makeMesh(a.id, a.mesh));
+        this.gameState.events.on("updateState", (a) => this.update(a))
+    }
+    update(data) {
+        this.actors.forEach((v, k) => {
+            const actor = data.get(k);
+            v.mesh.position.set(actor.pos[0], actor.pos[1], actor.pos[2]);
+        })
+    }
+    tick(dt) {
     }
     remove(obj) {
         if (obj) {
@@ -18,7 +36,13 @@ export class Graphics {
             this.scene.add(obj);
         }
     }
-    makeMesh(id, data) {
-        console.log(id, data);
+    makeMesh(id, meshName) {
+        console.log(meshName);
+        this.loader.meshManager.makeMesh(meshName).then(({ mesh, animations }) => {
+            //@ts-ignore
+            this.actors.set(id, { mesh, animation: new Animations(mesh, animations) })
+            //@ts-ignore
+            this.scene.add(mesh);
+        });
     }
 }

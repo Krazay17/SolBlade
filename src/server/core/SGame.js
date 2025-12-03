@@ -1,5 +1,5 @@
 import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js"
-import { NETPROTO } from "@solblade/common/core/NetProtocols.js"
+import { NETPROTO } from "@solblade/common/core/NetProtocol.js"
 import { SWorld } from "./SWorld.js"
 
 /**

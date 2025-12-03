@@ -41,7 +41,7 @@ export default class Actor {
 
             id: this.id,
             tempId: this.tempId,
-            type: this.type,
+            type: typeMap[this.type],
             subtype: this.subtype,
             name: this.name,
             owner: this.owner,
@@ -58,4 +58,7 @@ export default class Actor {
             timestamp: this.timestamp,
         }
     }
+}
+const typeMap = {
+    "player": 0,
 }

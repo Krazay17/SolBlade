@@ -3,11 +3,13 @@ import { worldRegistry } from "./ClientRegistry.js";
 import { CWorld } from "./CWorld.js";
 import { SolLoading } from "./SolLoading.js";
 import solSave from "./SolSave.js";
-import { NETPROTO } from "./NetProtocols.js";
+import { NETPROTO } from "./NetProtocol.js";
 
 export class CGame {
     /**@type {CWorld} */
     world;
+    stateIndex = 0;
+    socket;
     /**
      * 
      * @param {*} scene 
@@ -15,20 +17,22 @@ export class CGame {
      * @param {*} input 
      * @param {SolLoading} loader 
      */
-    constructor(scene, camera, input, loader, socket) {
+    constructor(scene, camera, input, loader) {
         this.scene = scene;
         this.camera = camera;
         this.input = input;
         this.loader = loader;
-        this.socket = socket;
 
         this.player = new CPlayer(this);
-        this.player.pos = [0, 15, 0];
+        this.player.pos = [0, 55, 0];
 
         this.start();
     }
     async start() {
         await this.newWorld(solSave.worldName);
+    }
+    getActorById(id) {
+        this.world.gameState.actors.get(id);
     }
     netBinds(socket) {
         this.socket = socket;
@@ -38,6 +42,7 @@ export class CGame {
                 this.socket.on(p, h.bind(this));
             } else console.warn(`No function ${p}`);
         }
+        this.socket.emit(NETPROTO.CLIENT.JOIN_GAME, this.player.serialize());
     }
     async newWorld(name) {
         const world = worldRegistry[name];
@@ -46,6 +51,9 @@ export class CGame {
         this.world = new world(this.scene, this.loader);
         await this.world.start();
         this.player.init(this.world);
+    }
+    spawnActor(data){
+        console.log(data)
     }
     tick(dt) {
         this.world.tick(dt);
@@ -58,6 +66,6 @@ export class CGame {
         return null;
     }
     worldSnap(data) {
-        console.log(data);
+        this.world.gameState.updateState(data);
     }
 }

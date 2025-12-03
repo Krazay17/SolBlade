@@ -15,10 +15,13 @@ export class CWorld extends SolWorld {
         super(name)
         this.globalScene = globalScene;
         this.loader = loader;
-        this.graphics = new Graphics(this.gameState);
+        this.graphics = new Graphics(this.gameState, loader);
+        this.gameState.events.on('addActor', (actor) => {
+            actor.makeMesh(loader.meshManager);
+        });
         this.skyBox = new SkyBox(this, loader.textureLoader);
     }
-    add(obj){
+    add(obj) {
         this.graphics.add(obj);
     }
     async start() {
@@ -31,7 +34,8 @@ export class CWorld extends SolWorld {
         if (!map) return;
         this.graphics.add(map.scene);
     }
-    tick(dt){
+    tick(dt) {
+        this.graphics.tick(dt);
         this.skyBox.tick(dt);
     }
     exit() {
@@ -39,7 +43,7 @@ export class CWorld extends SolWorld {
         this.graphics.remove();
         this.physics.remove();
     }
-    step(dt){
+    step(dt) {
         this.physics.step(dt);
     }
 }

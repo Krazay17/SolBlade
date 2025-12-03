@@ -1,25 +1,30 @@
 import { SkeletonUtils } from "three/examples/jsm/Addons";
+import { GLTFLoader } from "three/examples/jsm/Addons.js";
 
 export default class MeshManager {
+    /**
+     * 
+     * @param {GLTFLoader} glbLoader 
+     */
     constructor(glbLoader) {
         this.loader = glbLoader;
         this.loadedMesh = new Map();
     }
     async makeMesh(name) {
-        let mesh = {};
-        const loadedMesh = this.loadedMesh.get(name);
-        if (loadedMesh) {
-            mesh.scene = SkeletonUtils.clone(loadedMesh.scene);
-            mesh.animations = loadedMesh.animations;
-        } else {
-            mesh = await this._newMesh(name);
+        let loadedMesh = this.loadedMesh.get(name);
+        if (!loadedMesh) {
+            const gltf = await this.loader.loadAsync(`assets/${name}.glb`)
+            gltf.scene.position.set(0, -1, 0);
+            loadedMesh = {
+                mesh: gltf.scene,
+                animations: gltf.animations
+            }
+            this.loadedMesh.set(name, loadedMesh);
         }
-        return mesh;
-    }
-    async _newMesh(name) {
-        let mesh = await this.loader.loadAsync(`assets/${name}.glb`)
-
-        this.loadedMesh.set(name, mesh);
-        return mesh;
+        let result = {
+            mesh: SkeletonUtils.clone(loadedMesh.mesh),
+            animations: loadedMesh.animations
+        };
+        return result;
     }
 }

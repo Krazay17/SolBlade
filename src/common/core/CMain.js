@@ -6,8 +6,8 @@ import { SolRender } from "./SolRender.js";
 import { SolLoading } from "./SolLoading.js";
 import RAPIER from "@dimforge/rapier3d-compat";
 
-
 await RAPIER.init();
+
 class App {
     renderer;
     input;
@@ -32,7 +32,7 @@ class App {
         this.renderer = new SolRender(this.canvas);
         this.input = new UserInput(this.canvas);
         this.net = new CNet(this.url);
-        this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader, this.net.socket);
+        this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader);
 
         this.setupBindings();
 

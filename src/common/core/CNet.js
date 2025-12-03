@@ -60,7 +60,7 @@ class LocalClientIO {
     receive(event, data) {
         const h = this.handlers[event];
         if (h) h(data);
-        console.log(`Client receive ${event}`);
+        //console.log(`Client receive ${event}`);
     }
 }
 export class LocalServerIO {
@@ -81,7 +81,7 @@ export class LocalServerIO {
     receive(event, data) {
         const h = this.handlers[event];
         if (h) h(data);
-        console.log(`Server receive ${event}`);
+        //console.log(`Server receive ${event}`);
     }
     to(id) {
         return {
