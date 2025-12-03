@@ -4,7 +4,7 @@ import { EffectComposer, RenderPass, UnrealBloomPass } from "three/examples/jsm/
 export class SolRender {
     constructor(canvas) {
         this.canvas = canvas
-        
+
         this.bloomEnabled = true;
 
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
@@ -12,37 +12,25 @@ export class SolRender {
 
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, .8, 3000);
-        this.camera.lookAt(0, 0, 1);
         this.scene.add(this.camera);
-        
-        this.composer = this.createComposer();
-        this.renderPass = this.createRenderPass();
-        this.bloomPass = this.createBloomPass();
-        
+
+        this.composer = new EffectComposer(this.renderer);
+        this.renderPass = new RenderPass(this.scene, this.camera);
+        this.bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), .2, .5, 1);
+
         window.addEventListener('resize', this.onWindowResize.bind(this));
-        
+
         this.worldLight();
         this.addPasses();
     }
-    add(obj){
+    add(obj) {
         this.scene.add(obj);
     }
-    remove(obj){
+    remove(obj) {
         this.scene.remove(obj);
     }
     render(dt) {
         this.composer.render(dt);
-    }
-    createComposer() {
-        const composer = new EffectComposer(this.renderer);
-        return composer;
-    }
-    createRenderPass() {
-        return new RenderPass(this.scene, this.camera);
-    }
-    createBloomPass() {
-        const pass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), .2, .5, 1);
-        return pass;
     }
     addPasses() {
         this.composer.addPass(this.renderPass);

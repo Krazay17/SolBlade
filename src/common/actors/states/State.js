@@ -15,6 +15,7 @@ export default class State {
     }
     get controller() { return this.pawn.controller }
     get movement() { return this.pawn.movement }
+    get animation() { return this.pawn.animation }
     setState(state, params) { this.fsm.setState(state, params) }
     enter(state, params) { }
     exit(state) { }

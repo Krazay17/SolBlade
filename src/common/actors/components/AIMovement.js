@@ -28,4 +28,7 @@ export default class AIMovement {
     airMove(dt, dir) {
         this.pawn.latVel = dir;
     }
+    idleMove(dt){
+        this.pawn.velocity = this.pawn.velocity.multiplyScalar(.9);
+    }
 }

@@ -18,9 +18,6 @@ export default class PlayerStateManager {
             dead: new States.DeadState(game, this, actor),
             parry: new States.ParryState(game, this, actor),
             charge: new States.ChargeState(game, this, actor),
-            // wallCling: new States.WallClingState(game, this),
-            // wallSlide: new States.WallSlideState(game, this),
-            // wallJump: new States.WallJumpState(game, this),
         };
         this.activeState = this.states.idle;
         this.actionState = null;
