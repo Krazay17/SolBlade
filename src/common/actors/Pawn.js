@@ -6,8 +6,7 @@ import Controller from "./components/Controller.js";
 import { Vect3 } from "../utils/SolMath.js"
 import SolWorld from "../core/SolWorld.js";
 import AnimationManager from "@solblade/client/actors/components/AnimationManager.js";
-import PlayerMovement from "@solblade/client/actors/components/PlayerMovement.js";
-import AIMovement from "./components/AIMovement.js";
+import { Movement } from "./components/Movement.js";
 
 export default class Pawn extends Actor {
     /**
@@ -24,13 +23,12 @@ export default class Pawn extends Actor {
 
         /**@type {Controller} */
         this.controller = null;
-        /**@type {PlayerMovement | AIMovement} */
+        /**@type {Movement} */
         this.movement = null;
         /**@type {AnimationManager} */
         this.animation = null;
         this.fsm = null;
         this.abilities = null;
-        this.body = null;
         this.collider = null;
     }
     get vecPos() {
@@ -131,4 +129,7 @@ export default class Pawn extends Actor {
     }
     step(dt) { }
     stateChanged(state) { }
+    aim(){
+        return this.controller.aim();
+    }
 }

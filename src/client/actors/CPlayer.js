@@ -1,9 +1,10 @@
 import CPawn from "./CPawn.js";
 import PlayerMovement from "./components/PlayerMovement.js";
 import FSM from "@solblade/common/actors/states/FSM.js";
-import { Group, Vector3 } from "three";
+import { Group, PerspectiveCamera, Vector3 } from "three";
 import { Actions } from "../input/Actions.js";
 import { CGame } from "@solblade/common/core/CGame.js";
+import { Movement } from "@solblade/common/actors/components/Movement.js";
 
 export default class CPlayer extends CPawn {
     /**
@@ -20,6 +21,7 @@ export default class CPlayer extends CPawn {
         this.game = game;
         this.cameraArm = new Group();
         this.graphics.add(this.cameraArm);
+        /**@type {PerspectiveCamera} */
         this.camera = this.game.camera;
         this.camera.position.set(.333, .666, 1.333);
         this.camera.quaternion.copy(this.quatRot);
@@ -27,12 +29,13 @@ export default class CPlayer extends CPawn {
 
         this.controller = this.game.input;
         this.controller.look = (y, p) => this.look(y, p);
-        this.movement = new PlayerMovement(this);
+        this.movement = new Movement(this);
         this.fsm = new FSM(this, [
             "run", "fall"
         ]);
 
         this.tempVec = new Vector3();
+        this.tempVec2 = new Vector3();
     }
     init() {
         this.game.scene.add(this.graphics);
@@ -41,6 +44,7 @@ export default class CPlayer extends CPawn {
     setWorld(world) {
         this.world = world;
         this.makeBody(this.world.physics.world);
+        this.movement.body = this.body;
     }
     look(yaw, pitch) {
         this.yaw = yaw;
@@ -59,5 +63,11 @@ export default class CPlayer extends CPawn {
             }
         }
     }
-
+    aim(){
+        const d = this.camera.getWorldDirection(this.tempVec2);
+        return {
+            dir: d,
+            camDir: d,
+        }
+    }
 }

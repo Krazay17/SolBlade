@@ -2,10 +2,27 @@ import State from "./State.js";
 
 export default class RunState extends State {
     update(dt) {
-        if (!this.movement.isGrounded) return this.setState('fall');
+        if (!this.movement.groundChecker.isGrounded()) return this.setState('fall');
         const dir = this.controller.inputDirection();
         if (!dir) return this.setState('idle');
-        this.movement.groundMove(dt, dir);
-        const animScale = 1 + this.movement.momentumBooster?.getBoost() / 20;
+        this.movement.smartMove(dt, dir);
+        const animScale = 1 + this.movement.momentum?.getBoost() / 20;
+
+        switch (this.pivot()) {
+            case "Front":
+                this.animation.playAnimation('run');
+                break;
+            case 'Back':
+                this.animation.playAnimation('runBwd');
+                break;
+            case 'Left':
+                this.animation.playAnimation('strafeLeft');
+                break;
+            case 'Right':
+                this.animation.playAnimation('strafeRight');
+                break;
+            default:
+                this.animation.playAnimation('run');
+        }
     }
 }

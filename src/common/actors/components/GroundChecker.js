@@ -1,16 +1,13 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import Pawn from "../Pawn.js";
-import SolWorld from "@solblade/common/core/SolWorld.js";
 import { Vector3 } from "three";
 
 export default class GroundChecker {
     /**
      * 
-     * @param {SolWorld} world
      * @param {Pawn} pawn 
      */
-    constructor(world, pawn) {
-        this.world = world;
+    constructor(pawn) {
         this.pawn = pawn;
 
         this.tempVec = new Vector3();
@@ -31,7 +28,8 @@ export default class GroundChecker {
         return this.tempVec;
     }
     getFloor() {
-        const result = this.world.physics.world.castShape(
+        if(! this.pawn.world)return;
+        const result = this.pawn.world.physics.world.castShape(
             this.pawn.vecPos,
             { x: 0, y: 0, z: 0, w: 1 },
             this.downVec,

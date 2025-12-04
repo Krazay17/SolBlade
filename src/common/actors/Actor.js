@@ -42,6 +42,8 @@ export default class Actor {
         this.lifetime = lifetime;
         this.age = 0;
         this.timestamp = performance.now();
+
+        this.body = null;
     }
     serialize() {
         return {
@@ -67,7 +69,7 @@ export default class Actor {
             timestamp: this.timestamp,
         }
     }
-    tick(dt){}
+    tick(dt) { }
     makeBody(world, height = this.height, radius = this.radius) {
         const collideGroup = this.isRemote
             ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD)

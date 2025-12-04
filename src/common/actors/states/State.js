@@ -1,5 +1,6 @@
 import Pawn from "@solblade/common/actors/Pawn.js"
 import FSM from "./FSM.js";
+import { vectorsToLateralDegrees } from "@solblade/common/utils/Utils.js";
 
 export default class State {
     /**
@@ -22,4 +23,25 @@ export default class State {
     update(dt) { }
     canEnter(state) { return true }
     canExit(state) { return true }
+
+    pivot(moveDir = this.controller.direction, lookDir = this.pawn.aim().dir, useVel = false) {
+        if (useVel) {
+            moveDir = this.movement.velocity;
+            const lateral = Math.atan2(moveDir.x, moveDir.z);
+            if (lateral === 0) return "Neutral";
+            moveDir.normalize();
+        }
+        let angleDeg = vectorsToLateralDegrees(lookDir, moveDir);
+        const sector = Math.floor((angleDeg + 22.5) / 45) % 8;
+        switch (sector) {
+            case 0: return "Front";
+            case 1: return "Front";
+            case 2: return "Right";
+            case 3: return "Right";
+            case 4: return "Back";
+            case 5: return "Left";
+            case 6: return "Left";
+            case 7: return "Front";
+        }
+    }
 }

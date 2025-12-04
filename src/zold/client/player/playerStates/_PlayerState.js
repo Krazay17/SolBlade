@@ -57,7 +57,7 @@ export default class PlayerState {
         }
         return false;
     }
-    pivot(useVel = false) {
+    pivot(moveDir, lookDir, useVel = false) {
         const lookDir = this.actor.getShootData().dir;
         let moveDir;
         if (useVel) {
