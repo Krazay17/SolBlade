@@ -7,7 +7,7 @@ export default class RunState extends PlayerState {
     }
     update(dt) {
         this.actor.movement.groundMove(dt);
-        const animScale = 1 + this.movement.momentumBooster.getBoost() / 20;
+        const animScale = 1 + this.movement.momentumBooster?.getBoost() / 20;
         this.actor.energy.regenRate = this.actor.energy.baseRegenRate;
 
         this.actor.animationManager?.changeTimeScale(animScale, 2);
