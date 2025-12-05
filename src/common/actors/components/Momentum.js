@@ -1,6 +1,6 @@
 import { Vector3 } from 'three'
 
-export default class MomentumBoost {
+export class Momentum {
     constructor() {
         this.boostAmount = 0;
         this.lastVelocity = new Vector3();
@@ -11,11 +11,6 @@ export default class MomentumBoost {
         this.alignmentLax = 0;
         this.maxRunBoost = 10;
 
-    }
-    getalignment(currentVelocity) {
-        //this.lastAlignment = Math.max(0, Math.min(1, currentVelocity.dot(this.lastVelocity)));
-        this.lastVelocity = currentVelocity.clone();
-        return Math.pow(this.lastAlignment, 25);
     }
     increaseBoost(amount, max = this.maxRunBoost) {
         if (this.boostAmount < this.boostAmount + amount) {

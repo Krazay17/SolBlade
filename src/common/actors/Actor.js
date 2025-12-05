@@ -1,7 +1,3 @@
-import RAPIER from "@dimforge/rapier3d-compat";
-import { COLLISION_GROUPS } from "../config/SolConstants";
-
-
 export default class Actor {
     constructor(data = {}) {
         const {
@@ -51,16 +47,15 @@ export default class Actor {
 
             id: this.id,
             tempId: this.tempId,
-            type: typeMap[this.type],
+            type: this.type,
             subtype: this.subtype,
             name: this.name,
             owner: this.owner,
             worldName: this.worldName,
 
-
-            pos: this.body ? [this.body.translation().x, this.body.translation().y, this.body.translation().z] : this.pos,
+            pos: this.pos,
             dir: this.dir,
-            rot: this.body ? [this.body.rotation().x, this.body.rotation().y, this.body.rotation().z, this.body.rotation().w] : this.rot,
+            rot: this.rot,
 
             active: this.active,
             isRemote: this.isRemote,
@@ -69,25 +64,4 @@ export default class Actor {
             timestamp: this.timestamp,
         }
     }
-    tick(dt) { }
-    makeBody(world, height = this.height, radius = this.radius) {
-        const collideGroup = this.isRemote
-            ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD)
-            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY);
-        const bDesc = RAPIER.RigidBodyDesc.dynamic();
-        bDesc.setTranslation(this.pos[0], this.pos[1], this.pos[2]);
-        bDesc.lockRotations();
-        bDesc.setLinearDamping(0);
-        bDesc.setAngularDamping(0);
-        const cDesc = RAPIER.ColliderDesc.capsule(height, radius);
-        cDesc.setCollisionGroups(collideGroup);
-        cDesc.setFriction(0);
-        cDesc.setRestitution(0);
-
-        this.body = world.createRigidBody(bDesc)
-        this.collider = world.createCollider(cDesc, this.body);
-    }
-}
-const typeMap = {
-    "player": 0,
 }

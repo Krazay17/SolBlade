@@ -24,7 +24,7 @@ export default class State {
     canEnter(state) { return true }
     canExit(state) { return true }
 
-    pivot(moveDir = this.controller.direction, lookDir = this.pawn.aim().dir, useVel = false) {
+    pivot(useVel = false, moveDir = this.controller.direction, lookDir = this.pawn.aim().dir) {
         if (useVel) {
             moveDir = this.movement.velocity;
             const lateral = Math.atan2(moveDir.x, moveDir.z);

@@ -26,6 +26,24 @@ export class Physics {
             this.world.createCollider(desc);
         }
     }
+    makeCapsule(world = this.world, height = 1, radius = 0.5, isRemote = false) {
+        const collideGroup = isRemote
+            ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD)
+            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY);
+        const bDesc = RAPIER.RigidBodyDesc.dynamic();
+        bDesc.lockRotations();
+        bDesc.setLinearDamping(0);
+        bDesc.setAngularDamping(0);
+        const cDesc = RAPIER.ColliderDesc.capsule(height, radius);
+        cDesc.setCollisionGroups(collideGroup);
+        cDesc.setFriction(0);
+        cDesc.setRestitution(0);
+
+        const body = world.createRigidBody(bDesc)
+        const collider = world.createCollider(cDesc, body);
+
+        return { body, collider };
+    }
 }
 function colliderFromJson(data) {
     const colliders = [];

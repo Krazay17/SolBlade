@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import Pawn from "@solblade/common/actors/Pawn.js";
-import AnimationManager from "./components/AnimationManager.js";
 
 export default class CPawn extends Pawn {
     /**
@@ -34,7 +33,6 @@ export default class CPawn extends Pawn {
         meshManager.makeMesh(this.meshName).then(({ mesh, animations }) => {
             this.mesh = mesh;
             //@ts-ignore
-            this.animation = new AnimationManager(this, mesh, animations);
             this.mesh.position.set(0, -1, 0)
             //@ts-ignore
             this.graphics.add(this.mesh);

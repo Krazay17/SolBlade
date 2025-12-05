@@ -1,12 +1,12 @@
-import { SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
-import { CGame } from "./CGame.js";
-import UserInput from "@solblade/client/input/UserInput.js";
-import { SolRender } from "./SolRender.js";
-import { SolLoading } from "./SolLoading.js";
 import RAPIER from "@dimforge/rapier3d-compat";
+import { UserInput } from "@solblade/client/core/UserInput.js";
 import { io, WebSocket } from "socket.io-client";
-import { LocalTransport } from "../net/LocalTransport.js";
-import { LocalServerTransport } from "../net/LocalServerTransport.js";
+import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js";
+import { LocalServerTransport } from "@solblade/common/net/LocalServerTransport.js";
+import { LocalTransport } from "@solblade/common/net/LocalTransport.js";
+import { CGame } from "./CGame.js";
+import { SolLoading } from "./SolLoading.js";
+import { SolRender } from "./SolRender.js";
 /**
  * @typedef {import("@solblade/server/core/SGame.js").SGame}localServer
  */

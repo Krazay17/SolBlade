@@ -7,6 +7,7 @@ export default class RunState extends State {
         if (!dir) return this.setState('idle');
         this.movement.smartMove(dt, dir);
         const animScale = 1 + this.movement.momentum?.getBoost() / 20;
+        this.animation.changeTimeScale(animScale);
 
         switch (this.pivot()) {
             case "Front":

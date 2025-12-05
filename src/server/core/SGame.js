@@ -1,11 +1,11 @@
 import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js"
-import { NET } from "@solblade/common/core/NetProtocol.js"
-import { SWorld } from "./SWorld.js"
+import { NET } from "@solblade/common/net/NetProtocol.js"
+import { SWorld } from "../world/SWorld.js"
 import { LocalServerTransport } from "@solblade/common/net/LocalServerTransport.js";
 
 /**
  * @typedef {import("socket.io").Server} ServerIO
- * @typedef {import("@solblade/common/core/CNet.js").LocalServerIO} LocalServerIO
+ * @typedef {import("@solblade/client/core/CNet.js").LocalServerIO} LocalServerIO
  */
 
 export class SGame {
@@ -45,7 +45,8 @@ export class SGame {
     join(data) {
         const { id, worldName } = data;
         this.worlds[worldName].addPlayer(id, data);
-        this.io.emit(NET.SERVER.WELCOME, "welcome!");
+        //this.io.emit(NET.SERVER.WELCOME, "welcome!");
+        this.io.broadcast(NET.SERVER.WELCOME, "welcome!");
     }
     serverTest(cb) {
         //if (cb) cb(NET.SERVER.TEST);

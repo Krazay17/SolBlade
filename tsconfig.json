@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "strict": false, // disables all strict type checks
+    "noImplicitAny": false, // allows variables without a type annotation
+    "strictPropertyInitialization": false, // allows uninitialized class properties
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "allowJs": true, // you can still import/use JS files
+    "checkJs": false, // don’t type-check JS files
+    "paths": {
+      "@solblade/common/*": [
+        "common/*"
+      ],
+      "@solblade/client/*": [
+        "client/*"
+      ],
+      "@solblade/server/*": [
+        "server/*"
+      ]
+    }
+  },
+  "exclude": [
+    "src/zold/*",
+    "src/zdeprecated/*"
+  ]
+}

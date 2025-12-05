@@ -4,7 +4,7 @@ import MyEventEmitter from '../../../common/core/MyEventEmitter';
 import * as Weapon from './weapons/index';
 import { tryUpdatePosition } from '../core/NetManager';
 import CameraFX from '../core/CameraFX';
-import PlayerMovement from '../../../client/actors/components/PlayerMovement';
+import PlayerMovement from '../../../zdeprecated/PlayerMovement';
 import DevMenu from '../ui/DevMenu';
 import NamePlate from '../core/Nameplate';
 import PlayerStateManager from './playerStates/PlayerStateManager';

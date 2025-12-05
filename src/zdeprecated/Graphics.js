@@ -1,7 +1,6 @@
 import * as THREE from "three";
-import { GameState } from "./GameState.js";
-import { SolLoading } from "./SolLoading.js";
-import { Animations } from "./Animations.js";
+import { GameState } from "../common/core/GameState.js";
+import { SolLoading } from "../client/core/SolLoading.js";
 
 export class Graphics {
     /**

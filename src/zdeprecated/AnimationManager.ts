@@ -1,6 +1,4 @@
 import * as THREE from 'three';
-import MyEventEmitter from '@solblade/common/core/GlobalEventEmitter.js';
-import Pawn from '@solblade/common/actors/Pawn.js';
 
 export default class AnimationManager {
     pawn: any;
@@ -11,8 +9,6 @@ export default class AnimationManager {
     currentAnimation: string | null = null;
     _onFinishedListener: any;
     quedAnim: any;
-    setAnimState = this.playAnimation;
-    hitFreeze = this.changeTimeScale;
 
     constructor(pawn: any, model: THREE.Object3D, animations: THREE.AnimationClip[]) {
         this.pawn = pawn;
@@ -25,6 +21,9 @@ export default class AnimationManager {
             this.animations[clip.name] = clip;
         });
         this.playAnimation('idle');
+    }
+    addAnimations(model: THREE.Object3D, anims: THREE.AnimationClip[]){
+        
     }
 
     destroy() {
@@ -68,8 +67,6 @@ export default class AnimationManager {
                 this.quedAnim = setTimeout(listener, clipDuration);
             }
 
-            if (!this.pawn.isRemote) MyEventEmitter.emit('playAnimation', { name, loop });
-
             return clip;
         } else {
             console.warn(`Animation ${name} not found.`);
@@ -98,7 +95,6 @@ export default class AnimationManager {
                 this.mixer.timeScale = 1;
             }, duration);
         }
-        if (!this.pawn.isRemote) MyEventEmitter.emit('changeAnimation', { scale, duration });
     }
     clearTimeScale() {
         if (this.timeScaleTimer) {

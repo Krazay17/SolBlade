@@ -1,9 +1,8 @@
 import CPawn from "./CPawn.js";
-import PlayerMovement from "./components/PlayerMovement.js";
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { Group, PerspectiveCamera, Vector3 } from "three";
-import { Actions } from "../input/Actions.js";
-import { CGame } from "@solblade/common/core/CGame.js";
+import { ACTIONS } from "../config/Actions.js";
+import { CGame } from "@solblade/client/core/CGame.js";
 import { Movement } from "@solblade/common/actors/components/Movement.js";
 
 export default class CPlayer extends CPawn {
@@ -43,7 +42,6 @@ export default class CPlayer extends CPawn {
     }
     setWorld(world) {
         this.world = world;
-        this.makeBody(this.world.physics.world);
         this.movement.body = this.body;
     }
     look(yaw, pitch) {
@@ -56,7 +54,7 @@ export default class CPlayer extends CPawn {
     }
     tick(dt) {
         super.tick(dt);
-        if (this.controller.actionStates[Actions.DEVFLY]) {
+        if (this.controller.actionStates[ACTIONS.DEVFLY]) {
             if (this.body) {
                 this.body.setTranslation(this.vecPos.add(this.getAim().dir), true);
                 this.body.setLinvel({ x: 0, y: 0, z: 0 }, true);

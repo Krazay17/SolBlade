@@ -33,7 +33,6 @@ export default class AIController extends Controller {
         const players = this.world.players
         if (!players) return {};
 
-
         // get this enemy's position
         const pos = this.pawn.vecPos
 

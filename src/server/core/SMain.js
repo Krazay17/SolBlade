@@ -5,6 +5,7 @@ import RAPIER from "@dimforge/rapier3d-compat";
 import 'dotenv/config';
 import { SGame } from "./SGame.js";
 
+await RAPIER.init();
 
 const SERVER_VERSION = 1.14;
 const server = http.createServer();
@@ -21,7 +22,6 @@ async function init() {
         pingTimeout: 10000,
         cleanupEmptyChildNamespaces: true,
     });
-    await RAPIER.init();
     const game = new SGame(io);
     await game.start();
 }

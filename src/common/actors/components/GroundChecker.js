@@ -12,10 +12,10 @@ export default class GroundChecker {
 
         this.tempVec = new Vector3();
         this.downVec = { x: 0, y: -1, z: 0 };
-        this.ball = new RAPIER.Ball(this.pawn.radius);
+        this.ball = new RAPIER.Ball(this.pawn.radius * 1.4);
 
     }
-    isGrounded(slope = -0.7) {
+    isGrounded(slope = -0.6) {
         this.tempVec.set(0, 0, 0)
         const normal = this.getFloor()?.normal2;
         if (normal) this.tempVec.copy(normal);

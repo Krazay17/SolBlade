@@ -1,21 +1,25 @@
 import { setupKeybindWindow, addButton } from "../ui/KeyUI.js";
 import MyEventEmitter from "@solblade/common/core/GlobalEventEmitter.js"
-import { Actions } from "./Actions.js";
+import { ACTIONS, defaultBinds } from "../config/Actions.js";
 import { rotateInputAroundYaw } from "../../common/utils/Utils.js";
 import { Vector3 } from "three";
 import Controller from "@solblade/common/actors/components/Controller.js";
 
-export default class UserInput extends Controller {
+
+export class UserInput extends Controller {
   constructor(gameElement) {
     super();
     this.gameElement = gameElement;
 
-    this.pointerLocked = false;
     this.sensitivity = 0.0016;
-    this.testFunction = () => {
-      console.log('Test function called');
-    };
+    this.actionKeys = defaultBinds;
 
+    this.actionStates = {};
+    for (const key in ACTIONS) {
+      this.actionStates[ACTIONS[key]] = false;
+    }
+
+    this.pointerLocked = false;
     this.yaw = 0
     this.pitch = 0;
     this.direction = new Vector3();
@@ -24,27 +28,11 @@ export default class UserInput extends Controller {
     this.look = null;
     this.lockMouse = false;
     this.inputBlocked = false;
-    this.actionKeys = {
-      '0': Actions.ATTACK_LEFT,
-      '2': Actions.ATTACK_RIGHT,
-      'KeyW': Actions.FWD,
-      'KeyS': Actions.BWD,
-      'KeyA': Actions.LEFT,
-      'KeyD': Actions.RIGHT,
-      'Space': Actions.JUMP,
-      'ShiftLeft': Actions.DASH,
-      'KeyC': Actions.INVENTORY,
-      'KeyT': Actions.HOME,
-      'Digit1': Actions.SPELL_1,
-      'Digit2': Actions.SPELL_2,
-      'Digit3': Actions.SPELL_3,
-      'Digit4': Actions.SPELL_4,
-      'KeyF': Actions.DEVFLY,
+
+    this.testFunction = () => {
+      console.log('Test function called');
     };
-    this.actionStates = {};
-    for (const key in Actions) {
-      this.actionStates[Actions[key]] = false;
-    }
+
 
     document.addEventListener('pointerlockchange', () => {
       this.pointerLocked = (document.pointerLockElement === this.gameElement);
@@ -133,10 +121,10 @@ export default class UserInput extends Controller {
   }
   inputDirection() {
     let x = 0, z = 0;
-    if (this.actionStates[Actions['FWD']]) z -= 1;
-    if (this.actionStates[Actions['BWD']]) z += 1;
-    if (this.actionStates[Actions['LEFT']]) x -= 1;
-    if (this.actionStates[Actions['RIGHT']]) x += 1;
+    if (this.actionStates[ACTIONS['FWD']]) z -= 1;
+    if (this.actionStates[ACTIONS['BWD']]) z += 1;
+    if (this.actionStates[ACTIONS['LEFT']]) x -= 1;
+    if (this.actionStates[ACTIONS['RIGHT']]) x += 1;
 
     if (x === 0 && z === 0) return false;
 

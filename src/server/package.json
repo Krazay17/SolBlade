@@ -3,7 +3,7 @@
     "name": "@solblade/server",
     "scripts": {
         "start": "node ./core/SMain.js",
-        "dev": "nodemon ./core/SMain.js"
+        "dev": "nodemon -e ts,js,json --exec tsx ./core/SMain.js"
     },
     "dependencies": {
         "@dimforge/rapier3d-compat": "^0.19.2",

@@ -1,7 +1,17 @@
-import { SkeletonUtils } from "three/examples/jsm/Addons";
+import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/Addons.js";
+import { SkeletonUtils } from "three/examples/jsm/Addons";
 
-export default class MeshManager {
+class LoadingBar {
+    update(url, loaded, total) {
+        //console.log(url, loaded, total);
+    }
+    finish() {
+        //console.log("Finish Load!");
+    }
+}
+
+class MeshManager {
     /**
      * 
      * @param {GLTFLoader} glbLoader 
@@ -26,5 +36,15 @@ export default class MeshManager {
             animations: loadedMesh.animations
         };
         return result;
+    }
+}
+
+export class SolLoading {
+    constructor() {
+        this.loadingBar = new LoadingBar();
+        this.manager = new THREE.LoadingManager(this.loadingBar.finish, this.loadingBar.update)
+        this.glLoader = new GLTFLoader(this.manager)
+        this.textureLoader = new THREE.TextureLoader(this.manager);
+        this.meshManager = new MeshManager(this.glLoader)
     }
 }

@@ -1,9 +1,8 @@
 import { Scene } from "three";
-import { SolLoading } from "./SolLoading.js";
-import SolWorld from "./SolWorld.js";
+import { SolLoading } from "@solblade/client/core/SolLoading.js"
+import SolWorld from "@solblade/common/core/SolWorld.js";
 import SkyBox from "./SkyBox.js";
 import { CActor } from "@solblade/client/actors/CActor.js";
-import AnimationManager from "@solblade/client/actors/components/AnimationManager.js";
 
 export class CWorld extends SolWorld {
     /**@type {Map<string, CActor>} */
@@ -38,29 +37,11 @@ export class CWorld extends SolWorld {
         if (!map) return;
         this.add(map.scene);
     }
-    /**@param {CActor}actor */
-    async onNewActor(actor) {
-        const { mesh, animations } = await this.loader.meshManager.makeMesh('Wizard');
-        if (!mesh) return;
-        //@ts-ignore
-        actor.mesh = mesh;
-        //@ts-ignore
-        actor.animation = new AnimationManager(actor, mesh, animations);
-        //@ts-ignore
-        actor.graphics.add(mesh);
-        this.add(actor.graphics);
-    }
-    async newActor(data) {
-        const { id, } = data;
-        const actor = new CActor(data);
-        this.actors.set(id, actor);
-        if (this.onNewActor) this.onNewActor(actor)
-    }
     tick(dt) {
-        this.skyBox.tick(dt);
         this.actors.forEach((a) => {
             a.tick?.(dt);
-        })
+        });
+        this.skyBox.tick(dt);
     }
     exit() {
         this.physics.remove();

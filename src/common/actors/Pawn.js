@@ -5,7 +5,6 @@ import { COLLISION_GROUPS } from "../config/SolConstants.js";
 import Controller from "./components/Controller.js";
 import { Vect3 } from "../utils/SolMath.js"
 import SolWorld from "../core/SolWorld.js";
-import AnimationManager from "@solblade/client/actors/components/AnimationManager.js";
 import { Movement } from "./components/Movement.js";
 
 export default class Pawn extends Actor {
@@ -25,7 +24,6 @@ export default class Pawn extends Actor {
         this.controller = null;
         /**@type {Movement} */
         this.movement = null;
-        /**@type {AnimationManager} */
         this.animation = null;
         this.fsm = null;
         this.abilities = null;
@@ -89,30 +87,6 @@ export default class Pawn extends Actor {
         if (!this._vecDir) this._vecDir = new Vect3();
 
         return this._vecDir.setFromRotArray(this.rot);
-    }
-    /**@param {RAPIER.World} world */
-    makeBody(world, height = this.height, radius = this.radius) {
-        const collideGroup = this.isRemote
-            ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD)
-            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.WORLD);
-        const bDesc = RAPIER.RigidBodyDesc.dynamic();
-        bDesc.setTranslation(this.pos[0], this.pos[1], this.pos[2]);
-        bDesc.lockRotations();
-        bDesc.setLinearDamping(0);
-        bDesc.setAngularDamping(0);
-        const cDesc = RAPIER.ColliderDesc.capsule(height, radius);
-        cDesc.setCollisionGroups(collideGroup);
-        cDesc.setFriction(0);
-        cDesc.setRestitution(0);
-
-        this.body = world.createRigidBody(bDesc)
-        this.collider = world.createCollider(cDesc, this.body);
-    }
-    /**@param {RAPIER.World} world */
-    removeBody(world) {
-        world.removeRigidBody(this.body);
-        this.body = null;
-        this.collider = null;
     }
     tick(dt) {
         if (!this.active) return;

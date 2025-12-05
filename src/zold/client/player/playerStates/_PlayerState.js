@@ -1,5 +1,5 @@
 import { Vector3 } from 'three';
-import PlayerMovement from '../../../../client/actors/components/PlayerMovement';
+import PlayerMovement from '../../../../zdeprecated/PlayerMovement';
 import Player from '../Player';
 import PlayerStateManager from './PlayerStateManager';
 import PawnBody from '../../core/PawnCapsule';

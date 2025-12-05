@@ -1,4 +1,5 @@
 import Actor from "../actors/Actor.js";
+import { spawnActor } from "./ActorFactory.js";
 import { Physics } from "./Physics.js";
 
 export default class SolWorld {
@@ -14,6 +15,7 @@ export default class SolWorld {
         this.name = name;
 
         this.localPlayer = null;
+        this.loader = null;
         this.physics = new Physics();
     }
     async start() { }
@@ -44,20 +46,6 @@ export default class SolWorld {
             }
         }
     }
-    async newActor(data) {
-        const { id, type } = data;
-        const registry = await import("@solblade/server/core/ServerRegistry.js");
-        const aclass = registry.serverActors[type];
-        let actor;
-        if (aclass) {
-            actor = new aclass(this, { id, ...data });
-        } else {
-            actor = new Actor({ id, ...data });
-        }
-        this.actors.set(id, actor);
-        actor.makeBody(this.physics.world);
-        if (this.onNewActor) this.onNewActor(actor)
-    }
-    onNewActor(actor) { }
+    newActor(data) { }
     exit() { }
 }

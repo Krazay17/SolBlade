@@ -1,9 +1,9 @@
-import MomentumBoost from "@solblade/client/actors/components/MomentumBoost";
 import Pawn from "../Pawn";
 import GroundChecker from "./GroundChecker";
 import { RigidBody } from "@dimforge/rapier3d-compat";
 import { Vector3 } from "three";
 import { projectOnPlane } from "@solblade/common/utils/Utils";
+import { Momentum } from "./Momentum";
 
 export class Movement {
     /**
@@ -15,7 +15,7 @@ export class Movement {
         /**@type {RigidBody} */
         this.body = pawn.body;
         this.world = world;
-        this.momentum = new MomentumBoost();
+        this.momentum = new Momentum();
         this.groundChecker = new GroundChecker(pawn)
 
         this.tempVec = new Vector3()

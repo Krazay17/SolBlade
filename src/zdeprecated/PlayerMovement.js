@@ -1,8 +1,8 @@
 import { Vector3 } from "three";
 import { projectOnPlane, clampVector } from "@solblade/common/utils/Utils.js";
-import RunBoost from "./MomentumBoost.js";
+import RunBoost from "@solblade/common/actors/components/Momentum.js";
 import GroundChecker from "./GroundChecker.js";
-import CPlayer from "../CPlayer.js";
+import CPlayer from "@solblade/client/actors/CPlayer.js";
 
 export default class PlayerMovement {
     /**
