@@ -1,22 +1,43 @@
-import Pawn from "../Pawn";
 import GroundChecker from "./GroundChecker";
 import { RigidBody } from "@dimforge/rapier3d-compat";
-import { Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
 import { projectOnPlane } from "@solblade/common/utils/Utils";
 import { Momentum } from "./Momentum";
+import Actor from "../Actor";
+
+interface movementStateData {
+    idle: movementData,
+    ground: movementData,
+    air: movementData,
+    blade: movementData
+}
+interface movementData {
+    friction: number,
+    accel: number,
+    max: number,
+}
 
 export class Movement {
-    /**
-     * 
-     * @param {Pawn} pawn 
-     */
-    constructor(pawn, world) {
-        this.pawn = pawn;
+    owner: Actor;
+    body: RigidBody;
+    momentum: Momentum;
+    groundChecker: GroundChecker;
+    tempVec: Vector3;
+    tempVec1: Vector3;
+    tempVec2: Vector3;
+    speeds: movementStateData;
+    _vecPos: Vector3;
+    _quatRot: Quaternion;
+    _vecVel: Vector3;
+    _vecDir: Vector3;
+    _yaw: number;
+    upVec = new Vector3(0,1,0);
+    constructor(owner) {
+        this.owner = owner;
         /**@type {RigidBody} */
-        this.body = pawn.body;
-        this.world = world;
+        this.body = owner.body;
         this.momentum = new Momentum();
-        this.groundChecker = new GroundChecker(pawn)
+        this.groundChecker = new GroundChecker(owner)
 
         this.tempVec = new Vector3()
         this.tempVec1 = new Vector3()
@@ -25,6 +46,8 @@ export class Movement {
         this.speeds = {
             idle: {
                 friction: 25,
+                accel: 0,
+                max: 0,
             },
             ground: {
                 friction: 15,
@@ -43,9 +66,64 @@ export class Movement {
             }
         }
     }
+
+    get vecPos() {
+        if (!this._vecPos) this._vecPos = new Vector3();
+        return this._vecPos.copy(this.body.translation());
+    }
+    set vecPos(v) {
+        if (!this._vecPos) this._vecPos = new Vector3();
+        this._vecPos.copy(v);
+        this.owner.pos[0] = v.x;
+        this.owner.pos[1] = v.y;
+        this.owner.pos[2] = v.z;
+    }
+    get quatRot() {
+        if (!this._quatRot) this._quatRot = new Quaternion();
+        return this._quatRot.copy(this.body.rotation());
+    }
+    set quatRot(v) {
+        if (!this._quatRot) this._quatRot = new Quaternion();
+        this._quatRot.copy(v);
+        this.owner.rot[0] = v.x;
+        this.owner.rot[1] = v.y;
+        this.owner.rot[2] = v.z;
+        this.owner.rot[3] = v.w;
+    }
+    get yaw() { return this._yaw }
+    set yaw(v) {
+        this._yaw = v;
+        this.quatRot = this.quatRot.setFromAxisAngle(this.upVec, v)
+        console.log(this._yaw)
+
+        if (!this.body) return;
+        this.body.setRotation(this._quatRot, true);
+    }
     get velocity() {
-        if (!this.body) return this.tempVec
-        return this.tempVec.copy(this.body.linvel())
+        if (!this._vecVel) this._vecVel = new Vector3();
+
+        if (!this.body) return;
+        return this._vecVel.copy(this.body.linvel());
+    }
+    set velocity(v) {
+        if (!this._vecVel) this._vecVel = new Vector3();
+        this._vecVel.copy(v);
+
+        if (!this.body) return;
+        this.body.setLinvel(this._vecVel, true);
+    }
+    set latVel(v) {
+        if (!this._vecVel) this._vecVel = new Vector3();
+        this._vecVel.copy(v);
+
+        if (!this.body) return;
+        const { x, y, z } = this.body.linvel();
+        this.body.setLinvel({ x: v.x, y, z: v.z }, true);
+    }
+    get vecDir() {
+        if (!this._vecDir) this._vecDir = new Vector3();
+
+        return this._vecDir.applyQuaternion(this.body.rotation());
     }
     get latVel() {
         if (!this.body) return this.tempVec;
@@ -54,14 +132,10 @@ export class Movement {
         return this.tempVec.copy(v);
     }
     get isGrounded() { return this.groundChecker.isGrounded() }
-    set velocity(v) {
-        if (!this.body) return;
-        this.body.setLinvel(v, true);
-    }
     update(dt) {
         this.momentum.update(dt, this.velocity);
     }
-    smartMove(dt, dir) {
+    smartMove(dt, dir = this.vecDir) {
         if (this.groundChecker.isGrounded()) {
             if (dir) {
                 this.groundMove(dt, dir);
@@ -71,6 +145,10 @@ export class Movement {
         } else {
             this.airMove(dt, dir);
         }
+    }
+    devFly(dir) {
+        this.body.setTranslation(this.vecPos.add(dir), true);
+        this.body.setLinvel(dir, true);
     }
     idleMove(dt) {
         this.friction(dt, this.speeds.idle.friction);

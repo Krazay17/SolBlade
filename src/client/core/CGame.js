@@ -1,4 +1,4 @@
-import CPlayer from "@solblade/client/actors/CPlayer.js";
+import CPlayer from "@solblade/client/actors/player/CPlayer.js";
 import { UserInput } from "@solblade/client/core/UserInput.js";
 import { NET } from "@solblade/common/net/NetProtocol.js";
 import { CWorld } from "../world/CWorld.js";
@@ -29,19 +29,16 @@ export class CGame {
         }
 
         this.player = new CPlayer(this);
-        this.player.init();
-        this.player.pos = [0, 55, 0];
 
         window.addEventListener('keydown', (e) => {
             if (e.code !== "KeyE") return;
             console.time("test");
             this.socket.emit(NET.CLIENT.TEST);
         })
-
-        this.start();
     }
     async start() {
         await this.newWorld(solSave.worldName);
+        await this.player.init();
     }
     getActorById(id) {
         this.world.actors.get(id);
@@ -54,7 +51,7 @@ export class CGame {
                 this.socket.on(p, h.bind(this));
             } else console.warn(`No function ${p}`);
         }
-        this.socket.emit(NET.CLIENT.JOIN, this.player.serialize());
+        this.socket.emit(NET.CLIENT.JOIN, { id: '1', pos: [0, 1, 0] });
     }
     async newWorld(name) {
         const world = this.worldRegistry[name];

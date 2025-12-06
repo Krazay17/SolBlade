@@ -5,7 +5,7 @@
     "baseUrl": "./src",
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "strict": false, // disables all strict type checks
     "noImplicitAny": false, // allows variables without a type annotation
     "strictPropertyInitialization": false, // allows uninitialized class properties

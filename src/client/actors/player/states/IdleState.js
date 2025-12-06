@@ -1,4 +1,4 @@
-import State from "./State.js";
+import State from "./_PlayerState";
 
 export default class IdleState extends State {
     enter(state, params) {
@@ -27,6 +27,7 @@ export default class IdleState extends State {
         this.animation?.playAnimation('idle', true);
     }
     update(dt) {
+        console.log(this.fsm);
         if (!this.movement?.isGrounded) return this.fsm.setState('fall');
         if (this.controller.inputDirection()) return this.fsm.setState('run');
         this.movement.idleMove(dt);

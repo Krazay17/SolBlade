@@ -23,7 +23,7 @@ class MeshManager {
     async makeMesh(name) {
         let loadedMesh = this.loadedMesh.get(name);
         if (!loadedMesh) {
-            const gltf = await this.loader.loadAsync(`assets/${name}.glb`)
+            const gltf = await this.loader.loadAsync(`/assets/${name}.glb`)
             gltf.scene.position.set(0, -1, 0);
             loadedMesh = {
                 mesh: gltf.scene,

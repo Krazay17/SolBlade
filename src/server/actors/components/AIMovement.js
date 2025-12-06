@@ -1,16 +1,15 @@
 import SolWorld from "@solblade/common/core/SolWorld.js";
-import Pawn from "../Pawn.js";
-import GroundChecker from "./GroundChecker.js";
+import GroundChecker from "@solblade/common/actors/components/GroundChecker.js";
+import { SActor } from "../SActor";
 
 export default class AIMovement {
     /**
      * @param {SolWorld} world
-     * @param {Pawn} pawn 
+     * @param {SActor} owner
      */
-    constructor(world, pawn) {
-        this.world = world;
-        this.pawn = pawn;
-        this.groundChecker = new GroundChecker(this.world, this.pawn);
+    constructor(owner) {
+        this.owner = owner;
+        this.groundChecker = new GroundChecker(this.owner);
         //this.isGrounded = true;
     }
     get isGrounded(){return this.groundChecker.isGrounded()}
@@ -23,12 +22,12 @@ export default class AIMovement {
         }
     }
     groundMove(dt, dir) {
-        this.pawn.velocity = dir;
+        this.owner.velocity = dir;
     }
     airMove(dt, dir) {
-        this.pawn.latVel = dir;
+        this.owner.latVel = dir;
     }
     idleMove(dt){
-        this.pawn.velocity = this.pawn.velocity.multiplyScalar(.9);
+        this.owner.velocity = this.owner.velocity.multiplyScalar(.9);
     }
 }

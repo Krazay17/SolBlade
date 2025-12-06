@@ -2,7 +2,7 @@ import { Scene } from "three";
 import { SolLoading } from "@solblade/client/core/SolLoading.js"
 import SolWorld from "@solblade/common/core/SolWorld.js";
 import SkyBox from "./SkyBox.js";
-import { CActor } from "@solblade/client/actors/CActor.js";
+import { CActor } from "@solblade/client/actors/CActor";
 
 export class CWorld extends SolWorld {
     /**@type {Map<string, CActor>} */

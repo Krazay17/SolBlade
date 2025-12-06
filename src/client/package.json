@@ -1,4 +1,9 @@
 {
+    "name": "@solblade/client",
     "type": "module",
-    "name": "@solblade/client"
+    "dependencies": {
+        "@solblade/common": "file: ../common",
+        "@solblade/server": "file: ../server",
+        "@solblade/client": "file: ./"
+    }
 }

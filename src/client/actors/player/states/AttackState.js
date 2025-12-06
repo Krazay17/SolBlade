@@ -1,4 +1,4 @@
-import State from "./State.js";
+import State from "./_PlayerState";
 
 export default class AttackState extends State {
     enter(state, params = {}) {

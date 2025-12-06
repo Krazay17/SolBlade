@@ -1,6 +1,6 @@
 {
-    "type": "module",
     "name": "@solblade/server",
+    "type": "module",
     "scripts": {
         "start": "node ./core/SMain.js",
         "dev": "nodemon -e ts,js,json --exec tsx ./core/SMain.js"

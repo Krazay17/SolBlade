@@ -1,18 +1,17 @@
 import SolWorld from "@solblade/common/core/SolWorld.js";
-import Controller from "./Controller.js";
-import Pawn from "../Pawn.js";
+import Controller from "@solblade/common/actors/components/Controller.js";
+import { SActor } from "../SActor.js";
 
 export default class AIController extends Controller {
     /**
      * 
      * @param {SolWorld} world 
-     * @param {Pawn} pawn 
+     * @param {SActor} owner
      * @param {*} data 
      */
-    constructor(world, pawn, data = {}) {
+    constructor(owner, data = {}) {
         super();
-        this.world = world;
-        this.pawn = pawn;
+        this.owner = owner;
         const {
             aggroRadius = 20
         } = data;
@@ -23,18 +22,18 @@ export default class AIController extends Controller {
     update(dt) {
         this.blackboard = this.findNearestPlayer();
         if (!this.blackboard.player) {
-            this.pawn.fsm.setState('patrol');
+            this.owner.fsm.setState('patrol');
         }
     }
     inputDirection() {
         return this.blackboard.dir;
     }
     findNearestPlayer() {
-        const players = this.world.players
+        const players = this.owner.world.players
         if (!players) return {};
 
         // get this enemy's position
-        const pos = this.pawn.vecPos
+        const pos = this.owner.vecPos
 
         // find nearest player
         let nearest = null;

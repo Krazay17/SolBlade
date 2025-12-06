@@ -1,3 +1,3 @@
-export * from "../../common/config/SolConstants.js"
+export * from "@solblade/common/data/SolConstants.js"
 export * from "./Utils.js";
 export * from "./Item.js";

@@ -1,7 +1,7 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { UserInput } from "@solblade/client/core/UserInput.js";
 import { io, WebSocket } from "socket.io-client";
-import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js";
+import { SOL_PHYSICS_SETTINGS } from "@solblade/common/data/SolConstants.js";
 import { LocalServerTransport } from "@solblade/common/net/LocalServerTransport.js";
 import { LocalTransport } from "@solblade/common/net/LocalTransport.js";
 import { CGame } from "./CGame.js";
@@ -39,10 +39,7 @@ class App {
         this.renderer = new SolRender(this.canvas);
         this.input = new UserInput(this.canvas);
         this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader);
-
         this.setupBindings();
-
-        this.start();
     }
 
     async start() {
@@ -51,12 +48,12 @@ class App {
         } catch {
             if (this.socket) this.socket.close();
             const serverSocket = new LocalServerTransport();
-            this.socket = new LocalTransport(serverSocket);
-            serverSocket.client = this.socket;
+            this.socket = new LocalTransport();
 
             const { SGame } = await import("@solblade/server/core/SGame.js");
             this.localServer = new SGame(serverSocket);
-            await this.localServer.start(false);
+
+            await this.localServer.start(false, this.socket);
         }
         await this.game.start();
         this.game.netBinds(this.socket);
@@ -116,4 +113,6 @@ class App {
         });
     }
 }
-new App();
+
+const app = new App();
+await app.start();

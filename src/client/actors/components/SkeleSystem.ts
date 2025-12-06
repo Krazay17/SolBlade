@@ -1,10 +1,7 @@
 import type { AnimationClip } from "three";
 import * as THREE from "three";
-import type { SolLoading } from "../../core/SolLoading.js";
-import type { CActor } from "../CActor.js";
 
 export class SkeleSystem {
-    owner: CActor
     mesh = null;
     mixer: THREE.AnimationMixer | null = null;
     currentAction: THREE.AnimationAction | null = null
@@ -12,16 +9,12 @@ export class SkeleSystem {
     animations: Record<string, AnimationClip> = {};
     _onFinishedListener: any;
     quedAnim: any;
-    constructor(owner: CActor) {
-        this.owner = owner;
-    }
-    async addSkele(loader: SolLoading, name: string) {
-        const { mesh, animations } = await loader.meshManager.makeMesh(name);
+    
+    async addSkele(mesh: THREE.Object3D, animations: THREE.AnimationClip[]) {
         this.mesh = mesh;
         animations.forEach((clip: AnimationClip) => {
             this.animations[clip.name] = clip;
         });
-
     }
     playAnimation(name: string, loop: boolean = true, force: boolean = false, onFinished: any = null, rate = 1) {
         const clip = this.animations[name];

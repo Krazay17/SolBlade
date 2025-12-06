@@ -1,5 +1,5 @@
 import RAPIER from "@dimforge/rapier3d-compat";
-import { COLLISION_GROUPS, SOL_PHYSICS_SETTINGS } from "../config/SolConstants.js";
+import { COLLISION_GROUPS, SOL_PHYSICS_SETTINGS } from "../data/SolConstants.js";
 
 export class Physics {
     constructor() {
@@ -26,7 +26,7 @@ export class Physics {
             this.world.createCollider(desc);
         }
     }
-    makeCapsule(world = this.world, height = 1, radius = 0.5, isRemote = false) {
+    makeCapsule(height = 1, radius = 0.5, isRemote = false) {
         const collideGroup = isRemote
             ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD)
             : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY);
@@ -39,12 +39,13 @@ export class Physics {
         cDesc.setFriction(0);
         cDesc.setRestitution(0);
 
-        const body = world.createRigidBody(bDesc)
-        const collider = world.createCollider(cDesc, body);
+        const body = this.world.createRigidBody(bDesc)
+        const collider = this.world.createCollider(cDesc, body);
 
         return { body, collider };
     }
 }
+
 function colliderFromJson(data) {
     const colliders = [];
     for (const obj of data) {

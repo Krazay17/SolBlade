@@ -1,17 +1,23 @@
 export class LocalTransport {
     constructor(server) {
-        this.server = server;
-        this.handlers = new Map();
+        this.id = "1";
+        this.server = server;        // LocalServerTransport
+        this.handlers = new Map();   // event => [handlers]
     }
+
     on(event, handler) {
-        this.handlers.set(event, handler);
+        if (!this.handlers.has(event)) this.handlers.set(event, []);
+        this.handlers.get(event).push(handler);
     }
+
     emit(event, data) {
         if (this.server) this.server._recv(event, data);
     }
+
     _recv(event, data) {
-        const h = this.handlers.get(event);
-        if (h) h(data);
+        const handlers = this.handlers.get(event);
+        if (handlers) handlers.forEach(h => h(data));
     }
-    close() { }
+
+    close() {}
 }

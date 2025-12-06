@@ -1,7 +1,7 @@
 import { CActor } from "@solblade/client/actors/CActor";
 import { RActor } from "@solblade/client/actors/RActor";
-import { SActor } from "../actors/SActor";
-import { actorType } from "../actors/TypeData";
+import { SActor } from "@solblade/server/actors/SActor";
+import { actorType } from "../data/ActorData";
 
 export function spawnActor(world, type, role) {
     const typeData = actorType[type];

@@ -1,4 +1,4 @@
-import { SOL_PHYSICS_SETTINGS } from "@solblade/common/config/SolConstants.js"
+import { SOL_PHYSICS_SETTINGS } from "@solblade/common/data/SolConstants.js"
 import { NET } from "@solblade/common/net/NetProtocol.js"
 import { SWorld } from "../world/SWorld.js"
 import { LocalServerTransport } from "@solblade/common/net/LocalServerTransport.js";
@@ -14,6 +14,7 @@ export class SGame {
      */
     constructor(io) {
         this.io = io;
+        this.sockets = {};
 
         this.lastTime = 0;
         this.accumulator = 0;
@@ -25,28 +26,33 @@ export class SGame {
             //world2: new SWorld("world2")
         }
     }
-    async start(loop = true) {
-        this.bindEvents();
+    async start(loop = true, localSocket) {
+        this.bindEvents(localSocket);
         for (const world of Object.values(this.worlds)) {
-            world.start();
+            await world.start();
         }
         if (loop) this.loop();
     }
-    bindEvents() {
-        for (const p of Object.values(NET.CLIENT)) {
-            const f = this[p];
-            if (typeof f === "function") {
-                if (this.io) this.io.on(p, f.bind(this));
-            } else {
-                console.warn(`No function ${p}`);
+    bindEvents(localSocket) {
+        const connection = (socket) => {
+            const newSocket = this.sockets[socket.id] = socket;
+            for (const p of Object.values(NET.CLIENT)) {
+                const f = this[p];
+                if (typeof f === "function") {
+                    if (newSocket) newSocket.on(p, f.bind(this));
+                } else {
+                    console.warn(`No function ${p}`);
+                }
             }
         }
+        if (localSocket) connection(localSocket);
+        this.io.on("connection", connection);
     }
     join(data) {
-        const { id, worldName } = data;
-        this.worlds[worldName].addPlayer(id, data);
-        //this.io.emit(NET.SERVER.WELCOME, "welcome!");
-        this.io.broadcast(NET.SERVER.WELCOME, "welcome!");
+        console.log('sjoin')
+        // const { id, worldName } = data;
+        // this.worlds[worldName].addPlayer(id, data);
+        this.io.emit(NET.SERVER.WELCOME, "welcome!");
     }
     serverTest(cb) {
         //if (cb) cb(NET.SERVER.TEST);

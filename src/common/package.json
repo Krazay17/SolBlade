@@ -1,6 +1,6 @@
 {
-    "type": "module",
     "name": "@solblade/common",
+    "type": "module",
     "dependencies": {
         "@dimforge/rapier3d-compat": "^0.19.2",
         "socket.io": "^4.8.1",

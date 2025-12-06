@@ -1,34 +1,42 @@
 export class LocalServerTransport {
     constructor() {
-        this.handlers = new Map();
-        this.client = null;
+        this.handlers = new Map();  // event => [handlers]
+        this.clients = new Set();   // can be multiple clients
     }
 
     on(event, handler) {
-        this.handlers.set(event, handler);
+        if (!this.handlers.has(event)) this.handlers.set(event, []);
+        this.handlers.get(event).push(handler);
     }
 
     emit(event, data) {
-        if (this.client) this.client._recv(event, data);
+        // Send to all clients
+        this.clients.forEach(client => client._recv(event, data));
     }
 
-    sendTo(clientId, event, data) {
-        this.emit(event, data);
+    sendTo(client, event, data) {
+        client._recv(event, data);
     }
 
-    broadcast(event, data) {
-        this.emit(event, data);
+    addClient(client) {
+        this.clients.add(client);
+        client.server = this;
     }
-    to(id) {
-        return {
-            emit: (event, data) => {
-                this.emit(event, data);
-            }
-        }
+
+    removeClient(client) {
+        this.clients.delete(client);
+        client.server = null;
     }
+
     _recv(event, data) {
-        const h = this.handlers.get(event);
-        if (h) h(data);
+        const handlers = this.handlers.get(event);
+        if (handlers) handlers.forEach(h => h(data));
     }
-    close(){}
+
+    to(id) {
+        const client = [...this.clients].find(c => c.id === id);
+        return { emit: (event, data) => client._recv(event, data) };
+    }
+
+    close() { }
 }
