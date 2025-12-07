@@ -1,18 +1,17 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { Vector3 } from "three";
-import Actor from "../Actor.js";
+import { Movement } from "./Movement.js";
 
 export default class GroundChecker {
-    /**
-     * 
-     * @param {Actor} owner 
-     */
-    constructor(owner) {
-        this.owner = owner;
+    movement: Movement;
+    tempVec = new Vector3();
+    downVec = new Vector3(0, -1, 0);
+    ball: RAPIER.Ball;
 
+    constructor(movement: Movement, radius) {
+        this.movement = movement
         this.tempVec = new Vector3();
-        this.downVec = { x: 0, y: -1, z: 0 };
-        this.ball = new RAPIER.Ball(this.owner.radius * 1.4);
+        this.ball = new RAPIER.Ball(radius * 1.4);
 
     }
     isGrounded(slope = -0.6) {
@@ -28,10 +27,9 @@ export default class GroundChecker {
         return this.tempVec;
     }
     getFloor() {
-        if (!this.owner.world) return;
-        return;
-        const result = this.owner.world.physics.world.castShape(
-            this.owner.vecPos,
+        if (!this.movement.world.physics.world) return;
+        const result = this.movement.world.physics.world.castShape(
+            this.movement.vecPos,
             { x: 0, y: 0, z: 0, w: 1 },
             this.downVec,
             this.ball,
@@ -40,8 +38,8 @@ export default class GroundChecker {
             true,
             undefined,
             undefined,
-            this.owner.collider,
-            this.owner.body
+            this.movement.owner.collider,
+            this.movement.owner.body
         )
 
         return result;

@@ -9,8 +9,11 @@ export class SkeleSystem {
     animations: Record<string, AnimationClip> = {};
     _onFinishedListener: any;
     quedAnim: any;
-    
+    update(dt){
+        if(this.mixer)this.mixer.update(dt);
+    }
     async addSkele(mesh: THREE.Object3D, animations: THREE.AnimationClip[]) {
+        this.mixer = new THREE.AnimationMixer(mesh);
         this.mesh = mesh;
         animations.forEach((clip: AnimationClip) => {
             this.animations[clip.name] = clip;
@@ -58,4 +61,5 @@ export class SkeleSystem {
             return false;
         }
     }
+    changeTimeScale(scale: number){}
 }

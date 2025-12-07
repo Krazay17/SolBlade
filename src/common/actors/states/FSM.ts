@@ -1,22 +1,24 @@
 import IdleState from "@solblade/server/actors/states/IdleState";
 import PatrolState from "@solblade/server/actors/states/PatrolState";
+import { Pawn } from "../../core/Interfaces";
+import State from "./State";
 
 const stateRegistry = {
     idle: IdleState,
     patrol: PatrolState
 }
 
-export default class FSM {
-    constructor(owner, states = {}) {
+export default class FSM<T extends Pawn> {
+    owner: T
+    states: Record<string, any> = {};
+    state: any | null = null;
+    stateName: string;
+    constructor(owner: T, states: Record<string, any> = {}) {
         this.owner = owner;
-
-        this.states = {
-            idle: new stateRegistry['idle'](this, this.owner),
-        };
-        for (const [name, stateClass] of Object.entries(states)){
+        for (const [name, stateClass] of Object.entries(states)) {
             this.states[name] = new stateClass(this, owner);
         }
-        this.state = this.states['idle'];
+        if (this.states['idle']) this.state = this.states['idle'];
         this.stateName = 'idle';
     }
     addStates(states = []) {
@@ -28,6 +30,7 @@ export default class FSM {
     }
     setState(state, params) {
         const lastState = this.stateName;
+        console.log(state, lastState)
         if (state === lastState && !this.state.canReEnter) return false
         const newState = this.states[state]
         if (!newState) return;

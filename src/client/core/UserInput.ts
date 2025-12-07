@@ -5,29 +5,28 @@ import { rotateInputAroundYaw } from "../../common/utils/Utils.js";
 import { Vector3 } from "three";
 import Controller from "@solblade/common/actors/components/Controller.js";
 
-
 export class UserInput extends Controller {
+  gameElement: HTMLElement;
+  pointerLocked = false;
+  yaw = 0
+  pitch = 0;
+  direction = new Vector3();
+  keys = {};
+  mice = {};
+  look = null;
+  lockMouse = false;
+  inputBlocked = false;
+  sensitivity = 0.0016;
+  actionStates: Record<string, boolean> = {};
+  actionKeys = defaultBinds
+  testFunction: any;
   constructor(gameElement) {
     super();
     this.gameElement = gameElement;
 
-    this.sensitivity = 0.0016;
-    this.actionKeys = defaultBinds;
-
-    this.actionStates = {};
     for (const key in ACTIONS) {
       this.actionStates[ACTIONS[key]] = false;
     }
-
-    this.pointerLocked = false;
-    this.yaw = 0
-    this.pitch = 0;
-    this.direction = new Vector3();
-    this.keys = {};
-    this.mice = {};
-    this.look = null;
-    this.lockMouse = false;
-    this.inputBlocked = false;
 
     this.testFunction = () => {
       console.log('Test function called');

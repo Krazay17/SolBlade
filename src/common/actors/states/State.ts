@@ -1,23 +1,24 @@
+import { Pawn } from "@solblade/common/core/Interfaces";
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { vectorsToLateralDegrees } from "@solblade/common/utils/Utils.js";
-import { SActor } from "@solblade/server/actors/SActor";
 
-export default class State {
-    /**
-     * 
-     * @param {FSM} fsm 
-     * @param {SActor} owner 
-     */
-    constructor(fsm, owner) {
+export default class State<T extends Pawn> {
+    fsm: FSM<T>;
+    owner: T;
+    name: string = "state";
+    canReEnter: boolean = false;
+    enterTime = 0;
+    duration = 0;
+    cd = 0;
+    constructor(fsm: FSM<T>, owner: T) {
         this.fsm = fsm;
         this.owner = owner;
-        this.name = "state";
-        this.canReEnter = false;
     }
-    get controller() { return this.owner.controller }
+    get controller(): T['controller'] { return this.owner.controller }
     get movement() { return this.owner.movement }
-    setState(state, params) { this.fsm.setState(state, params) }
-    enter(state, params) { }
+    get animation() { return this.owner.animation }
+    setState(state: string, params?: any) { this.fsm.setState(state, params) }
+    enter(state: string, params: any = {}) { }
     exit(state) { }
     update(dt) { }
     canEnter(state) { return true }

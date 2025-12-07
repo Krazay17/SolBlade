@@ -38,8 +38,6 @@ export default class Actor {
         this.lifetime = lifetime;
         this.age = 0;
         this.timestamp = performance.now();
-
-        this.body = null;
     }
     serialize() {
         return {

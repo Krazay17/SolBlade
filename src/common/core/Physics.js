@@ -13,8 +13,6 @@ export class Physics {
     }
     async makeWorld(name) {
         let worldData;
-        //     const { loadJson } = await import("@solblade/common/utils/LoadJson.js");
-        //     worldData = await loadJson(`../worlds/${name}.json`)
         const worldModule = await import(`../worlds/${name}.json`);
         worldData = worldModule.default;
         if (!worldData) return;
@@ -29,7 +27,7 @@ export class Physics {
     makeCapsule(height = 1, radius = 0.5, isRemote = false) {
         const collideGroup = isRemote
             ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD)
-            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY);
+            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.WORLD);
         const bDesc = RAPIER.RigidBodyDesc.dynamic();
         bDesc.lockRotations();
         bDesc.setLinearDamping(0);

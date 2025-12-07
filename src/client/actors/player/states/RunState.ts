@@ -1,8 +1,11 @@
-import State from "./_PlayerState";
+import State from "@solblade/common/actors/states/State";
+import { ACTIONS } from "@solblade/client/config/Actions";
+import type { Player } from "@solblade/common/core/Interfaces";
 
-export default class RunState extends State {
+export default class RunState extends State<Player> {
     update(dt) {
         if (!this.movement.groundChecker.isGrounded()) return this.setState('fall');
+        if(this.controller.actionStates[ACTIONS.JUMP]) return this.setState("jump");
         const dir = this.controller.inputDirection();
         if (!dir) return this.setState('idle');
         this.movement.smartMove(dt, dir);

@@ -3,7 +3,8 @@ import { RigidBody } from "@dimforge/rapier3d-compat";
 import { Quaternion, Vector3 } from "three";
 import { projectOnPlane } from "@solblade/common/utils/Utils";
 import { Momentum } from "./Momentum";
-import Actor from "../Actor";
+import { PhysicsActor } from "../../core/Interfaces";
+import SolWorld from "@solblade/common/core/SolWorld";
 
 interface movementStateData {
     idle: movementData,
@@ -18,7 +19,8 @@ interface movementData {
 }
 
 export class Movement {
-    owner: Actor;
+    owner: PhysicsActor;
+    world: SolWorld;
     body: RigidBody;
     momentum: Momentum;
     groundChecker: GroundChecker;
@@ -31,13 +33,13 @@ export class Movement {
     _vecVel: Vector3;
     _vecDir: Vector3;
     _yaw: number;
-    upVec = new Vector3(0,1,0);
-    constructor(owner) {
+    upVec = new Vector3(0, 1, 0);
+    constructor(owner: PhysicsActor, world: SolWorld) {
         this.owner = owner;
-        /**@type {RigidBody} */
+        this.world = world
         this.body = owner.body;
         this.momentum = new Momentum();
-        this.groundChecker = new GroundChecker(owner)
+        this.groundChecker = new GroundChecker(this, owner.radius);
 
         this.tempVec = new Vector3()
         this.tempVec1 = new Vector3()
@@ -94,7 +96,6 @@ export class Movement {
     set yaw(v) {
         this._yaw = v;
         this.quatRot = this.quatRot.setFromAxisAngle(this.upVec, v)
-        console.log(this._yaw)
 
         if (!this.body) return;
         this.body.setRotation(this._quatRot, true);
@@ -111,6 +112,11 @@ export class Movement {
 
         if (!this.body) return;
         this.body.setLinvel(this._vecVel, true);
+    }
+    get vY() { return this.velocity.y }
+    set vY(a) {
+        const v = this.velocity;
+        this.velocity = this.velocity.set(v.x, a, v.z);
     }
     set latVel(v) {
         if (!this._vecVel) this._vecVel = new Vector3();
@@ -146,13 +152,6 @@ export class Movement {
             this.airMove(dt, dir);
         }
     }
-    devFly(dir) {
-        this.body.setTranslation(this.vecPos.add(dir), true);
-        this.body.setLinvel(dir, true);
-    }
-    idleMove(dt) {
-        this.friction(dt, this.speeds.idle.friction);
-    }
     groundMove(dt, wishdir) {
         this.friction(dt, this.speeds.ground.friction);
         if (!wishdir) return;
@@ -168,6 +167,16 @@ export class Movement {
         if (!dir) return;
         this.accelerate(dt, dir, this.speeds.air.max, this.speeds.air.accel);
     }
+    idleMove(dt) {
+        this.friction(dt, this.speeds.idle.friction);
+    }
+    devFly(dir) {
+        this.body.setTranslation(this.vecPos.add(dir), true);
+        this.body.setLinvel(dir, true);
+    }
+    jumpStart() {
+        this.vY += 25;
+    }
     friction(dt, amnt, exponential = true) {
         const v = this.velocity;
         const speed = v.length();
@@ -180,9 +189,6 @@ export class Movement {
         v.z *= scale;
         this.velocity = v;
     }
-    /**
-     * @param {Vector3} wishdir 
-     * */
     accelerate(dt, wishdir, wishspeed, accel, blend = 0.01) {
         if (!this.body) return;
         const dirspeed = this.latVel.dot(wishdir);
