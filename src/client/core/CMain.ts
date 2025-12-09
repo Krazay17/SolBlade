@@ -47,7 +47,7 @@ class App {
         }
         await this.game.netConnect(this.net.socket);
 
-        requestAnimationFrame(this.loop.bind(this));
+        requestAnimationFrame(this.loop);
     }
 
     // --- Core Game Loop (Fixed Time Step) ---

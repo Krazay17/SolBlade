@@ -1,16 +1,17 @@
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
 export class CNet {
     url = location.hostname === "localhost"
         ? "ws://localhost:8080"
         : "wss://srv.solblade.online";
-    socket = io(this.url, {
-        transports: ["websocket"],
-    });
+    socket: Socket;
     events: Map<string, any> = new Map();
     localServer: any | null = null;
     constructor() {
-        this.socket.on("connection", () => {
+        this.socket = io(this.url, {
+            transports: ["websocket"],
+        });
+        this.socket.on("connect", () => {
             console.log('socket connected');
         })
         this.socket.onAny((event, ...args) => {
@@ -47,7 +48,7 @@ export class CNet {
             console.log("fail emit with ack");
         }
     }
-    async startLocal(){
+    async startLocal() {
         return null;
     }
 }
