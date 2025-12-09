@@ -2,7 +2,7 @@ import { Collider, RigidBody, World } from "@dimforge/rapier3d-compat";
 import { Movement } from "../actors/components/Movement";
 import Controller from "../actors/components/Controller";
 import { UserInput } from "@solblade/client/core/UserInput";
-import AIController from "@solblade/server/actors/components/AIController";
+import AIController from "@solblade/server/core/AIController";
 import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
 
 export interface PhysicsActor {

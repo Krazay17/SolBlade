@@ -4,16 +4,13 @@ import SolWorld from "@solblade/common/core/SolWorld.js";
 import SkyBox from "./SkyBox.js";
 import { CGame } from "../core/CGame.js";
 import { spawnActor } from "@solblade/common/core/ActorFactory.js";
-import { CActor } from "../actors/CActor.js";
-import { RActor } from "../actors/RActor.js";
+import { spawnA } from "@solblade/common/core/AFactory.js";
 
 export class CWorld extends SolWorld {
-    declare actors: Map<string, CActor | RActor>
-    declare players: Map<string, CActor | RActor>
+    declare loader: SolLoading;
     localPlayer: string;
     game: CGame;
     globalScene: Scene;
-    loader: SolLoading;
     scene: Scene;
     skyBox: SkyBox;
     constructor(name: string, game: CGame) {
@@ -40,10 +37,8 @@ export class CWorld extends SolWorld {
         if (!map) return;
         this.add(map.scene);
     }
-    tick(dt) {
-        this.actors.forEach((a) => {
-            a.tick?.(dt);
-        });
+    tick(dt: number) {
+        super.tick(dt)
         this.skyBox.tick(dt);
     }
     exit() {
@@ -52,13 +47,13 @@ export class CWorld extends SolWorld {
     step(dt) {
         this.physics.step(dt);
     }
-    removeRemoteActors(){
-        this.actors.forEach((v, k)=>{
+    removeRemoteActors() {
+        this.actors.forEach((v, k) => {
             v.graphics.removeFromParent();
             this.actors.delete(k);
         });
-        
-        this.players.forEach((v, k)=>{
+
+        this.players.forEach((v, k) => {
             v.graphics.removeFromParent();
             this.actors.delete(k);
         });
@@ -71,9 +66,8 @@ export class CWorld extends SolWorld {
             if (actor) {
                 actor.actorUpdate.update(d);
             } else {
-                const newActor = spawnActor(this, d.type, "remote", d) as CActor | RActor
+                const newActor = spawnA(this, d.type, "remote", d);
                 this.actors.set(id, newActor);
-                newActor.skeleSystem.addSkele(this.loader);
             }
         }
     }

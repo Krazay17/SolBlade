@@ -1,4 +1,4 @@
-import CPlayer from "@solblade/client/actors/player/CPlayer.js";
+import { Player } from "@solblade/client/actors/player/Player.js";
 import { UserInput } from "@solblade/client/core/UserInput.js";
 import { NET } from "@solblade/common/net/NetProtocol.js";
 import { CWorld } from "../world/CWorld.js";
@@ -30,7 +30,7 @@ export class CGame {
             world1: CWorld1,
         }
 
-        this.player = new CPlayer(this, {
+        this.player = new Player(this, {
             meshName: "spikeMan",
             pos: [0, 10, 0],
         });
@@ -43,7 +43,6 @@ export class CGame {
     }
     async start() {
         await this.newWorld(solSave.worldName);
-        await this.player.init();
     }
     getActorById(id) {
         this.world.actors.get(id);

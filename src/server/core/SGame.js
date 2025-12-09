@@ -1,16 +1,14 @@
 import { SOL_PHYSICS_SETTINGS } from "@solblade/common/data/SolConstants.js"
 import { NET } from "@solblade/common/net/NetProtocol.js"
-import { SWorld } from "../world/SWorld.js"
-import { LocalServerTransport } from "@solblade/common/net/LocalServerTransport.js";
+import { SWorld } from "./SWorld.js"
 
 /**
  * @typedef {import("socket.io").Server} ServerIO
- * @typedef {import("@solblade/client/core/CNet.js").LocalServerIO} LocalServerIO
  */
 
 export class SGame {
     /**
-     * @param {ServerIO | LocalServerIO | LocalServerTransport} io 
+     * @param {ServerIO} io 
      */
     constructor(io) {
         this.io = io;

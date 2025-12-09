@@ -6,13 +6,18 @@ export default class SolWorld {
     players: Map<string, Actor> = new Map();
     name: string;
     physics: Physics;
+    loader;
     constructor(name: string) {
         this.name = name;
         this.physics = new Physics();
     }
     async start() { }
     step(dt) { }
-    tick(dt) { }
+    tick(dt: number) {
+        this.actors.forEach((v, k) => {
+            v.tick?.(dt);
+        });
+    }
     getState() {
         const data = [];
         this.actors.forEach((v, k) => {

@@ -8,27 +8,29 @@ export default class GroundChecker {
     downVec = new Vector3(0, -1, 0);
     ball: RAPIER.Ball;
 
-    constructor(movement: Movement, radius) {
+    constructor(movement: Movement, radius?: number) {
         this.movement = movement
         this.tempVec = new Vector3();
-        this.ball = new RAPIER.Ball(radius * 1.4);
+        this.ball = new RAPIER.Ball(.5);
 
     }
     isGrounded(slope = -0.6) {
-        this.tempVec.set(0, 0, 0)
         const normal = this.getFloor()?.normal2;
-        if (normal) this.tempVec.copy(normal);
+        if (!normal) return false;
+        this.tempVec.set(0, 0, 0)
+        this.tempVec.copy(normal);
         return this.tempVec.y < slope;
     }
     floorNormal() {
-        this.tempVec.set(0, 0, 0)
         const normal = this.getFloor()?.normal2;
-        if (normal) this.tempVec.copy(normal);
+        if (!normal) return false
+        this.tempVec.set(0, 0, 0)
+        this.tempVec.copy(normal);
         return this.tempVec;
     }
     getFloor() {
-        if (!this.movement.owner.world.physics.world) return;
-        const result = this.movement.owner.world.physics.world.castShape(
+        if (!this.movement.actor.world.physics.world) return;
+        const result = this.movement.actor.world.physics.world.castShape(
             this.movement.vecPos,
             { x: 0, y: 0, z: 0, w: 1 },
             this.downVec,
@@ -38,8 +40,8 @@ export default class GroundChecker {
             true,
             undefined,
             undefined,
-            this.movement.owner.collider,
-            this.movement.owner.body
+            this.movement.actor.collider,
+            this.movement.actor.body
         )
 
         return result;

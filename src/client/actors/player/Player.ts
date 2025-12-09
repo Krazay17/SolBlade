@@ -1,27 +1,22 @@
 import { CGame } from "@solblade/client/core/CGame.js";
-import { Movement } from "@solblade/common/actors/components/Movement.js";
 import { Group, PerspectiveCamera, Vector3 } from "three";
 import { ACTIONS } from "../../config/Actions.js";
 import { UserInput } from "../../core/UserInput.js";
 import { CWorld } from "../../world/CWorld.js";
 import { SkeleSystem } from "../components/SkeleSystem.js";
 import FSM from "@solblade/common/actors/states/FSM.js";
-import { CActor } from "../CActor.js";
 import { playerStateRegistry } from "./states/StateReg.js";
-import { PhysicsActor, Player } from "@solblade/common/core/Interfaces.js";
+import { Pawn } from "@solblade/common/actors/Pawn.js";
+import { Movement } from "@solblade/common/actors/components/Movement.js";
 
-export default class CPlayer extends CActor implements Player {
+export class Player extends Pawn {
+    declare controller?: UserInput;
     game: CGame;
-    controller: UserInput;
     cameraArm: Group;
     camera: PerspectiveCamera;
-    animation: SkeleSystem;
-    fsm: FSM<Player>;
-    actor: CActor
     tempVec: Vector3;
-    physics: PhysicsActor;
     constructor(game: CGame, data: any = {}) {
-        super(game.world, {
+        super({
             ...data,
             type: "player",
         });
@@ -34,17 +29,18 @@ export default class CPlayer extends CActor implements Player {
         this.camera = this.game.camera;
         this.camera.position.set(.333, .666, 1.333);
         this.cameraArm.add(this.camera);
+
         this.animation = new SkeleSystem(this);
+        this.animation.addSkele(this.game.loader);
 
         this.controller = this.game.input;
         this.controller.look = (y, p) => this.look(y, p);
 
+        this.movement = new Movement(this);
+
         this.fsm = new FSM(this, playerStateRegistry);
 
         this.tempVec = new Vector3();
-    }
-    async init() {
-        await this.animation.addSkele(this.game.loader);
     }
     setWorld(world: CWorld) {
         this.world = world;

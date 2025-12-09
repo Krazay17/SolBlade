@@ -1,7 +1,6 @@
 import State from "@solblade/common/actors/states/State";
-import { Player } from "@solblade/common/core/Interfaces";
 
-export class JumpState extends State<Player> {
+export class JumpState extends State {
     enter(state: any, params: any): void {
         this.enterTime = performance.now();
         this.duration = 500;

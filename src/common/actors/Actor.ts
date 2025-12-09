@@ -1,3 +1,8 @@
+import { Collider, RigidBody } from "@dimforge/rapier3d-compat";
+import SolWorld from "../core/SolWorld";
+import { Group, Quaternion, Vector3 } from "three";
+import { ActorUpdate } from "@solblade/client/actors/components/ActorUpdate";
+
 export default class Actor {
     id: string;
     tempId: string;
@@ -8,15 +13,22 @@ export default class Actor {
     worldName: string;
     meshName: string;
     pos: number[];
-    dir: number[];
     rot: number[];
     active: boolean;
     isRemote: boolean;
     lifetime: number;
-    height: number;
-    radius: number;
     age: number;
     timestamp: number;
+
+    components = new Map<string, any>();
+    body?: RigidBody;
+    world?: SolWorld;
+    collider?: Collider;
+    graphics?: Group;
+    actorUpdate?: ActorUpdate;
+
+    _vecPos: Vector3;
+    _quatRot: Quaternion;
     constructor(data: any = {}) {
         const {
             id = '1',
@@ -28,13 +40,10 @@ export default class Actor {
             worldName = 'world1',
             meshName = "spikeMan",
             pos = [0, 0, 0],
-            dir = [0, 0, 0],
             rot = [0, 0, 0, 1],
             active = true,
             isRemote = true,
             lifetime = 0,
-            height = 1,
-            radius = 0.5,
         } = data;
 
         this.id = id;
@@ -47,16 +56,37 @@ export default class Actor {
         this.meshName = meshName;
 
         this.pos = pos;
-        this.dir = dir;
         this.rot = rot;
-        this.height = height;
-        this.radius = radius;
 
         this.active = active;
         this.isRemote = isRemote;
         this.lifetime = lifetime;
         this.age = 0;
         this.timestamp = performance.now();
+    }
+    get vecPos() {
+        if (!this._vecPos) this._vecPos = new Vector3();
+        return this._vecPos.fromArray(this.pos);
+    }
+    get quatRot() {
+        if (!this._quatRot) this._quatRot = new Quaternion();
+        return this._quatRot.fromArray(this.rot);
+    }
+    setId(id) {
+        this.id = id;
+        console.log(id);
+    }
+    add<T>(key: string, c: T): T {
+        this.components.set(key, c);
+        return c;
+    }
+    get<T>(key: string): T {
+        return this.components.get(key);
+    }
+    tick(dt: number) {
+        for (const comp of this.components.values()) {
+            comp.tick?.(dt);
+        }
     }
     serialize() {
         return {
@@ -70,7 +100,6 @@ export default class Actor {
             meshName: this.meshName,
 
             pos: this.pos,
-            dir: this.dir,
             rot: this.rot,
 
             active: this.active,

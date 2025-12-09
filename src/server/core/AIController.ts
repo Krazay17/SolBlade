@@ -1,17 +1,14 @@
-import SolWorld from "@solblade/common/core/SolWorld.js";
-import Controller from "@solblade/common/actors/components/Controller.js";
-import { SActor } from "../SActor.js";
+
+import Controller from "@solblade/common/actors/components/Controller";
+import { Pawn } from "@solblade/common/actors/Pawn";
 
 export default class AIController extends Controller {
-    /**
-     * 
-     * @param {SolWorld} world 
-     * @param {SActor} owner
-     * @param {*} data 
-     */
-    constructor(owner, data = {}) {
+    pawn: Pawn;
+    aggroRadius: number;
+    blackboard: any;
+    constructor(pawn: Pawn, data: any = {}) {
         super();
-        this.owner = owner;
+        this.pawn = pawn;
         const {
             aggroRadius = 20
         } = data;
@@ -22,27 +19,28 @@ export default class AIController extends Controller {
     update(dt) {
         this.blackboard = this.findNearestPlayer();
         if (!this.blackboard.player) {
-            this.owner.fsm.setState('patrol');
+            this.pawn.fsm.setState('patrol');
         }
     }
     inputDirection() {
         return this.blackboard.dir;
     }
     findNearestPlayer() {
-        const players = this.owner.world.players
+        const players = this.pawn.world.players
         if (!players) return {};
 
         // get this enemy's position
-        const pos = this.owner.vecPos
+        if(!this.pawn.movement)return;
+        const pos = this.pawn.movement.vecPos
 
         // find nearest player
         let nearest = null;
         let minDistSq = Infinity;
         let targetDir = null;
         for (const [id, p] of players) {
-            const dx = p.pos.x - pos.x;
-            const dy = p.pos.y - pos.y;
-            const dz = p.pos.z - pos.z;
+            const dx = p.pos[0] - pos.x;
+            const dy = p.pos[1] - pos.y;
+            const dz = p.pos[2] - pos.z;
             const distSq = dx * dx + dy * dy + dz * dz;
             if (distSq < this.aggroRadius && (distSq < minDistSq)) {
                 minDistSq = distSq;

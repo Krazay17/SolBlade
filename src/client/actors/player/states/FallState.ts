@@ -1,11 +1,12 @@
 import State from "@solblade/common/actors/states/State";
-import type { Player } from "@solblade/common/core/Interfaces";
 
-export default class FallState extends State<Player> {
+export default class FallState extends State {
     update(dt) {
         if (this.movement.isGrounded) return this.setState('idle');
         const dir = this.controller.inputDirection();
-        this.movement.airMove(dt, dir);
+        if (dir) {
+            this.movement.airMove(dt, dir);
+        }
         this.anim();
     }
 

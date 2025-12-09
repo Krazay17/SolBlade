@@ -1,8 +1,7 @@
 import State from "@solblade/common/actors/states/State";
 import { ACTIONS } from "@solblade/client/config/Actions";
-import { Player } from "@solblade/common/core/Interfaces";
 
-export default class IdleState extends State<Player> {
+export default class IdleState extends State {
     enter(state, params) {
         if (!this.movement.isGrounded) return this.setState('fall');
         if (state === 'attack') return this.idle();

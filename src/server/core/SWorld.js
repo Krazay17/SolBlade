@@ -1,5 +1,5 @@
 import Actor from "@solblade/common/actors/Actor.js";
-import { spawnActor } from "@solblade/common/core/ActorFactory";
+import { spawnA } from "@solblade/common/core/AFactory";
 import SolWorld from "@solblade/common/core/SolWorld.js";
 
 export class SWorld extends SolWorld {
@@ -11,11 +11,10 @@ export class SWorld extends SolWorld {
         await this.physics.makeWorld(this.name);
         const enemies = 1;
         for (let i = 0; i < enemies; i++) {
-            const actor = this.actors.set(this.actorIndex++, spawnActor(this, "wizard", "server", { pos: [0, 15, 0], meshName: "Wizard" }));
         }
     }
     addPlayer(id, data) {
-        const actor = spawnActor(this, data.type, "server", data);
+        const actor = spawnA(this, data.type, "server", data);
         actor.id = id;
         this.actors.set(id, actor);
         this.players.set(id, actor);

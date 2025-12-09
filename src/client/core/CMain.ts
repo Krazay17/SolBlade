@@ -1,24 +1,19 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { UserInput } from "@solblade/client/core/UserInput.js";
-import { io, Socket } from "socket.io-client";
 import { SOL_PHYSICS_SETTINGS } from "@solblade/common/data/SolConstants.js";
-import { LocalServerTransport } from "@solblade/common/net/LocalServerTransport.js";
-import { LocalTransport } from "@solblade/common/net/LocalTransport.js";
 import { CGame } from "./CGame.js";
 import { SolLoading } from "./SolLoading.js";
 import { SolRender } from "./SolRender.js";
 import { CNet } from "./CNet.js";
-/**
- * @typedef {import("@solblade/server/core/SGame.js").SGame}localServer
- */
+
 await RAPIER.init();
 
 class App {
     net: CNet;
-    renderer;
-    input;
-    loader;
-    game;
+    renderer: SolRender;
+    input: UserInput;
+    loader: SolLoading;
+    game: CGame;
     localServer: any;
 
     // Time Management
@@ -45,7 +40,7 @@ class App {
         } catch {
             this.localServer = await this.net.startLocal();
         }
-        await this.game.netConnect(this.net.socket);
+        this.game.netConnect(this.net.socket);
 
         requestAnimationFrame(this.loop);
     }

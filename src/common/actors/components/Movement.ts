@@ -1,10 +1,8 @@
 import GroundChecker from "./GroundChecker";
-import { RigidBody } from "@dimforge/rapier3d-compat";
 import { Quaternion, Vector3 } from "three";
 import { projectOnPlane } from "@solblade/common/utils/Utils";
 import { Momentum } from "./Momentum";
-import { PhysicsActor } from "../../core/Interfaces";
-import SolWorld from "@solblade/common/core/SolWorld";
+import Actor from "../Actor";
 
 interface movementStateData {
     idle: movementData,
@@ -19,7 +17,7 @@ interface movementData {
 }
 
 export class Movement {
-    owner: PhysicsActor;
+    actor: Actor;
     momentum: Momentum;
     groundChecker: GroundChecker;
     tempVec: Vector3;
@@ -32,10 +30,10 @@ export class Movement {
     _vecDir: Vector3;
     _yaw: number;
     upVec = new Vector3(0, 1, 0);
-    constructor(owner: PhysicsActor) {
-        this.owner = owner;
+    constructor(actor: Actor) {
+        this.actor = actor;
         this.momentum = new Momentum();
-        this.groundChecker = new GroundChecker(this, owner.radius);
+        this.groundChecker = new GroundChecker(this, .5);
 
         this.tempVec = new Vector3()
         this.tempVec1 = new Vector3()
@@ -67,47 +65,49 @@ export class Movement {
 
     get vecPos() {
         if (!this._vecPos) this._vecPos = new Vector3();
-        return this._vecPos.copy(this.owner.body.translation());
+        if (!this.actor.body) return this._vecPos;
+        return this._vecPos.copy(this.actor.body.translation());
     }
     set vecPos(v) {
         if (!this._vecPos) this._vecPos = new Vector3();
         this._vecPos.copy(v);
-        this.owner.pos[0] = v.x;
-        this.owner.pos[1] = v.y;
-        this.owner.pos[2] = v.z;
+        this.actor.pos[0] = v.x;
+        this.actor.pos[1] = v.y;
+        this.actor.pos[2] = v.z;
     }
     get quatRot() {
         if (!this._quatRot) this._quatRot = new Quaternion();
-        return this._quatRot.copy(this.owner.body.rotation());
+        if (!this.actor.body) return this._quatRot;
+        return this._quatRot.copy(this.actor.body.rotation());
     }
     set quatRot(v) {
         if (!this._quatRot) this._quatRot = new Quaternion();
         this._quatRot.copy(v);
-        this.owner.rot[0] = v.x;
-        this.owner.rot[1] = v.y;
-        this.owner.rot[2] = v.z;
-        this.owner.rot[3] = v.w;
+        this.actor.rot[0] = v.x;
+        this.actor.rot[1] = v.y;
+        this.actor.rot[2] = v.z;
+        this.actor.rot[3] = v.w;
     }
     get yaw() { return this._yaw }
     set yaw(v) {
         this._yaw = v;
         this.quatRot = this.quatRot.setFromAxisAngle(this.upVec, v)
 
-        if (!this.owner.body) return;
-        this.owner.body.setRotation(this._quatRot, true);
+        if (!this.actor.body) return;
+        this.actor.body.setRotation(this._quatRot, true);
     }
     get velocity() {
         if (!this._vecVel) this._vecVel = new Vector3();
 
-        if (!this.owner.body) return;
-        return this._vecVel.copy(this.owner.body.linvel());
+        if (!this.actor.body) return this._vecVel;
+        return this._vecVel.copy(this.actor.body.linvel());
     }
     set velocity(v) {
         if (!this._vecVel) this._vecVel = new Vector3();
         this._vecVel.copy(v);
 
-        if (!this.owner.body) return;
-        this.owner.body.setLinvel(this._vecVel, true);
+        if (!this.actor.body) return;
+        this.actor.body.setLinvel(this._vecVel, true);
     }
     get vY() { return this.velocity.y }
     set vY(a) {
@@ -118,26 +118,28 @@ export class Movement {
         if (!this._vecVel) this._vecVel = new Vector3();
         this._vecVel.copy(v);
 
-        if (!this.owner.body) return;
-        const { x, y, z } = this.owner.body.linvel();
-        this.owner.body.setLinvel({ x: v.x, y, z: v.z }, true);
+        if (!this.actor.body) return;
+        const { x, y, z } = this.actor.body.linvel();
+        this.actor.body.setLinvel({ x: v.x, y, z: v.z }, true);
     }
     get vecDir() {
         if (!this._vecDir) this._vecDir = new Vector3();
-
-        return this._vecDir.applyQuaternion(this.owner.body.rotation());
+        if (!this.actor.body) return this._vecDir;
+        return this._vecDir.applyQuaternion(this.actor.body.rotation());
     }
     get latVel() {
-        if (!this.owner.body) return this.tempVec;
-        const v = this.owner.body.linvel();
+        const v = this.velocity;
         v.y = 0;
         return this.tempVec.copy(v);
     }
-    get isGrounded() { return this.groundChecker.isGrounded() }
+    get isGrounded() {
+        return this.groundChecker.isGrounded()
+    }
     update(dt) {
         this.momentum.update(dt, this.velocity);
     }
-    smartMove(dt, dir = this.vecDir) {
+    smartMove(dt, dir) {
+        if (!dir) return;
         if (this.groundChecker.isGrounded()) {
             if (dir) {
                 this.groundMove(dt, dir);
@@ -167,8 +169,8 @@ export class Movement {
         this.friction(dt, this.speeds.idle.friction);
     }
     devFly(dir) {
-        this.owner.body.setTranslation(this.vecPos.add(dir), true);
-        this.owner.body.setLinvel(dir, true);
+        this.actor.body.setTranslation(this.vecPos.add(dir), true);
+        this.actor.body.setLinvel(dir, true);
     }
     jumpStart() {
         this.vY += 12;
@@ -186,7 +188,7 @@ export class Movement {
         this.velocity = v;
     }
     accelerate(dt, wishdir, wishspeed, accel, blend = 0.01) {
-        if (!this.owner.body) return;
+        if (!this.actor.body) return;
         const dirspeed = this.latVel.dot(wishdir);
         const addSpeed = wishspeed - dirspeed;
         if (addSpeed <= 0) return false;
