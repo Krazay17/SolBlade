@@ -60,7 +60,8 @@ export class SGame {
         const id = socket.id;
         const worldName = this.sockets[id].worldName;
         const world = this.worlds[worldName];
-        world.removePlayer(id);
+        if(!world)return;
+        world.removePlayer?.(id);
     }
     input(data, socket){
         

@@ -51,11 +51,11 @@ export class CGame {
     netBinds() {
         if (this.netBound) return;
         this.netBound = true;
-        this.socket.on("disconnect", () => this.netDisconnnect());
+        this.socket.on?.("disconnect", () => this.netDisconnnect());
         for (const p of Object.values(NET.SERVER)) {
             const h = this[p];
             if (typeof h === "function") {
-                this.socket.on(p, h.bind(this));
+                this.socket.on?.(p, h.bind(this));
             } else console.warn(`No function ${p}`);
         }
     }

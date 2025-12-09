@@ -1,25 +1,25 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { UserInput } from "@solblade/client/core/UserInput.js";
-import { io, WebSocket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { SOL_PHYSICS_SETTINGS } from "@solblade/common/data/SolConstants.js";
 import { LocalServerTransport } from "@solblade/common/net/LocalServerTransport.js";
 import { LocalTransport } from "@solblade/common/net/LocalTransport.js";
 import { CGame } from "./CGame.js";
 import { SolLoading } from "./SolLoading.js";
 import { SolRender } from "./SolRender.js";
+import { CNet } from "./CNet.js";
 /**
  * @typedef {import("@solblade/server/core/SGame.js").SGame}localServer
  */
 await RAPIER.init();
 
 class App {
+    net: CNet;
     renderer;
     input;
+    loader;
     game;
-    /**@type {WebSocket | LocalTransport} */
-    socket;
-    /**@type {localServer} */
-    localServer;
+    localServer: any;
 
     // Time Management
     timeStep = SOL_PHYSICS_SETTINGS.timeStep;
@@ -27,15 +27,11 @@ class App {
     accumulator = 0;
     focused = true;
     running = true;
-
-    // Environment/Config
-    url = location.hostname === "localhost"
-        ? "ws://localhost:8080"
-        : "wss://srv.solblade.online";
     canvas = document.getElementById("webgl");
 
     constructor() {
         this.loader = new SolLoading();
+        this.net = new CNet();
         this.renderer = new SolRender(this.canvas);
         this.input = new UserInput(this.canvas);
         this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader);
@@ -43,20 +39,14 @@ class App {
     }
 
     async start() {
+        this.game.start();
         try {
-            this.socket = await this._tryConnect();
+            await this.net.start();
         } catch {
-            if (this.socket) this.socket.close();
-            const serverSocket = new LocalServerTransport();
-            this.socket = new LocalTransport();
-
-            const { SGame } = await import("@solblade/server/core/SGame.js");
-            this.localServer = new SGame(serverSocket);
-
-            await this.localServer.start(false, this.socket);
+            this.localServer = await this.net.startLocal();
         }
-        await this.game.start();
-        this.game.netBinds(this.socket);
+        await this.game.netConnect(this.net.socket);
+
         requestAnimationFrame(this.loop.bind(this));
     }
 
@@ -80,23 +70,6 @@ class App {
             if (this.renderer) this.renderer.render(dt);
         }
         requestAnimationFrame(this.loop);
-    }
-    _tryConnect() {
-        return new Promise((resolve, reject) => {
-            const tempSocket = io(this.url, {
-                transports: ["websocket"],
-                reconnection: true,
-                timeout: 20000,
-            });
-            
-            tempSocket.on("connect", () => {
-                this.game.netConnect(tempSocket);
-                resolve(tempSocket);
-            });
-            tempSocket.on("connect_error", (err) => {
-                reject(err);
-            });
-        });
     }
 
     handleSleep() {

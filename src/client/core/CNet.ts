@@ -1,0 +1,98 @@
+import { io } from "socket.io-client";
+
+export class CNet {
+    url = location.hostname === "localhost"
+        ? "ws://localhost:8080"
+        : "wss://srv.solblade.online";
+    socket = io(this.url, {
+        transports: ["websocket"],
+    });
+    events: Map<string, any> = new Map();
+    localServer: any | null = null;
+    constructor() {
+        this.socket.on("connection", () => {
+            console.log('socket connected');
+        })
+        this.socket.onAny((event, ...args) => {
+            const e = this.events.get(event)
+            if (e) e(...args);
+        })
+    }
+    connect() { this.socket.connect(); }
+    on(event: any, handler: any) { this.events.set(event, handler) }
+    emit(event: any, ...data: any) {
+        if (this.socket.connected) {
+            this.socket.emit(event, ...data)
+        } else if (this.localServer) {
+            this.localServer[event](data);
+        }
+    }
+    async emitWithAck(event, ...args) {
+        try {
+            await this.socket.emitWithAck(event, ...args)
+        } catch {
+            console.warn("Failed to connect")
+        }
+    }
+    async start() {
+        try {
+            this.socket.connect();
+            const response = await this.socket.timeout(5000).emitWithAck("hello", "world");
+            console.log(response);
+        }
+        catch {
+            // const { SGame } = await import("@solblade/server/core/SGame.js");
+            // this.localServer = new SGame();
+            // await this.localServer.start(false);
+            console.log("fail emit with ack");
+        }
+    }
+    async startLocal(){
+        return null;
+    }
+}
+// class LocalClientIO {
+//     constructor() {
+//         this.server = null;
+//         this.handlers = {};
+//     }
+//     on(event, handler) {
+//         this.handlers[event] = handler;
+//     }
+//     emit(event, data) {
+//         this.server.receive(event, data);
+//     }
+//     receive(event, data) {
+//         const h = this.handlers[event];
+//         if (h) h(data);
+//         //console.log(`Client receive ${event}`);
+//     }
+// }
+// export class LocalServerIO {
+//     /**
+//      * @param {LocalClientIO}client
+//      */
+//     constructor(client) {
+//         this.client = client;
+//         client.server = this;
+//         this.handlers = {};
+//     }
+//     on(event, handler) {
+//         this.handlers[event] = handler;
+//     }
+//     emit(event, data) {
+//         this.client.receive(event, data);
+//     }
+//     receive(event, data) {
+//         const h = this.handlers[event];
+//         if (h) h(data);
+//         //console.log(`Server receive ${event}`);
+//     }
+//     to(id) {
+//         return {
+//             emit: (event, data) => {
+//                 this.client.receive(event, data);
+//             }
+//         }
+//     }
+// }

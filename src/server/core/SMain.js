@@ -22,6 +22,12 @@ async function init() {
         pingTimeout: 10000,
         cleanupEmptyChildNamespaces: true,
     });
+    io.on("connection", (socket) => {
+        socket.on("hello", (arg1, callback) => {
+            console.log(arg1);
+            callback('welcome')
+        });
+    })
     const game = new SGame(io);
     await game.start();
 }
