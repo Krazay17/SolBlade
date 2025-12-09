@@ -1,13 +1,32 @@
 export default class Actor {
-    constructor(data = {}) {
+    id: string;
+    tempId: string;
+    type: string;
+    subtype: string;
+    name: string;
+    owner: string;
+    worldName: string;
+    meshName: string;
+    pos: number[];
+    dir: number[];
+    rot: number[];
+    active: boolean;
+    isRemote: boolean;
+    lifetime: number;
+    height: number;
+    radius: number;
+    age: number;
+    timestamp: number;
+    constructor(data: any = {}) {
         const {
             id = '1',
             tempId = data.tempId ?? crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 10),
-            type = null,
+            type = 'player',
             subtype = null,
             name = "actor",
             owner = null,
             worldName = 'world1',
+            meshName = "spikeMan",
             pos = [0, 0, 0],
             dir = [0, 0, 0],
             rot = [0, 0, 0, 1],
@@ -17,7 +36,6 @@ export default class Actor {
             height = 1,
             radius = 0.5,
         } = data;
-        this.data = data;
 
         this.id = id;
         this.tempId = tempId;
@@ -26,6 +44,7 @@ export default class Actor {
         this.name = name;
         this.owner = owner;
         this.worldName = worldName;
+        this.meshName = meshName;
 
         this.pos = pos;
         this.dir = dir;
@@ -41,8 +60,6 @@ export default class Actor {
     }
     serialize() {
         return {
-            ...this.data,
-
             id: this.id,
             tempId: this.tempId,
             type: this.type,
@@ -50,6 +67,7 @@ export default class Actor {
             name: this.name,
             owner: this.owner,
             worldName: this.worldName,
+            meshName: this.meshName,
 
             pos: this.pos,
             dir: this.dir,

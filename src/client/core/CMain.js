@@ -85,11 +85,12 @@ class App {
         return new Promise((resolve, reject) => {
             const tempSocket = io(this.url, {
                 transports: ["websocket"],
-                reconnection: false,
-                timeout: 100,
+                reconnection: true,
+                timeout: 20000,
             });
-
+            
             tempSocket.on("connect", () => {
+                this.game.netConnect(tempSocket);
                 resolve(tempSocket);
             });
             tempSocket.on("connect_error", (err) => {

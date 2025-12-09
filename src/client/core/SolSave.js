@@ -23,7 +23,9 @@ class SolSave {
             return;
         }
         this.version = CURRENT_VERSION;
+        this.name = parsed.name ?? this.name;
         this.worldName = parsed.worldName ?? this.worldName;
+        this.money = parsed.money ?? this.money;
     }
     reset(keep) {
         this.name = keep.name ?? this.name;

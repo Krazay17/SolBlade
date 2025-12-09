@@ -5,15 +5,17 @@ import { CWorld } from "../world/CWorld.js";
 import { CWorld1 } from "../world/index.js";
 import { SolLoading } from "./SolLoading.js";
 import solSave from "./SolSave.js";
+import { Scene } from "three";
 
 export class CGame {
     /**@type {CWorld} */
     world;
     stateIndex = 0;
     socket;
+    netBound = false;
     /**
      * 
-     * @param {*} scene 
+     * @param {Scene} scene 
      * @param {*} camera 
      * @param {UserInput} input 
      * @param {SolLoading} loader 
@@ -28,13 +30,16 @@ export class CGame {
             world1: CWorld1,
         }
 
-        this.player = new CPlayer(this);
+        this.player = new CPlayer(this, {
+            meshName: "spikeMan",
+            pos: [0, 10, 0],
+        });
 
         window.addEventListener('keydown', (e) => {
             if (e.code !== "KeyE") return;
             console.time("test");
             this.socket.emit(NET.CLIENT.TEST);
-        })
+        });
     }
     async start() {
         await this.newWorld(solSave.worldName);
@@ -43,21 +48,31 @@ export class CGame {
     getActorById(id) {
         this.world.actors.get(id);
     }
-    netBinds(socket) {
-        this.socket = socket;
+    netBinds() {
+        if (this.netBound) return;
+        this.netBound = true;
+        this.socket.on("disconnect", () => this.netDisconnnect());
         for (const p of Object.values(NET.SERVER)) {
             const h = this[p];
             if (typeof h === "function") {
                 this.socket.on(p, h.bind(this));
             } else console.warn(`No function ${p}`);
         }
-        this.socket.emit(NET.CLIENT.JOIN, { id: '1', pos: [0, 1, 0] });
+    }
+    netConnect(socket) {
+        this.socket = socket;
+        this.player.setId(socket.id);
+        this.netBinds();
+        this.socket.emit(NET.CLIENT.JOIN, this.player.serialize());
+    }
+    netDisconnnect() {
+        this.world.removeRemoteActors();
     }
     async newWorld(name) {
         const world = this.worldRegistry[name];
         if (!world) return
         if (this.world) this.world.exit();
-        this.world = new world(this.scene, this.loader);
+        this.world = new world(this);
         await this.world.start();
         this.player.setWorld(this.world);
     }
@@ -72,7 +87,7 @@ export class CGame {
         this.world.step(dt);
     }
     snap(data) {
-        this.world.updateState(data);
+        this.world?.updateState(data);
     }
     welcome(data) {
         console.log(data);

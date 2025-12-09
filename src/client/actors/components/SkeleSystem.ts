@@ -1,7 +1,11 @@
+import { SolLoading } from "@solblade/client/core/SolLoading";
 import type { AnimationClip } from "three";
 import * as THREE from "three";
+import { CActor } from "../CActor";
+import { RActor } from "../RActor";
 
 export class SkeleSystem {
+    owner: CActor |RActor;
     mesh = null;
     mixer: THREE.AnimationMixer | null = null;
     currentAction: THREE.AnimationAction | null = null
@@ -9,10 +13,15 @@ export class SkeleSystem {
     animations: Record<string, AnimationClip> = {};
     _onFinishedListener: any;
     quedAnim: any;
-    update(dt){
-        if(this.mixer)this.mixer.update(dt);
+    constructor(owner) {
+        this.owner = owner;
     }
-    async addSkele(mesh: THREE.Object3D, animations: THREE.AnimationClip[]) {
+    update(dt) {
+        if (this.mixer) this.mixer.update(dt);
+    }
+    async addSkele(loader: SolLoading) {
+        const { mesh, animations } = await loader.meshManager.makeMesh(this.owner.meshName);
+        this.owner.graphics.add(mesh);
         this.mixer = new THREE.AnimationMixer(mesh);
         this.mesh = mesh;
         animations.forEach((clip: AnimationClip) => {
@@ -61,5 +70,5 @@ export class SkeleSystem {
             return false;
         }
     }
-    changeTimeScale(scale: number){}
+    changeTimeScale(scale: number) { }
 }

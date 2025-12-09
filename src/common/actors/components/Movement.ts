@@ -20,8 +20,6 @@ interface movementData {
 
 export class Movement {
     owner: PhysicsActor;
-    world: SolWorld;
-    body: RigidBody;
     momentum: Momentum;
     groundChecker: GroundChecker;
     tempVec: Vector3;
@@ -34,10 +32,8 @@ export class Movement {
     _vecDir: Vector3;
     _yaw: number;
     upVec = new Vector3(0, 1, 0);
-    constructor(owner: PhysicsActor, world: SolWorld) {
+    constructor(owner: PhysicsActor) {
         this.owner = owner;
-        this.world = world
-        this.body = owner.body;
         this.momentum = new Momentum();
         this.groundChecker = new GroundChecker(this, owner.radius);
 
@@ -71,7 +67,7 @@ export class Movement {
 
     get vecPos() {
         if (!this._vecPos) this._vecPos = new Vector3();
-        return this._vecPos.copy(this.body.translation());
+        return this._vecPos.copy(this.owner.body.translation());
     }
     set vecPos(v) {
         if (!this._vecPos) this._vecPos = new Vector3();
@@ -82,7 +78,7 @@ export class Movement {
     }
     get quatRot() {
         if (!this._quatRot) this._quatRot = new Quaternion();
-        return this._quatRot.copy(this.body.rotation());
+        return this._quatRot.copy(this.owner.body.rotation());
     }
     set quatRot(v) {
         if (!this._quatRot) this._quatRot = new Quaternion();
@@ -97,21 +93,21 @@ export class Movement {
         this._yaw = v;
         this.quatRot = this.quatRot.setFromAxisAngle(this.upVec, v)
 
-        if (!this.body) return;
-        this.body.setRotation(this._quatRot, true);
+        if (!this.owner.body) return;
+        this.owner.body.setRotation(this._quatRot, true);
     }
     get velocity() {
         if (!this._vecVel) this._vecVel = new Vector3();
 
-        if (!this.body) return;
-        return this._vecVel.copy(this.body.linvel());
+        if (!this.owner.body) return;
+        return this._vecVel.copy(this.owner.body.linvel());
     }
     set velocity(v) {
         if (!this._vecVel) this._vecVel = new Vector3();
         this._vecVel.copy(v);
 
-        if (!this.body) return;
-        this.body.setLinvel(this._vecVel, true);
+        if (!this.owner.body) return;
+        this.owner.body.setLinvel(this._vecVel, true);
     }
     get vY() { return this.velocity.y }
     set vY(a) {
@@ -122,18 +118,18 @@ export class Movement {
         if (!this._vecVel) this._vecVel = new Vector3();
         this._vecVel.copy(v);
 
-        if (!this.body) return;
-        const { x, y, z } = this.body.linvel();
-        this.body.setLinvel({ x: v.x, y, z: v.z }, true);
+        if (!this.owner.body) return;
+        const { x, y, z } = this.owner.body.linvel();
+        this.owner.body.setLinvel({ x: v.x, y, z: v.z }, true);
     }
     get vecDir() {
         if (!this._vecDir) this._vecDir = new Vector3();
 
-        return this._vecDir.applyQuaternion(this.body.rotation());
+        return this._vecDir.applyQuaternion(this.owner.body.rotation());
     }
     get latVel() {
-        if (!this.body) return this.tempVec;
-        const v = this.body.linvel();
+        if (!this.owner.body) return this.tempVec;
+        const v = this.owner.body.linvel();
         v.y = 0;
         return this.tempVec.copy(v);
     }
@@ -171,11 +167,11 @@ export class Movement {
         this.friction(dt, this.speeds.idle.friction);
     }
     devFly(dir) {
-        this.body.setTranslation(this.vecPos.add(dir), true);
-        this.body.setLinvel(dir, true);
+        this.owner.body.setTranslation(this.vecPos.add(dir), true);
+        this.owner.body.setLinvel(dir, true);
     }
     jumpStart() {
-        this.vY += 25;
+        this.vY += 12;
     }
     friction(dt, amnt, exponential = true) {
         const v = this.velocity;
@@ -190,7 +186,7 @@ export class Movement {
         this.velocity = v;
     }
     accelerate(dt, wishdir, wishspeed, accel, blend = 0.01) {
-        if (!this.body) return;
+        if (!this.owner.body) return;
         const dirspeed = this.latVel.dot(wishdir);
         const addSpeed = wishspeed - dirspeed;
         if (addSpeed <= 0) return false;

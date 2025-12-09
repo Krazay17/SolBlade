@@ -35,11 +35,13 @@ export class SGame {
     }
     bindEvents(localSocket) {
         const connection = (socket) => {
-            const newSocket = this.sockets[socket.id] = socket;
+            this.sockets[socket.id] = socket;
+            socket.on("disconnect", ()=>this.leave(socket));
             for (const p of Object.values(NET.CLIENT)) {
                 const f = this[p];
                 if (typeof f === "function") {
-                    if (newSocket) newSocket.on(p, f.bind(this));
+                    const boundF = f.bind(this);
+                    socket.on(p, (data) => boundF(data, socket));
                 } else {
                     console.warn(`No function ${p}`);
                 }
@@ -48,11 +50,20 @@ export class SGame {
         if (localSocket) connection(localSocket);
         this.io.on("connection", connection);
     }
-    join(data) {
-        console.log('sjoin')
-        // const { id, worldName } = data;
-        // this.worlds[worldName].addPlayer(id, data);
+    join(data, socket) {
+        const { worldName } = data;
+        this.sockets[socket.id].worldName = worldName;
+        this.worlds[worldName].addPlayer(socket.id, data);
         this.io.emit(NET.SERVER.WELCOME, "welcome!");
+    }
+    leave(socket){
+        const id = socket.id;
+        const worldName = this.sockets[id].worldName;
+        const world = this.worlds[worldName];
+        world.removePlayer(id);
+    }
+    input(data, socket){
+        
     }
     serverTest(cb) {
         //if (cb) cb(NET.SERVER.TEST);

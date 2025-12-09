@@ -1,7 +1,6 @@
 import IdleState from "@solblade/server/actors/states/IdleState";
 import PatrolState from "@solblade/server/actors/states/PatrolState";
 import { Pawn } from "../../core/Interfaces";
-import State from "./State";
 
 const stateRegistry = {
     idle: IdleState,
@@ -30,7 +29,6 @@ export default class FSM<T extends Pawn> {
     }
     setState(state, params) {
         const lastState = this.stateName;
-        console.log(state, lastState)
         if (state === lastState && !this.state.canReEnter) return false
         const newState = this.states[state]
         if (!newState) return;
@@ -45,7 +43,7 @@ export default class FSM<T extends Pawn> {
         this.state.enter(lastState, params);
         this.stateName = state;
 
-        console.log(`state: ${state} last: ${lastState}`);
+        console.log(`${state} prev: ${lastState}`);
 
         return true;
     }

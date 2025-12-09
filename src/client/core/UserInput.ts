@@ -13,7 +13,7 @@ export class UserInput extends Controller {
   direction = new Vector3();
   keys = {};
   mice = {};
-  look = null;
+  look = (y, p) => { };
   lockMouse = false;
   inputBlocked = false;
   sensitivity = 0.0016;

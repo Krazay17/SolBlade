@@ -8,40 +8,33 @@ import { SkeleSystem } from "../components/SkeleSystem.js";
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { CActor } from "../CActor.js";
 import { playerStateRegistry } from "./states/StateReg.js";
+import { PhysicsActor, Player } from "@solblade/common/core/Interfaces.js";
 
-export default class CPlayer {
+export default class CPlayer extends CActor implements Player {
     game: CGame;
-    meshName: string;
-    pos: number[];
-    graphics: Group;
+    controller: UserInput;
     cameraArm: Group;
     camera: PerspectiveCamera;
     animation: SkeleSystem;
-    controller: UserInput;
-    movement: Movement;
-    fsm: FSM;
-    world: CWorld;
+    fsm: FSM<Player>;
     actor: CActor
     tempVec: Vector3;
+    physics: PhysicsActor;
     constructor(game: CGame, data: any = {}) {
-        const {
-            meshName = "spikeMan",
-            pos = [0, 10, 0],
-            rot = [0, 0, 0, 1],
-        } = data;
+        super(game.world, {
+            ...data,
+            type: "player",
+        });
         this.game = game;
-        this.meshName = meshName;
-        this.pos = pos;
 
         this.graphics = new Group();
         this.game.scene.add(this.graphics);
         this.cameraArm = new Group();
         this.graphics.add(this.cameraArm);
-        /**@type {PerspectiveCamera} */
         this.camera = this.game.camera;
         this.camera.position.set(.333, .666, 1.333);
         this.cameraArm.add(this.camera);
-        this.animation = new SkeleSystem();
+        this.animation = new SkeleSystem(this);
 
         this.controller = this.game.input;
         this.controller.look = (y, p) => this.look(y, p);
@@ -50,34 +43,29 @@ export default class CPlayer {
 
         this.tempVec = new Vector3();
     }
-    get body() { return this.actor.body }
-    get collider() { return this.actor.collider }
     async init() {
-        const { mesh, animations } = await this.game.loader.meshManager.makeMesh(this.meshName);
-        await this.animation.addSkele(mesh, animations);
-
-        this.graphics.add(mesh);
+        await this.animation.addSkele(this.game.loader);
     }
     setWorld(world: CWorld) {
         this.world = world;
-        if (!this.actor) this.actor = new CActor(world, {pos: this.pos});
-        else this.actor.world = world;
-        if (!this.movement) this.movement = new Movement(this.actor, world);
-        else this.movement.world = world;
+        const { body, collider } = this.world.physics.makeCapsule();
+        body.setTranslation({ x: this.pos[0], y: this.pos[1], z: this.pos[2] }, false);
+        this.body = body;
+        this.collider = collider;
     }
     look(yaw, pitch) {
-        if (this.actor) this.movement.yaw = yaw;
+        if (this.body) this.movement.yaw = yaw;
         this.cameraArm.rotation.x = pitch;
     }
     tick(dt) {
-        if (!this.actor) return;
+        if (!this.body) return;
         if (this.fsm) this.fsm.update(dt);
         if (this.controller.actionStates[ACTIONS.DEVFLY]) {
             this.movement.devFly(this.aim().camDir);
         }
 
-        this.graphics.position.copy(this.actor.body.translation());
-        this.graphics.quaternion.copy(this.actor.body.rotation())
+        this.graphics.position.copy(this.body.translation());
+        this.graphics.quaternion.copy(this.body.rotation())
         this.animation.update(dt);
     }
     aim() {
