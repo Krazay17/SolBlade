@@ -20,7 +20,7 @@ export default class MainMenu {
             if (e.key === 'Escape') {
                 this.toggle();
             }
-        })
+        });
     }
     init() {
         const root = document.createElement('div');

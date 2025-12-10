@@ -1,6 +1,6 @@
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { vectorsToLateralDegrees } from "@solblade/common/utils/Utils.js";
-import Actor from "../Actor";
+import {Actor} from "../Actor";
 
 export default class State {
     fsm: FSM;

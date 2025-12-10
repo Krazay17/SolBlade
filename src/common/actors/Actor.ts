@@ -7,23 +7,30 @@ import { Movement } from "./components/Movement";
 import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
 import FSM from "./states/FSM";
 
-export default class Actor {
-    components = new Map<Function, any>();
-    id: string;
-    tempId: string;
-    type: string;
-    subtype: string;
-    name: string;
-    owner: string;
-    worldName: string;
-    meshName: string;
-    pos: number[];
-    rot: number[];
-    active: boolean;
-    isRemote: boolean;
-    lifetime: number;
-    age: number;
-    timestamp: number;
+export interface ActorInint {
+    id?: string;
+    owner?: string;
+    type?: string;
+    name?: string;
+    model?: string;
+    worldName?: string;
+    pos?: number[];
+    rot?: number[];
+    active?: boolean;
+    lifetime?: number;
+}
+
+export class Actor implements ActorInint {
+    id?: string;
+    type?: string;
+    name?: string;
+    owner?: string;
+    worldName?: string;
+    model?: string;
+    pos?: number[];
+    rot?: number[];
+    active?: boolean;
+    lifetime?: number;
 
     controller?: Controller;
     movement?: Movement;
@@ -36,41 +43,25 @@ export default class Actor {
     graphics?: Group;
     actorUpdate?: ActorUpdate;
 
+    components = new Map<Function, any>();
+    age = 0;
     _vecPos: Vector3;
     _quatRot: Quaternion;
-    constructor(data: any = {}) {
-        const {
-            id = '1',
-            tempId = data.tempId ?? crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2, 10),
-            type = 'player',
-            subtype = null,
-            name = "actor",
-            owner = null,
-            worldName = 'world1',
-            meshName = "spikeMan",
-            pos = [0, 0, 0],
-            rot = [0, 0, 0, 1],
-            active = true,
-            isRemote = true,
-            lifetime = 0,
-        } = data;
+    timestamp: number;
+    constructor(data: ActorInint = {}) {
+        this.id = data.id ?? crypto.randomUUID();
+        this.type = data.type;
+        this.name = data.name;
+        this.owner = data.owner ?? null;
+        this.worldName = data.worldName;
+        this.model = data.model;
 
-        this.id = id;
-        this.tempId = tempId;
-        this.type = type;
-        this.subtype = subtype;
-        this.name = name;
-        this.owner = owner;
-        this.worldName = worldName;
-        this.meshName = meshName;
+        this.pos = data.pos ?? [0, 1, 0];
+        this.rot = data.rot ?? [0, 0, 0, 1];
 
-        this.pos = pos;
-        this.rot = rot;
+        this.active = data.active;
 
-        this.active = active;
-        this.isRemote = isRemote;
-        this.lifetime = lifetime;
-        this.age = 0;
+        this.lifetime = data.lifetime;
         this.timestamp = performance.now();
     }
     get vecPos() {
@@ -90,7 +81,7 @@ export default class Actor {
         return component;
     }
     get<T>(ctor: new (...args: any[]) => T): T {
-        const v = this.get(ctor);
+        const v = this.components.get(ctor);
         if (!v) throw new Error(`Missing component: ${ctor.name}`);
         return v;
     }
@@ -99,7 +90,7 @@ export default class Actor {
             comp.tick?.(dt);
         }
     }
-    aim(){
+    aim() {
         return {
             dir: undefined,
             camDir: undefined,
@@ -108,19 +99,16 @@ export default class Actor {
     serialize() {
         return {
             id: this.id,
-            tempId: this.tempId,
             type: this.type,
-            subtype: this.subtype,
             name: this.name,
             owner: this.owner,
             worldName: this.worldName,
-            meshName: this.meshName,
+            model: this.model,
 
             pos: this.pos,
             rot: this.rot,
 
             active: this.active,
-            isRemote: this.isRemote,
             lifetime: this.lifetime,
             age: this.age,
             timestamp: this.timestamp,

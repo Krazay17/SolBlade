@@ -5,6 +5,7 @@ import { CGame } from "./CGame.js";
 import { SolLoading } from "./SolLoading.js";
 import { SolRender } from "./SolRender.js";
 import { CNet } from "./CNet.js";
+import solSave from "./SolSave.js";
 
 await RAPIER.init();
 
@@ -80,6 +81,14 @@ class App {
         window.addEventListener("blur", () => {
             this.focused = false;
         });
+        window.addEventListener("beforeunload", ()=>{
+            solSave.name = this.game.player.name;
+
+            solSave.save({
+                name: this.game.player.name,
+                money: this.game.player.money,
+            });
+        })
     }
 }
 

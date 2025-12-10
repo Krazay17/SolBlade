@@ -1,5 +1,5 @@
 
-import Actor from "@solblade/common/actors/Actor";
+import {Actor} from "@solblade/common/actors/Actor";
 import Controller from "@solblade/common/actors/components/Controller";
 
 export default class AIController extends Controller {

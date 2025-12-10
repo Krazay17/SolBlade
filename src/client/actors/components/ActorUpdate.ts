@@ -1,4 +1,4 @@
-import Actor from "@solblade/common/actors/Actor";
+import {Actor} from "@solblade/common/actors/Actor";
 
 export class ActorUpdate {
     owner: Actor;

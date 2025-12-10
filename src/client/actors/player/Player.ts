@@ -7,7 +7,7 @@ import { SkeleSystem } from "../components/SkeleSystem.js";
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { playerStateRegistry } from "./states/StateReg.js";
 import { Movement } from "@solblade/common/actors/components/Movement.js";
-import Actor from "@solblade/common/actors/Actor.js";
+import { Actor, ActorInint } from "@solblade/common/actors/Actor.js";
 
 export class Player extends Actor {
     declare controller?: UserInput;
@@ -15,7 +15,9 @@ export class Player extends Actor {
     cameraArm: Group;
     camera: PerspectiveCamera;
     tempVec: Vector3;
-    constructor(game: CGame, data: any = {}) {
+
+    money: number;
+    constructor(game: CGame, data: ActorInint = {}) {
         super({
             ...data,
             type: "player",
@@ -54,6 +56,7 @@ export class Player extends Actor {
         this.cameraArm.rotation.x = pitch;
     }
     tick(dt) {
+        super.tick(dt);
         if (!this.body) return;
         if (this.fsm) this.fsm.update(dt);
         if (this.controller.actionStates[ACTIONS.DEVFLY]) {

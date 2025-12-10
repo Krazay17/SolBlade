@@ -21,7 +21,7 @@ export class SGame {
 
         this.worlds = {
             world1: new SWorld("world1"),
-            //world2: new SWorld("world2")
+            world2: new SWorld("world2")
         }
     }
     async start(loop = true, localSocket) {

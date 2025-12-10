@@ -3,7 +3,6 @@ import { SolLoading } from "@solblade/client/core/SolLoading.js"
 import SolWorld from "@solblade/common/core/SolWorld.js";
 import SkyBox from "./SkyBox.js";
 import { CGame } from "../core/CGame.js";
-import { spawnActor } from "@solblade/common/core/ActorFactory.js";
 import { spawnA } from "@solblade/common/core/AFactory.js";
 
 export class CWorld extends SolWorld {
@@ -58,16 +57,17 @@ export class CWorld extends SolWorld {
             this.actors.delete(k);
         });
     }
-    updateState(data) {
+    updateState(data: any) {
         for (const d of data) {
-            const { id, worldName, meshName } = d;
+            const { id, worldName } = d;
             if (id === this.game.player.id || worldName !== this.name) continue;
             const actor = this.actors.get(id);
             if (actor) {
-                actor.actorUpdate.update(d);
+                actor.actorUpdate?.update(d);
             } else {
                 const newActor = spawnA(this, d.type, "remote", d);
                 this.actors.set(id, newActor);
+                if(newActor.graphics)this.scene.add(newActor.graphics);
             }
         }
     }

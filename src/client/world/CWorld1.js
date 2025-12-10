@@ -1,4 +1,4 @@
-import { CWorld } from "./CWorld.js";
+import { CWorld } from "./CWorld";
 
 export class CWorld1 extends CWorld {
     constructor(game) {

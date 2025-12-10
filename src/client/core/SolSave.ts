@@ -1,13 +1,23 @@
 const CURRENT_VERSION = 0.01;
-class SolSave {
+
+interface SaveData {
+    version?: number;
+    name?: string;
+    worldName?: string;
+    money?: number;
+}
+
+class SolSave implements SaveData {
     version = CURRENT_VERSION;
     name = "Player";
-    worldName = "world1";
+    worldName = "world2";
     money = 100;
-    save() {
+    save(newData: SaveData = {}) {
         const data = {
-            version: this.version,
-            worldName: this.worldName,
+            version: newData.version ?? this.version,
+            name: newData.name ?? this.name,
+            worldName: newData.worldName ?? this.worldName,
+            money: newData.money ?? this.money,
         }
         localStorage.setItem("SolBladeSave", JSON.stringify(data))
     }

@@ -1,4 +1,4 @@
-import Actor from "@solblade/common/actors/Actor.js";
+import { Actor } from "@solblade/common/actors/Actor.js";
 import { spawnA } from "@solblade/common/core/AFactory";
 import SolWorld from "@solblade/common/core/SolWorld.js";
 
@@ -11,6 +11,8 @@ export class SWorld extends SolWorld {
         await this.physics.makeWorld(this.name);
         const enemies = 1;
         for (let i = 0; i < enemies; i++) {
+            const actor = spawnA(this, "wizard", "server", { id: this.actorIndex++, pos: [0, 1, -5], worldName: "world2" });
+            this.actors.set(actor.id, actor);
         }
     }
     addPlayer(id, data) {
@@ -19,9 +21,9 @@ export class SWorld extends SolWorld {
         this.actors.set(id, actor);
         this.players.set(id, actor);
     }
-    removePlayer(id){
+    removePlayer(id) {
         const player = this.players.get(id);
-        if(!player)return;
+        if (!player) return;
         this.players.delete(id);
         this.actors.delete(id);
     }

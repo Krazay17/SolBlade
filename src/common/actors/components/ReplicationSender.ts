@@ -1,4 +1,4 @@
-import Actor from "../Actor";
+import {Actor} from "../Actor";
 
 export class ReplicationSender {
     actor: Actor

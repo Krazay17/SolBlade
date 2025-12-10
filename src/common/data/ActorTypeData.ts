@@ -1,6 +1,6 @@
 import AIController from "@solblade/server/core/AIController";
 import { Movement } from "../actors/components/Movement";
-import Actor from "../actors/Actor";
+import { Actor } from "../actors/Actor";
 
 interface PhysicsConfig {
     shape: "capsule" | "box";

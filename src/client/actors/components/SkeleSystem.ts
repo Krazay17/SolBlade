@@ -1,10 +1,10 @@
 import { SolLoading } from "@solblade/client/core/SolLoading";
-import { Pawn } from "@solblade/common/actors/Pawn";
+import { Actor } from "@solblade/common/actors/Actor";
 import type { AnimationClip } from "three";
 import * as THREE from "three";
 
 export class SkeleSystem {
-    pawn: Pawn
+    actor: Actor
     mesh = null;
     mixer: THREE.AnimationMixer | null = null;
     currentAction: THREE.AnimationAction | null = null
@@ -12,15 +12,15 @@ export class SkeleSystem {
     animations: Record<string, AnimationClip> = {};
     _onFinishedListener: any;
     quedAnim: any;
-    constructor(pawn: Pawn) {
-        this.pawn = pawn;
+    constructor(actor: Actor) {
+        this.actor = actor;
     }
     update(dt) {
         if (this.mixer) this.mixer.update(dt);
     }
     async addSkele(loader: SolLoading) {
-        const { mesh, animations } = await loader.meshManager.makeMesh(this.pawn.meshName);
-        this.pawn.graphics.add(mesh);
+        const { mesh, animations } = await loader.meshManager.makeMesh(this.actor.model);
+        this.actor.graphics.add(mesh);
         this.mixer = new THREE.AnimationMixer(mesh);
         this.mesh = mesh;
         animations.forEach((clip: AnimationClip) => {

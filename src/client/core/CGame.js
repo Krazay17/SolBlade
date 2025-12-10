@@ -1,13 +1,12 @@
 import { Player } from "@solblade/client/actors/player/Player.js";
 import { UserInput } from "@solblade/client/core/UserInput.js";
 import { NET } from "@solblade/common/net/NetProtocol.js";
+import { Scene } from "three";
 import { CWorld } from "../world/CWorld.js";
-import { CWorld1 } from "../world/index.js";
+import { CWorld1 } from "../world/CWorld1.js";
+import { CWorld2 } from "../world/CWorld2.js";
 import { SolLoading } from "./SolLoading.js";
 import solSave from "./SolSave.js";
-import { Scene } from "three";
-import { CameraComponent } from "@solblade/common/actors/components/CameraComponent.js";
-import { AttachBox } from "@solblade/common/actors/components/AttachBox.js";
 
 export class CGame {
     /**@type {CWorld} */
@@ -30,13 +29,14 @@ export class CGame {
 
         this.worldRegistry = {
             world1: CWorld1,
+            world2: CWorld2,
         }
 
         this.player = new Player(this, {
-            meshName: "spikeMan",
+            worldName: solSave.worldName,
+            model: "spikeMan",
             pos: [0, 10, 0],
         });
-        this.player.add(new AttachBox(this.player));
 
         window.addEventListener('keydown', (e) => {
             if (e.code !== "KeyE") return;
@@ -86,7 +86,7 @@ export class CGame {
         console.timeEnd("test");
     }
     step(dt) {
-        this.world.step(dt);
+        if (this.world) this.world.step(dt);
     }
     snap(data) {
         this.world?.updateState(data);

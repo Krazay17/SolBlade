@@ -1,19 +1,20 @@
 import { Group } from "three";
-import Actor from "../Actor";
+import { Actor } from "../Actor";
 
 export class RemoteInterpolation {
     actor: Actor
-    groups: Group[];
-    constructor(actor: Actor, groups?: Group[]) {
+    groups: Group[] = [];
+    constructor(actor: Actor, group?: Group) {
         this.actor = actor;
-        this.groups = groups;
+        this.addGroup(group);
     }
-    addGroup(group){
+    addGroup(group: Group) {
         this.groups.push(group);
     }
     tick(dt: number) {
-        if (!this.groups) return;
+        if (this.groups.length < 1) return;
         for (const g of this.groups) {
+            if (g === undefined) return;
             const to = this.actor.vecPos;
             const from = g.position;
             const dist = g.position.distanceTo(this.actor.vecPos);

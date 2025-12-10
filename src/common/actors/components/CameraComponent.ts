@@ -1,5 +1,5 @@
 import { PerspectiveCamera } from "three";
-import Actor from "../Actor";
+import {Actor} from "../Actor";
 
 export class CameraComponent {
     actor: Actor;
