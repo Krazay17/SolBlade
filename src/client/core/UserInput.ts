@@ -131,7 +131,13 @@ export class UserInput extends Controller {
     this.direction.set(rotatedX, 0, rotatedZ).normalize();
     return this.direction;
   }
-
+  aim(){
+    console.log(this.direction);
+    return {
+      dir: this.direction,
+      camDir: undefined,
+    }
+  }
 }
 function addKeys() {
   addButton('KeyUnpressed', 'KeyW', 'Fwd', 1, 2);

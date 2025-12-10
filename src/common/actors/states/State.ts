@@ -24,13 +24,14 @@ export default class State {
     canEnter(state) { return true }
     canExit(state) { return true }
 
-    pivot(useVel = false, moveDir = this.controller.direction, lookDir = this.actor.controller.aim().dir) {
+    pivot(useVel = false, moveDir = this.controller.direction, lookDir = this.actor.aim?.().dir) {
         if (useVel) {
             moveDir = this.movement.velocity;
             const lateral = Math.atan2(moveDir.x, moveDir.z);
             if (lateral === 0) return "Neutral";
             moveDir.normalize();
         }
+        if(!lookDir)return "Front";
         let angleDeg = vectorsToLateralDegrees(lookDir, moveDir);
         const sector = Math.floor((angleDeg + 22.5) / 45) % 8;
         switch (sector) {

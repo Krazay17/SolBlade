@@ -6,5 +6,5 @@ export default class Controller {
     inputDirection(): Vector3 | boolean { return this.direction }
     aim() { return { dir: null, camDir: null } }
     update(dt: number) { }
-    look(y, p){}
+    look(y, p) { }
 }

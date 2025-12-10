@@ -8,6 +8,7 @@ import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
 import FSM from "./states/FSM";
 
 export default class Actor {
+    components = new Map<Function, any>();
     id: string;
     tempId: string;
     type: string;
@@ -29,7 +30,6 @@ export default class Actor {
     animation?: SkeleSystem;
     fsm?: FSM;
 
-    components = new Map<string, any>();
     body?: RigidBody;
     world?: SolWorld;
     collider?: Collider;
@@ -85,16 +85,24 @@ export default class Actor {
         this.id = id;
         console.log(id);
     }
-    add<T>(key: string, c: T): T {
-        this.components.set(key, c);
-        return c;
+    add<T>(component: T): T {
+        this.components.set((component as any).constructor, component);
+        return component;
     }
-    get<T>(key: string): T {
-        return this.components.get(key);
+    get<T>(ctor: new (...args: any[]) => T): T {
+        const v = this.get(ctor);
+        if (!v) throw new Error(`Missing component: ${ctor.name}`);
+        return v;
     }
     tick(dt: number) {
         for (const comp of this.components.values()) {
             comp.tick?.(dt);
+        }
+    }
+    aim(){
+        return {
+            dir: undefined,
+            camDir: undefined,
         }
     }
     serialize() {

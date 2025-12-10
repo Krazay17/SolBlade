@@ -6,6 +6,8 @@ import { CWorld1 } from "../world/index.js";
 import { SolLoading } from "./SolLoading.js";
 import solSave from "./SolSave.js";
 import { Scene } from "three";
+import { CameraComponent } from "@solblade/common/actors/components/CameraComponent.js";
+import { AttachBox } from "@solblade/common/actors/components/AttachBox.js";
 
 export class CGame {
     /**@type {CWorld} */
@@ -34,6 +36,7 @@ export class CGame {
             meshName: "spikeMan",
             pos: [0, 10, 0],
         });
+        this.player.add(new AttachBox(this.player));
 
         window.addEventListener('keydown', (e) => {
             if (e.code !== "KeyE") return;
