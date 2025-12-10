@@ -10,9 +10,9 @@ export default class PatrolState extends State {
     update(dt) {
         this.accumulator += dt;
 
-        this.movement.smartMove(dt);
+        this.movement.smartMove(dt, this.controller.direction);
 
-        if(this.accumulator > 5000) {
+        if (this.accumulator > 5000) {
             this.reverse = -1;
             this.accumulator = 0;
         }

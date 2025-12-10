@@ -1,22 +1,22 @@
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { vectorsToLateralDegrees } from "@solblade/common/utils/Utils.js";
-import { Pawn } from "../Pawn";
+import Actor from "../Actor";
 
 export default class State {
     fsm: FSM;
-    pawn: Pawn;
+    actor: Actor;
     name: string = "state";
     canReEnter: boolean = false;
     enterTime = 0;
     duration = 0;
     cd = 0;
-    constructor(fsm: FSM, pawn: Pawn) {
+    constructor(fsm: FSM, actor: Actor) {
         this.fsm = fsm;
-        this.pawn = pawn;
+        this.actor = actor;
     }
-    get controller() { return this.pawn.controller }
-    get movement() { return this.pawn.movement }
-    get animation() { return this.pawn.animation }
+    get controller() { return this.actor.controller }
+    get movement() { return this.actor.movement }
+    get animation() { return this.actor.animation }
     setState(state: string, params?: any) { this.fsm.setState(state, params) }
     enter(state: string, params: any = {}) { }
     exit(state) { }
@@ -24,7 +24,7 @@ export default class State {
     canEnter(state) { return true }
     canExit(state) { return true }
 
-    pivot(useVel = false, moveDir = this.controller.direction, lookDir = this.pawn.aim().dir) {
+    pivot(useVel = false, moveDir = this.controller.direction, lookDir = this.actor.controller.aim().dir) {
         if (useVel) {
             moveDir = this.movement.velocity;
             const lateral = Math.atan2(moveDir.x, moveDir.z);

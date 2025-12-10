@@ -2,6 +2,10 @@ import { Collider, RigidBody } from "@dimforge/rapier3d-compat";
 import SolWorld from "../core/SolWorld";
 import { Group, Quaternion, Vector3 } from "three";
 import { ActorUpdate } from "@solblade/client/actors/components/ActorUpdate";
+import Controller from "./components/Controller";
+import { Movement } from "./components/Movement";
+import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
+import FSM from "./states/FSM";
 
 export default class Actor {
     id: string;
@@ -19,6 +23,11 @@ export default class Actor {
     lifetime: number;
     age: number;
     timestamp: number;
+
+    controller?: Controller;
+    movement?: Movement;
+    animation?: SkeleSystem;
+    fsm?: FSM;
 
     components = new Map<string, any>();
     body?: RigidBody;

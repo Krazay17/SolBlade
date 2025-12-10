@@ -1,14 +1,15 @@
-import { Pawn } from "../Pawn";
+import Actor from "../Actor";
+
 
 export default class FSM {
-    pawn: Pawn;
+    actor: Actor;
     states: Record<string, any> = {};
     state: any | null = null;
     stateName: string;
-    constructor(pawn: Pawn, states: Record<string, any> = {}) {
-        this.pawn = pawn;
+    constructor(actor: Actor, states: Record<string, any> = {}) {
+        this.actor = actor;
         for (const [name, stateClass] of Object.entries(states)) {
-            this.states[name] = new stateClass(this, pawn);
+            this.states[name] = new stateClass(this, actor);
         }
         if (this.states['idle']) this.state = this.states['idle'];
         this.stateName = 'idle';

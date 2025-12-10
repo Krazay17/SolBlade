@@ -1,14 +1,14 @@
 
+import Actor from "@solblade/common/actors/Actor";
 import Controller from "@solblade/common/actors/components/Controller";
-import { Pawn } from "@solblade/common/actors/Pawn";
 
 export default class AIController extends Controller {
-    pawn: Pawn;
+    actor: Actor;
     aggroRadius: number;
     blackboard: any;
-    constructor(pawn: Pawn, data: any = {}) {
+    constructor(actor: Actor, data: any = {}) {
         super();
-        this.pawn = pawn;
+        this.actor = actor;
         const {
             aggroRadius = 20
         } = data;
@@ -19,19 +19,19 @@ export default class AIController extends Controller {
     update(dt) {
         this.blackboard = this.findNearestPlayer();
         if (!this.blackboard.player) {
-            this.pawn.fsm.setState('patrol');
+            this.actor.fsm.setState('patrol');
         }
     }
     inputDirection() {
         return this.blackboard.dir;
     }
     findNearestPlayer() {
-        const players = this.pawn.world.players
+        const players = this.actor.world.players
         if (!players) return {};
 
         // get this enemy's position
-        if(!this.pawn.movement)return;
-        const pos = this.pawn.movement.vecPos
+        if (!this.actor.movement) return;
+        const pos = this.actor.movement.vecPos
 
         // find nearest player
         let nearest = null;

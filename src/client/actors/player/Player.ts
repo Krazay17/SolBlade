@@ -6,10 +6,10 @@ import { CWorld } from "../../world/CWorld.js";
 import { SkeleSystem } from "../components/SkeleSystem.js";
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { playerStateRegistry } from "./states/StateReg.js";
-import { Pawn } from "@solblade/common/actors/Pawn.js";
 import { Movement } from "@solblade/common/actors/components/Movement.js";
+import Actor from "@solblade/common/actors/Actor.js";
 
-export class Player extends Pawn {
+export class Player extends Actor {
     declare controller?: UserInput;
     game: CGame;
     cameraArm: Group;
