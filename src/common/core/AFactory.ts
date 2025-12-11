@@ -36,8 +36,8 @@ export function spawnA<T extends keyof typeof actorType>(
         actor.add(new RemoteInterpolation(actor, group));
         if (def.model && world.loader) {
             const skelesys = new SkeleSystem(actor);
-            if (actor.model) skelesys.addSkele(world.loader);
-            actor.add(skelesys);
+            skelesys.addSkele(world.loader);
+            actor.animation = skelesys;
         }
     }
     if (role === "server") {

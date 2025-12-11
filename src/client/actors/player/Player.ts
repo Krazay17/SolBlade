@@ -74,7 +74,7 @@ export class Player extends Actor {
         this.quatRot = this.body.rotation();
         this.graphics.position.copy(this.body.translation());
         this.graphics.quaternion.copy(this.body.rotation());
-        this.animation.update(dt);
+        //this.animation.update(dt);
         this.replicator.tick(dt);
     }
     aim() {

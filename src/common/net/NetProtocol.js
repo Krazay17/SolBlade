@@ -6,6 +6,7 @@ export const NET = {
         LEAVE: "leave",
         INPUT: "input",
         PLAYER_MOVED: "playerMoved",
+        PLAYER_ANIM: "playerAnim",
     },
     SERVER: {
         TEST: "clientTest",

@@ -5,7 +5,12 @@ import Controller from "./components/Controller";
 import { Movement } from "./components/Movement";
 import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
 import FSM from "./states/FSM";
-
+interface Anim {
+    name: string;
+    time: number;
+    scale: number;
+    loop: boolean;
+}
 export interface ActorInint {
     id?: string;
     owner?: string;
@@ -28,6 +33,7 @@ export class Actor implements ActorInint {
     model?: string;
     pos?: number[];
     rot?: number[];
+    anim?: Anim;
     active?: boolean;
     lifetime?: number;
 
@@ -48,18 +54,18 @@ export class Actor implements ActorInint {
     timestamp: number;
     constructor(data: ActorInint = {}) {
         this.id = data.id ?? crypto.randomUUID();
-        this.type = data.type;
-        this.name = data.name;
+        this.type = data.type ?? "wizard";
+        this.name = data.name ?? "Dude";
         this.owner = data.owner ?? null;
-        this.worldName = data.worldName;
-        this.model = data.model;
+        this.worldName = data.worldName ?? "world1";
+        this.model = data.model ?? "Wizard";
 
         this.pos = data.pos ?? [0, 1, 0];
         this.rot = data.rot ?? [0, 0, 0, 1];
 
-        this.active = data.active;
+        this.active = data.active ?? true;
 
-        this.lifetime = data.lifetime;
+        this.lifetime = data.lifetime ?? undefined;
         this.timestamp = performance.now();
     }
     get vecPos() {
@@ -102,6 +108,7 @@ export class Actor implements ActorInint {
         for (const comp of this.components.values()) {
             comp.tick?.(dt);
         }
+        if(this.animation)this.animation.update(dt);
     }
     aim() {
         return {
@@ -117,6 +124,7 @@ export class Actor implements ActorInint {
             owner: this.owner,
             worldName: this.worldName,
             model: this.model,
+            anim: this.anim,
 
             pos: this.pos,
             rot: this.rot,

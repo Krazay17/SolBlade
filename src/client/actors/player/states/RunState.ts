@@ -4,7 +4,7 @@ import { ACTIONS } from "@solblade/client/config/Actions";
 export default class RunState extends State {
     update(dt) {
         if (!this.movement.groundChecker.isGrounded()) return this.setState('fall');
-        if(this.controller.actionStates[ACTIONS.JUMP]) return this.setState("jump");
+        if (this.controller.actionStates[ACTIONS.JUMP]) return this.setState("jump");
         const dir = this.controller.inputDirection();
         if (!dir) return this.setState('idle');
         this.movement.smartMove(dt, dir);
@@ -13,19 +13,19 @@ export default class RunState extends State {
 
         switch (this.pivot()) {
             case "Front":
-                this.animation.playAnimation('run');
+                this.animation.playAnimation({ name: 'run' });
                 break;
             case 'Back':
-                this.animation.playAnimation('runBwd');
+                this.animation.playAnimation({ name: 'runBwd' });
                 break;
             case 'Left':
-                this.animation.playAnimation('strafeLeft');
+                this.animation.playAnimation({ name: 'strafeLeft' });
                 break;
             case 'Right':
-                this.animation.playAnimation('strafeRight');
+                this.animation.playAnimation({ name: 'strafeRight' });
                 break;
             default:
-                this.animation.playAnimation('run');
+                this.animation.playAnimation({ name: 'run' });
         }
     }
 }

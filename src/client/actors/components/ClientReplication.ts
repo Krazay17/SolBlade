@@ -7,6 +7,7 @@ export class ClientReplication {
     net: CNet
     lastPos: number[] = [0, 0, 0];
     lastRot: number[] = [0, 0, 0, 0];
+    lastAnim: string = "";
     constructor(actor: Actor, net: CNet) {
         this.actor = actor;
         this.net = net;
@@ -14,6 +15,7 @@ export class ClientReplication {
     tick(dt: number) {
         let update: any = {};
         const { pos, rot } = this.actor;
+        const anim = this.actor.animation.getAnim()
 
         if (!this.lastPos.every((v, i) => v === pos[i])) {
             this.lastPos = [...pos];
@@ -25,6 +27,10 @@ export class ClientReplication {
         }
         if (update.pos || update.rot) {
             this.net.emit(NET.CLIENT.PLAYER_MOVED, update);
+        }
+        if (this.lastAnim !== anim.name) {
+            this.lastAnim = anim.name;
+            this.net.emit(NET.CLIENT.PLAYER_ANIM, anim);
         }
     }
 }

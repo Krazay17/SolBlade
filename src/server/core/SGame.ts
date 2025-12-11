@@ -72,6 +72,12 @@ export class SGame {
     input(data, socket) {
         const user = this.users[socket.id];
     }
+    playerAnim(anim, socket) {
+        const user = this.users[socket.id];
+        if (user.actor) {
+            user.actor.anim = anim;
+        }
+    }
     playerMoved(data, socket) {
         const user = this.users[socket.id];
         if (user.actor) {

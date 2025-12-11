@@ -46,6 +46,9 @@ export class CGame {
             this.net.emit(NET.CLIENT.TEST, "test");
         });
     }
+    clientTest() {
+        console.timeEnd("test");
+    }
     async start() {
         await this.newWorld(solSave.worldName);
     }
@@ -82,9 +85,6 @@ export class CGame {
     tick(dt) {
         if (this.world) this.world.tick(dt);
         this.player.tick(dt);
-    }
-    clientTest() {
-        console.timeEnd("test");
     }
     step(dt) {
         if (this.world) this.world.step(dt);

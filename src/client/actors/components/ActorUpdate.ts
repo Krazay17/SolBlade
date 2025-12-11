@@ -9,10 +9,11 @@ export class ActorUpdate {
         this.actor = actor;
     }
     update(data: Actor) {
-        const { name, pos, rot } = data;
+        const { name, pos, rot, anim } = data;
         this.updateName(name);
         this.updatePos(pos);
         this.updateRot(rot);
+        this.updateAnim(anim);
     }
     updateName(name: string) {
         if (!name) return;
@@ -33,5 +34,9 @@ export class ActorUpdate {
         if (current.length === rot.length && current.every((v, i) => v === rot[i])) return;
         this.actor.rot = rot;
         if (this.onUpdateRot) this.onUpdateRot(rot);
+    }
+    updateAnim(anim) {
+        if(!anim)return;
+        this.actor.anim = anim;
     }
 }

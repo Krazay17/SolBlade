@@ -4,26 +4,23 @@ import { ACTIONS } from "@solblade/client/config/Actions";
 export default class IdleState extends State {
     enter(state, params) {
         if (!this.movement.isGrounded) return this.setState('fall');
-        if (state === 'attack') return this.idle();
+        if (state === 'attack') return this.animation?.playAnimation({ name: "idle" });
         switch (this.pivot()) {
             case 'Front':
-                this.animation?.playAnimation('runStopFwd', false, false, () => this.idle()) || this.idle();
+                this.animation?.playAnimation({ name: 'runStopFwd', loop: false }, { name: "idle" });
                 break;
             case 'Left':
-                this.animation?.playAnimation('runStopLeft', false, false, () => this.idle()) || this.idle();
+                this.animation?.playAnimation({ name: 'runStopLeft', loop: false }, { name: "idle" });
                 break;
             case 'Right':
-                this.animation?.playAnimation('runStopRight', false, false, () => this.idle()) || this.idle();
+                this.animation?.playAnimation({ name: 'runStopRight', loop: false }, { name: "idle" });
                 break;
             case 'Back':
-                this.animation?.playAnimation('runStopBack', false, false, () => this.idle()) || this.idle();
+                this.animation?.playAnimation({ name: "idle" });
                 break;
             default:
-                this.idle();
+                this.animation?.playAnimation({ name: "idle" });
         }
-    }
-    idle() {
-        this.animation?.playAnimation('idle', true);
     }
     update(dt) {
         if (this.controller.actionStates[ACTIONS.JUMP]) return this.setState("jump");

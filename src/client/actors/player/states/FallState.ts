@@ -13,19 +13,19 @@ export default class FallState extends State {
     anim() {
         switch (this.pivot(true)) {
             case 'Front':
-                this.animation?.playAnimation('fall', true);
+                this.animation?.playAnimation({ name: 'fall' });
                 break;
             case 'Left':
-                this.animation?.playAnimation('fallLeft', true) || this.animation?.playAnimation('fall', true);
+                this.animation?.playAnimation({ name: 'fallLeft' })
                 break;
             case 'Right':
-                this.animation?.playAnimation('fallRight', true) || this.animation?.playAnimation('fall', true);
+                this.animation?.playAnimation({ name: 'fallRight' })
                 break;
             case 'Back':
-                this.animation?.playAnimation('fallBwd', true) || this.animation?.playAnimation('fall', true);
+                this.animation?.playAnimation({ name: 'fallBwd' })
                 break;
             default:
-                this.animation?.playAnimation('fall', true);
+                this.animation?.playAnimation({ name: 'fall' });
         }
     }
 }

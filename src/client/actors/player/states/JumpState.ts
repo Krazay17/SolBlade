@@ -5,7 +5,7 @@ export class JumpState extends State {
         this.enterTime = performance.now();
         this.duration = 500;
         this.movement.jumpStart();
-        this.animation.playAnimation("jump", false);
+        this.animation.playAnimation({name: "jump", loop: false});
     }
     update(dt: any): void {
         const now = performance.now();
