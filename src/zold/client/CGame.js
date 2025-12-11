@@ -14,7 +14,7 @@ import MeshManager from './core/MeshManager';
 import SolRenderPass from '@solblade/common/good/SolGraphics.js';
 import QuestManager from './core/QuestManager';
 import { setNetScene } from './core/NetManager';
-import Player from './player/Player';
+import Player from './player/zPlayer.js';
 import LightManager from './core/LightManager';
 import Inventory from './player/Inventory';
 import SoundPlayer from '../../xotherOld/client/SoundPlayer';

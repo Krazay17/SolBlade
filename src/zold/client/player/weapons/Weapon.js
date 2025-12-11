@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import MyEventEmitter from '../../../../common/core/MyEventEmitter';
 import MeshTrace from '../../core/MeshTrace';
-import Player from '../Player';
+import Player from '../zPlayer';
 import Game from '../../CGame';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { COLLISION_GROUPS } from '../../../old/shared';

@@ -1,7 +1,7 @@
 import CGame from "../../CGame";
 import LocalData from "../../../../client/core/LocalData";
 import MyEventEmitter from "../../../../common/core/MyEventEmitter";
-import Player from "../../player/Player";
+import Player from "../../player/zPlayer";
 import "./StyleFrames.css";
 
 export default class PlayerFrames {

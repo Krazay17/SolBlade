@@ -1,23 +1,28 @@
 import { SOL_PHYSICS_SETTINGS } from "@solblade/common/data/SolConstants.js"
 import { NET } from "@solblade/common/net/NetProtocol.js"
 import { SWorld } from "./SWorld.js"
+import type { Server, Socket } from "socket.io";
+import type { Actor } from "@solblade/common/actors/Actor.js";
 
-/**
- * @typedef {import("socket.io").Server} ServerIO
- */
+interface User {
+    socket?: Socket;
+    id?: string;
+    worldName?: string;
+    actor?: Actor;
+}
 
 export class SGame {
-    /**
-     * @param {ServerIO} io 
-     */
-    constructor(io) {
-        this.io = io;
-        this.sockets = {};
+    io: Server;
+    users: Record<string, User> = {};
 
-        this.lastTime = 0;
-        this.accumulator = 0;
-        this.timeStep = SOL_PHYSICS_SETTINGS.timeStep;
-        this.tickcounter = 0;
+    lastTime = 0;
+    accumulator = 0;
+    timeStep = SOL_PHYSICS_SETTINGS.timeStep
+    tickcounter = 0;
+
+    worlds: Record<string, SWorld>;
+    constructor(io: Server) {
+        this.io = io;
 
         this.worlds = {
             world1: new SWorld("world1"),
@@ -32,9 +37,9 @@ export class SGame {
         if (loop) this.loop();
     }
     bindEvents(localSocket) {
-        const connection = (socket) => {
-            this.sockets[socket.id] = socket;
-            socket.on("disconnect", ()=>this.leave(socket));
+        const connection = (socket: Socket) => {
+            this.users[socket.id] = { socket };
+            socket.on("disconnect", () => this.leave(socket));
             for (const p of Object.values(NET.CLIENT)) {
                 const f = this[p];
                 if (typeof f === "function") {
@@ -49,20 +54,29 @@ export class SGame {
         this.io.on("connection", connection);
     }
     join(data, socket) {
+        const user = this.users[socket.id];
         const { worldName } = data;
-        this.sockets[socket.id].worldName = worldName;
-        this.worlds[worldName].addPlayer(socket.id, data);
+        user.worldName = worldName;
+        user.actor = this.worlds[worldName].addPlayer(socket.id, data);
+
         this.io.emit(NET.SERVER.WELCOME, "welcome!");
     }
-    leave(socket){
+    leave(socket) {
         const id = socket.id;
-        const worldName = this.sockets[id].worldName;
-        const world = this.worlds[worldName];
-        if(!world)return;
+        const user = this.users[id];
+        const world = this.worlds[user.worldName];
+
+        if (!world) return;
         world.removePlayer?.(id);
     }
-    input(data, socket){
-        
+    input(data, socket) {
+        const user = this.users[socket.id];
+    }
+    playerMoved(data, socket) {
+        const user = this.users[socket.id];
+        if (user.actor) {
+            user.actor.actorUpdate.update(data);
+        }
     }
     serverTest(cb) {
         //if (cb) cb(NET.SERVER.TEST);

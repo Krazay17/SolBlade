@@ -12,7 +12,7 @@ import HitData from '../core/HitData';
 import { menuButton } from '../ui/Menu';
 import Energy from '../core/Energy';
 import { Ray } from '@dimforge/rapier3d-compat';
-import { lerpTo } from '../../../common/utils/Utils';
+import { lerpTo } from '@solblade/common/utils/Utils';
 import { Actor } from '../../old/shared';
 
 export default class Player extends Actor {

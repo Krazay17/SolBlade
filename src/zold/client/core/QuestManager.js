@@ -1,4 +1,4 @@
-import Player from "../player/Player";
+import Player from "../player/zPlayer";
 import Game from "../CGame";
 import QuestCrown from "./QuestCrown";
 import QuestPlayerKill from "./QuestPlayerKill";

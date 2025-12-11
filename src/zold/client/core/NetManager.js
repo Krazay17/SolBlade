@@ -6,7 +6,7 @@ import HitData from "./HitData";
 import VoiceChat from './VoiceChat';
 import { menuButton } from "../ui/Menu";
 import Game from "../CGame";
-import Player from "../player/Player";
+import Player from "../player/zPlayer";
 import CGame from "../CGame";
 import Scene from "../scenes/Scene";
 

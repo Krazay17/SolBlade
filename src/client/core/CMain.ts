@@ -30,7 +30,7 @@ class App {
         this.net = new CNet();
         this.renderer = new SolRender(this.canvas);
         this.input = new UserInput(this.canvas);
-        this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader);
+        this.game = new CGame(this.renderer.scene, this.renderer.camera, this.input, this.loader, this.net);
         this.setupBindings();
     }
 
@@ -41,7 +41,7 @@ class App {
         } catch {
             this.localServer = await this.net.startLocal();
         }
-        this.game.netConnect(this.net.socket);
+        this.game.netConnect();
 
         requestAnimationFrame(this.loop);
     }
@@ -81,9 +81,7 @@ class App {
         window.addEventListener("blur", () => {
             this.focused = false;
         });
-        window.addEventListener("beforeunload", ()=>{
-            solSave.name = this.game.player.name;
-
+        window.addEventListener("beforeunload", () => {
             solSave.save({
                 name: this.game.player.name,
                 money: this.game.player.money,

@@ -8,6 +8,8 @@ import FSM from "@solblade/common/actors/states/FSM.js";
 import { playerStateRegistry } from "./states/StateReg.js";
 import { Movement } from "@solblade/common/actors/components/Movement.js";
 import { Actor, ActorInint } from "@solblade/common/actors/Actor.js";
+import { CNet } from "@solblade/client/core/CNet.js";
+import { ClientReplication } from "../components/ClientReplication.js";
 
 export class Player extends Actor {
     declare controller?: UserInput;
@@ -16,8 +18,11 @@ export class Player extends Actor {
     camera: PerspectiveCamera;
     tempVec: Vector3;
 
+    world?: CWorld;
+    replicator?: ClientReplication;
+
     money: number;
-    constructor(game: CGame, data: ActorInint = {}) {
+    constructor(game: CGame, data: ActorInint = {}, net: CNet) {
         super({
             ...data,
             type: "player",
@@ -42,6 +47,8 @@ export class Player extends Actor {
 
         this.fsm = new FSM(this, playerStateRegistry);
 
+        this.replicator = new ClientReplication(this, this.game.net);
+
         this.tempVec = new Vector3();
     }
     setWorld(world: CWorld) {
@@ -55,17 +62,20 @@ export class Player extends Actor {
         if (this.body) this.movement.yaw = yaw;
         this.cameraArm.rotation.x = pitch;
     }
-    tick(dt) {
+    tick(dt: number) {
         super.tick(dt);
         if (!this.body) return;
         if (this.fsm) this.fsm.update(dt);
+        if(this.movement)this.movement.update(dt);
         if (this.controller.actionStates[ACTIONS.DEVFLY]) {
             this.movement.devFly(this.aim().camDir);
         }
-
+        this.vecPos = this.body.translation();
+        this.quatRot = this.body.rotation();
         this.graphics.position.copy(this.body.translation());
-        this.graphics.quaternion.copy(this.body.rotation())
+        this.graphics.quaternion.copy(this.body.rotation());
         this.animation.update(dt);
+        this.replicator.tick(dt);
     }
     aim() {
         const d = this.camera.getWorldDirection(this.tempVec);

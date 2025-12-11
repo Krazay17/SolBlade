@@ -1,6 +1,5 @@
 import { Collider, RigidBody } from "@dimforge/rapier3d-compat";
-import SolWorld from "../core/SolWorld";
-import { Group, Quaternion, Vector3 } from "three";
+import { Group, Quaternion, QuaternionLike, Vector3, Vector3Like } from "three";
 import { ActorUpdate } from "@solblade/client/actors/components/ActorUpdate";
 import Controller from "./components/Controller";
 import { Movement } from "./components/Movement";
@@ -38,10 +37,9 @@ export class Actor implements ActorInint {
     fsm?: FSM;
 
     body?: RigidBody;
-    world?: SolWorld;
     collider?: Collider;
     graphics?: Group;
-    actorUpdate?: ActorUpdate;
+    actorUpdate?: ActorUpdate = new ActorUpdate(this);
 
     components = new Map<Function, any>();
     age = 0;
@@ -71,6 +69,21 @@ export class Actor implements ActorInint {
     get quatRot() {
         if (!this._quatRot) this._quatRot = new Quaternion();
         return this._quatRot.fromArray(this.rot);
+    }
+    set vecPos(v: Vector3 | Vector3Like) {
+        if (!this._vecPos) this._vecPos = new Vector3();
+        this._vecPos.copy(v);
+        this.pos[0] = v.x;
+        this.pos[1] = v.y;
+        this.pos[2] = v.z;
+    }
+    set quatRot(v: Quaternion | QuaternionLike) {
+        if (!this._quatRot) this._quatRot = new Quaternion();
+        this._quatRot.copy(v);
+        this.rot[0] = v.x;
+        this.rot[1] = v.y;
+        this.rot[2] = v.z;
+        this.rot[3] = v.w;
     }
     setId(id) {
         this.id = id;

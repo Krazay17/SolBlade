@@ -1,4 +1,4 @@
-import Player from "../player/Player";
+import Player from "../player/zPlayer";
 import MyEventEmitter from "../../../common/core/MyEventEmitter";
 
 export default class Energy {

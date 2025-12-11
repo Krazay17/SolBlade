@@ -1,37 +1,52 @@
 
-import {Actor} from "@solblade/common/actors/Actor";
+import { Actor } from "@solblade/common/actors/Actor";
 import Controller from "@solblade/common/actors/components/Controller";
+import SolWorld from "@solblade/common/core/SolWorld";
+import { Vector3 } from "three";
+
+interface Blackboard {
+    player?: Actor;
+    dir?: Vector3;
+}
 
 export default class AIController extends Controller {
     actor: Actor;
+    world: SolWorld;
     aggroRadius: number;
-    blackboard: any;
-    constructor(actor: Actor, data: any = {}) {
+    blackboard: Blackboard;
+
+    tempVec = new Vector3();
+    constructor(actor: Actor, world: SolWorld, data: any = {}) {
         super();
         this.actor = actor;
+        this.world = world;
         const {
-            aggroRadius = 20
+            aggroRadius = 50
         } = data;
         this.aggroRadius = aggroRadius;
 
-        this.blackboard = {};
+        this.blackboard = {
+            player: null,
+            dir: this.tempVec,
+        };
     }
-    update(dt) {
-        this.blackboard = this.findNearestPlayer();
+    tick(dt) {
+        this.findNearestPlayer();
         if (!this.blackboard.player) {
-            this.actor.fsm.setState('patrol');
+            this.actor.fsm?.setState('patrol');
         }
     }
     inputDirection() {
         return this.blackboard.dir;
     }
     findNearestPlayer() {
-        const players = this.actor.world.players
-        if (!players) return {};
+        const players = this.world.players
+        if (!players) {
+            this.blackboard.player = null;
+            return;
+        };
 
-        // get this enemy's position
-        if (!this.actor.movement) return;
-        const pos = this.actor.movement.vecPos
+        const pos = this.actor.vecPos;
 
         // find nearest player
         let nearest = null;
@@ -48,7 +63,10 @@ export default class AIController extends Controller {
                 targetDir = { x: dx, y: dy, z: dz };
             }
         }
-        if (!nearest) return false;
+        if (!nearest) {
+            this.blackboard.player = null;
+            return;
+        }
 
         const dist = Math.sqrt(minDistSq);
         const dir = {
@@ -56,6 +74,7 @@ export default class AIController extends Controller {
             y: targetDir.y / dist,
             z: targetDir.z / dist,
         }
-        return { player: nearest, dist, dir };
+        this.blackboard.player = nearest;
+        this.blackboard.dir = this.tempVec.copy(dir);
     }
 } 

@@ -1,6 +1,6 @@
 import { Vector3 } from 'three';
 import PlayerMovement from '../../../../zdeprecated/PlayerMovement';
-import Player from '../Player';
+import Player from '../zPlayer';
 import PlayerStateManager from './PlayerStateManager';
 import PawnBody from '../../core/PawnCapsule';
 import Game from '../../CGame';

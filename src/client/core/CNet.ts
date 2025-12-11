@@ -38,7 +38,7 @@ export class CNet {
     async start() {
         try {
             this.socket.connect();
-            const response = await this.socket.timeout(5000).emitWithAck("hello", "world");
+            const response = await this.socket.timeout(5000).emitWithAck("hello", "Hello World!!");
             console.log(response);
         }
         catch {

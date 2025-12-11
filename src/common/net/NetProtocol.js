@@ -5,6 +5,7 @@ export const NET = {
         JOIN: "join",
         LEAVE: "leave",
         INPUT: "input",
+        PLAYER_MOVED: "playerMoved",
     },
     SERVER: {
         TEST: "clientTest",

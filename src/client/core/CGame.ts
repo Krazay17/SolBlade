@@ -1,31 +1,33 @@
 import { Player } from "@solblade/client/actors/player/Player.js";
 import { UserInput } from "@solblade/client/core/UserInput.js";
 import { NET } from "@solblade/common/net/NetProtocol.js";
-import { Scene } from "three";
-import { CWorld } from "../world/CWorld.js";
+import { PerspectiveCamera, Scene } from "three";
 import { CWorld1 } from "../world/CWorld1.js";
 import { CWorld2 } from "../world/CWorld2.js";
 import { SolLoading } from "./SolLoading.js";
 import solSave from "./SolSave.js";
+import { CNet } from "./CNet.js";
+import { CWorld } from "../world/CWorld.js";
 
 export class CGame {
-    /**@type {CWorld} */
-    world;
+    scene: Scene;
+    camera: PerspectiveCamera;
+    input: UserInput;
+    loader: SolLoading;
+    net: CNet;
+
+    worldRegistry;
+    player: Player;
+
+    world: CWorld;
     stateIndex = 0;
-    socket;
     netBound = false;
-    /**
-     * 
-     * @param {Scene} scene 
-     * @param {*} camera 
-     * @param {UserInput} input 
-     * @param {SolLoading} loader 
-     */
-    constructor(scene, camera, input, loader) {
+    constructor(scene: Scene, camera: PerspectiveCamera, input: UserInput, loader: SolLoading, net: CNet) {
         this.scene = scene;
         this.camera = camera;
         this.input = input;
         this.loader = loader;
+        this.net = net;
 
         this.worldRegistry = {
             world1: CWorld1,
@@ -36,12 +38,12 @@ export class CGame {
             worldName: solSave.worldName,
             model: "spikeMan",
             pos: [0, 10, 0],
-        });
+        }, this.net);
 
         window.addEventListener('keydown', (e) => {
             if (e.code !== "KeyE") return;
             console.time("test");
-            this.socket.emit(NET.CLIENT.TEST);
+            this.net.emit(NET.CLIENT.TEST, "test");
         });
     }
     async start() {
@@ -53,19 +55,18 @@ export class CGame {
     netBinds() {
         if (this.netBound) return;
         this.netBound = true;
-        this.socket.on?.("disconnect", () => this.netDisconnnect());
+        this.net.on?.("disconnect", () => this.netDisconnnect());
         for (const p of Object.values(NET.SERVER)) {
             const h = this[p];
             if (typeof h === "function") {
-                this.socket.on?.(p, h.bind(this));
+                this.net.on?.(p, h.bind(this));
             } else console.warn(`No function ${p}`);
         }
     }
-    netConnect(socket) {
-        this.socket = socket;
-        this.player.setId(socket.id);
+    netConnect() {
+        this.player.setId(this.net.socket.id);
         this.netBinds();
-        this.socket.emit(NET.CLIENT.JOIN, this.player.serialize());
+        this.net.emit(NET.CLIENT.JOIN, this.player.serialize());
     }
     netDisconnnect() {
         this.world.removeRemoteActors();
