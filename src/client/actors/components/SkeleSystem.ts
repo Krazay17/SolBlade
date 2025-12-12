@@ -36,6 +36,7 @@ export class SkeleSystem {
         animations.forEach((clip: AnimationClip) => {
             this.animations[clip.name] = clip;
         });
+        this.playAnimation({ name: "idle" })
     }
     getAnim() {
         const anim = {

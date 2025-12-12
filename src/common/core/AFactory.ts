@@ -2,11 +2,14 @@ import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
 import { AbilitySystem } from "../actors/abilities/AbilitySystem";
 import { Actor, ActorInint } from "../actors/Actor";
 import { CameraComponent } from "../actors/components/CameraComponent";
-import { RemoteInterpolation } from "../actors/components/RemoteInterpolation";
+import { RemoteInterpolation } from "../../client/actors/components/RemoteInterpolation";
 import SolWorld from "./SolWorld";
 import { actorType } from "../data/ActorTypeData";
 import { Group } from "three";
-import { ActorUpdate } from "@solblade/client/actors/components/ActorUpdate";
+import { Movement } from "../actors/components/Movement";
+import FSM from "../actors/states/FSM";
+import { ServerInterpolation } from "@solblade/server/core/ServerInterpolation";
+import { NetworkSync } from "../actors/components/NetSync";
 
 export function spawnA<T extends keyof typeof actorType>(
     world: SolWorld,
@@ -17,18 +20,18 @@ export function spawnA<T extends keyof typeof actorType>(
     const def = actorType[type];
     const defaults = {
         type,
+        world,
         worldName: world.name,
         model: def.model,
         ...data
     }
     const actor = new Actor(defaults);
 
-    actor.add(new def.movement(actor));
+    actor.add(new NetworkSync(actor))
 
     if (role === "local") {
-        if (def.controller) actor.add(new def.controller(actor));
         if (type === "player") {
-            actor.add(new CameraComponent(actor));
+            //actor.add(new CameraComponent(actor));
         }
     }
     if (role === "remote") {
@@ -41,13 +44,18 @@ export function spawnA<T extends keyof typeof actorType>(
         }
     }
     if (role === "server") {
-        if (def.abilities) {
-            actor.add(new AbilitySystem(actor, def.abilities));
+        if (type !== "player") {
+            if (def.controller) actor.controller = new def.controller(actor, world);
+            actor.movement = new Movement(actor);
+            actor.fsm = new FSM(actor, def.states);
+            if (def.abilities) actor.add(new AbilitySystem(actor, def.abilities));
+            actor.add(new ServerInterpolation(actor));
+        } else {
+            //actor.add(new ServerInterpolation(actor, true));
         }
-        if (type === "player") {
-            //actor.actorUpdate = new ActorUpdate(actor);
-        }
+        const { body, collider } = world.physics.makeCapsule(def.physics.height, def.physics.radius)
+        actor.body = body;
+        actor.collider = collider;
     }
-
     return actor;
 }

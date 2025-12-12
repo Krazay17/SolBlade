@@ -34,6 +34,8 @@ export default class AIController extends Controller {
         this.findNearestPlayer();
         if (!this.blackboard.player) {
             this.actor.fsm?.setState('patrol');
+        } else {
+            this.actor.movement.smartMove(dt, this.blackboard.dir);
         }
     }
     inputDirection() {

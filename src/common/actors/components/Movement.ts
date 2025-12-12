@@ -2,7 +2,8 @@ import GroundChecker from "./GroundChecker";
 import { Quaternion, Vector3 } from "three";
 import { projectOnPlane } from "@solblade/common/utils/Utils";
 import { Momentum } from "./Momentum";
-import {Actor} from "../Actor";
+import { Actor } from "../Actor";
+import SolWorld from "@solblade/common/core/SolWorld";
 
 interface movementStateData {
     idle: movementData,

@@ -1,6 +1,11 @@
 import AIController from "@solblade/server/core/AIController";
-import { Movement } from "../actors/components/Movement";
-import { Actor } from "../actors/Actor";
+import IdleState from "@solblade/server/core/IdleState";
+import PatrolState from "@solblade/server/core/PatrolState";
+
+const stateReg = {
+    idle: IdleState,
+    patrol: PatrolState,
+}
 
 interface PhysicsConfig {
     shape: "capsule" | "box";
@@ -10,42 +15,40 @@ interface PhysicsConfig {
 }
 
 interface ActorTypeDefinition {
-    movement: new (actor: Actor) => any;
-    controller?: new (actor: Actor) => any; // only used for local actors
     model?: string;
     abilities?: string[];
+    states?: typeof stateReg;
     physics?: PhysicsConfig;
+    controller?: new (...args: any) => {};
 }
 
 export const actorType = {
-    wizard: {
-        movement: Movement,
-        controller: AIController,
-        model: "Wizard",
-        abilities: ["fireball", "teleport"],
-        physics: { shape: "capsule", mass: 1, height: 1, radius: 0.5 }
-    },
-
     goblin: {
-        movement: Movement,
-        controller: AIController,
         model: "Goblin",
+        controller: null,
         abilities: ["slash"],
+        states: stateReg,
         physics: { shape: "capsule", mass: 0.5, height: 0.8, radius: 0.3 }
     },
-
     player: {
-        movement: Movement,
-        controller: null,
         model: "PlayerMage",
+        controller: null,
         abilities: ["dash", "fireball"],
+        states: stateReg,
         physics: { shape: "capsule", mass: 1, height: 1, radius: 0.5 }
     },
     devil: {
-        movement: Movement,
-        controller: AIController,
         model: "devilMan",
+        controller: null,
         abilities: ["slash"],
+        states: stateReg,
         physics: { shape: "capsule", mass: 0.5, height: 0.8, radius: 0.3 }
-    }
+    },
+    wizard: {
+        model: "Wizard",
+        controller: AIController,
+        abilities: ["fireball", "teleport"],
+        states: stateReg,
+        physics: { shape: "capsule", mass: 1, height: 1, radius: 0.5 }
+    },
 } satisfies Record<string, ActorTypeDefinition>;

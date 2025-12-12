@@ -90,9 +90,13 @@ export class CGame {
         if (this.world) this.world.step(dt);
     }
     snap(data) {
+        console.log(data);
         this.world?.updateState(data);
     }
     welcome(data) {
         console.log(data);
+    }
+    removeActor(id) {
+        this.world?.removeActor(id);
     }
 }

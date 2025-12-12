@@ -1,5 +1,5 @@
 import { Group, Quaternion } from "three";
-import { Actor } from "../Actor";
+import { Actor } from "../../../common/actors/Actor";
 
 export class RemoteInterpolation {
     actor: Actor

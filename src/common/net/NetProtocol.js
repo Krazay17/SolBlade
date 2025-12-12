@@ -5,12 +5,12 @@ export const NET = {
         JOIN: "join",
         LEAVE: "leave",
         INPUT: "input",
-        PLAYER_MOVED: "playerMoved",
-        PLAYER_ANIM: "playerAnim",
+        PLAYER_SENDUPDATE: "playerUpdate"
     },
     SERVER: {
         TEST: "clientTest",
         SNAP: "snap",
         WELCOME: "welcome",
+        REMOVE_ACTOR: "removeActor",
     }
 }

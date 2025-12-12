@@ -25,12 +25,12 @@ export class ClientReplication {
             this.lastRot = [...rot];
             update.rot = rot;
         }
-        if (update.pos || update.rot) {
-            this.net.emit(NET.CLIENT.PLAYER_MOVED, update);
-        }
         if (this.lastAnim !== anim.name) {
             this.lastAnim = anim.name;
-            this.net.emit(NET.CLIENT.PLAYER_ANIM, anim);
+            update.anim = anim;
+        }
+        if (update.pos || update.rot || update.anim) {
+            this.net.emit(NET.CLIENT.PLAYER_SENDUPDATE, update);
         }
     }
 }

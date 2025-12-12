@@ -12,7 +12,7 @@ export class SWorld extends SolWorld {
         await this.physics.makeWorld(this.name);
         const enemies = 1;
         for (let i = 0; i < enemies; i++) {
-            const actor = spawnA(this, "wizard", "server", { id: this.actorIndex++, pos: [0, 1, -5] });
+            const actor = spawnA(this, "wizard", "server", { id: this.actorIndex++, pos: [0, 25, -5] });
             this.actors.set(actor.id, actor);
             actor.add(new AIController(actor, this));
         }

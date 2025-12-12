@@ -1,10 +1,11 @@
 import { Collider, RigidBody } from "@dimforge/rapier3d-compat";
 import { Group, Quaternion, QuaternionLike, Vector3, Vector3Like } from "three";
-import { ActorUpdate } from "@solblade/client/actors/components/ActorUpdate";
+import { ActorUpdate } from "@solblade/common/actors/components/ActorUpdate";
 import Controller from "./components/Controller";
 import { Movement } from "./components/Movement";
 import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
 import FSM from "./states/FSM";
+import SolWorld from "../core/SolWorld";
 interface Anim {
     name: string;
     time: number;
@@ -22,6 +23,7 @@ export interface ActorInint {
     rot?: number[];
     active?: boolean;
     lifetime?: number;
+    world?: SolWorld;
 }
 
 export class Actor implements ActorInint {
@@ -37,6 +39,7 @@ export class Actor implements ActorInint {
     active?: boolean;
     lifetime?: number;
 
+    world?: SolWorld;
     controller?: Controller;
     movement?: Movement;
     animation?: SkeleSystem;
@@ -60,6 +63,8 @@ export class Actor implements ActorInint {
         this.worldName = data.worldName ?? "world1";
         this.model = data.model ?? "Wizard";
 
+        this.world = data.world ?? null;
+
         this.pos = data.pos ?? [0, 1, 0];
         this.rot = data.rot ?? [0, 0, 0, 1];
 
@@ -76,14 +81,14 @@ export class Actor implements ActorInint {
         if (!this._quatRot) this._quatRot = new Quaternion();
         return this._quatRot.fromArray(this.rot);
     }
-    set vecPos(v: Vector3 | Vector3Like) {
+    set vecPos(v: Vector3) {
         if (!this._vecPos) this._vecPos = new Vector3();
         this._vecPos.copy(v);
         this.pos[0] = v.x;
         this.pos[1] = v.y;
         this.pos[2] = v.z;
     }
-    set quatRot(v: Quaternion | QuaternionLike) {
+    set quatRot(v: Quaternion) {
         if (!this._quatRot) this._quatRot = new Quaternion();
         this._quatRot.copy(v);
         this.rot[0] = v.x;
@@ -105,16 +110,23 @@ export class Actor implements ActorInint {
         return v;
     }
     tick(dt: number) {
+        if (this.movement) this.movement.update(dt);
+        if (this.animation) this.animation.update(dt);
         for (const comp of this.components.values()) {
             comp.tick?.(dt);
         }
-        if(this.animation)this.animation.update(dt);
     }
     aim() {
         return {
             dir: undefined,
             camDir: undefined,
         }
+    }
+    destroy() {
+        this.components.forEach((v, k) => {
+            v.destroy?.();
+        });
+        this.active = false;
     }
     serialize() {
         return {

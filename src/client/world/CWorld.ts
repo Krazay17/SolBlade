@@ -4,6 +4,7 @@ import SolWorld from "@solblade/common/core/SolWorld.js";
 import SkyBox from "./SkyBox.js";
 import { CGame } from "../core/CGame.js";
 import { spawnA } from "@solblade/common/core/AFactory.js";
+import { NetworkSync } from "@solblade/common/actors/components/NetSync.js";
 
 export class CWorld extends SolWorld {
     declare loader: SolLoading;
@@ -57,17 +58,30 @@ export class CWorld extends SolWorld {
             this.actors.delete(k);
         });
     }
+    removeActor(id: string) {
+        console.log(id);
+        const actor = this.actors.get(id);
+        if (!actor) return;
+        actor.destroy();
+        if (actor.graphics) actor.graphics.removeFromParent();
+        this.actors.delete(id);
+    }
     updateState(data: any) {
         for (const d of data) {
             const { id, worldName } = d;
             if (id === this.game.player.id || worldName !== this.name) continue;
             const actor = this.actors.get(id);
             if (actor) {
-                actor.actorUpdate?.update(d);
+                if (!d.active) {
+                    this.removeActor(d);
+                    continue;
+                }
+                const syncer = actor.get(NetworkSync);
+                if (syncer) syncer.onServerUpdate(d);
             } else {
                 const newActor = spawnA(this, d.type, "remote", d);
                 this.actors.set(id, newActor);
-                if(newActor.graphics)this.scene.add(newActor.graphics);
+                if (newActor.graphics) this.scene.add(newActor.graphics);
             }
         }
     }

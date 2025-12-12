@@ -1,9 +1,11 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { Vector3 } from "three";
 import { Movement } from "./Movement.js";
+import SolWorld from "@solblade/common/core/SolWorld.js";
 
 export default class GroundChecker {
     movement: Movement;
+    world: SolWorld;
     tempVec = new Vector3();
     downVec = new Vector3(0, -1, 0);
     ball: RAPIER.Ball;

@@ -68,17 +68,12 @@ export class SGame {
 
         if (!world) return;
         world.removePlayer?.(id);
+        this.io.emit(NET.SERVER.REMOVE_ACTOR, id);
     }
     input(data, socket) {
         const user = this.users[socket.id];
     }
-    playerAnim(anim, socket) {
-        const user = this.users[socket.id];
-        if (user.actor) {
-            user.actor.anim = anim;
-        }
-    }
-    playerMoved(data, socket) {
+    playerUpdate(data, socket) {
         const user = this.users[socket.id];
         if (user.actor) {
             user.actor.actorUpdate.update(data);

@@ -27,12 +27,12 @@ export class Physics {
     makeCapsule(height = 1, radius = 0.5, isRemote = false) {
         const collideGroup = isRemote
             ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD)
-            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.WORLD);
+            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.WORLD | COLLISION_GROUPS.PLAYER);
         const bDesc = RAPIER.RigidBodyDesc.dynamic();
         bDesc.lockRotations();
         bDesc.setLinearDamping(0);
         bDesc.setAngularDamping(0);
-        const cDesc = RAPIER.ColliderDesc.capsule(height, radius);
+        const cDesc = RAPIER.ColliderDesc.capsule(height/2, radius);
         cDesc.setCollisionGroups(collideGroup);
         cDesc.setFriction(0);
         cDesc.setRestitution(0);
