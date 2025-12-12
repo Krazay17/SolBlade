@@ -10,7 +10,6 @@ import { Movement } from "@solblade/common/actors/components/Movement.js";
 import { Actor, ActorInint } from "@solblade/common/actors/Actor.js";
 import { CNet } from "@solblade/client/core/CNet.js";
 import { ClientReplication } from "../components/ClientReplication.js";
-import { NetworkSync } from "@solblade/common/actors/components/NetSync.js";
 
 export class Player extends Actor {
     declare controller?: UserInput;
@@ -18,11 +17,10 @@ export class Player extends Actor {
     game: CGame;
     cameraArm: Group;
     camera: PerspectiveCamera;
-    tempVec: Vector3;
-    tempQuat: Quaternion;
+    tempVec: Vector3 = new Vector3();
+    tempQuat: Quaternion = new Quaternion();
 
     replicator?: ClientReplication;
-    netSync?: NetworkSync;
 
     money: number;
     constructor(game: CGame, data: ActorInint = {}, net: CNet) {
@@ -47,11 +45,8 @@ export class Player extends Actor {
         this.controller.look = (y, p) => this.look(y, p);
 
         this.movement = new Movement(this);
-
         this.fsm = new FSM(this, playerStateRegistry);
-
-        //this.replicator = new ClientReplication(this, this.game.net);
-        this.netSync = new NetworkSync(this, this.game.net);
+        this.replication = new ClientReplication(this, this.game.net);
 
         this.tempVec = new Vector3();
     }
@@ -70,15 +65,11 @@ export class Player extends Actor {
         super.tick(dt);
         if (!this.body) return;
         if (this.fsm) this.fsm.update(dt);
-        if (this.movement) this.movement.update(dt);
         if (this.controller.actionStates[ACTIONS.DEVFLY]) {
             this.movement.devFly(this.aim().camDir);
         }
-        this.vecPos = this.tempVec.copy(this.body.translation());
-        this.quatRot = this.tempQuat.copy(this.body.rotation());
-        this.graphics.position.copy(this.body.translation());
-        this.graphics.quaternion.copy(this.body.rotation());
-        this.replicator.tick(dt);
+        this.graphics.position.set(this.pos[0], this.pos[1], this.pos[2]);
+        this.graphics.quaternion.set(this.rot[0], this.rot[1], this.rot[2], this.rot[3]);
     }
     aim() {
         const d = this.camera.getWorldDirection(this.tempVec);

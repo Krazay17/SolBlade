@@ -8,8 +8,7 @@ import { actorType } from "../data/ActorTypeData";
 import { Group } from "three";
 import { Movement } from "../actors/components/Movement";
 import FSM from "../actors/states/FSM";
-import { ServerInterpolation } from "@solblade/server/core/ServerInterpolation";
-import { NetworkSync } from "../actors/components/NetSync";
+import { ClientReplication } from "@solblade/client/actors/components/ClientReplication";
 
 export function spawnA<T extends keyof typeof actorType>(
     world: SolWorld,
@@ -26,8 +25,7 @@ export function spawnA<T extends keyof typeof actorType>(
         ...data
     }
     const actor = new Actor(defaults);
-
-    actor.add(new NetworkSync(actor))
+    actor.replication = new ClientReplication(actor);
 
     if (role === "local") {
         if (type === "player") {
@@ -35,8 +33,7 @@ export function spawnA<T extends keyof typeof actorType>(
         }
     }
     if (role === "remote") {
-        const group = actor.graphics = new Group();
-        actor.add(new RemoteInterpolation(actor, group));
+        actor.graphics = new Group();
         if (def.model && world.loader) {
             const skelesys = new SkeleSystem(actor);
             skelesys.addSkele(world.loader);
@@ -45,13 +42,11 @@ export function spawnA<T extends keyof typeof actorType>(
     }
     if (role === "server") {
         if (type !== "player") {
-            if (def.controller) actor.controller = new def.controller(actor, world);
+            if (def.controller) actor.add(new def.controller(actor, world));
             actor.movement = new Movement(actor);
-            actor.fsm = new FSM(actor, def.states);
+            //actor.fsm = new FSM(actor, def.states);
             if (def.abilities) actor.add(new AbilitySystem(actor, def.abilities));
-            actor.add(new ServerInterpolation(actor));
         } else {
-            //actor.add(new ServerInterpolation(actor, true));
         }
         const { body, collider } = world.physics.makeCapsule(def.physics.height, def.physics.radius)
         actor.body = body;

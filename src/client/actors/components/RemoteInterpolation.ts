@@ -12,6 +12,7 @@ export class RemoteInterpolation {
         this.groups.push(group);
     }
     tick(dt: number) {
+        console.log(this.actor.pos)
         if (this.groups.length < 1) return;
         for (const g of this.groups) {
             if (g === undefined) return;

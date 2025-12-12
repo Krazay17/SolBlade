@@ -76,7 +76,7 @@ export class SGame {
     playerUpdate(data, socket) {
         const user = this.users[socket.id];
         if (user.actor) {
-            user.actor.actorUpdate.update(data);
+            user.actor.replication?.serverUpdate(data);
         }
     }
     serverTest(cb) {

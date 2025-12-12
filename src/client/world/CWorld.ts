@@ -4,7 +4,6 @@ import SolWorld from "@solblade/common/core/SolWorld.js";
 import SkyBox from "./SkyBox.js";
 import { CGame } from "../core/CGame.js";
 import { spawnA } from "@solblade/common/core/AFactory.js";
-import { NetworkSync } from "@solblade/common/actors/components/NetSync.js";
 
 export class CWorld extends SolWorld {
     declare loader: SolLoading;
@@ -76,8 +75,7 @@ export class CWorld extends SolWorld {
                     this.removeActor(d);
                     continue;
                 }
-                const syncer = actor.get(NetworkSync);
-                if (syncer) syncer.onServerUpdate(d);
+                actor.replication.serverUpdate(d);
             } else {
                 const newActor = spawnA(this, d.type, "remote", d);
                 this.actors.set(id, newActor);

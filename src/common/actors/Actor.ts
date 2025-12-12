@@ -1,11 +1,12 @@
 import { Collider, RigidBody } from "@dimforge/rapier3d-compat";
-import { Group, Quaternion, QuaternionLike, Vector3, Vector3Like } from "three";
-import { ActorUpdate } from "@solblade/common/actors/components/ActorUpdate";
+import { Group, Quaternion, Vector3 } from "three";
 import Controller from "./components/Controller";
 import { Movement } from "./components/Movement";
 import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
 import FSM from "./states/FSM";
 import SolWorld from "../core/SolWorld";
+import { PhysicsSync } from "./components/PhysicsSync";
+import { ClientReplication } from "@solblade/client/actors/components/ClientReplication";
 interface Anim {
     name: string;
     time: number;
@@ -48,7 +49,8 @@ export class Actor implements ActorInint {
     body?: RigidBody;
     collider?: Collider;
     graphics?: Group;
-    actorUpdate?: ActorUpdate = new ActorUpdate(this);
+    replication?: ClientReplication;
+    physicsSync: PhysicsSync = new PhysicsSync(this);
 
     components = new Map<Function, any>();
     age = 0;
@@ -110,11 +112,13 @@ export class Actor implements ActorInint {
         return v;
     }
     tick(dt: number) {
+        if (this.physicsSync) this.physicsSync.tick(dt);
         if (this.movement) this.movement.update(dt);
         if (this.animation) this.animation.update(dt);
         for (const comp of this.components.values()) {
             comp.tick?.(dt);
         }
+        if(this.replication)this.replication.tick(dt);
     }
     aim() {
         return {

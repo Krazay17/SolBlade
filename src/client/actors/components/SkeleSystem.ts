@@ -11,14 +11,14 @@ interface Anim {
 }
 
 export class SkeleSystem {
-    actor: Actor
-    mesh = null;
-    mixer: THREE.AnimationMixer | null = null;
-    currentAction: THREE.AnimationAction | null = null
-    currentAnimation: string = '';
-    animations: Record<string, AnimationClip> = {};
-    _onFinishedListener: any;
-    quedAnim: any;
+    private actor: Actor
+    private mixer: THREE.AnimationMixer | null = null;
+    private currentAction: THREE.AnimationAction | null = null
+    private currentAnimation: string = '';
+    private animations: Record<string, AnimationClip> = {};
+    private _onFinishedListener: any;
+    private quedAnim: any;
+
     constructor(actor: Actor) {
         this.actor = actor;
     }
@@ -32,7 +32,6 @@ export class SkeleSystem {
         const { mesh, animations } = await loader.meshManager.makeMesh(this.actor.model);
         this.actor.graphics.add(mesh);
         this.mixer = new THREE.AnimationMixer(mesh);
-        this.mesh = mesh;
         animations.forEach((clip: AnimationClip) => {
             this.animations[clip.name] = clip;
         });

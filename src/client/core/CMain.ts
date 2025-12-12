@@ -38,8 +38,9 @@ class App {
         this.game.start();
         try {
             await this.net.start();
-        } catch {
-            this.localServer = await this.net.startLocal();
+        } catch (e) {
+            console.warn(e);
+            //this.localServer = await this.net.startLocal();
         }
         this.game.netConnect();
 

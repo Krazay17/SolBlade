@@ -1,4 +1,4 @@
-import {Actor} from "../actors/Actor.js";
+import { Actor } from "../actors/Actor.js";
 import { Physics } from "./Physics.js";
 
 export default class SolWorld {
