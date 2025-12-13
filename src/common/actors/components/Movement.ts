@@ -1,5 +1,5 @@
 import GroundChecker from "./GroundChecker";
-import { Quaternion, Vector3 } from "three";
+import { Euler, Matrix4, Quaternion, Vector3 } from "three";
 import { projectOnPlane } from "@solblade/common/utils/Utils";
 import { Momentum } from "./Momentum";
 import { Actor } from "../Actor";
@@ -18,19 +18,25 @@ interface movementData {
 }
 
 export class Movement {
-    actor: Actor;
-    momentum: Momentum;
-    groundChecker: GroundChecker;
-    tempVec: Vector3;
-    tempVec1: Vector3;
-    tempVec2: Vector3;
-    speeds: movementStateData;
-    _vecPos: Vector3;
-    _quatRot: Quaternion;
-    _vecVel: Vector3;
-    _vecDir: Vector3;
-    _yaw: number;
-    upVec = new Vector3(0, 1, 0);
+    turnSpeed: number = 1;
+
+    private actor: Actor;
+    private momentum: Momentum;
+    private groundChecker: GroundChecker;
+    private targetRot: Quaternion = new Quaternion();
+    private tempVec: Vector3 = new Vector3();
+    private tempVec1: Vector3 = new Vector3();
+    private tempVec2: Vector3 = new Vector3();
+    private tempQuat: Quaternion = new Quaternion();
+    private tempEuler: Euler = new Euler();
+    private tempMatrix: Matrix4 = new Matrix4();
+    private speeds: movementStateData;
+    private _vecPos: Vector3;
+    private _quatRot: Quaternion;
+    private _vecVel: Vector3;
+    private _vecDir: Vector3;
+    private _yaw: number;
+    private upVec = new Vector3(0, 1, 0);
     constructor(actor: Actor) {
         this.actor = actor;
         this.momentum = new Momentum();
@@ -160,6 +166,44 @@ export class Movement {
             wishdir = projectOnPlane(wishdir, floor);
         }
         this.accelerate(dt, wishdir, speed, this.speeds.ground.accel);
+    }
+    turnTo(dt: number, dir) {
+        if (!this.actor.body) return;
+        const rot = this.tempQuat.copy(this.actor.body.rotation());
+
+        if (dir instanceof Quaternion) {
+            this.targetRot.copy(dir);
+        } else if (dir instanceof Vector3) {
+            this.tempMatrix.lookAt(
+                this.tempVec.set(0, 0, 0),
+                dir,
+                this.upVec,
+            )
+            this.targetRot.setFromRotationMatrix(this.tempMatrix);
+        }
+        // --- Yaw Filtering (Crucial Step) ---
+
+        // The targetRot now contains the full 3D rotation (yaw, pitch, roll) needed 
+        // to face 'dir'. We need to remove the pitch and roll.
+
+        // 1. Apply the target rotation to a temporary Vector3 that starts facing +Z
+        const filteredDir = this.tempVec.set(0, 0, 1).applyQuaternion(this.targetRot);
+
+        // 2. ZERO OUT the Y component (height) of the resulting vector.
+        // This forces the direction vector to exist purely on the X-Z (ground) plane.
+        filteredDir.y = 0;
+
+        // 3. Re-normalize the vector
+        filteredDir.normalize();
+
+        // 4. Calculate the FINAL Yaw-Only Target Quaternion from the filtered X-Z vector
+        // This creates a quaternion that only rotates around the Y axis.
+        this.targetRot.setFromUnitVectors(
+            this.tempVec1.set(0, 0, -1), // The initial direction (forward)
+            filteredDir // The desired ground-plane direction
+        );
+        rot.slerp(this.targetRot, dt * 60);
+        this.actor.body.setRotation(rot, true);
     }
     airMove(dt, dir) {
         this.friction(dt, this.speeds.air.friction)

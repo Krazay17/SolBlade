@@ -1,4 +1,5 @@
 import State from "@solblade/common/actors/states/State"
+import AIController from "./AIController";
 
 export default class PatrolState extends State {
     accumulator: number;
@@ -9,8 +10,8 @@ export default class PatrolState extends State {
     }
     update(dt) {
         this.accumulator += dt;
-
-        this.movement.smartMove(dt, this.controller.direction);
+        const con = this.actor.get(AIController);
+        if (con) this.movement.smartMove(dt, con.inputDirection());
 
         if (this.accumulator > 5000) {
             this.reverse = -1;

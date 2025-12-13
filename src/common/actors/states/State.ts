@@ -5,6 +5,7 @@ import {Actor} from "../Actor";
 export default class State {
     fsm: FSM;
     actor: Actor;
+    target?: Actor;
     name: string = "state";
     canReEnter: boolean = false;
     enterTime = 0;

@@ -9,6 +9,7 @@ import { Group } from "three";
 import { Movement } from "../actors/components/Movement";
 import FSM from "../actors/states/FSM";
 import { ClientReplication } from "@solblade/client/actors/components/ClientReplication";
+import AIController from "@solblade/server/core/AIController";
 
 export function spawnA<T extends keyof typeof actorType>(
     world: SolWorld,
@@ -42,13 +43,14 @@ export function spawnA<T extends keyof typeof actorType>(
     }
     if (role === "server") {
         if (type !== "player") {
-            if (def.controller) actor.add(new def.controller(actor, world));
+            actor.controller = new AIController(this, world);
             actor.movement = new Movement(actor);
-            //actor.fsm = new FSM(actor, def.states);
+            actor.fsm = new FSM(actor, def.states);
             if (def.abilities) actor.add(new AbilitySystem(actor, def.abilities));
         } else {
         }
-        const { body, collider } = world.physics.makeCapsule(def.physics.height, def.physics.radius)
+        const { body, collider } = world.physics.makeCapsule(def.physics.height, def.physics.radius);
+        body.setTranslation(actor.vecPos, true);
         actor.body = body;
         actor.collider = collider;
     }

@@ -32,14 +32,17 @@ export default class AIController extends Controller {
     }
     tick(dt) {
         this.findNearestPlayer();
-        if (!this.blackboard.player) {
-            this.actor.fsm?.setState('patrol');
+        if (this.blackboard.player) {
+            this.actor.fsm?.setState('chase');
         } else {
-            this.actor.movement.smartMove(dt, this.blackboard.dir);
+            this.actor.fsm?.setState('patrol');
         }
     }
     inputDirection() {
-        return this.blackboard.dir;
+        const dir = this.blackboard.player
+            ? this.blackboard.dir
+            : this.actor.vecRot;
+        return dir;
     }
     findNearestPlayer() {
         const players = this.world.players

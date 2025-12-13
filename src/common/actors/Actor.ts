@@ -7,6 +7,7 @@ import FSM from "./states/FSM";
 import SolWorld from "../core/SolWorld";
 import { PhysicsSync } from "./components/PhysicsSync";
 import { ClientReplication } from "@solblade/client/actors/components/ClientReplication";
+
 interface Anim {
     name: string;
     time: number;
@@ -56,6 +57,7 @@ export class Actor implements ActorInint {
     age = 0;
     _vecPos: Vector3;
     _quatRot: Quaternion;
+    _vecRot: Vector3;
     timestamp: number;
     constructor(data: ActorInint = {}) {
         this.id = data.id ?? crypto.randomUUID();
@@ -82,6 +84,10 @@ export class Actor implements ActorInint {
     get quatRot() {
         if (!this._quatRot) this._quatRot = new Quaternion();
         return this._quatRot.fromArray(this.rot);
+    }
+    get vecRot() {
+        if (!this._vecRot) this._vecRot = new Vector3();
+        return this._vecRot.applyQuaternion(this.quatRot);
     }
     set vecPos(v: Vector3) {
         if (!this._vecPos) this._vecPos = new Vector3();
@@ -112,13 +118,15 @@ export class Actor implements ActorInint {
         return v;
     }
     tick(dt: number) {
+        if (this.controller) this.controller.update(dt);
+        if (this.fsm && this.body) this.fsm.update(dt);
         if (this.physicsSync) this.physicsSync.tick(dt);
         if (this.movement) this.movement.update(dt);
         if (this.animation) this.animation.update(dt);
         for (const comp of this.components.values()) {
             comp.tick?.(dt);
         }
-        if(this.replication)this.replication.tick(dt);
+        if (this.replication) this.replication.tick(dt);
     }
     aim() {
         return {

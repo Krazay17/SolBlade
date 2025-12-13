@@ -64,7 +64,6 @@ export class Player extends Actor {
     tick(dt: number) {
         super.tick(dt);
         if (!this.body) return;
-        if (this.fsm) this.fsm.update(dt);
         if (this.controller.actionStates[ACTIONS.DEVFLY]) {
             this.movement.devFly(this.aim().camDir);
         }
