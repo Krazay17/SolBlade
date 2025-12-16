@@ -3,7 +3,7 @@ import MyEventEmitter from "@solblade/common/core/GlobalEventEmitter.js"
 import { ACTIONS, defaultBinds } from "../config/Actions.js";
 import { rotateInputAroundYaw } from "../../common/utils/Utils.js";
 import { Vector3 } from "three";
-import Controller from "@solblade/common/actors/components/Controller.js";
+import { Controller } from "@solblade/common/actors/components/Controller.js";
 
 export class UserInput extends Controller {
   gameElement: HTMLElement;
@@ -21,7 +21,7 @@ export class UserInput extends Controller {
   actionKeys = defaultBinds
   testFunction: any;
   constructor(gameElement) {
-    super();
+    super(null, null);
     this.gameElement = gameElement;
 
     for (const key in ACTIONS) {
@@ -114,7 +114,7 @@ export class UserInput extends Controller {
       }
     })
   }
-  update(dt) { }
+  tick(dt) { }
   buttonPressed(action) {
     MyEventEmitter.emit(action);
   }
@@ -131,7 +131,7 @@ export class UserInput extends Controller {
     this.direction.set(rotatedX, 0, rotatedZ).normalize();
     return this.direction;
   }
-  aim(){
+  aim() {
     console.log(this.direction);
     return {
       dir: this.direction,

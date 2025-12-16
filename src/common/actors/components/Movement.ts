@@ -3,24 +3,46 @@ import { Euler, Matrix4, Quaternion, Vector3 } from "three";
 import { projectOnPlane } from "@solblade/common/utils/Utils";
 import { Momentum } from "./Momentum";
 import { Actor } from "../Actor";
-import SolWorld from "@solblade/common/core/SolWorld";
 
-interface movementStateData {
-    idle: movementData,
-    ground: movementData,
-    air: movementData,
-    blade: movementData
+export interface movementStateData {
+    idle?: movementData,
+    ground?: movementData,
+    air?: movementData,
+    blade?: movementData
 }
 interface movementData {
-    friction: number,
-    accel: number,
-    max: number,
+    friction?: number,
+    accel?: number,
+    max?: number,
+}
+
+const defaults: movementStateData = {
+    idle: {
+        friction: 25,
+        accel: 0,
+        max: 0,
+    },
+    ground: {
+        friction: 15,
+        accel: 15,
+        max: 6,
+    },
+    air: {
+        friction: 0.05,
+        accel: 3,
+        max: 4,
+    },
+    blade: {
+        friction: 0,
+        accel: 1,
+        max: 7,
+    }
 }
 
 export class Movement {
     turnSpeed: number = 1;
 
-    private actor: Actor;
+    actor: Actor;
     private momentum: Momentum;
     private groundChecker: GroundChecker;
     private targetRot: Quaternion = new Quaternion();
@@ -37,7 +59,9 @@ export class Movement {
     private _vecDir: Vector3;
     private _yaw: number;
     private upVec = new Vector3(0, 1, 0);
-    constructor(actor: Actor) {
+
+
+    constructor(actor: Actor, options: movementStateData = {}) {
         this.actor = actor;
         this.momentum = new Momentum();
         this.groundChecker = new GroundChecker(this, .5);
@@ -47,27 +71,11 @@ export class Movement {
         this.tempVec2 = new Vector3()
 
         this.speeds = {
-            idle: {
-                friction: 25,
-                accel: 0,
-                max: 0,
-            },
-            ground: {
-                friction: 15,
-                accel: 15,
-                max: 6,
-            },
-            air: {
-                friction: 0.05,
-                accel: 3,
-                max: 4,
-            },
-            blade: {
-                friction: 0,
-                accel: 1,
-                max: 7,
-            }
-        }
+            idle: { ...defaults.idle, ...options.idle },
+            ground: { ...defaults.ground, ...options.ground },
+            air: { ...defaults.air, ...options.air },
+            blade: { ...defaults.blade, ...options.blade },
+        } as movementStateData;
     }
 
     get vecPos() {
@@ -167,7 +175,7 @@ export class Movement {
         }
         this.accelerate(dt, wishdir, speed, this.speeds.ground.accel);
     }
-    turnTo(dt: number, dir) {
+    turnTo(dt: number, dir: Vector3 | Quaternion) {
         if (!this.actor.body) return;
         const rot = this.tempQuat.copy(this.actor.body.rotation());
 

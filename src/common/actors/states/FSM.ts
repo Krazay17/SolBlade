@@ -14,7 +14,7 @@ export default class FSM {
         if (this.states['idle']) this.state = this.states['idle'];
         this.stateName = 'idle';
     }
-    setState(state, params?: any) {
+    setState(state: string, params?: any) {
         const lastState = this.stateName;
         if (state === lastState && !this.state.canReEnter) return false
         const newState = this.states[state]

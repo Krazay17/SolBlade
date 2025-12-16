@@ -28,5 +28,6 @@ export default class SolWorld {
     }
     updateState(data) { }
     newActor(data) { }
+    add(obj){}
     exit() { }
 }

@@ -1,15 +1,11 @@
 import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
 import { AbilitySystem } from "../actors/abilities/AbilitySystem";
 import { Actor, ActorInint } from "../actors/Actor";
-import { CameraComponent } from "../actors/components/CameraComponent";
-import { RemoteInterpolation } from "../../client/actors/components/RemoteInterpolation";
 import SolWorld from "./SolWorld";
 import { actorType } from "../data/ActorTypeData";
 import { Group } from "three";
-import { Movement } from "../actors/components/Movement";
 import FSM from "../actors/states/FSM";
 import { ClientReplication } from "@solblade/client/actors/components/ClientReplication";
-import AIController from "@solblade/server/core/AIController";
 
 export function spawnA<T extends keyof typeof actorType>(
     world: SolWorld,
@@ -19,40 +15,30 @@ export function spawnA<T extends keyof typeof actorType>(
 ) {
     const def = actorType[type];
     const defaults = {
+        ...data,
         type,
         world,
         worldName: world.name,
-        model: def.model,
-        ...data
+        model: def.model ?? data.model,
     }
     const actor = new Actor(defaults);
     actor.replication = new ClientReplication(actor);
 
     if (role === "local") {
-        if (type === "player") {
-            //actor.add(new CameraComponent(actor));
-        }
     }
     if (role === "remote") {
-        actor.graphics = new Group();
-        if (def.model && world.loader) {
-            const skelesys = new SkeleSystem(actor);
-            skelesys.addSkele(world.loader);
-            actor.animation = skelesys;
-        }
+        const group = actor.graphics = new Group();
+        world.add(group);
+        actor.animation = new SkeleSystem(actor);
+        actor.animation.addSkele(world.loader);
+        world.physics.makeBody(actor, def.physics, true);
     }
     if (role === "server") {
-        if (type !== "player") {
-            actor.controller = new AIController(this, world);
-            actor.movement = new Movement(actor);
-            actor.fsm = new FSM(actor, def.states);
-            if (def.abilities) actor.add(new AbilitySystem(actor, def.abilities));
-        } else {
-        }
-        const { body, collider } = world.physics.makeCapsule(def.physics.height, def.physics.radius);
-        body.setTranslation(actor.vecPos, true);
-        actor.body = body;
-        actor.collider = collider;
+        if (def.controller) actor.controller = new def.controller.cls(actor, world, def.controller.options)
+        if (def.movement) actor.movement = new def.movement.cls(actor, def.movement.options);
+        if (def.states) actor.fsm = new FSM(actor, def.states);
+        if (def.abilities) actor.add(new AbilitySystem(actor, def.abilities));
+        world.physics.makeBody(actor, def.physics);
     }
     return actor;
 }

@@ -79,7 +79,6 @@ export class CWorld extends SolWorld {
             } else {
                 const newActor = spawnA(this, d.type, "remote", d);
                 this.actors.set(id, newActor);
-                if (newActor.graphics) this.scene.add(newActor.graphics);
             }
         }
     }

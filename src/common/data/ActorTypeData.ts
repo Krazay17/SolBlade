@@ -1,45 +1,52 @@
-import AIController from "@solblade/server/core/AIController";
-import { ChaseState } from "@solblade/server/core/ChaseState";
-import IdleState from "@solblade/server/core/IdleState";
-import PatrolState from "@solblade/server/core/PatrolState";
+import { AIController } from "@solblade/server/actors/AIController";
+import { ChaseState, IdleState, PatrolState } from "@solblade/server/actors";
+import { Controller, ControllerOptions } from "../actors/components/Controller";
+import { Movement, movementStateData } from "../actors/components/Movement";
+import { PhysicsConfig } from "../core/Physics";
 
 const stateReg = {
     idle: IdleState,
     patrol: PatrolState,
     chase: ChaseState,
 }
-
-interface PhysicsConfig {
-    shape: "capsule" | "box";
-    mass: number;
-    height?: number;
-    radius?: number;
+interface ControllerConfig {
+    cls?: typeof Controller;
+    options?: ControllerOptions;
 }
-
+interface MovementConfig {
+    cls?: typeof Movement;
+    options?: movementStateData;
+}
 interface ActorTypeDefinition {
+    controller?: ControllerConfig;
+    movement?: MovementConfig;
     model?: string;
     abilities?: string[];
     states?: typeof stateReg;
     physics?: PhysicsConfig;
 }
 
-export const actorType = {
+export const actorType: Record<string, ActorTypeDefinition> = {
     player: {
-        model: "spikeMan",
-        abilities: ["dash", "fireball"],
-        states: null,
-        physics: { shape: "capsule", mass: 1, height: 1, radius: 0.5 }
+        physics: { shape: "capsule" }
     },
     wizard: {
+        controller: {
+            cls: AIController,
+            options: {
+                aggroRange: 20,
+            }
+        },
+        movement: {
+            cls: Movement,
+
+        },
         model: "Wizard",
         abilities: ["fireball", "teleport"],
         states: stateReg,
-        physics: { shape: "capsule", mass: 1, height: 1, radius: 0.5 }
     },
-    movingBox: {
+    box: {
         model: "Box",
-        abilities: null,
-        states: null,
         physics: { shape: "box", mass: 1, height: 1, radius: 1 }
-    },
-} satisfies Record<string, ActorTypeDefinition>;
+    }
+};

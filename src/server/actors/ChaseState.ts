@@ -1,9 +1,9 @@
 import State from "@solblade/common/actors/states/State";
-import AIController from "./AIController";
+import {AIController} from "./AIController";
 
 export class ChaseState extends State {
     update(dt: any): void {
-        const target = this.actor.get(AIController)?.blackboard.player;
+        const target = (this.actor.controller as AIController)?.blackboard.player;
         if (target) {
             const dir = target.vecPos.sub(this.actor.vecPos).normalize();
             this.movement.turnTo(dt, dir);

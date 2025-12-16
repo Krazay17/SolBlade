@@ -1,7 +1,15 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { COLLISION_GROUPS, SOL_PHYSICS_SETTINGS } from "../data/SolConstants.js";
+import { Actor } from "../actors/Actor.js";
 
+export interface PhysicsConfig {
+    shape?: "capsule" | "box";
+    mass?: number;
+    height?: number;
+    radius?: number;
+}
 export class Physics {
+    world: RAPIER.World;
     constructor() {
         this.world = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
     }
@@ -11,7 +19,7 @@ export class Physics {
     step(dt) {
         this.world.step();
     }
-    async makeWorld(name) {
+    async makeWorld(name: string) {
         let worldData;
         const worldModule = await import(`../worlds/${name}.json`);
         worldData = worldModule.default;
@@ -24,21 +32,44 @@ export class Physics {
             this.world.createCollider(desc);
         }
     }
-    makeCapsule(height = 1, radius = 0.5, isRemote = false) {
-        const collideGroup = isRemote
-            ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD)
-            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.ENEMY | COLLISION_GROUPS.WORLD | COLLISION_GROUPS.PLAYER);
-        const bDesc = RAPIER.RigidBodyDesc.dynamic();
-        bDesc.lockRotations();
-        bDesc.setLinearDamping(0);
-        bDesc.setAngularDamping(0);
-        const cDesc = RAPIER.ColliderDesc.capsule(height/2, radius);
-        cDesc.setCollisionGroups(collideGroup);
-        cDesc.setFriction(0);
-        cDesc.setRestitution(0);
+    makeBody(actor: Actor, options: PhysicsConfig = {}, remote: boolean = false) {
+        const {
+            shape = "capsule",
+            height = 1,
+            radius = 0.5,
+            mass = undefined,
+        } = options;
 
-        const body = this.world.createRigidBody(bDesc)
-        const collider = this.world.createCollider(cDesc, body);
+        const collideGroup = remote
+            ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD | COLLISION_GROUPS.ENEMY)
+            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD | COLLISION_GROUPS.ENEMY);
+
+        const bodyD = remote
+            ? RAPIER.RigidBodyDesc.kinematicPositionBased()
+            : RAPIER.RigidBodyDesc.dynamic()
+        bodyD.lockRotations();
+        bodyD.setLinearDamping(0);
+        bodyD.setAngularDamping(0);
+        const body = this.world.createRigidBody(bodyD);
+        body.setTranslation(actor.vecPos, true);
+
+        let colliderD: RAPIER.ColliderDesc;
+        switch (shape) {
+            case "capsule":
+                colliderD = RAPIER.ColliderDesc.capsule(height / 2, radius)
+                break;
+            default:
+                throw new Error("no shape");
+        }
+        colliderD.setCollisionGroups(collideGroup);
+        colliderD.setFriction(0);
+        colliderD.setRestitution(0);
+
+        const collider = this.world.createCollider(colliderD, body);
+        if (mass !== undefined) collider.setMass(mass);
+
+        actor.body = body;
+        actor.collider = collider;
 
         return { body, collider };
     }

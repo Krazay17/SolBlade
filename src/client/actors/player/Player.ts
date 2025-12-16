@@ -46,16 +46,13 @@ export class Player extends Actor {
 
         this.movement = new Movement(this);
         this.fsm = new FSM(this, playerStateRegistry);
-        this.replication = new ClientReplication(this, this.game.net);
+        this.replication = new ClientReplication(this, net);
 
         this.tempVec = new Vector3();
     }
     setWorld(world: CWorld) {
         this.world = world;
-        const { body, collider } = this.world.physics.makeCapsule();
-        body.setTranslation({ x: this.pos[0], y: this.pos[1], z: this.pos[2] }, false);
-        this.body = body;
-        this.collider = collider;
+        world.physics.makeBody(this, { remote: false });
     }
     look(yaw, pitch) {
         if (this.body) this.movement.yaw = yaw;

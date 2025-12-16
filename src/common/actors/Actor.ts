@@ -1,6 +1,5 @@
 import { Collider, RigidBody } from "@dimforge/rapier3d-compat";
 import { Group, Quaternion, Vector3 } from "three";
-import Controller from "./components/Controller";
 import { Movement } from "./components/Movement";
 import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
 import FSM from "./states/FSM";
@@ -42,7 +41,7 @@ export class Actor implements ActorInint {
     lifetime?: number;
 
     world?: SolWorld;
-    controller?: Controller;
+    controller?: any;
     movement?: Movement;
     animation?: SkeleSystem;
     fsm?: FSM;
@@ -62,7 +61,7 @@ export class Actor implements ActorInint {
     constructor(data: ActorInint = {}) {
         this.id = data.id ?? crypto.randomUUID();
         this.type = data.type ?? "wizard";
-        this.name = data.name ?? "Dude";
+        this.name = data.name ?? "Gary";
         this.owner = data.owner ?? null;
         this.worldName = data.worldName ?? "world1";
         this.model = data.model ?? "Wizard";
@@ -87,6 +86,7 @@ export class Actor implements ActorInint {
     }
     get vecRot() {
         if (!this._vecRot) this._vecRot = new Vector3();
+        this._vecRot.set(0,0,1);
         return this._vecRot.applyQuaternion(this.quatRot);
     }
     set vecPos(v: Vector3) {
@@ -118,7 +118,7 @@ export class Actor implements ActorInint {
         return v;
     }
     tick(dt: number) {
-        if (this.controller) this.controller.update(dt);
+        if (this.controller) this.controller.tick(dt);
         if (this.fsm && this.body) this.fsm.update(dt);
         if (this.physicsSync) this.physicsSync.tick(dt);
         if (this.movement) this.movement.update(dt);
