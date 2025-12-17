@@ -4,7 +4,7 @@ import SolWorld from "@solblade/common/core/SolWorld.js";
 import SkyBox from "./SkyBox.js";
 import { CGame } from "../core/CGame.js";
 import { spawnA } from "@solblade/common/core/AFactory.js";
-import { Actor } from "@solblade/common/actors/Actor.js";
+import { Actor, ActorInit } from "@solblade/common/actors/Actor.js";
 
 export class CWorld extends SolWorld {
     declare loader: SolLoading;
@@ -69,20 +69,31 @@ export class CWorld extends SolWorld {
         if (actor.graphics) actor.graphics.removeFromParent();
         this.actors.delete(id);
     }
-    updateState(data: any) {
-        for (const d of data) {
-            const { id, worldName } = d;
-            if (id === this.game.player.id || worldName !== this.name) continue;
-            const actor = this.actors.get(id);
-            if (actor) {
-                if (!d.active) {
-                    this.removeActor(d);
-                    continue;
-                }
-                actor.replication.serverUpdate(d);
+    updateState(serverState: Record<string, ActorInit>) {
+        for (const [id, actor] of this.actors) {
+            // Skip the local player
+            if (id === this.game.player.id) continue;
+
+            const serverData = serverState[id];
+
+            if (serverData) {
+                // Actor exists on both: Update it
+                actor.replication.serverUpdate(serverData);
             } else {
-                const newActor = spawnA(this, d.type, "remote", d);
-                this.actors.set(id, newActor);
+                // Actor exists locally but NOT on server: Delete it
+                this.removeActor(id);
+            }
+        }
+
+        for (const id in serverState) {
+            if (id === this.game.player.id) continue;
+
+            if (!this.actors.has(id)) {
+                const data = serverState[id];
+                if (data.worldName === this.name) {
+                    const newActor = spawnA(this, data.type, "remote", data);
+                    this.actors.set(id, newActor);
+                }
             }
         }
     }

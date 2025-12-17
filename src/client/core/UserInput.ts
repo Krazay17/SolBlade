@@ -20,6 +20,7 @@ export class UserInput extends Controller {
   actionStates: Record<string, boolean> = {};
   actionKeys = defaultBinds
   testFunction: any;
+  inputHandler = new InputHandler();
   constructor(gameElement) {
     super(null, null);
     this.gameElement = gameElement;
@@ -56,6 +57,7 @@ export class UserInput extends Controller {
     // });
     document.addEventListener('keydown', (e) => {
       if (this.inputBlocked) return;
+      this.inputHandler.handleKey(e.code, true);
       this.keys[e.code] = true;
       const action = this.actionKeys[e.code];
       if (action) this.actionStates[action] = true;
@@ -65,6 +67,7 @@ export class UserInput extends Controller {
     });
     document.addEventListener('keyup', (e) => {
       if (this.inputBlocked) return;
+      this.inputHandler.handleKey(e.code, false);
       this.keys[e.code] = false;
       const action = this.actionKeys[e.code];
       if (action) this.actionStates[action] = false;
@@ -156,4 +159,55 @@ function normalizeAngle(a) {
   if (a > Math.PI) a -= Math.PI * 2;
   if (a < -Math.PI) a += Math.PI * 2;
   return a;
+}
+
+class InputHandler {
+  currentMask: number;
+  inputBuffer: any[];
+  sequenceNumber: number;
+  constructor() {
+    this.currentMask = 0;
+    this.inputBuffer = []; // To store for reconciliation
+    this.sequenceNumber = 0;
+  }
+
+  // Call this when a key is pressed/released
+  handleKey(keyCode, isDown) {
+    const action = defaultBinds[keyCode];
+    if (!action) return;
+
+    if (isDown) {
+      this.currentMask |= action;  // Set bit (OR)
+    } else {
+      this.currentMask &= ~action; // Clear bit (AND NOT)
+    }
+  }
+
+  // Call this every fixed tick (e.g., 60 times a second)
+  getTickPayload() {
+    this.sequenceNumber++;
+
+    const payload = {
+      seq: this.sequenceNumber,
+      mask: this.currentMask
+    };
+
+    // Store this so we can "replay" it later if the server corrects us
+    this.inputBuffer.push(payload);
+
+    return payload;
+  }
+  // Add this helper method to your networking or input class
+  serializeInput(payload) {
+    // 4 bytes for sequence (Uint32) + 2 bytes for mask (Uint16) = 6 bytes
+    const buffer = new ArrayBuffer(6);
+    const view = new DataView(buffer);
+
+    // Write the sequence number (32-bit integer)
+    view.setUint32(0, payload.seq, true); // true = little-endian
+    // Write the bitmask (16-bit integer)
+    view.setUint16(4, payload.mask, true);
+
+    return buffer;
+  }
 }

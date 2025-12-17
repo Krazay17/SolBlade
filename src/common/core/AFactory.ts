@@ -40,12 +40,12 @@ export function spawnA<T extends keyof typeof actorType>(
         world.physics.makeBody(actor, def.physics, def.scale, false);
     }
     if (role === "server") {
-        if (def.controller) actor.controller = new def.controller.cls(actor, world, def.controller.options)
+        if (def.controller) actor.controller = new def.controller.cls(actor, def.controller.options)
         if (def.movement) actor.movement = new def.movement.cls(actor, def.movement.options);
         if (def.states) actor.fsm = new FSM(actor, def.states);
         if (def.abilities) actor.add(new AbilitySystem(actor, def.abilities));
         world.physics.makeBody(actor, def.physics, def.scale, isPlayer);
     }
-    world.addActor(actor);
+    world.addActor(actor, init.id);
     return actor;
 }

@@ -20,10 +20,20 @@ export class SWorld extends SolWorld {
         }
         spawnBox();
     }
-    addActor(actor) {
-        const indx = this.actorIndex++;
-        actor.id = indx
-        this.actors.set(indx, actor);
+    addActor(actor, id) {
+        id = id
+            ? id
+            : this.actorIndex++;
+
+        actor.id = id;
+        this.actors.set(id, actor);
+    }
+    removeActor(id) {
+        const actor = this.actors.get(id);
+        if (!actor) return;
+        if (actor.collider) this.physics.world.removeCollider(actor.collider);
+        actor.destroy();
+        this.actors.delete(id);
     }
     addPlayer(id, data) {
         const actor = spawnA(this, data.type, "server", data);
@@ -40,6 +50,9 @@ export class SWorld extends SolWorld {
         this.actors.delete(id);
     }
     step(dt) {
+        this.actors.forEach((v, k) => {
+            if (v.pos[1] < -100) this.removeActor(k);
+        })
         this.physics.step(dt);
         const update = {}
         update.state = this.getState();

@@ -1,17 +1,27 @@
-import { Vector3 } from "three";
 import type { Actor } from "../Actor";
 import type SolWorld from "@solblade/common/core/SolWorld";
 
 export class Controller {
     actor: Actor;
     world: SolWorld;
-    direction: Vector3 = new Vector3();
+
+    yaw: number = 0;
+    pitch: number = 0;
+
     actionStates: any;
-    constructor(actor: Actor, world: SolWorld, options?: any) {
-        this.actor = actor;
-        this.world = world;
+    constructor(actor: Actor, options?: any) {
+        if (actor) {
+            this.actor = actor;
+            this.world = actor.world;
+        }
     }
-    inputDirection(): Vector3 | boolean { return this.direction }
+    inputDirection() { }
+    lookDirection() {
+        const x = Math.sin(this.yaw) * Math.cos(this.pitch);
+        const y = Math.sin(this.pitch);
+        const z = Math.cos(this.yaw) * Math.cos(this.pitch);
+        return { x, y, z }
+    }
     aim() { return { dir: null, camDir: null } }
     tick(dt: number) { }
     look(y, p) { }

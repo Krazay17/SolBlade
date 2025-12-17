@@ -1,7 +1,6 @@
 
 import { Actor } from "@solblade/common/actors/Actor";
 import { Controller } from "@solblade/common/actors/components/Controller";
-import SolWorld from "@solblade/common/core/SolWorld";
 import { Vector3 } from "three";
 
 interface Blackboard {
@@ -18,13 +17,11 @@ export class AIController extends Controller {
     blackboard: Blackboard;
 
     tempVec = new Vector3();
-    constructor(actor: Actor, world: SolWorld, data?: AIControllerOptions) {
-        super(actor, world);
-        this.actor = actor;
-        this.world = world;
+    constructor(actor: Actor, options?: AIControllerOptions) {
+        super(actor);
         const {
             aggroRadius = 50
-        } = data;
+        } = options;
         this.aggroRadius = aggroRadius;
 
         this.blackboard = {

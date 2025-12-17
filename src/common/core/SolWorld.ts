@@ -19,16 +19,16 @@ export default class SolWorld {
         });
     }
     getState() {
-        const data = [];
+        const state = {};
         this.actors.forEach((v, k) => {
-            const obj = v.serialize();
-            data.push(obj);
+            state[k] = v.serialize();
         })
-        return data
+        return state;
     }
     updateState(data) { }
     newActor(data) { }
-    addActor(actor: Actor){}
+    addActor(actor: Actor, id: string){}
+    removeActor(id: string){}
     add(obj){}
     exit() { }
 }

@@ -30,7 +30,8 @@ interface ActorTypeDefinition {
 export const actorType: Record<string, ActorTypeDefinition> = {
     player: {
         model: "spikeMan",
-        physics: { shape: "pawn", radius: .5 }
+        physics: { shape: "pawn", radius: .5 },
+        abilities: ['fireball'],
     },
     wizard: {
         controller: {

@@ -38,4 +38,9 @@ export class AbilitySystem extends Component {
             v.use();
         })
     }
+    useIndex(index: number){
+        const ability = this.abilities.get(index);
+        if(!ability)return;
+        ability.use();
+    }
 }

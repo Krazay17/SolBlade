@@ -11,6 +11,7 @@ import { Actor, ActorInit } from "@solblade/common/actors/Actor.js";
 import { CNet } from "@solblade/client/core/CNet.js";
 import { ClientReplication } from "../components/ClientReplication.js";
 import { PhysicsConfig } from "@solblade/common/core/Physics.js";
+import { AbilitySystem } from "@solblade/common/actors/abilities/AbilitySystem.js";
 
 export class Player extends Actor {
     declare controller?: UserInput;
@@ -47,6 +48,7 @@ export class Player extends Actor {
 
         this.movement = new Movement(this);
         this.fsm = new FSM(this, playerStateRegistry);
+        //this.abilitySys = new AbilitySystem(this, ["fireball"]);
         this.replication = new ClientReplication(this, net);
 
         this.tempVec = new Vector3();
@@ -65,6 +67,9 @@ export class Player extends Actor {
         if (this.controller.actionStates[ACTIONS.DEVFLY]) {
             this.movement.devFly(this.aim().camDir);
         }
+        // if(this.controller.actionStates[ACTIONS.ATTACK_LEFT]){  
+        //     this.abilitySys.useIndex(0);
+        // }
         this.graphics.position.set(this.pos[0], this.pos[1], this.pos[2]);
         this.graphics.quaternion.set(this.rot[0], this.rot[1], this.rot[2], this.rot[3]);
     }

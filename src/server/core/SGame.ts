@@ -79,6 +79,9 @@ export class SGame {
             user.actor.replication?.serverUpdate(data);
         }
     }
+    playerInput(data, socket){
+        //console.log(data);
+    }
     serverTest(cb) {
         //if (cb) cb(NET.SERVER.TEST);
         this.io.emit(NET.SERVER.TEST);

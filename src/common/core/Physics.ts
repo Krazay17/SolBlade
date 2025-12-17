@@ -1,26 +1,20 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { COLLISION_GROUPS, SOL_PHYSICS_SETTINGS } from "../data/SolConstants.js";
 import { Actor } from "../actors/Actor.js";
-import { Vector3 } from "three";
 
 export interface PhysicsConfig {
     shape?: "pawn" | "capsule" | "box" | "ball" | "trimesh";
     mass?: number;
     height?: number;
     radius?: number;
-    // New: Trimesh support
     vertices?: Float32Array | number[];
     indices?: Uint32Array | number[];
-    // New: Override defaults if needed
     collisionGroup?: number;
     sensor?: boolean;
 }
 
 export class Physics {
-    world: RAPIER.World;
-    constructor() {
-        this.world = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
-    }
+    world = new RAPIER.World(SOL_PHYSICS_SETTINGS.gravity);
     remove() {
         this.world.free();
     }
@@ -41,19 +35,16 @@ export class Physics {
         }
     }
     makeBody(actor: Actor, options: PhysicsConfig = {}, scale: number = 1, isProxy: boolean = false) {
-        // 1. PREP DATA (Crucial: Fallback to defaults immediately)
         const h = (options.height ?? 1) * scale;
         const r = (options.radius ?? 0.5) * scale;
         const shape = options.shape || "pawn";
 
-        // 2. DEFINE DESCRIPTORS
         const bodyD = isProxy
             ? RAPIER.RigidBodyDesc.kinematicPositionBased()
             : RAPIER.RigidBodyDesc.dynamic();
 
         let colliderD: RAPIER.ColliderDesc;
 
-        // 3. THE SWITCH (Actually safer for Rapier's WASM stability)
         switch (shape) {
             case "capsule":
             case "pawn":
@@ -79,7 +70,6 @@ export class Physics {
                 throw new Error(`Unknown shape: ${shape}`);
         }
 
-        // 4. APPLY GROUPS & SENSORS
         const group = this.resolveCollisionGroup(shape, isProxy, options.collisionGroup);
         if (group) colliderD.setCollisionGroups(group);
 

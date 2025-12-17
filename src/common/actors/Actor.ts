@@ -7,6 +7,7 @@ import SolWorld from "../core/SolWorld";
 import { PhysicsSync } from "./components/PhysicsSync";
 import { ClientReplication } from "@solblade/client/actors/components/ClientReplication";
 import { PhysicsConfig } from "../core/Physics";
+import { AbilitySystem } from "./abilities/AbilitySystem";
 
 interface Anim {
     name: string;
@@ -56,6 +57,7 @@ export class Actor implements ActorInit {
     graphics?: Group;
     replication?: ClientReplication;
     physicsSync: PhysicsSync = new PhysicsSync(this);
+    abilitySys: AbilitySystem;
 
     components = new Map<Function, any>();
     age = 0;
@@ -125,6 +127,7 @@ export class Actor implements ActorInit {
         return v;
     }
     tick(dt: number) {
+        if (!this.active) return;
         if (this.controller) this.controller.tick(dt);
         if (this.fsm && this.body) this.fsm.update(dt);
         if (this.physicsSync) this.physicsSync.tick(dt);
@@ -147,10 +150,10 @@ export class Actor implements ActorInit {
         }
     }
     destroy() {
+        this.active = false;
         this.components.forEach((v, k) => {
             v.destroy?.();
         });
-        this.active = false;
     }
     serialize() {
         return {

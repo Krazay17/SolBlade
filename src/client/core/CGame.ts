@@ -87,6 +87,16 @@ export class CGame {
         this.player.tick(dt);
     }
     step(dt) {
+        if (this.input) {
+            const payload = this.input.inputHandler.getTickPayload();
+            if (!payload) return;
+
+            // Convert the object to raw bytes
+            const binaryPayload = this.input.inputHandler.serializeInput(payload);
+
+            // Send the raw bytes
+            this.net.emit(NET.CLIENT.PLAYER_INPUT, binaryPayload);
+        }
         if (this.world) this.world.step(dt);
     }
     snap(data) {
