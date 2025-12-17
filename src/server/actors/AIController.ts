@@ -9,12 +9,16 @@ interface Blackboard {
     dir?: Vector3;
 }
 
+export interface AIControllerOptions {
+    aggroRadius?: number;
+}
+
 export class AIController extends Controller {
     aggroRadius: number;
     blackboard: Blackboard;
 
     tempVec = new Vector3();
-    constructor(actor: Actor, world: SolWorld, data?: any) {
+    constructor(actor: Actor, world: SolWorld, data?: AIControllerOptions) {
         super(actor, world);
         this.actor = actor;
         this.world = world;

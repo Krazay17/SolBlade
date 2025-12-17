@@ -4,7 +4,7 @@ import { projectOnPlane } from "@solblade/common/utils/Utils";
 import { Momentum } from "./Momentum";
 import { Actor } from "../Actor";
 
-export interface movementStateData {
+export interface MovementOptions {
     idle?: movementData,
     ground?: movementData,
     air?: movementData,
@@ -16,7 +16,7 @@ interface movementData {
     max?: number,
 }
 
-const defaults: movementStateData = {
+const defaults: MovementOptions = {
     idle: {
         friction: 25,
         accel: 0,
@@ -43,8 +43,8 @@ export class Movement {
     turnSpeed: number = 1;
 
     actor: Actor;
-    private momentum: Momentum;
-    private groundChecker: GroundChecker;
+    momentum: Momentum;
+    groundChecker: GroundChecker;
     private targetRot: Quaternion = new Quaternion();
     private tempVec: Vector3 = new Vector3();
     private tempVec1: Vector3 = new Vector3();
@@ -52,7 +52,7 @@ export class Movement {
     private tempQuat: Quaternion = new Quaternion();
     private tempEuler: Euler = new Euler();
     private tempMatrix: Matrix4 = new Matrix4();
-    private speeds: movementStateData;
+    private speeds: MovementOptions;
     private _vecPos: Vector3;
     private _quatRot: Quaternion;
     private _vecVel: Vector3;
@@ -61,10 +61,10 @@ export class Movement {
     private upVec = new Vector3(0, 1, 0);
 
 
-    constructor(actor: Actor, options: movementStateData = {}) {
+    constructor(actor: Actor, options: MovementOptions = {}) {
         this.actor = actor;
         this.momentum = new Momentum();
-        this.groundChecker = new GroundChecker(this, .5);
+        this.groundChecker = new GroundChecker(this, .4);
 
         this.tempVec = new Vector3()
         this.tempVec1 = new Vector3()
@@ -75,7 +75,7 @@ export class Movement {
             ground: { ...defaults.ground, ...options.ground },
             air: { ...defaults.air, ...options.air },
             blade: { ...defaults.blade, ...options.blade },
-        } as movementStateData;
+        } as MovementOptions;
     }
 
     get vecPos() {

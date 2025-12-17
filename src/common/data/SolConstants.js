@@ -9,6 +9,7 @@ export const COLLISION_GROUPS = {
     PLAYER: 0b0010,
     ENEMY: 0b0100,
     RAY: 0b1000,
+    PROJECTILE: 0b1001,
 };
 
 export const WEAPON_STATS = {

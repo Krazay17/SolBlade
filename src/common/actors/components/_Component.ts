@@ -1,14 +1,11 @@
 import SolWorld from "@solblade/common/core/SolWorld";
 import { Actor } from "../Actor";
 
-export class Debugger {
+export class Component {
     actor: Actor;
     world: SolWorld;
-    constructor(actor: Actor, world: SolWorld){
+    constructor(actor: Actor) {
         this.actor = actor;
-        this.world = world;
-    }
-    tick(dt){
-        console.log(this.actor.pos);
+        this.world = actor.world;
     }
 }

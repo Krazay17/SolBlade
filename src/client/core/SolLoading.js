@@ -21,21 +21,25 @@ class MeshManager {
         this.loadedMesh = new Map();
     }
     async makeMesh(name) {
-        let loadedMesh = this.loadedMesh.get(name);
-        if (!loadedMesh) {
-            const gltf = await this.loader.loadAsync(`/assets/${name}.glb`)
-            gltf.scene.position.set(0, -1, 0);
-            loadedMesh = {
-                mesh: gltf.scene,
-                animations: gltf.animations
+        try {
+            let loadedMesh = this.loadedMesh.get(name);
+            if (!loadedMesh) {
+                const gltf = await this.loader.loadAsync(`/assets/${name}.glb`)
+                gltf.scene.position.set(0, -1, 0);
+                loadedMesh = {
+                    mesh: gltf.scene,
+                    animations: gltf.animations
+                }
+                this.loadedMesh.set(name, loadedMesh);
             }
-            this.loadedMesh.set(name, loadedMesh);
+            let result = {
+                mesh: SkeletonUtils.clone(loadedMesh.mesh),
+                animations: loadedMesh.animations
+            };
+            return result;
+        } catch {
+            return null;
         }
-        let result = {
-            mesh: SkeletonUtils.clone(loadedMesh.mesh),
-            animations: loadedMesh.animations
-        };
-        return result;
     }
 }
 

@@ -1,6 +1,6 @@
-import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
+import { MeshSystem } from "@solblade/client/actors/components/MeshSystem";
 import { AbilitySystem } from "../actors/abilities/AbilitySystem";
-import { Actor, ActorInint } from "../actors/Actor";
+import { Actor, ActorInit } from "../actors/Actor";
 import SolWorld from "./SolWorld";
 import { actorType } from "../data/ActorTypeData";
 import { Group } from "three";
@@ -11,34 +11,41 @@ export function spawnA<T extends keyof typeof actorType>(
     world: SolWorld,
     type: T,
     role: "local" | "remote" | "server",
-    data: ActorInint,
+    data?: ActorInit,
 ) {
     const def = actorType[type];
-    const defaults = {
+    const init = {
+        ...def,
         ...data,
         type,
         world,
         worldName: world.name,
-        model: def.model ?? data.model,
     }
-    const actor = new Actor(defaults);
+    const actor = new Actor(init);
+
+    const isPlayer = type === "player";
     actor.replication = new ClientReplication(actor);
 
     if (role === "local") {
     }
     if (role === "remote") {
         const group = actor.graphics = new Group();
+        group.position.copy(actor.vecPos);
+        if (init.scale) group.scale.set(init.scale, init.scale, init.scale);
         world.add(group);
-        actor.animation = new SkeleSystem(actor);
-        actor.animation.addSkele(world.loader);
-        world.physics.makeBody(actor, def.physics, true);
+        actor.mesh = new MeshSystem(actor);
+        if (init.model) {
+            actor.mesh.addMesh(world.loader, init.model);
+        }
+        world.physics.makeBody(actor, def.physics, def.scale, false);
     }
     if (role === "server") {
         if (def.controller) actor.controller = new def.controller.cls(actor, world, def.controller.options)
         if (def.movement) actor.movement = new def.movement.cls(actor, def.movement.options);
         if (def.states) actor.fsm = new FSM(actor, def.states);
         if (def.abilities) actor.add(new AbilitySystem(actor, def.abilities));
-        world.physics.makeBody(actor, def.physics);
+        world.physics.makeBody(actor, def.physics, def.scale, isPlayer);
     }
+    world.addActor(actor);
     return actor;
 }

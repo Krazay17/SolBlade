@@ -4,6 +4,7 @@ import SolWorld from "@solblade/common/core/SolWorld.js";
 import SkyBox from "./SkyBox.js";
 import { CGame } from "../core/CGame.js";
 import { spawnA } from "@solblade/common/core/AFactory.js";
+import { Actor } from "@solblade/common/actors/Actor.js";
 
 export class CWorld extends SolWorld {
     declare loader: SolLoading;
@@ -45,6 +46,9 @@ export class CWorld extends SolWorld {
     }
     step(dt) {
         this.physics.step(dt);
+    }
+    addActor(actor: Actor): void {
+        this.actors.set(actor.id, actor);
     }
     removeRemoteActors() {
         this.actors.forEach((v, k) => {

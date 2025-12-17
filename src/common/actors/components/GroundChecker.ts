@@ -13,7 +13,7 @@ export default class GroundChecker {
     constructor(movement: Movement, radius?: number) {
         this.movement = movement
         this.tempVec = new Vector3();
-        this.ball = new RAPIER.Ball(.5);
+        this.ball = new RAPIER.Ball(radius);
 
     }
     isGrounded(slope = -0.6) {

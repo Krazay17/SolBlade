@@ -1,6 +1,6 @@
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { vectorsToLateralDegrees } from "@solblade/common/utils/Utils.js";
-import {Actor} from "../Actor";
+import { Actor } from "../Actor";
 
 export default class State {
     fsm: FSM;
@@ -17,7 +17,7 @@ export default class State {
     }
     get controller() { return this.actor.controller }
     get movement() { return this.actor.movement }
-    get animation() { return this.actor.animation }
+    get animation() { return this.actor.mesh }
     setState(state: string, params?: any) { this.fsm.setState(state, params) }
     enter(state: string, params: any = {}) { }
     exit(state) { }
@@ -32,7 +32,7 @@ export default class State {
             if (lateral === 0) return "Neutral";
             moveDir.normalize();
         }
-        if(!lookDir)return "Front";
+        if (!lookDir) return "Front";
         let angleDeg = vectorsToLateralDegrees(lookDir, moveDir);
         const sector = Math.floor((angleDeg + 22.5) / 45) % 8;
         switch (sector) {

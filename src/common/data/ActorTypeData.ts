@@ -1,7 +1,7 @@
-import { AIController } from "@solblade/server/actors/AIController";
+import { AIController, AIControllerOptions } from "@solblade/server/actors/AIController";
 import { ChaseState, IdleState, PatrolState } from "@solblade/server/actors";
-import { Controller, ControllerOptions } from "../actors/components/Controller";
-import { Movement, movementStateData } from "../actors/components/Movement";
+import { Controller } from "../actors/components/Controller";
+import { Movement, MovementOptions } from "../actors/components/Movement";
 import { PhysicsConfig } from "../core/Physics";
 
 const stateReg = {
@@ -11,16 +11,17 @@ const stateReg = {
 }
 interface ControllerConfig {
     cls?: typeof Controller;
-    options?: ControllerOptions;
+    options?: AIControllerOptions;
 }
 interface MovementConfig {
     cls?: typeof Movement;
-    options?: movementStateData;
+    options?: MovementOptions;
 }
 interface ActorTypeDefinition {
     controller?: ControllerConfig;
     movement?: MovementConfig;
     model?: string;
+    scale?: number;
     abilities?: string[];
     states?: typeof stateReg;
     physics?: PhysicsConfig;
@@ -28,25 +29,41 @@ interface ActorTypeDefinition {
 
 export const actorType: Record<string, ActorTypeDefinition> = {
     player: {
-        physics: { shape: "capsule" }
+        model: "spikeMan",
+        physics: { shape: "pawn", radius: .5 }
     },
     wizard: {
         controller: {
             cls: AIController,
             options: {
-                aggroRange: 20,
+                aggroRadius: 200,
             }
         },
         movement: {
             cls: Movement,
-
+            options: {
+                ground: {
+                    max: 1,
+                }
+            }
         },
         model: "Wizard",
         abilities: ["fireball", "teleport"],
         states: stateReg,
+        physics: {
+            shape: "pawn",
+            radius: .5,
+        },
     },
     box: {
         model: "Box",
-        physics: { shape: "box", mass: 1, height: 1, radius: 1 }
+        physics: { shape: "box" },
+        scale: 2
+    },
+    projectile: {
+        movement: { cls: Movement, },
+        model: "Ball",
+        physics: { shape: "ball" },
+        scale: .2
     }
 };

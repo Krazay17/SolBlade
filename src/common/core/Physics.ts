@@ -1,13 +1,21 @@
 import RAPIER from "@dimforge/rapier3d-compat";
 import { COLLISION_GROUPS, SOL_PHYSICS_SETTINGS } from "../data/SolConstants.js";
 import { Actor } from "../actors/Actor.js";
+import { Vector3 } from "three";
 
 export interface PhysicsConfig {
-    shape?: "capsule" | "box";
+    shape?: "pawn" | "capsule" | "box" | "ball" | "trimesh";
     mass?: number;
     height?: number;
     radius?: number;
+    // New: Trimesh support
+    vertices?: Float32Array | number[];
+    indices?: Uint32Array | number[];
+    // New: Override defaults if needed
+    collisionGroup?: number;
+    sensor?: boolean;
 }
+
 export class Physics {
     world: RAPIER.World;
     constructor() {
@@ -32,46 +40,81 @@ export class Physics {
             this.world.createCollider(desc);
         }
     }
-    makeBody(actor: Actor, options: PhysicsConfig = {}, remote: boolean = false) {
-        const {
-            shape = "capsule",
-            height = 1,
-            radius = 0.5,
-            mass = undefined,
-        } = options;
+    makeBody(actor: Actor, options: PhysicsConfig = {}, scale: number = 1, isProxy: boolean = false) {
+        // 1. PREP DATA (Crucial: Fallback to defaults immediately)
+        const h = (options.height ?? 1) * scale;
+        const r = (options.radius ?? 0.5) * scale;
+        const shape = options.shape || "pawn";
 
-        const collideGroup = remote
-            ? COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD | COLLISION_GROUPS.ENEMY)
-            : COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD | COLLISION_GROUPS.ENEMY);
-
-        const bodyD = remote
+        // 2. DEFINE DESCRIPTORS
+        const bodyD = isProxy
             ? RAPIER.RigidBodyDesc.kinematicPositionBased()
-            : RAPIER.RigidBodyDesc.dynamic()
-        bodyD.lockRotations();
-        bodyD.setLinearDamping(0);
-        bodyD.setAngularDamping(0);
-        const body = this.world.createRigidBody(bodyD);
-        body.setTranslation(actor.vecPos, true);
+            : RAPIER.RigidBodyDesc.dynamic();
 
         let colliderD: RAPIER.ColliderDesc;
+
+        // 3. THE SWITCH (Actually safer for Rapier's WASM stability)
         switch (shape) {
             case "capsule":
-                colliderD = RAPIER.ColliderDesc.capsule(height / 2, radius)
+            case "pawn":
+                colliderD = RAPIER.ColliderDesc.capsule(h / 2, r);
+                if (shape === "pawn") {
+                    bodyD.lockRotations().setLinearDamping(0).setAngularDamping(0);
+                }
+                break;
+            case "box":
+                colliderD = RAPIER.ColliderDesc.cuboid(h, h, h);
+                break;
+            case "ball":
+                colliderD = RAPIER.ColliderDesc.ball(r);
+                break;
+            case "trimesh":
+                if (!options.vertices || !options.indices) throw new Error("Trimesh missing data");
+                colliderD = RAPIER.ColliderDesc.trimesh(
+                    options.vertices as Float32Array,
+                    options.indices as Uint32Array
+                );
                 break;
             default:
-                throw new Error("no shape");
+                throw new Error(`Unknown shape: ${shape}`);
         }
-        colliderD.setCollisionGroups(collideGroup);
-        colliderD.setFriction(0);
-        colliderD.setRestitution(0);
 
+        // 4. APPLY GROUPS & SENSORS
+        const group = this.resolveCollisionGroup(shape, isProxy, options.collisionGroup);
+        if (group) colliderD.setCollisionGroups(group);
+
+        colliderD.setFriction(0).setRestitution(0);
+        if (options.sensor) colliderD.setSensor(true);
+
+        const body = this.world.createRigidBody(bodyD);
+        body.setTranslation(actor.vecPos, true);
         const collider = this.world.createCollider(colliderD, body);
-        if (mass !== undefined) collider.setMass(mass);
+
+        if (options.mass !== undefined) collider.setMass(options.mass);
 
         actor.body = body;
         actor.collider = collider;
-
         return { body, collider };
+    }
+    private resolveCollisionGroup(shape: string, isProxy: boolean, override?: number): number | null {
+        if (override) return override;
+
+        // Projectiles
+        if (shape === "ball") {
+            return COLLISION_GROUPS.PROJECTILE << 16 | COLLISION_GROUPS.WORLD;
+        }
+
+        // Pawns / Players / Enemies
+        if (shape === "pawn") {
+            // isProxy = true usually means it's an enemy or remote player
+            if (isProxy) {
+                return COLLISION_GROUPS.ENEMY << 16 | (COLLISION_GROUPS.PLAYER | COLLISION_GROUPS.WORLD);
+            } else {
+                return COLLISION_GROUPS.PLAYER << 16 | (COLLISION_GROUPS.WORLD | COLLISION_GROUPS.ENEMY);
+            }
+        }
+
+        return null;
     }
 }
 

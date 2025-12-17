@@ -37,7 +37,7 @@ export class ClientReplication {
         if (now - this.lastSent < this.sendRate) return;
         let update: any = {};
         const { pos, rot } = this.actor;
-        const anim = this.actor.animation.getAnim()
+        const anim = this.actor.mesh.getAnim()
 
         if (!this.lastPos || !this.lastPos.every((v, i) => v === pos[i])) {
             this.lastPos = [...pos];

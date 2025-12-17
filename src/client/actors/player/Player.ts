@@ -3,13 +3,14 @@ import { Group, PerspectiveCamera, Quaternion, Vector3 } from "three";
 import { ACTIONS } from "../../config/Actions.js";
 import { UserInput } from "../../core/UserInput.js";
 import { CWorld } from "../../world/CWorld.js";
-import { SkeleSystem } from "../components/SkeleSystem.js";
+import { MeshSystem } from "../components/MeshSystem.js";
 import FSM from "@solblade/common/actors/states/FSM.js";
 import { playerStateRegistry } from "./states/StateReg.js";
 import { Movement } from "@solblade/common/actors/components/Movement.js";
-import { Actor, ActorInint } from "@solblade/common/actors/Actor.js";
+import { Actor, ActorInit } from "@solblade/common/actors/Actor.js";
 import { CNet } from "@solblade/client/core/CNet.js";
 import { ClientReplication } from "../components/ClientReplication.js";
+import { PhysicsConfig } from "@solblade/common/core/Physics.js";
 
 export class Player extends Actor {
     declare controller?: UserInput;
@@ -23,7 +24,7 @@ export class Player extends Actor {
     replicator?: ClientReplication;
 
     money: number;
-    constructor(game: CGame, data: ActorInint = {}, net: CNet) {
+    constructor(game: CGame, data: ActorInit = {}, net: CNet) {
         super({
             ...data,
             type: "player",
@@ -38,8 +39,8 @@ export class Player extends Actor {
         this.camera.position.set(.333, .666, 1.333);
         this.cameraArm.add(this.camera);
 
-        this.animation = new SkeleSystem(this);
-        this.animation.addSkele(this.game.loader);
+        this.mesh = new MeshSystem(this);
+        this.mesh.addMesh(this.game.loader);
 
         this.controller = this.game.input;
         this.controller.look = (y, p) => this.look(y, p);
@@ -52,7 +53,7 @@ export class Player extends Actor {
     }
     setWorld(world: CWorld) {
         this.world = world;
-        world.physics.makeBody(this, { remote: false });
+        world.physics.makeBody(this, { height: 1, radius: 0.5 } as PhysicsConfig, undefined, false);
     }
     look(yaw, pitch) {
         if (this.body) this.movement.yaw = yaw;
@@ -69,8 +70,12 @@ export class Player extends Actor {
     }
     aim() {
         const d = this.camera.getWorldDirection(this.tempVec);
+        const pos = this.vecPos.clone();
+        pos.y += 0.8;
+        pos.addScaledVector(d, 2);
         return {
             dir: d,
+            pos,
             camDir: d,
         }
     }

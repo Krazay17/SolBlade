@@ -1,11 +1,12 @@
 import { Collider, RigidBody } from "@dimforge/rapier3d-compat";
 import { Group, Quaternion, Vector3 } from "three";
 import { Movement } from "./components/Movement";
-import { SkeleSystem } from "@solblade/client/actors/components/SkeleSystem";
+import { MeshSystem } from "@solblade/client/actors/components/MeshSystem";
 import FSM from "./states/FSM";
 import SolWorld from "../core/SolWorld";
 import { PhysicsSync } from "./components/PhysicsSync";
 import { ClientReplication } from "@solblade/client/actors/components/ClientReplication";
+import { PhysicsConfig } from "../core/Physics";
 
 interface Anim {
     name: string;
@@ -13,7 +14,7 @@ interface Anim {
     scale: number;
     loop: boolean;
 }
-export interface ActorInint {
+export interface ActorInit {
     id?: string;
     owner?: string;
     type?: string;
@@ -22,12 +23,14 @@ export interface ActorInint {
     worldName?: string;
     pos?: number[];
     rot?: number[];
+    scale?: number;
     active?: boolean;
     lifetime?: number;
     world?: SolWorld;
+    physicsConfig?: PhysicsConfig;
 }
 
-export class Actor implements ActorInint {
+export class Actor implements ActorInit {
     id?: string;
     type?: string;
     name?: string;
@@ -36,6 +39,7 @@ export class Actor implements ActorInint {
     model?: string;
     pos?: number[];
     rot?: number[];
+    scale?: number;
     anim?: Anim;
     active?: boolean;
     lifetime?: number;
@@ -43,11 +47,12 @@ export class Actor implements ActorInint {
     world?: SolWorld;
     controller?: any;
     movement?: Movement;
-    animation?: SkeleSystem;
+    mesh?: MeshSystem;
     fsm?: FSM;
 
     body?: RigidBody;
     collider?: Collider;
+    physicsConfig?: PhysicsConfig;
     graphics?: Group;
     replication?: ClientReplication;
     physicsSync: PhysicsSync = new PhysicsSync(this);
@@ -58,7 +63,7 @@ export class Actor implements ActorInint {
     _quatRot: Quaternion;
     _vecRot: Vector3;
     timestamp: number;
-    constructor(data: ActorInint = {}) {
+    constructor(data: ActorInit = {}) {
         this.id = data.id ?? crypto.randomUUID();
         this.type = data.type ?? "wizard";
         this.name = data.name ?? "Gary";
@@ -70,6 +75,8 @@ export class Actor implements ActorInint {
 
         this.pos = data.pos ?? [0, 1, 0];
         this.rot = data.rot ?? [0, 0, 0, 1];
+        this.scale = data.scale ?? 1;
+        this.physicsConfig = data.physicsConfig ?? null;
 
         this.active = data.active ?? true;
 
@@ -86,7 +93,7 @@ export class Actor implements ActorInint {
     }
     get vecRot() {
         if (!this._vecRot) this._vecRot = new Vector3();
-        this._vecRot.set(0,0,1);
+        this._vecRot.set(0, 0, 1);
         return this._vecRot.applyQuaternion(this.quatRot);
     }
     set vecPos(v: Vector3) {
@@ -122,15 +129,20 @@ export class Actor implements ActorInint {
         if (this.fsm && this.body) this.fsm.update(dt);
         if (this.physicsSync) this.physicsSync.tick(dt);
         if (this.movement) this.movement.update(dt);
-        if (this.animation) this.animation.update(dt);
+        if (this.mesh) this.mesh.update(dt);
         for (const comp of this.components.values()) {
             comp.tick?.(dt);
         }
+
         if (this.replication) this.replication.tick(dt);
     }
     aim() {
+        const pos = this.vecPos.clone();
+        pos.y += 0.8;
+        pos.addScaledVector(this.vecRot, .5);
         return {
-            dir: undefined,
+            dir: this.vecRot,
+            pos,
             camDir: undefined,
         }
     }

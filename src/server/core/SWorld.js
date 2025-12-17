@@ -10,12 +10,20 @@ export class SWorld extends SolWorld {
     }
     async start() {
         await this.physics.makeWorld(this.name);
-        const enemies = 2;
+        const enemies = 1;
         for (let i = 0; i < enemies; i++) {
-            const actor = spawnA(this, "wizard", "server", { id: this.actorIndex++, pos: [0, 25+i, -5] });
-            this.actors.set(actor.id, actor);
-            actor.add(new Debugger(actor, this));
+            const actor = spawnA(this, "wizard", "server", { pos: [0, 40 + i, -5] });
         }
+        const spawnBox = () => {
+            if (this.actors.size < 50) spawnA(this, "box", "server", { pos: [0, 155, 0] });
+            setTimeout(spawnBox, 2500);
+        }
+        spawnBox();
+    }
+    addActor(actor) {
+        const indx = this.actorIndex++;
+        actor.id = indx
+        this.actors.set(indx, actor);
     }
     addPlayer(id, data) {
         const actor = spawnA(this, data.type, "server", data);

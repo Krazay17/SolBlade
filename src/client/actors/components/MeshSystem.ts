@@ -10,7 +10,11 @@ interface Anim {
     loop?: boolean;
 }
 
-export class SkeleSystem {
+const meshReg = {
+
+}
+
+export class MeshSystem {
     private actor: Actor
     private mixer: THREE.AnimationMixer | null = null;
     private currentAction: THREE.AnimationAction | null = null
@@ -18,24 +22,51 @@ export class SkeleSystem {
     private animations: Record<string, AnimationClip> = {};
     private _onFinishedListener: any;
     private quedAnim: any;
+    mesh: any;
 
     constructor(actor: Actor) {
         this.actor = actor;
     }
     update(dt) {
-        if (this.mixer) this.mixer.update(dt);
-        if (this.actor.anim) {
-            this.playAnimation(this.actor.anim);
+        if (this.mixer) {
+            this.mixer.update(dt);
+            if (this.actor.anim) {
+                this.playAnimation(this.actor.anim);
+            }
         }
     }
-    async addSkele(loader: SolLoading) {
-        const { mesh, animations } = await loader.meshManager.makeMesh(this.actor.model);
+    async addMesh(loader: SolLoading, model?: string) {
+        try {
+
+            const { mesh, animations } = await loader.meshManager.makeMesh(model || this.actor.model);
+            //if (this.actor.scale) mesh.position.set(0, -1 * this.actor.scale, 0);
+            this.mesh = mesh;
+            this.actor.graphics.add(mesh);
+            if (animations) {
+                this.mixer = new THREE.AnimationMixer(mesh);
+                animations.forEach((clip: AnimationClip) => {
+                    this.animations[clip.name] = clip;
+                });
+                this.playAnimation({ name: "idle" })
+            }
+        } catch {
+            this.mesh = this.addSimpleMesh(model || this.actor.model);
+        }
+    }
+    addSimpleMesh(model) {
+        console.log('simplemesh')
+        let mesh;
+        switch (model) {
+            case "Ball":
+                mesh = new THREE.Mesh(
+                    new THREE.SphereGeometry(1),
+                    new THREE.MeshBasicMaterial({ color: "white" }),
+                )
+                break;
+        }
+        if (!mesh) return;
         this.actor.graphics.add(mesh);
-        this.mixer = new THREE.AnimationMixer(mesh);
-        animations.forEach((clip: AnimationClip) => {
-            this.animations[clip.name] = clip;
-        });
-        this.playAnimation({ name: "idle" })
+        return mesh;
     }
     getAnim() {
         const anim = {
